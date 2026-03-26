@@ -1,16 +1,50 @@
 ﻿@model HabitTracker.Models.User
 
-<div class="card fade-in">
-    <h2>Dashboard</h2>
+<h2>Dashboard</h2>
+<a href="/Habit/Suggestion">AI Suggestion</a>
+<p><b>Level:</b> @Model.Level</p>
+<p><b>XP:</b> @Model.XP</p>
 
-    <p><strong>Level:</strong> @Model.Level</p>
-
-    <!-- XP BAR -->
-    <div class="xp-bar mb-2">
-        <div class="xp-fill" style="width:@Model.XP%"></div>
+<div class="progress mb-3">
+    <div class="progress-bar bg-success"
+         style="width:@(Model.XP)%">
+        @Model.XP / 100 XP
     </div>
-
-    <p>@Model.XP / 100 XP</p>
-
-    <a href="/Habit" class="btn btn-primary mt-3">Go to Habits</a>
 </div>
+
+<!-- CHART -->
+<canvas id="habitChart" height="100"></canvas>
+
+<!-- BEST HABIT -->
+<div class="card p-3 mt-4 shadow-sm">
+    <h5>🏆 Best Habit</h5>
+
+    @{
+        var best = Model.Habits?.OrderByDescending(h => h.XPReward).FirstOrDefault();
+    }
+
+    @if (best != null)
+    {
+        <p><b>@best.Name</b></p>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('habitChart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(ViewBag.ChartLabels)],
+                datasets: [{
+                    label: 'Completed Habits',
+                    data: [@Html.Raw(ViewBag.ChartData)],
+                    borderWidth: 2
+                }]
+            }
+        });
+    </script>
+}

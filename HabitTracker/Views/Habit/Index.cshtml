@@ -1,109 +1,97 @@
 ﻿@model List<HabitTracker.Models.Habit>
+@inject HabitTracker.Data.AppDbContext _context
 
-<div class="container mt-4">
+<h3>Your Habits</h3>
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Your Habits</h3>
+<a href="/Habit/Create" class="btn btn-primary mb-3">
+    + Create Habit
+</a>
+<a href="/Habit/Suggestion" class="btn btn-warning mb-3">
+    🤖 Smart Suggestion
+</a>
+@foreach (var habit in Model)
+{
+    var now = DateTime.Now;
 
-        <a href="/Habit/Create" class="btn btn-primary">
-            ➕ Create Habit
-        </a>
-    </div>
+    var isDone = _context.HabitLogs
+        .Any(x => x.HabitId == habit.Id && x.Date == DateTime.Today);
 
-    @if (Model != null && Model.Any())
-    {
-        foreach (var habit in Model)
-        {
-            var isDone = habit.LastCompletedDate == DateTime.Today;
+    var isMissed = habit.Deadline != null
+                   && habit.Deadline < now
+                   && !isDone;
 
-            <div class="card p-3 mb-3 shadow-sm rounded-3">
+    var isWarning = habit.Deadline != null
+                    && habit.Deadline > now
+                    && (habit.Deadline.Value - now).TotalMinutes <= 60
+                    && !isDone;
 
-                <div class="d-flex justify-content-between align-items-center">
+    <div class="card p-3 mb-3 shadow-sm rounded-3
+            @(isMissed ? "border-danger bg-danger-subtle" : "")
+            @(isWarning ? "border-warning bg-warning-subtle" : "")
+            @(isDone ? "border-success" : "")">
 
-                    <!-- LEFT CONTENT -->
-                    <div>
-                        <h5>
-                            <img src="@(string.IsNullOrEmpty(habit.Icon)
-                                                                         ? Url.Content("~/icons/default.png")
-                                                                         : Url.Content("~/icons/" + habit.Icon))"
-                         width="30" />
+        <div class="d-flex justify-content-between align-items-center">
 
-                            @habit.Name
-                        </h5>
+            <!-- LEFT -->
+            <div>
+                <h5>
+                    <!-- <img src="~/icons/@habit.Icon" width="30" /> -->
+                    
+                    @habit.Name
+                </h5>
 
-                        <p class="text-muted mb-1">
-                            ⏰ @(habit.ReminderTime?.ToString(@"hh\:mm") ?? "No time")
-                            | 🔁 @habit.Frequency
-                        </p>
+                <p class="text-muted">
+                    🔥 Streak: <b>@habit.Streak</b> <br />
 
-                        <p class="mb-1">
-                            📅 Deadline: @(habit.Deadline?.ToString("yyyy-MM-dd") ?? "None")
-                        </p>
+                    ⏰ Deadline:
+                    <span class="deadline"
+                          data-deadline="@habit.Deadline?.ToString("yyyy-MM-ddTHH:mm:ss")">
+                        @(habit.Deadline?.ToString("yyyy-MM-dd HH:mm") ?? "None")
+                    </span>
+                </p>
 
-                        <p class="mb-0">
-                            🔥 Streak: @habit.Streak ngày
-                        </p>
-                    </div>
+                @if (isMissed)
+                {
+                    <span class="badge bg-danger">Missed ❌</span>
+                }
+                else if (isWarning)
+                {
+                    <span class="badge bg-warning text-dark">Hurry Up ⚠️</span>
+                }
+            </div>
 
-                    <!-- RIGHT ACTION -->
-                    <div class="text-end">
+            <!-- RIGHT -->
+            <div class="d-flex flex-column gap-2">
 
-                        <!-- DONE -->
                 @if (!isDone)
-                        {
-                            <a href="/Habit/Complete/@habit.Id"
-                               class="btn btn-success btn-sm mb-1">
-                                ✔ Done
-                            </a>
-                        }
-                        else
-                        {
-                            <div class="mb-1">
-                                <span class="badge bg-success">
-                                    ✔ Done Today
-                                </span>
-                            </div>
-                        }
+                {
+                    <a href="/Habit/Complete/@habit.Id"
+                       class="btn btn-success">
+                        ✔ Done
+                    </a>
+                }
+                else
+                {
+                    <span class="badge bg-success">Done Today</span>
+                }
 
-                        <!-- VIEW & DELETE -->
-                        <div>
-                            <a href="/Habit/Details/@habit.Id"
-                               class="btn btn-info btn-sm">
-                                View
-                            </a>
+                <a href="/Habit/Details/@habit.Id"
+                   class="btn btn-info btn-sm">
+                    Details
+                </a>
 
-                            <a href="/Habit/Delete/@habit.Id"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete this habit?')">
-                                Delete
-                            </a>
-                        </div>
-
-                    </div>
-
-                </div>
+                <a href="/Habit/Delete/@habit.Id"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this habit?')">
+                    Delete
+                </a>
 
             </div>
-        }
-    }
-    else
-    {
-        <!-- EMPTY STATE -->
-        <div class="alert alert-info text-center">
-            You have no habits yet 😢 <br />
 
-            <a href="/Habit/Create" class="btn btn-primary mt-2">
-                ➕ Create your first habit
-            </a>
         </div>
-    }
 
-</div>
+        <!-- COUNTDOWN -->
+        <div class="mt-2 text-end text-muted small countdown"></div>
 
-<!-- FLOATING BUTTON -->
-<a href="/Habit/Create"
-   class="btn btn-primary rounded-circle"
-   style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; font-size:24px;">
-    +
-</a>
+    </div>
+}

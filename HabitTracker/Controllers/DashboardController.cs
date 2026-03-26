@@ -14,9 +14,28 @@ namespace HabitTracker.Controllers
 
         public IActionResult Index()
         {
-            int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
 
             var user = _context.Users.Find(userId);
+
+            // ===== LẤY 7 NGÀY =====
+            var last7Days = Enumerable.Range(0, 7)
+                .Select(i => DateTime.Today.AddDays(-i))
+                .Reverse()
+                .ToList();
+
+            var data = last7Days.Select(day => new
+            {
+                date = day.ToString("dd/MM"),
+                count = _context.HabitLogs
+                    .Count(x => x.Date == day && x.Habit.UserId == userId)
+            });
+
+            ViewBag.ChartLabels = string.Join(",", data.Select(x => $"'{x.date}'"));
+            ViewBag.ChartData = string.Join(",", data.Select(x => x.count));
 
             return View(user);
         }

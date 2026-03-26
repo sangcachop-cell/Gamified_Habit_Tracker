@@ -13,6 +13,7 @@ namespace HabitTracker.Controllers
             _context = context;
         }
 
+        // ================= INDEX =================
         public IActionResult Index()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -24,9 +25,26 @@ namespace HabitTracker.Controllers
                 .Where(h => h.UserId == userId)
                 .ToList();
 
+            var now = DateTime.Now;
+
+            foreach (var h in habits)
+            {
+                bool isDoneToday = _context.HabitLogs
+                    .Any(x => x.HabitId == h.Id && x.Date == DateTime.Today);
+
+                // 🔥 MISS nếu quá thời gian (date + time)
+                if (h.Deadline != null && h.Deadline < now && !isDoneToday)
+                {
+                    h.Streak = 0;
+                }
+            }
+
+            _context.SaveChanges();
+
             return View(habits);
         }
 
+        // ================= CREATE =================
         public IActionResult Create()
         {
             return View();
@@ -45,103 +63,58 @@ namespace HabitTracker.Controllers
             return RedirectToAction("Index");
         }
 
+        // ================= COMPLETE =================
         public IActionResult Complete(int id)
         {
             var habit = _context.Habits.Find(id);
 
-            if (habit != null)
+            if (habit == null)
+                return RedirectToAction("Index");
+
+            var today = DateTime.Today;
+
+            var log = _context.HabitLogs
+                .FirstOrDefault(x => x.HabitId == id && x.Date == today);
+
+            if (log == null)
             {
-                var today = DateTime.Today;
-
-                if (habit.LastCompletedDate != today)
+                // ===== SAVE LOG =====
+                _context.HabitLogs.Add(new HabitLog
                 {
-                    var user = _context.Users.Find(habit.UserId);
+                    HabitId = id,
+                    Date = today,
+                    IsCompleted = true
+                });
 
-                    // XP
-                    user.XP += habit.XPReward;
+                // ===== STREAK =====
+                var yesterday = today.AddDays(-1);
 
-                    if (user.XP >= 100)
-                    {
-                        user.Level++;
-                        user.XP -= 100;
-                    }
+                bool didYesterday = _context.HabitLogs
+                    .Any(x => x.HabitId == id && x.Date == yesterday);
 
-                    // STREAK
-                    if (habit.LastCompletedDate == today.AddDays(-1))
-                        habit.Streak++;
-                    else
-                        habit.Streak = 1;
+                if (didYesterday)
+                    habit.Streak++;
+                else
+                    habit.Streak = 1;
 
-                    habit.LastCompletedDate = today;
+                // ===== XP =====
+                var user = _context.Users.Find(habit.UserId);
 
-                    _context.SaveChanges();
+                user.XP += habit.XPReward;
+
+                if (user.XP >= 100)
+                {
+                    user.Level++;
+                    user.XP -= 100;
                 }
+
+                _context.SaveChanges();
             }
 
             return RedirectToAction("Index");
         }
-        public IActionResult Dashboard()
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
 
-            var habits = _context.Habits
-                .Where(h => h.UserId == userId)
-                .ToList();
-
-            var today = DateTime.Today;
-
-            int total = habits.Count;
-            int done = habits.Count(h => h.LastCompletedDate == today);
-
-            ViewBag.Percent = total == 0 ? 0 : (done * 100 / total);
-
-            return View(habits);
-        }
-
-        private void UpdateStreak(User user)
-        {
-            var today = DateTime.Today;
-
-            if (user.LastCheckInDate == null)
-            {
-                user.CurrentStreak = 1;
-            }
-            else if (user.LastCheckInDate.Value.Date == today.AddDays(-1))
-            {
-                user.CurrentStreak++;
-            }
-            else if (user.LastCheckInDate.Value.Date != today)
-            {
-                user.CurrentStreak = 1;
-            }
-
-            user.LastCheckInDate = today;
-
-            if (user.CurrentStreak > user.LongestStreak)
-            {
-                user.LongestStreak = user.CurrentStreak;
-            }
-        }
-
-        private void CheckBadge(User user)
-        {
-            var badges = _context.Badges.ToList();
-
-            foreach (var badge in badges)
-            {
-                bool has = _context.UserBadges
-                    .Any(x => x.UserId == user.Id && x.BadgeId == badge.Id);
-
-                if (!has && user.XP >= badge.RequiredXP)
-                {
-                    _context.UserBadges.Add(new UserBadge
-                    {
-                        UserId = user.Id,
-                        BadgeId = badge.Id
-                    });
-                }
-            }
-        }
+        // ================= DELETE =================
         public IActionResult Delete(int id)
         {
             var habit = _context.Habits.Find(id);
@@ -154,15 +127,83 @@ namespace HabitTracker.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // ================= DETAILS =================
         public IActionResult Details(int id)
         {
-            var habit = _context.Habits
-                .FirstOrDefault(h => h.Id == id);
+            var habit = _context.Habits.FirstOrDefault(h => h.Id == id);
 
             if (habit == null)
                 return RedirectToAction("Index");
 
             return View(habit);
+        }
+        public IActionResult Suggestion()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
+            var habits = _context.Habits
+                .Where(h => h.UserId == userId)
+                .ToList();
+
+            var suggestions = new List<string>();
+
+            foreach (var h in habits)
+            {
+                var logs = _context.HabitLogs
+                    .Where(x => x.HabitId == h.Id)
+                    .ToList();
+
+                int total = logs.Count;
+                int done = logs.Count(x => x.IsCompleted);
+
+                if (total >= 5)
+                {
+                    double rate = (double)done / total;
+
+                    if (rate < 0.5)
+                    {
+                        suggestions.Add($"⚠️ '{h.Name}' completion thấp ({rate:P0}), thử giảm độ khó.");
+                    }
+                    else if (rate > 0.8)
+                    {
+                        suggestions.Add($"🏆 '{h.Name}' rất tốt ({rate:P0}), hãy nâng cấp!");
+                    }
+                }
+
+                if (h.Streak == 0 && total > 5)
+                {
+                    suggestions.Add($"💡 '{h.Name}' hay bị reset streak, thử bắt đầu nhỏ hơn.");
+                }
+
+                if (h.ReminderTime != null)
+                {
+                    var lateCount = logs.Count(x =>
+                        x.Date.TimeOfDay > h.ReminderTime);
+
+                    if (lateCount >= 3)
+                    {
+                        suggestions.Add($"⏰ Bạn hay làm trễ '{h.Name}', thử đổi giờ.");
+                    }
+                }
+            }
+
+            if (!habits.Any(h => h.Name.Contains("Water")))
+            {
+                suggestions.Add("💧 Bạn nên thêm habit uống nước!");
+            }
+
+            if (!habits.Any(h => h.Name.Contains("Exercise")))
+            {
+                suggestions.Add("🏃 Bạn nên thêm habit vận động!");
+            }
+
+            ViewBag.Suggestions = suggestions;
+
+            return View();
         }
     }
 }
