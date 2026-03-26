@@ -1,0 +1,92 @@
+﻿@model HabitTracker.Models.User
+
+<div class="profile-page">
+    <div class="profile-box">
+
+        <!-- AVATAR -->
+        <img src="~/images/@(Model.Avatar ?? "default.png")"
+             class="profile-avatar" />
+
+        <h3 class="mt-3">@Model.Username</h3>
+        <p class="text-muted">@Model.Email</p>
+
+        <!-- LEVEL + XP -->
+        <div class="xp-box">
+            <p><b>Level:</b> @Model.Level</p>
+            <p><b>XP:</b> @Model.XP</p>
+
+            <div class="xp-bar">
+                <div class="xp-fill"
+                     style="width:@(Model.XP % 100)%"></div>
+            </div>
+        </div>
+
+        <!-- STREAK -->
+        <hr />
+        <h5>🔥 Streak</h5>
+        <p><b>Current:</b> @Model.CurrentStreak days</p>
+        <p><b>Longest:</b> @Model.LongestStreak days</p>
+
+        <!-- BADGES -->
+        <hr />
+        <h5>🏆 Badges</h5>
+
+        <div class="d-flex flex-wrap gap-2">
+            @if (Model.UserBadges != null && Model.UserBadges.Any())
+            {
+                foreach (var ub in Model.UserBadges)
+                {
+                    <img src="~/badges/@ub.Badge.Icon"
+                         title="@ub.Badge.Name"
+                         width="50"
+                         style="border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.2);" />
+                }
+            }
+            else
+            {
+                <p class="text-muted">No badges yet 😢</p>
+            }
+        </div>
+
+        <!-- INFO -->
+        <hr />
+        <div class="profile-info text-start">
+            <p><b>Username:</b> @Model.Username</p>
+            <p><b>Email:</b> @Model.Email</p>
+            <p><b>Phone:</b> @Model.PhoneNumber</p>
+            <p><b>Location:</b> @Model.Location</p>
+            <p><b>Gender:</b> @Model.Gender</p>
+            <p><b>DOB:</b> @(Model.DateOfBirth?.ToString("yyyy-MM-dd"))</p>
+            <p><b>Bio:</b> @Model.Bio</p>
+
+            <p>
+                <b>Social:</b>
+                @if (!string.IsNullOrEmpty(Model.FacebookLink))
+                {
+                    <a href="@Model.FacebookLink" target="_blank">FB</a>
+                }
+                @if (!string.IsNullOrEmpty(Model.LinkedInLink))
+                {
+                    <span> | </span>
+                    <a href="@Model.LinkedInLink" target="_blank">LinkedIn</a>
+                }
+                @if (!string.IsNullOrEmpty(Model.InstagramLink))
+                {
+                    <span> | </span>
+                    <a href="@Model.InstagramLink" target="_blank">IG</a>
+                }
+            </p>
+
+            <p><b>Habits:</b> @(Model.Habits?.Count ?? 0)</p>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="mt-4 d-grid gap-2">
+            <a asp-action="EditProfile" class="btn btn-warning">Edit Profile</a>
+            <a asp-action="ChangePassword" class="btn btn-secondary">Change Password</a>
+            <a href="/Home/Index" class="btn btn-outline-secondary mt-2">Back</a>
+            <a href="/Habit/Dashboard" class="btn btn-info">Dashboard</a>
+        </div>
+
+    </div>
+</div>

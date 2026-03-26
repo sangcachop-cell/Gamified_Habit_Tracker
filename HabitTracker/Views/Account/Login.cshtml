@@ -1,0 +1,48 @@
+﻿@model HabitTracker.Models.ViewModels.LoginViewModel
+
+<div class="login-page">
+
+    <!-- LOGO -->
+    <div class="logo-top">
+        <img src="~/images/logoweb.png" alt="Logo" />
+    </div>
+
+    <!-- FORM -->
+    <div class="login-box">
+
+        <h3>Welcome Back</h3>
+
+        <form method="post">
+
+            <input asp-for="Email" placeholder="Email" />
+            <input asp-for="Password" type="password" placeholder="Password" />
+
+            <button type="submit" class="btn btn-primary">
+                Login
+            </button>
+
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <p class="text-danger">@ViewBag.Error</p>
+        }
+
+        <hr />
+
+        <!-- 🔥 GOOGLE LOGIN -->
+        <a asp-controller="Account"
+           asp-action="GoogleLogin"
+           class="btn btn-danger w-100 mt-2">
+            Login with Google
+        </a>
+
+        <hr />
+
+        <a href="/Account/Register" class="btn btn-outline-primary">
+            Create new account
+        </a>
+
+    </div>
+
+</div>

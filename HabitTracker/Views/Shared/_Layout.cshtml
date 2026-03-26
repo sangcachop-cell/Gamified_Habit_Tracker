@@ -1,0 +1,169 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // 👉 FULL PAGE cho Login/Register/Profile
+    bool isFullPage = controller == "Account" &&
+        (action == "Login" || action == "Register"
+         || action == "Profile"
+         || action == "EditProfile"
+         || action == "ChangePassword");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HabitTracker</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- ===== NAVBAR (ẨN nếu là full page) ===== -->
+    @if (!isFullPage)
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm">
+                <div class="container-fluid">
+
+                    <!-- LOGO -->
+                    <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                        HabitTracker
+                    </a>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarContent">
+
+                        <!-- LEFT -->
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Habit" asp-action="Index">Habits</a>
+                            </li>
+                        </ul>
+
+                        <!-- RIGHT -->
+                        <ul class="navbar-nav align-items-center">
+
+                            @if (Context.Session.GetString("Username") != null)
+                            {
+                                <li class="nav-item dropdown">
+
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       style="gap:8px;">
+
+                                        <img src="~/images/@(Context.Session.GetString("Avatar") ?? "default.png")"
+                                             width="40"
+                                             height="40"
+                                             class="rounded-circle border"
+                                             style="object-fit:cover;" />
+
+                                        <span class="fw-semibold">
+                                            @Context.Session.GetString("Username")
+                                        </span>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                                👤 Profile
+                                            </a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
+                                                📊 Dashboard
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Habit" asp-action="Index">
+                                                📋 My Habits
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" href="#">🏆 Achievements</a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" href="#">⚙️ Settings</a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <li>
+                                            <a class="dropdown-item text-danger"
+                                               asp-controller="Account"
+                                               asp-action="Logout">
+                                                🚪 Logout
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                                </li>
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <!-- ===== BODY ===== -->
+    <div class="@(isFullPage ? "" : "container mt-4")">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    @if (!isFullPage)
+    {
+        <footer class="border-top footer text-muted mt-5">
+            <div class="container text-center py-3">
+                © 2026 - HabitTracker
+            </div>
+        </footer>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

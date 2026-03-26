@@ -1,0 +1,16 @@
+﻿@model HabitTracker.Models.User
+
+<div class="card fade-in">
+    <h2>Dashboard</h2>
+
+    <p><strong>Level:</strong> @Model.Level</p>
+
+    <!-- XP BAR -->
+    <div class="xp-bar mb-2">
+        <div class="xp-fill" style="width:@Model.XP%"></div>
+    </div>
+
+    <p>@Model.XP / 100 XP</p>
+
+    <a href="/Habit" class="btn btn-primary mt-3">Go to Habits</a>
+</div>

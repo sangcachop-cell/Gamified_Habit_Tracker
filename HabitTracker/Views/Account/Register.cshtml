@@ -1,0 +1,61 @@
+﻿@model HabitTracker.Models.ViewModels.RegisterViewModel
+
+<div class="login-page">
+
+    <!-- LOGO -->
+    <div class="logo-top">
+        <img src="~/images/logoweb.png" class="logo-large" />
+    </div>
+
+    <!-- FORM -->
+    <div class="login-box">
+
+        <h3>Create Account</h3>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <input asp-for="Username" placeholder="Username" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+
+            <input asp-for="Email" class="form-control" placeholder="Email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+
+            <input asp-for="Password" type="password" placeholder="Password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+
+            <!-- Avatar -->
+            <input asp-for="AvatarFile" type="file" onchange="previewImage(event)" />
+
+            <!-- Preview -->
+            <div class="text-center mt-2">
+                <img id="preview"
+                     src="~/images/default.png"
+                     class="avatar-preview" />
+            </div>
+
+            <button type="submit">
+                Register
+            </button>
+        </form>
+
+        <hr />
+
+        <a href="/Account/Login" class="btn btn-outline-primary">
+            Already have account?
+        </a>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('preview').src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+}

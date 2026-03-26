@@ -1,0 +1,109 @@
+﻿@model List<HabitTracker.Models.Habit>
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Your Habits</h3>
+
+        <a href="/Habit/Create" class="btn btn-primary">
+            ➕ Create Habit
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        foreach (var habit in Model)
+        {
+            var isDone = habit.LastCompletedDate == DateTime.Today;
+
+            <div class="card p-3 mb-3 shadow-sm rounded-3">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <!-- LEFT CONTENT -->
+                    <div>
+                        <h5>
+                            <img src="@(string.IsNullOrEmpty(habit.Icon)
+                                                                         ? Url.Content("~/icons/default.png")
+                                                                         : Url.Content("~/icons/" + habit.Icon))"
+                         width="30" />
+
+                            @habit.Name
+                        </h5>
+
+                        <p class="text-muted mb-1">
+                            ⏰ @(habit.ReminderTime?.ToString(@"hh\:mm") ?? "No time")
+                            | 🔁 @habit.Frequency
+                        </p>
+
+                        <p class="mb-1">
+                            📅 Deadline: @(habit.Deadline?.ToString("yyyy-MM-dd") ?? "None")
+                        </p>
+
+                        <p class="mb-0">
+                            🔥 Streak: @habit.Streak ngày
+                        </p>
+                    </div>
+
+                    <!-- RIGHT ACTION -->
+                    <div class="text-end">
+
+                        <!-- DONE -->
+                @if (!isDone)
+                        {
+                            <a href="/Habit/Complete/@habit.Id"
+                               class="btn btn-success btn-sm mb-1">
+                                ✔ Done
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="mb-1">
+                                <span class="badge bg-success">
+                                    ✔ Done Today
+                                </span>
+                            </div>
+                        }
+
+                        <!-- VIEW & DELETE -->
+                        <div>
+                            <a href="/Habit/Details/@habit.Id"
+                               class="btn btn-info btn-sm">
+                                View
+                            </a>
+
+                            <a href="/Habit/Delete/@habit.Id"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Are you sure you want to delete this habit?')">
+                                Delete
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <!-- EMPTY STATE -->
+        <div class="alert alert-info text-center">
+            You have no habits yet 😢 <br />
+
+            <a href="/Habit/Create" class="btn btn-primary mt-2">
+                ➕ Create your first habit
+            </a>
+        </div>
+    }
+
+</div>
+
+<!-- FLOATING BUTTON -->
+<a href="/Habit/Create"
+   class="btn btn-primary rounded-circle"
+   style="position:fixed; bottom:20px; right:20px; width:60px; height:60px; font-size:24px;">
+    +
+</a>

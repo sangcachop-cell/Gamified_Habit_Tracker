@@ -1,0 +1,120 @@
+﻿@model HabitTracker.Models.User
+
+<div class="profile-page">
+
+    <div class="profile-box">
+
+        <h3>Edit Profile</h3>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <input type="hidden" name="Id" value="@Model.Id" />
+
+            <!-- AVATAR -->
+            <img id="preview"
+                 src="~/images/@(Model.Avatar ?? "default.png")"
+                 class="profile-avatar mb-3" />
+
+            <input type="file"
+                   name="AvatarFile"
+                   class="form-control"
+                   onchange="previewImage(event)" />
+
+            <!-- USERNAME -->
+            <input name="Username"
+                   value="@Model.Username"
+                   class="form-control mt-3"
+                   placeholder="Username" required />
+
+            <!-- EMAIL -->
+            <input name="Email"
+                   value="@Model.Email"
+                   class="form-control mt-2"
+                   placeholder="Email" required />
+
+            <!-- PHONE -->
+            <input name="PhoneNumber"
+                   value="@Model.PhoneNumber"
+                   class="form-control mt-2"
+                   placeholder="Phone number" />
+
+            <!-- LOCATION -->
+            <input name="Location"
+                   value="@Model.Location"
+                   class="form-control mt-2"
+                   placeholder="Location" />
+
+            <!-- GENDER -->
+            <select name="Gender" class="form-control mt-2">
+                <option value="">Gender</option>
+                <option value="Male" selected="@(Model.Gender == "Male")">Male</option>
+                <option value="Female" selected="@(Model.Gender == "Female")">Female</option>
+                <option value="Other" selected="@(Model.Gender == "Other")">Other</option>
+            </select>
+
+            <!-- DOB -->
+            <input type="date"
+                   name="DateOfBirth"
+                   value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))"
+                   class="form-control mt-2" />
+
+            <!-- BIO -->
+            <textarea name="Bio"
+                      class="form-control mt-2"
+                      placeholder="About you">@Model.Bio</textarea>
+
+            <!-- SOCIAL -->
+            <input name="FacebookLink"
+                   value="@Model.FacebookLink"
+                   class="form-control mt-2"
+                   placeholder="Facebook link" />
+
+            <input name="LinkedInLink"
+                   value="@Model.LinkedInLink"
+                   class="form-control mt-2"
+                   placeholder="LinkedIn link" />
+
+            <input name="InstagramLink"
+                   value="@Model.InstagramLink"
+                   class="form-control mt-2"
+                   placeholder="Instagram link" />
+
+            <button type="submit" class="btn btn-primary mt-3">
+                Save Changes
+            </button>
+
+        </form>
+
+        <a href="/Account/Profile" class="btn btn-outline-secondary mt-2">
+            Back
+        </a>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast-box">Updated successfully!</div>
+
+@section Scripts {
+<script>
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+        document.getElementById('preview').src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+        // Show toast
+                function showToast(message) {
+                    let toast = document.getElementById("toast");
+                    toast.innerText = message;
+                    toast.style.display = "block";
+
+                    setTimeout(() => {
+                        toast.style.display = "none";
+                    }, 2500);
+                }
+</script>
+}
