@@ -361,5 +361,33 @@ html, body {
     border-radius: 10px;
     font-size: 12px;
 }
+    .badge-toast {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: gold;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: bold;
+        animation: fadeOut 3s forwards;
+    }
 
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+    .reward-toast {
+        position: fixed;
+        bottom: 70px;
+        left: 20px;
+        background: #0d6efd;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+    }
 }

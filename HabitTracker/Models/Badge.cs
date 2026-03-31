@@ -7,7 +7,6 @@
         public string Description { get; set; }
         public string Icon { get; set; }
         public int RequiredXP { get; set; }
-
         public List<UserBadge>? UserBadges { get; set; }
     }
 }

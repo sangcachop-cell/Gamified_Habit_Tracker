@@ -14,5 +14,7 @@ namespace HabitTracker.Data
         public DbSet<Badge> Badges { get; set; }
         public DbSet<UserBadge> UserBadges { get; set; }
         public DbSet<HabitLog> HabitLogs { get; set; }
+        public DbSet<Models.Task> Tasks { get; set; }
+        public DbSet<TaskLog> TaskLogs { get; set; }
     }
 }

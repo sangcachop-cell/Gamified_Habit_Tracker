@@ -239,5 +239,26 @@ namespace HabitTracker.Controllers
 
             return RedirectToAction("Index", "Dashboard");
         }
+        public IActionResult Leaderboard()
+        {
+            var users = _context.Users.ToList();
+
+            // TOP XP
+            var topXP = users
+                .OrderByDescending(u => u.XP)
+                .Take(10)
+                .ToList();
+
+            // TOP STREAK
+            var topStreak = users
+                .OrderByDescending(u => u.CurrentStreak)
+                .Take(10)
+                .ToList();
+
+            ViewBag.TopXP = topXP;
+            ViewBag.TopStreak = topStreak;
+
+            return View();
+        }
     }
 }

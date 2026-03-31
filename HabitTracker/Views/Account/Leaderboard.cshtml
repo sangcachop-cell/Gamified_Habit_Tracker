@@ -1,0 +1,68 @@
+﻿@{
+    var topXP = ViewBag.TopXP as List<HabitTracker.Models.User>;
+    var topStreak = ViewBag.TopStreak as List<HabitTracker.Models.User>;
+}
+
+<h2 class="mb-4">🏆 Leaderboard</h2>
+
+<div class="row">
+
+    <!-- TOP XP -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+            <h4>🎮 Top XP</h4>
+
+            @for (int i = 0; i < topXP.Count; i++)
+            {
+                var u = topXP[i];
+
+                <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded
+                         @(i == 0 ? "bg-warning text-dark" :
+                                            i == 1 ? "bg-light" :
+                                            i == 2 ? "bg-light" : "")">
+
+                <div>
+                    <b>#@(i + 1)</b>
+                    <img src="~/images/@(u.Avatar ?? "default.png")"
+                         width="30" class="rounded-circle ms-2 me-2" />
+                    @u.Username
+                </div>
+
+                    <div>
+                        ⭐ @u.XP XP | Lv.@u.Level
+                    </div>
+                </div>
+                        }
+        </div>
+    </div>
+
+    <!-- TOP STREAK -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+            <h4>🔥 Top Streak</h4>
+
+            @for (int i = 0; i < topStreak.Count; i++)
+            {
+                var u = topStreak[i];
+
+                <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded
+                         @(i == 0 ? "bg-danger text-white" :
+                                            i == 1 ? "bg-light" :
+                                            i == 2 ? "bg-light" : "")">
+
+                <div>
+                    <b>#@(i + 1)</b>
+                    <img src="~/images/@(u.Avatar ?? "default.png")"
+                         width="30" class="rounded-circle ms-2 me-2" />
+                    @u.Username
+                </div>
+
+                    <div>
+                        🔥 @u.CurrentStreak days
+                    </div>
+                </div>
+                        }
+        </div>
+    </div>
+
+</div>
