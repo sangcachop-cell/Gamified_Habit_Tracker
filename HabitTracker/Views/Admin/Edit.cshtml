@@ -1,0 +1,47 @@
+﻿@model HabitTracker.Models.Quest
+
+@{
+    ViewData["Title"] = "Sửa Quest";
+}
+
+<div class="container py-4" style="max-width: 650px;">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+        <h4 class="mb-0">✏️ Sửa Quest: @Model.Name</h4>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <partial name="_QuestForm" model="Model" />
+
+                <hr />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        💾 Cập nhật
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+```
+
+---
+
+## Kiểm tra cấu trúc thư mục
+```
+Views/
+  └── Admin/
+       ├── Index.cshtml       ✅ đã có
+       ├── Create.cshtml      ← tạo mới
+       ├── Edit.cshtml        ← tạo mới
+       └── _QuestForm.cshtml  ← tạo mới (partial, tên bắt đầu bằng _)

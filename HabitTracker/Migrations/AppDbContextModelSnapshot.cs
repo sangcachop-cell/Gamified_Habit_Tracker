@@ -30,17 +30,31 @@ namespace HabitTracker.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Icon")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Rarity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("RequiredXP")
                         .HasColumnType("int");
@@ -48,9 +62,137 @@ namespace HabitTracker.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Badges");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Đạt 50 XP",
+                            Icon = "🌱",
+                            IsActive = true,
+                            Name = "Người mới bắt đầu",
+                            Rarity = "Common",
+                            RequiredXP = 50
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Đạt 200 XP",
+                            Icon = "⚔️",
+                            IsActive = true,
+                            Name = "Chiến binh",
+                            Rarity = "Common",
+                            RequiredXP = 200
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Đạt 500 XP",
+                            Icon = "🏆",
+                            IsActive = true,
+                            Name = "Huyền thoại",
+                            Rarity = "Common",
+                            RequiredXP = 500
+                        });
                 });
 
-            modelBuilder.Entity("HabitTracker.Models.Habit", b =>
+            modelBuilder.Entity("HabitTracker.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Quest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -59,124 +201,201 @@ namespace HabitTracker.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("Deadline")
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Frequency")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Icon")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
-                    b.Property<DateTime?>("LastCompletedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<TimeSpan?>("ReminderTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("Streak")
+                    b.Property<int>("TimesCompleted")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("XPReward")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CategoryId");
 
-                    b.ToTable("Habits");
-                });
+                    b.ToTable("Quests");
 
-            modelBuilder.Entity("HabitTracker.Models.HabitLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("HabitId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HabitId");
-
-                    b.ToTable("HabitLogs");
-                });
-
-            modelBuilder.Entity("HabitTracker.Models.Task", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("XP")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tasks");
-                });
-
-            modelBuilder.Entity("HabitTracker.Models.TaskLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TaskLogs");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Category = "Sức khỏe",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "💧",
+                            IsActive = true,
+                            Name = "Uống 2 lít nước",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Category = "Sức khỏe",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Medium",
+                            Frequency = "Daily",
+                            Icon = "🏃",
+                            IsActive = true,
+                            Name = "Tập thể dục 30 phút",
+                            TimesCompleted = 0,
+                            XPReward = 25
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Category = "Sức khỏe",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "😴",
+                            IsActive = true,
+                            Name = "Ngủ đủ 8 tiếng",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = "Sức khỏe",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Hard",
+                            Frequency = "Weekly",
+                            Icon = "🏅",
+                            IsActive = true,
+                            Name = "Chạy bộ 5km",
+                            TimesCompleted = 0,
+                            XPReward = 50
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Category = "Học tập",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "📚",
+                            IsActive = true,
+                            Name = "Đọc sách 20 phút",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Category = "Học tập",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Medium",
+                            Frequency = "Daily",
+                            Icon = "🗣️",
+                            IsActive = true,
+                            Name = "Học ngoại ngữ 30 phút",
+                            TimesCompleted = 0,
+                            XPReward = 25
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Category = "Học tập",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Hard",
+                            Frequency = "Monthly",
+                            Icon = "🎓",
+                            IsActive = true,
+                            Name = "Hoàn thành 1 khóa học online",
+                            TimesCompleted = 0,
+                            XPReward = 50
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Category = "Tinh thần",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "🧘",
+                            IsActive = true,
+                            Name = "Thiền 10 phút",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Category = "Tinh thần",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "📝",
+                            IsActive = true,
+                            Name = "Viết nhật ký",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = "Tài chính",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Easy",
+                            Frequency = "Daily",
+                            Icon = "💰",
+                            IsActive = true,
+                            Name = "Ghi chép chi tiêu hôm nay",
+                            TimesCompleted = 0,
+                            XPReward = 10
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = "Tài chính",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Difficulty = "Medium",
+                            Frequency = "Weekly",
+                            Icon = "🏦",
+                            IsActive = true,
+                            Name = "Tiết kiệm theo kế hoạch tuần",
+                            TimesCompleted = 0,
+                            XPReward = 25
+                        });
                 });
 
             modelBuilder.Entity("HabitTracker.Models.User", b =>
@@ -188,10 +407,19 @@ namespace HabitTracker.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Avatar")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CoverImage")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("CurrentStreak")
                         .HasColumnType("int");
@@ -201,16 +429,34 @@ namespace HabitTracker.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FacebookLink")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("FacebookUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("InstagramLink")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("InstagramUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastActiveDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastCheckInDate")
                         .HasColumnType("datetime2");
@@ -222,24 +468,46 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("LinkedInLink")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("LinkedInUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("LongestStreak")
                         .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TotalQuestsCompleted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalXPEarned")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TwitterUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("XP")
                         .HasColumnType("int");
@@ -275,10 +543,58 @@ namespace HabitTracker.Migrations
                     b.ToTable("UserBadges");
                 });
 
-            modelBuilder.Entity("HabitTracker.Models.Habit", b =>
+            modelBuilder.Entity("HabitTracker.Models.UserQuest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CompletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("QuestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("XPEarned")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserQuests");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Category", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "CreatedByUser")
+                        .WithMany("CreatedCategories")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Notification", b =>
                 {
                     b.HasOne("HabitTracker.Models.User", "User")
-                        .WithMany("Habits")
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -286,15 +602,13 @@ namespace HabitTracker.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HabitTracker.Models.HabitLog", b =>
+            modelBuilder.Entity("HabitTracker.Models.Quest", b =>
                 {
-                    b.HasOne("HabitTracker.Models.Habit", "Habit")
-                        .WithMany()
-                        .HasForeignKey("HabitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("HabitTracker.Models.Category", "CustomCategory")
+                        .WithMany("Quests")
+                        .HasForeignKey("CategoryId");
 
-                    b.Navigation("Habit");
+                    b.Navigation("CustomCategory");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.UserBadge", b =>
@@ -316,16 +630,49 @@ namespace HabitTracker.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.UserQuest", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Quest", "Quest")
+                        .WithMany("UserQuests")
+                        .HasForeignKey("QuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany("UserQuests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quest");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.Badge", b =>
                 {
                     b.Navigation("UserBadges");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Category", b =>
+                {
+                    b.Navigation("Quests");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Quest", b =>
+                {
+                    b.Navigation("UserQuests");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.User", b =>
                 {
-                    b.Navigation("Habits");
+                    b.Navigation("CreatedCategories");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("UserBadges");
+
+                    b.Navigation("UserQuests");
                 });
 #pragma warning restore 612, 618
         }

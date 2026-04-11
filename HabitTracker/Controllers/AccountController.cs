@@ -1,11 +1,13 @@
-﻿using HabitTracker.Data;
+﻿using HabitTracker.Constants;
+using HabitTracker.Data;
 using HabitTracker.Models;
 using HabitTracker.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using HabitTracker.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace HabitTracker.Controllers
@@ -13,252 +15,330 @@ namespace HabitTracker.Controllers
     public class AccountController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _env;
+        private readonly IAuthService _authService;
+        private readonly IFileService _fileService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(AppDbContext context, IWebHostEnvironment env)
+        public AccountController(
+            AppDbContext context,
+            IAuthService authService,
+            IFileService fileService,
+            ILogger<AccountController> logger)
         {
             _context = context;
-            _env = env;
+            _authService = authService;
+            _fileService = fileService;
+            _logger = logger;
         }
 
         // ===== REGISTER =====
         public IActionResult Register() => View();
 
         [HttpPost]
-        public IActionResult Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var existingUser = _context.Users
-                .FirstOrDefault(x => x.Email == model.Email);
-
-            if (existingUser != null)
+            var (isValid, errorMessage) = _authService.ValidateRegister(model);
+            if (!isValid)
             {
-                ModelState.AddModelError("Email", "Email đã tồn tại!");
+                ModelState.AddModelError("", errorMessage);
                 return View(model);
             }
 
-            string fileName = "default.png";
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email == model.Email);
 
-            if (model.AvatarFile != null)
+            if (existingUser != null)
             {
-                string path = Path.Combine(_env.WebRootPath, "images");
-                Directory.CreateDirectory(path);
-
-                fileName = Guid.NewGuid() + Path.GetExtension(model.AvatarFile.FileName);
-                string fullPath = Path.Combine(path, fileName);
-
-                using var stream = new FileStream(fullPath, FileMode.Create);
-                model.AvatarFile.CopyTo(stream);
+                ModelState.AddModelError("Email", AppConstants.Messages.EMAIL_EXISTS);
+                return View(model);
             }
+
+            var (fileValid, fileError) = _fileService.ValidateFile(model.AvatarFile);
+            if (!fileValid)
+            {
+                ModelState.AddModelError("AvatarFile", fileError);
+                return View(model);
+            }
+
+            string avatarFileName = await _fileService.SaveAvatarAsync(model.AvatarFile);
 
             var user = new User
             {
-                Username = model.Username,
-                Email = model.Email,
-                Password = model.Password,
-                Avatar = fileName,
+                Username = model.Username.Trim(),
+                Email = model.Email.ToLower().Trim(),
+                Password = _authService.HashPassword(model.Password),
+                Avatar = avatarFileName,
                 XP = 0,
                 Level = 1
             };
 
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction("Login");
+            _logger.LogInformation($"User registered: {user.Email}");
+            TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+
+            return RedirectToAction(nameof(Login));
         }
 
         // ===== LOGIN =====
         public IActionResult Login() => View();
 
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            var user = _context.Users
-                .FirstOrDefault(x => x.Email == model.Email && x.Password == model.Password);
-
-            if (user == null)
+            var (isValid, errorMessage) = _authService.ValidateLogin(model);
+            if (!isValid)
             {
-                ViewBag.Error = "Sai tài khoản";
-                return View();
+                ModelState.AddModelError("", errorMessage);
+                return View(model);
             }
 
-            HttpContext.Session.SetInt32("UserId", user.Id);
-            HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("Avatar", user.Avatar ?? "default.png");
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email == model.Email.ToLower().Trim());
+
+            if (user == null || !_authService.VerifyPassword(model.Password, user.Password))
+            {
+                ModelState.AddModelError("", AppConstants.Messages.INVALID_CREDENTIALS);
+                _logger.LogWarning($"Failed login attempt for: {model.Email}");
+                return View(model);
+            }
+
+            SetUserSession(user);
+            _logger.LogInformation($"User logged in: {user.Email}");
 
             return RedirectToAction("Index", "Dashboard");
         }
 
-        // ===== PROFILE =====
-        public IActionResult Profile()
+        // ===== PROFILE (VIEW & EDIT) =====
+        [HttpGet]
+        public async Task<IActionResult> Profile()
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
+            var userId = GetUserId();
             if (userId == null)
-                return RedirectToAction("Login");
+                return RedirectToAction(nameof(Login));
 
-            var user = _context.Users
+            var user = await _context.Users
                 .Include(u => u.UserBadges)
-                .ThenInclude(ub => ub.Badge)
-                .Include(u => u.Habits)
-                .FirstOrDefault(u => u.Id == userId);
+                    .ThenInclude(ub => ub.Badge)
+                .Include(u => u.UserQuests)
+                    .ThenInclude(uq => uq.Quest)
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
-            return View(user);
-        }
-
-        // ===== EDIT PROFILE =====
-        public IActionResult EditProfile()
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
-            if (userId == null)
-                return RedirectToAction("Login");
-
-            var user = _context.Users.Find(userId);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
 
             return View(user);
         }
 
         [HttpPost]
-        public IActionResult EditProfile(User model, IFormFile? AvatarFile)
+        public async Task<IActionResult> Profile(User model, IFormFile? AvatarFile)
         {
-            var user = _context.Users.Find(model.Id);
-
+            var user = await _context.Users.FindAsync(model.Id);
             if (user == null)
-                return RedirectToAction("Login");
+                return RedirectToAction(nameof(Login));
 
-            user.Username = model.Username;
-            user.Email = model.Email;
-            user.PhoneNumber = model.PhoneNumber;
-            user.Location = model.Location;
-            user.Gender = model.Gender;
-            user.DateOfBirth = model.DateOfBirth;
-            user.Bio = model.Bio;
-            user.FacebookLink = model.FacebookLink;
-            user.LinkedInLink = model.LinkedInLink;
-            user.InstagramLink = model.InstagramLink;
-
-            if (AvatarFile != null)
+            try
             {
-                string path = Path.Combine(_env.WebRootPath, "images");
+                // Update basic info
+                user.Username = model.Username?.Trim() ?? user.Username;
+                user.Email = model.Email?.ToLower().Trim() ?? user.Email;
+                user.PhoneNumber = model.PhoneNumber?.Trim();
+                user.Location = model.Location?.Trim();
+                user.Gender = model.Gender?.Trim();
+                user.DateOfBirth = model.DateOfBirth;
+                user.Bio = model.Bio?.Trim();
+                user.FacebookLink = model.FacebookLink?.Trim();
+                user.LinkedInLink = model.LinkedInLink?.Trim();
+                user.InstagramLink = model.InstagramLink?.Trim();
 
-                string fileName = Guid.NewGuid() + Path.GetExtension(AvatarFile.FileName);
-                string fullPath = Path.Combine(path, fileName);
+                // Handle avatar upload
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    if (!AvatarFile.ContentType.StartsWith("image/"))
+                    {
+                        ModelState.AddModelError("AvatarFile", "Please upload an image file");
+                        return View(model);
+                    }
 
-                using var stream = new FileStream(fullPath, FileMode.Create);
-                AvatarFile.CopyTo(stream);
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("AvatarFile", "File size must be less than 5MB");
+                        return View(model);
+                    }
 
-                user.Avatar = fileName;
-                HttpContext.Session.SetString("Avatar", fileName);
+                    var fileName = $"{user.Id}_{DateTime.UtcNow.Ticks}{Path.GetExtension(AvatarFile.FileName)}";
+                    var filePath = Path.Combine("wwwroot/images", fileName);
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    user.Avatar = fileName;
+                    HttpContext.Session.SetString(AppConstants.SESSION_AVATAR, fileName);
+                }
+
+                await _context.SaveChangesAsync();
+                HttpContext.Session.SetString(AppConstants.SESSION_USERNAME, user.Username);
+
+                _logger.LogInformation($"User updated profile: {user.Email}");
+                TempData["Success"] = "✅ Profile updated successfully!";
+
+                return RedirectToAction(nameof(Profile));
             }
-
-            HttpContext.Session.SetString("Username", user.Username);
-
-            _context.SaveChanges();
-
-            return RedirectToAction("Profile");
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating profile: {ex.Message}");
+                TempData["Error"] = "❌ Error updating profile. Please try again.";
+                return View(model);
+            }
         }
 
         // ===== CHANGE PASSWORD =====
-        public IActionResult ChangePassword()
-        {
-            return View();
-        }
+        [HttpGet]
+        public IActionResult ChangePassword() => View();
 
         [HttpPost]
-        public IActionResult ChangePassword(string oldPassword, string newPassword)
+        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmPassword)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
+            var userId = GetUserId();
             if (userId == null)
-                return RedirectToAction("Login");
+                return RedirectToAction(nameof(Login));
 
-            var user = _context.Users.Find(userId);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
 
-            if (user.Password != oldPassword)
+            try
             {
-                ViewBag.Error = "Sai mật khẩu cũ";
+                if (!_authService.VerifyPassword(oldPassword, user.Password))
+                {
+                    ModelState.AddModelError("oldPassword", "Current password is incorrect");
+                    return View();
+                }
+
+                if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+                {
+                    ModelState.AddModelError("newPassword", "New password must be at least 6 characters");
+                    return View();
+                }
+
+                if (newPassword != confirmPassword)
+                {
+                    ModelState.AddModelError("confirmPassword", "Passwords do not match");
+                    return View();
+                }
+
+                user.Password = _authService.HashPassword(newPassword);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"User changed password: {user.Email}");
+                TempData["Success"] = "✅ Password changed successfully!";
                 return View();
             }
-
-            user.Password = newPassword;
-            _context.SaveChanges();
-
-            ViewBag.Success = "Đổi mật khẩu thành công!";
-            return View();
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error changing password: {ex.Message}");
+                TempData["Error"] = "❌ Error changing password";
+                return View();
+            }
         }
 
         // ===== LOGOUT =====
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            _logger.LogInformation("User logged out");
+            TempData["Success"] = "Đã đăng xuất!";
+            return RedirectToAction(nameof(Login));
         }
+
+        // ===== GOOGLE LOGIN =====
         public IActionResult GoogleLogin()
         {
-            var redirectUrl = Url.Action("GoogleResponse", "Account");
-
-            var properties = new AuthenticationProperties
-            {
-                RedirectUri = redirectUrl
-            };
-
-            // 🔥 BẮT GOOGLE CHỌN LẠI ACCOUNT
+            var redirectUrl = Url.Action(nameof(GoogleResponse));
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
             properties.Items["prompt"] = "select_account";
 
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
+
         public async Task<IActionResult> GoogleResponse()
         {
-            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var result = await HttpContext.AuthenticateAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            if (result?.Principal == null)
+                return RedirectToAction(nameof(Login));
 
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
-
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
-            var user = _context.Users.FirstOrDefault(x => x.Email == email);
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction(nameof(Login));
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email == email.ToLower());
 
             if (user == null)
             {
                 user = new User
                 {
-                    Email = email,
-                    Username = name,
-                    Password = "GOOGLE_LOGIN",
-                    Avatar = "default.png"
+                    Email = email.ToLower(),
+                    Username = name ?? "Google User",
+                    Password = _authService.HashPassword(AppConstants.GOOGLE_LOGIN_PASSWORD),
+                    Avatar = AppConstants.DEFAULT_AVATAR
                 };
 
                 _context.Users.Add(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"New user from Google: {email}");
             }
 
-            HttpContext.Session.SetInt32("UserId", user.Id);
-            HttpContext.Session.SetString("Username", user.Username);
-
+            SetUserSession(user);
             return RedirectToAction("Index", "Dashboard");
         }
-        public IActionResult Leaderboard()
+
+        // ===== LEADERBOARD =====
+        public async Task<IActionResult> Leaderboard()
         {
-            var users = _context.Users.ToList();
-
-            // TOP XP
-            var topXP = users
+            var topXP = await _context.Users
                 .OrderByDescending(u => u.XP)
-                .Take(10)
-                .ToList();
+                .Take(AppConstants.LEADERBOARD_TOP_COUNT)
+                .ToListAsync();
 
-            // TOP STREAK
-            var topStreak = users
+            var topStreak = await _context.Users
                 .OrderByDescending(u => u.CurrentStreak)
-                .Take(10)
-                .ToList();
+                .Take(AppConstants.LEADERBOARD_TOP_COUNT)
+                .ToListAsync();
 
             ViewBag.TopXP = topXP;
             ViewBag.TopStreak = topStreak;
 
             return View();
+        }
+
+        // ===== HELPER METHODS =====
+        private void SetUserSession(User user)
+        {
+            HttpContext.Session.SetInt32(AppConstants.SESSION_USER_ID, user.Id);
+            HttpContext.Session.SetString(AppConstants.SESSION_USERNAME, user.Username);
+            HttpContext.Session.SetString(
+                AppConstants.SESSION_AVATAR,
+                user.Avatar ?? AppConstants.DEFAULT_AVATAR);
+            HttpContext.Session.SetString(
+                AppConstants.SESSION_IS_ADMIN,
+                user.IsAdmin ? "true" : "false");
+        }
+
+        private int? GetUserId()
+        {
+            return HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
         }
     }
 }

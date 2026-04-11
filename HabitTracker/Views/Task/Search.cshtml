@@ -1,0 +1,316 @@
+﻿@model List<Quest>
+@{
+    ViewData["Title"] = "Tìm kiếm Quest";
+}
+
+<style>
+    .search-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+        .search-box h2 {
+            margin-bottom: 20px;
+        }
+
+    .search-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .search-form input,
+        .search-form select {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-form button {
+            padding: 10px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .search-form button:hover {
+                background: #218838;
+            }
+
+    .quest-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s;
+    }
+
+        .quest-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+    .quest-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .quest-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        margin-right: 8px;
+    }
+
+    .badge-category {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .badge-difficulty {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+
+    .badge-frequency {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .badge-xp {
+        background: #e8f5e9;
+        color: #388e3c;
+    }
+
+    .quest-description {
+        color: #666;
+        margin: 10px 0;
+        line-height: 1.6;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+        .no-results img {
+            width: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+    .filter-tags {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tag {
+        background: #f0f0f0;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+    }
+
+        .filter-tag .remove {
+            margin-left: 8px;
+            cursor: pointer;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+    .results-count {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 0.95em;
+    }
+</style>
+
+<div class="container mt-5">
+    <!-- Search Box -->
+    <div class="search-box">
+        <h2>🔍 Tìm kiếm Quest</h2>
+        <form method="get" action="/task/search" class="search-form">
+            <input type="text"
+                   name="q"
+                   placeholder="Tìm kiếm quest..."
+                   value="@ViewBag.SearchQuery"
+                   class="form-control">
+
+            <select name="category" class="form-control">
+                <option value="">-- Tất cả categories --</option>
+                @if (ViewBag.Categories != null)
+                {
+                    @foreach (var cat in ViewBag.Categories)
+                    {
+                        <option value="@cat"
+                                selected="@(ViewBag.SelectedCategory == cat ? "selected" : "")">
+                            @cat
+                        </option>
+                    }
+                }
+            </select>
+
+            <select name="difficulty" class="form-control">
+                <option value="">-- Tất cả levels --</option>
+                @if (ViewBag.Difficulties != null)
+                {
+                    @foreach (var diff in ViewBag.Difficulties)
+                    {
+                        <option value="@diff"
+                                selected="@(ViewBag.SelectedDifficulty == diff ? "selected" : "")">
+                            @diff
+                        </option>
+                    }
+                }
+            </select>
+
+            <select name="frequency" class="form-control">
+                <option value="">-- Tất cả frequency --</option>
+                @if (ViewBag.Frequencies != null)
+                {
+                    @foreach (var freq in ViewBag.Frequencies)
+                    {
+                        <option value="@freq"
+                                selected="@(ViewBag.SelectedFrequency == freq ? "selected" : "")">
+                            @freq
+                        </option>
+                    }
+                }
+            </select>
+
+            <button type="submit" class="btn btn-success">
+                🔍 Tìm kiếm
+            </button>
+
+            <a href="/task/search" class="btn btn-secondary">
+                ↺ Reset
+            </a>
+        </form>
+    </div>
+
+    <!-- Active Filters -->
+    @if (!string.IsNullOrEmpty(ViewBag.SearchQuery) ||
+        !string.IsNullOrEmpty(ViewBag.SelectedCategory) ||
+        !string.IsNullOrEmpty(ViewBag.SelectedDifficulty))
+    {
+        <div class="filter-tags">
+            @if (!string.IsNullOrEmpty(ViewBag.SearchQuery))
+            {
+                <span class="filter-tag">
+                    🔍 "@ViewBag.SearchQuery"
+                    <span class="remove">✕</span>
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.SelectedCategory))
+            {
+                <span class="filter-tag">
+                    📁 @ViewBag.SelectedCategory
+                    <span class="remove">✕</span>
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.SelectedDifficulty))
+            {
+                <span class="filter-tag">
+                    ⚔️ @ViewBag.SelectedDifficulty
+                    <span class="remove">✕</span>
+                </span>
+            }
+        </div>
+    }
+
+    <!-- Results -->
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="results-count">
+            ✅ Tìm thấy <strong>@Model.Count</strong> quest
+        </div>
+
+        <div class="quest-results">
+            @foreach (var quest in Model)
+            {
+                <div class="quest-card">
+                    <div class="quest-header">
+                        <div class="quest-title">
+                            @if (!string.IsNullOrEmpty(quest.Icon))
+                            {
+                                <span>@quest.Icon</span>
+                            }
+                            @quest.Name
+                        </div>
+                        <div>
+                            <span class="badge badge-xp">@quest.XPReward XP</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(quest.Description))
+                    {
+                        <div class="quest-description">
+                            @quest.Description
+                        </div>
+                    }
+
+                    <div style="margin-top: 12px;">
+                        <span class="badge badge-category">📁 @quest.Category</span>
+                        <span class="badge badge-difficulty">⚔️ @quest.Difficulty</span>
+                        <span class="badge badge-frequency">🔄 @quest.Frequency</span>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <a href="/task" class="btn btn-sm btn-primary">
+                            📋 Xem tất cả quests
+                        </a>
+                        <a href="/task" class="btn btn-sm btn-info">
+                            ▶️ Thực hiện quest
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-results">
+            <div style="font-size: 3em; margin-bottom: 20px;">🔍</div>
+            <h4>Không tìm thấy quest nào</h4>
+            <p style="color: #999; margin-top: 10px;">
+                Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc
+            </p>
+            <a href="/task/search" class="btn btn-primary mt-3">
+                ↺ Xóa bộ lọc
+            </a>
+            <a href="/task" class="btn btn-secondary mt-3">
+                👉 Về trang Quest
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add to navbar or breadcrumb for navigation
+        console.log("Search page loaded");
+    </script>
+}

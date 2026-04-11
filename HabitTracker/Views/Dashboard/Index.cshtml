@@ -1,49 +1,65 @@
 ﻿@model HabitTracker.Models.User
 
 <h2>Dashboard</h2>
-<a href="/Habit/Suggestion">AI Suggestion</a>
+
 <p><b>Level:</b> @Model.Level</p>
 <p><b>XP:</b> @Model.XP</p>
 
 <div class="progress mb-3">
-    <div class="progress-bar bg-success"
-         style="width:@(Model.XP)%">
-        @Model.XP / 100 XP
+    @{
+        int xpInLevel = Model.XP % 100;
+    }
+    <div class="progress-bar bg-success" style="width:@xpInLevel%">
+        @xpInLevel / 100 XP
     </div>
 </div>
 
 <!-- CHART -->
 <canvas id="habitChart" height="100"></canvas>
 
-<!-- BEST HABIT -->
+<!-- BEST QUEST -->
 <div class="card p-3 mt-4 shadow-sm">
-    <h5>🏆 Best Habit</h5>
-
+    <h5>🏆 Best Quest</h5>
     @{
-        var best = Model.Habits?.OrderByDescending(h => h.XPReward).FirstOrDefault();
+        var best = Model.UserQuests?
+        .OrderByDescending(uq => uq.Quest?.XPReward)
+        .FirstOrDefault();
     }
-
-    @if (best != null)
+    @if (best?.Quest != null)
     {
-        <p><b>@best.Name</b></p>
+        <p><b>@best.Quest.Icon @best.Quest.Name</b></p>
+        <span class="badge bg-warning text-dark">+@best.Quest.XPReward XP</span>
+        <span class="badge bg-secondary">@best.Quest.Category</span>
+    }
+    else
+    {
+        <p class="text-muted">Chưa hoàn thành quest nào.</p>
     }
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         const ctx = document.getElementById('habitChart');
-
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [@Html.Raw(ViewBag.ChartLabels)],
                 datasets: [{
-                    label: 'Completed Habits',
+                    label: 'Quests hoàn thành',
                     data: [@Html.Raw(ViewBag.ChartData)],
-                    borderWidth: 2
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
                 }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
         });
     </script>

@@ -1,0 +1,346 @@
+﻿@using HabitTracker.Models.ViewModels
+@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Thống kê chi tiết";
+    var dayOfWeekNames = new[] { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
+}
+
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">📊 Thống kê chi tiết</h2>
+
+    <!-- Performance Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Hoàn thành hôm nay</h6>
+                    <h2>@Model.QuestStats.Completed / @Model.QuestStats.Total</h2>
+                    <small>@((Model.QuestStats.Pending)) chưa làm</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-success text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Completion Rate</h6>
+                    <h2>@Model.PerformanceMetrics.CompletionRate.ToString("F1")%</h2>
+                    <small>@Model.GetPerformanceRating()</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-info text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title">XP / Ngày</h6>
+                    <h2>@Model.PerformanceMetrics.AverageXPPerDay.ToString("F0")</h2>
+                    <small>TB trong 30 ngày</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-warning text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Consistency</h6>
+                    <h2>@Model.PerformanceMetrics.ConsistencyScore%</h2>
+                    <small>@Model.GetConsistencyStatus()</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">📈 So sánh với người khác</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>Bạn hoàn thành (7 ngày): <strong>@Model.Comparison.UserCompletion</strong> quests</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>Trung bình người khác: <strong>@Model.Comparison.AverageCompletion</strong> quests</p>
+                        </div>
+                    </div>
+                    @if (Model.IsAboveAverage())
+                    {
+                        <div class="alert alert-success" role="alert">
+                            ✅ Bạn hoàn thành nhiều hơn mức trung bình!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            💪 Cố gắng thêm một chút nữa để vượt qua mức trung bình!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- XP Trend Chart -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    📈 Trend XP (30 ngày gần nhất)
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="xpChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown Chart -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    🏆 Breakdown theo Category
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- More Charts -->
+    <div class="row mb-4">
+        <!-- Activity Heatmap -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    🔥 Hoạt động theo ngày trong tuần
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Difficulty Breakdown -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    ⚔️ Breakdown theo Difficulty
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="difficultyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Achievements -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    🎖️ Achievements gần đây
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentAchievements?.Any() == true)
+                    {
+                        <div class="row">
+                            @foreach (var achievement in Model.RecentAchievements)
+                            {
+                                <div class="col-md-3 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">🏅</h5>
+                                            <p class="card-text">
+                                                <strong>@achievement.AchievementName</strong>
+                                                <br />
+                                                <small class="text-muted">@achievement.AchievedDate.ToString("dd/MM/yyyy")</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Chưa có achievements. Tiếp tục cố gắng! 💪</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    📋 Tóm tắt
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p>Tổng quests hoàn thành: <strong>@Model.GetTotalCompletions()</strong></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>Tổng XP (30 ngày): <strong>@Model.GetTotalXP()</strong></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>Category hàng đầu: <strong>@Model.GetTopCategory()</strong></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>Ngày hoạt động: <strong>@Model.ActivityByDay.Sum(x => x.Count) / @(Model.ActivityByDay.Count * 7)</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Color palette
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+
+        // ===== 1. XP TREND CHART =====
+        const xpData = @Html.Raw(Json.Serialize(Model.XPTrend));
+        const xpCtx = document.getElementById('xpChart')?.getContext('2d');
+        if (xpCtx) {
+            new Chart(xpCtx, {
+                type: 'line',
+                data: {
+                    labels: xpData.map(x => new Date(x.date).toLocaleDateString('vi-VN')),
+                    datasets: [{
+                        label: 'XP earned',
+                        data: xpData.map(x => x.xp),
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // ===== 2. CATEGORY BREAKDOWN CHART =====
+        const categoryData = @Html.Raw(Json.Serialize(Model.CategoryBreakdown));
+        const catCtx = document.getElementById('categoryChart')?.getContext('2d');
+        if (catCtx) {
+            new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryData.map(x => x.category),
+                    datasets: [{
+                        data: categoryData.map(x => x.count),
+                        backgroundColor: colors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // ===== 3. ACTIVITY BY DAY OF WEEK =====
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        const activityData = @Html.Raw(Json.Serialize(Model.ActivityByDay));
+        const actCtx = document.getElementById('activityChart')?.getContext('2d');
+        if (actCtx) {
+            new Chart(actCtx, {
+                type: 'bar',
+                data: {
+                    labels: activityData.map(x => dayNames[x.dayOfWeek]),
+                    datasets: [{
+                        label: 'Quests completed',
+                        data: activityData.map(x => x.count),
+                        backgroundColor: '#4BC0C0',
+                        borderColor: '#36A2EB',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // ===== 4. DIFFICULTY BREAKDOWN =====
+        const difficultyData = @Html.Raw(Json.Serialize(Model.DifficultyBreakdown));
+        const diffCtx = document.getElementById('difficultyChart')?.getContext('2d');
+        if (diffCtx) {
+            new Chart(diffCtx, {
+                type: 'bar',
+                data: {
+                    labels: difficultyData.map(x => x.difficulty),
+                    datasets: [{
+                        label: 'Completions',
+                        data: difficultyData.map(x => x.count),
+                        backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    </script>
+}

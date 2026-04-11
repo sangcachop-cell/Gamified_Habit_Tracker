@@ -390,4 +390,106 @@ html, body {
         padding: 12px;
         border-radius: 8px;
     }
+    /* ===== TOAST NOTIFICATION ===== */
+    #toast-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast-noti {
+        min-width: 280px;
+        max-width: 340px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        transform: translateX(120px);
+        transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+        .toast-noti.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-noti.hide {
+            opacity: 0;
+            transform: translateX(120px);
+        }
+
+    /* Màu theo lo?i */
+    .toast-xp {
+        background: linear-gradient(135deg, #f6a623, #f76b1c);
+    }
+
+    .toast-badge {
+        background: linear-gradient(135deg, #7b2ff7, #4a90d9);
+    }
+
+    .toast-streak {
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    }
+
+    .toast-level {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    /* Icon l?n bên trái */
+    .toast-icon {
+        font-size: 2rem;
+        line-height: 1;
+        flex-shrink: 0;
+        animation: bounceIcon 0.5s ease;
+    }
+
+    /* Progress bar t? ??ng ??m ng??c */
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255,255,255,0.5);
+        border-radius: 0 0 12px 12px;
+        animation: progressBar 3.5s linear forwards;
+    }
+
+    .toast-noti {
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes bounceIcon {
+        0% {
+            transform: scale(0.5);
+        }
+
+        60% {
+            transform: scale(1.3);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes progressBar {
+        from {
+            width: 100%;
+        }
+
+        to {
+            width: 0%;
+        }
+    }
 }

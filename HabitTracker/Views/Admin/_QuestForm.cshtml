@@ -1,0 +1,180 @@
+﻿@model HabitTracker.Models.Quest
+
+@* ===== EMOJI PICKER ===== *@
+<div class="mb-3">
+    <label class="form-label fw-bold">Icon (emoji)</label>
+    <div class="input-group">
+        <span class="input-group-text" id="selectedEmoji" style="font-size:1.4rem; min-width:50px;">
+            @(string.IsNullOrEmpty(Model?.Icon) ? "⭐" : Model.Icon)
+        </span>
+        <input asp-for="Icon" id="iconInput" class="form-control" placeholder="Hoặc nhập emoji thủ công..."
+               value="@(string.IsNullOrEmpty(Model?.Icon) ? "⭐" : Model.Icon)" />
+    </div>
+
+    @* Tabs danh mục emoji *@
+    <div class="mt-2">
+        <ul class="nav nav-tabs nav-sm" id="emojiTabs">
+            <li class="nav-item"><a class="nav-link active py-1 px-2 small" data-tab="popular">⭐ Phổ biến</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="health">💪 Sức khỏe</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="study">📚 Học tập</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="mental">🧘 Tinh thần</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="money">💰 Tài chính</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="social">👥 Xã hội</a></li>
+            <li class="nav-item"><a class="nav-link py-1 px-2 small" data-tab="hobby">🎨 Sở thích</a></li>
+        </ul>
+
+        <div class="border border-top-0 rounded-bottom p-2 bg-light" style="min-height:70px;">
+            @* Popular *@
+            <div class="emoji-group" data-group="popular">
+                ⭐ 🔥 ✅ 🎯 💫 🚀 🏆 🎉 💡 ⚡ 🌟 👑 🎖️ 🥇 💎 🔑
+            </div>
+            @* Sức khỏe *@
+            <div class="emoji-group d-none" data-group="health">
+                💪 🏃 🚴 🏋️ 🤸 🧗 🏊 🚶 🥗 🥦 💧 🍎 😴 🛏️ 🧘 🏅 🩺 💊 🫀 🦷 👟 🏸 ⚽ 🎾
+            </div>
+            @* Học tập *@
+            <div class="emoji-group d-none" data-group="study">
+                📚 📖 ✏️ 📝 🖊️ 🎓 🏫 💻 🖥️ 📱 🔬 🔭 📐 📏 🗂️ 📊 📈 🧮 🧪 🎯 📄 📋 🗒️ 🔍
+            </div>
+            @* Tinh thần *@
+            <div class="emoji-group d-none" data-group="mental">
+                🧘 🙏 🌸 🌿 🕯️ 🫶 ❤️ 😊 🌈 ☀️ 🌙 ⭐ 🍃 🌺 🦋 🕊️ 🌻 💆 📿 🎵 🎶 🌊 🏔️ 🌄
+            </div>
+            @* Tài chính *@
+            <div class="emoji-group d-none" data-group="money">
+                💰 💵 💳 🏦 📈 📊 🪙 💹 🤑 🏧 💸 🛒 🏪 📑 🧾 📒 💼 🏠 🚗 ✈️ 📦 🎁 💡 🔐
+            </div>
+            @* Xã hội *@
+            <div class="emoji-group d-none" data-group="social">
+                👥 👨‍👩‍👧 🤝 💬 📞 📧 🗣️ 🫂 ❤️ 🎂 🎊 🥂 🍽️ ☕ 🤗 👫 🫶 🙌 👏 💌 🎀 🎗️ 🌹 🤲
+            </div>
+            @* Sở thích *@
+            <div class="emoji-group d-none" data-group="hobby">
+                🎨 🖌️ 🎭 🎬 🎮 🎵 🎸 🎹 🎤 📷 ✂️ 🧶 🪡 🍳 🧁 🌱 🪴 🐾 📚 🎲 🃏 🎯 ✈️ 🏕️
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===== TÊN ===== *@
+<div class="mb-3">
+    <label class="form-label fw-bold">Tên nhiệm vụ <span class="text-danger">*</span></label>
+    <input asp-for="Name" class="form-control" placeholder="Ví dụ: Uống 2 lít nước mỗi ngày" required />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+
+@* ===== MÔ TẢ ===== *@
+<div class="mb-3">
+    <label class="form-label">Mô tả</label>
+    <textarea asp-for="Description" class="form-control" rows="2"
+              placeholder="Mô tả ngắn..."></textarea>
+</div>
+
+@* ===== DANH MỤC + ĐỘ KHÓ + TẦN SUẤT ===== *@
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Danh mục</label>
+        <select asp-for="Category" class="form-select">
+            <optgroup label="Cơ bản">
+                <option value="Sức khỏe">💪 Sức khỏe</option>
+                <option value="Học tập">📚 Học tập</option>
+                <option value="Tinh thần">🧘 Tinh thần</option>
+                <option value="Tài chính">💰 Tài chính</option>
+            </optgroup>
+            <optgroup label="Nâng cao">
+                <option value="Xã hội">👥 Xã hội</option>
+                <option value="Sở thích">🎨 Sở thích</option>
+                <option value="Công việc">💼 Công việc</option>
+                <option value="Gia đình">👨‍👩‍👧 Gia đình</option>
+                <option value="Thể thao">⚽ Thể thao</option>
+                <option value="Dinh dưỡng">🥗 Dinh dưỡng</option>
+                <option value="Sáng tạo">🎯 Sáng tạo</option>
+                <option value="Công nghệ">💻 Công nghệ</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Độ khó</label>
+        <select asp-for="Difficulty" class="form-select">
+            <option value="Easy">🟢 Dễ (+10 XP)</option>
+            <option value="Medium">🟡 Trung bình (+25 XP)</option>
+            <option value="Hard">🔴 Khó (+50 XP)</option>
+        </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Tần suất</label>
+        <select asp-for="Frequency" class="form-select">
+            <option value="Daily">🔁 Hàng ngày</option>
+            <option value="Weekly">📅 Hàng tuần</option>
+            <option value="Monthly">🗓️ Hàng tháng</option>
+        </select>
+    </div>
+</div>
+
+@if (Model != null && Model.Id != 0)
+{
+    <div class="mb-3 form-check">
+        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+        <label class="form-check-label">Đang hiển thị cho người dùng</label>
+    </div>
+}
+
+@* ===== SCRIPT EMOJI PICKER ===== *@
+<style>
+    .emoji-group {
+        font-size: 1.5rem;
+        line-height: 2.2rem;
+        letter-spacing: 4px;
+    }
+
+        .emoji-group span {
+            cursor: pointer;
+            transition: transform .1s;
+            display: inline-block;
+        }
+
+            .emoji-group span:hover {
+                transform: scale(1.3);
+            }
+
+    #emojiTabs .nav-link {
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        #emojiTabs .nav-link.active {
+            font-weight: 600;
+        }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Wrap mỗi emoji thành <span> clickable
+        document.querySelectorAll(".emoji-group").forEach(group => {
+            const emojis = [...group.textContent.trim()].filter(c => c.trim());
+            group.innerHTML = emojis.map(e =>
+                `<span title="${e}" onclick="pickEmoji('${e}')">${e}</span>`
+            ).join(" ");
+        });
+
+        // Tab switching
+        document.querySelectorAll("#emojiTabs .nav-link").forEach(tab => {
+            tab.addEventListener("click", function () {
+                document.querySelectorAll("#emojiTabs .nav-link").forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+                const target = this.dataset.tab;
+                document.querySelectorAll(".emoji-group").forEach(g => {
+                    g.classList.toggle("d-none", g.dataset.group !== target);
+                });
+            });
+        });
+    });
+
+    function pickEmoji(emoji) {
+        document.getElementById("iconInput").value = emoji;
+        document.getElementById("selectedEmoji").textContent = emoji;
+    }
+</script>

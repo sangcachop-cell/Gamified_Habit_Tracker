@@ -4,7 +4,6 @@
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
 
-    // 👉 FULL PAGE (không navbar)
     bool isFullPage = controller == "Account" &&
         (action == "Login" || action == "Register"
          || action == "Profile"
@@ -18,33 +17,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HabitTracker</title>
-
-    <!-- BOOTSTRAP -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <!-- ICON (thêm cho đẹp) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
     @if (!isFullPage)
     {
         <header>
             <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
                 <div class="container-fluid">
 
-                    <!-- LOGO -->
+                    <!-- Logo -->
                     <a class="navbar-brand fw-bold text-primary"
                        asp-controller="Dashboard" asp-action="Index">
                         🚀 HabitTracker
                     </a>
 
-                    <!-- TOGGLE -->
                     <button class="navbar-toggler" type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#navbarContent">
@@ -53,7 +44,7 @@
 
                     <div class="collapse navbar-collapse" id="navbarContent">
 
-                        <!-- ===== LEFT MENU ===== -->
+                        <!-- LEFT MENU -->
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                             <li class="nav-item">
@@ -63,14 +54,8 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Habit" asp-action="Index">
-                                    📋 Habits
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Habit" asp-action="Suggestion">
-                                    🤖 Suggestion
+                                <a class="nav-link" asp-controller="Task" asp-action="Index">
+                                    📋 Tasks
                                 </a>
                             </li>
 
@@ -80,47 +65,65 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Task" asp-action="Index">
-                                    Tasks
+                            <!-- 🔍 SEARCH BUTTON -->
+                            <li class="nav-item ms-3">
+                                <a class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
+                                   asp-controller="Task" asp-action="Search"
+                                   style="padding: 8px 15px; margin-top: 5px;">
+                                    🔍 Search Quests
                                 </a>
                             </li>
 
+                            @if (Context.Session.GetString("IsAdmin") == "true")
+                            {
+                                <li class="nav-item ms-2">
+                                    <a class="nav-link text-warning fw-bold"
+                                       asp-controller="Admin" asp-action="Index">
+                                        ⚙️ Admin
+                                    </a>
+                                </li>
+                            }
+
                         </ul>
 
-                        <!-- ===== RIGHT USER ===== -->
+                        <!-- CENTER - QUICK STATS (Optional) -->
+                        @if (Context.Session.GetString("Username") != null)
+                        {
+                            <div style="margin: 0 20px; display: flex; gap: 20px; align-items: center;">
+                                <small style="color: #666;">
+                                    <strong style="color: #667eea;">Level:</strong> <span id="navbar-level">-</span>
+                                </small>
+                            </div>
+                        }
+
+                        <!-- RIGHT USER MENU -->
                         <ul class="navbar-nav align-items-center">
 
                             @if (Context.Session.GetString("Username") != null)
                             {
                                 <li class="nav-item dropdown">
-
                                     <a class="nav-link dropdown-toggle d-flex align-items-center"
                                        href="#"
                                        data-bs-toggle="dropdown"
                                        style="gap:10px;">
-
-                                        <!-- AVATAR -->
                                         <img src="@(Context.Session.GetString("Avatar") != null
-                                                                                                 && Context.Session.GetString("Avatar").StartsWith("http")
-                                                                                                 ? Context.Session.GetString("Avatar")
-                                                                                                 : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
-                                     width="40"
-                                     height="40"
+                                                                                                                                                  && Context.Session.GetString("Avatar").StartsWith("http")
+                                                                                                                                                  ? Context.Session.GetString("Avatar")
+                                                                                                                                                  : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
+                                     width="40" height="40"
                                      class="rounded-circle border"
                                      style="object-fit:cover;" />
+                                <span class="fw-semibold d-none d-md-inline">
+                                    @Context.Session.GetString("Username")
+                                </span>
+                            </a>
 
-                                        <span class="fw-semibold">
-                                            @Context.Session.GetString("Username")
-                                        </span>
-                                    </a>
-
-                                    <!-- DROPDOWN -->
                                     <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
 
+                                        <!-- PROFILE LINK -->
                                         <li>
                                             <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                                👤 Profile
+                                                👤 My Profile
                                             </a>
                                         </li>
 
@@ -131,26 +134,40 @@
                                         </li>
 
                                         <li>
-                                            <a class="dropdown-item" asp-controller="Habit" asp-action="Index">
-                                                📋 My Habits
+                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Statistics">
+                                                📈 Statistics
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Task" asp-action="Search">
+                                                🔍 Search Quests
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Task" asp-action="Index">
+                                                📋 All Tasks
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">
+                                                🏆 My Badges
                                             </a>
                                         </li>
 
                                         <li>
                                             <a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">
-                                                🏆 Leaderboard
+                                                🏅 Leaderboard
                                             </a>
                                         </li>
 
-                                        <li>
-                                            <a class="dropdown-item" href="#">
-                                                🎯 Achievements
-                                            </a>
-                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
 
                                         <li>
-                                            <a class="dropdown-item" href="#">
-                                                ⚙️ Settings
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
+                                                🔐 Change Password
                                             </a>
                                         </li>
 
@@ -163,7 +180,6 @@
                                                 🚪 Logout
                                             </a>
                                         </li>
-
                                     </ul>
                                 </li>
                                                 }
@@ -171,13 +187,12 @@
                             {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                        Login
+                                        🔐 Login
                                     </a>
                                 </li>
-
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Account" asp-action="Register">
-                                        Register
+                                        📝 Register
                                     </a>
                                 </li>
                             }
@@ -187,6 +202,24 @@
                 </div>
             </nav>
         </header>
+
+        @* ===== TOAST DATA TỪ TEMPDATA ===== *@
+        @if (TempData["ToastXP"] != null)
+        {
+            <div id="toast-data-xp" data-value="@TempData["ToastXP"]" style="display:none"></div>
+        }
+        @if (TempData["ToastBadge"] != null)
+        {
+            <div id="toast-data-badge" data-value="@TempData["ToastBadge"]" style="display:none"></div>
+        }
+        @if (TempData["ToastLevel"] != null)
+        {
+            <div id="toast-data-level" data-value="@TempData["ToastLevel"]" style="display:none"></div>
+        }
+        @if (TempData["ToastStreak"] != null)
+        {
+            <div id="toast-data-streak" data-value="@TempData["ToastStreak"]" style="display:none"></div>
+        }
     }
 
     <!-- ================= BODY ================= -->
@@ -201,7 +234,7 @@
     {
         <footer class="border-top mt-5">
             <div class="container text-center py-3 text-muted">
-                © 2026 - HabitTracker 🚀
+                © 2026 - HabitTracker 🚀 | v1.0 | 5 Features
             </div>
         </footer>
     }
@@ -209,8 +242,151 @@
     <!-- SCRIPTS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
     @RenderSection("Scripts", required: false)
+
+    <!-- ===== TOAST CONTAINER + SCRIPT ===== -->
+    <div id="toast-container"></div>
+
+    <style>
+        #toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-noti {
+            min-width: 280px;
+            max-width: 340px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateX(120px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .toast-noti.show {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .toast-noti.hide {
+                opacity: 0;
+                transform: translateX(120px);
+            }
+
+        .toast-xp {
+            background: linear-gradient(135deg, #f6a623, #f76b1c);
+        }
+
+        .toast-badge {
+            background: linear-gradient(135deg, #7b2ff7, #4a90d9);
+        }
+
+        .toast-streak {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
+
+        .toast-level {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: #1a1a1a;
+        }
+
+        .toast-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+            animation: bounceIcon 0.5s ease;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 0 0 12px 12px;
+            animation: progressBar 3.5s linear forwards;
+        }
+
+        @@keyframes bounceIcon {
+            0% {
+                transform: scale(0.5);
+            }
+
+            60% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @@keyframes progressBar {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+    </style>
+
+    <script>
+        function showToast(icon, title, message, type, duration) {
+            duration = duration || 3500;
+            var container = document.getElementById('toast-container');
+            var toast = document.createElement('div');
+            toast.className = 'toast-noti ' + type;
+            toast.innerHTML =
+                '<div class="toast-icon">' + icon + '</div>' +
+                '<div>' +
+                    '<div style="font-weight:700;font-size:1rem;">' + title + '</div>' +
+                    '<div style="font-size:0.85rem;opacity:0.9;">' + message + '</div>' +
+                '</div>' +
+                '<div class="toast-progress"></div>';
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    toast.classList.add('show');
+                });
+            });
+
+            setTimeout(function () {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                setTimeout(function () { toast.remove(); }, 400);
+            }, duration);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var xp     = document.getElementById('toast-data-xp');
+            var badge  = document.getElementById('toast-data-badge');
+            var level  = document.getElementById('toast-data-level');
+            var streak = document.getElementById('toast-data-streak');
+
+            if (xp)     showToast('⚡', 'Nhận XP!',      xp.dataset.value,     'toast-xp',     3500);
+            if (streak) setTimeout(function(){ showToast('🔥', 'Streak!',       streak.dataset.value, 'toast-streak', 4000); }, 300);
+            if (badge)  setTimeout(function(){ showToast('🏅', 'Huy hiệu mới!', badge.dataset.value,  'toast-badge',  5000); }, 800);
+            if (level)  setTimeout(function(){ showToast('⬆️', 'Level Up!',     level.dataset.value,  'toast-level',  5000); }, 1400);
+        });
+    </script>
 
 </body>
 </html>

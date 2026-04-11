@@ -1,0 +1,107 @@
+﻿@model List<HabitTracker.Models.Quest>
+
+@{
+    ViewData["Title"] = "Admin - Quản lý Quest";
+    var active = Model.Where(q => q.IsActive).ToList();
+    var inactive = Model.Where(q => !q.IsActive).ToList();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>⚙️ Quản lý Quest</h3>
+        <a asp-action="Create" class="btn btn-primary">+ Thêm Quest mới</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @* Bảng quest đang active *@
+    <h5 class="mb-3">Đang hiển thị (@active.Count)</h5>
+    <div class="table-responsive mb-5">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Icon</th>
+                    <th>Tên</th>
+                    <th>Danh mục</th>
+                    <th>Độ khó</th>
+                    <th>Tần suất</th>
+                    <th>XP</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var q in active)
+                {
+                    <tr>
+                        <td class="text-center" style="font-size:1.4rem">@q.Icon</td>
+                        <td>
+                            <b>@q.Name</b>
+                            @if (!string.IsNullOrEmpty(q.Description))
+                            {
+                                <br>
+                        
+                                <small class="text-muted">@q.Description</small>
+                            }
+                        </td>
+                        <td><span class="badge bg-secondary">@q.Category</span></td>
+                        <td>
+                            @{
+                                var diffClass = q.Difficulty == "Easy" ? "success"
+                                : q.Difficulty == "Medium" ? "warning" : "danger";
+                            }
+                            <span class="badge bg-@diffClass">@q.Difficulty</span>
+                        </td>
+                        <td>@q.Frequency</td>
+                        <td><b class="text-warning">+@q.XPReward</b></td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@q.Id"
+                               class="btn btn-sm btn-outline-primary me-1">✏️ Sửa</a>
+                            <form asp-action="Delete" method="post" style="display:inline"
+                                  onsubmit="return confirm('Ẩn quest này?')">
+                                <input type="hidden" name="id" value="@q.Id" />
+                                <button class="btn btn-sm btn-outline-danger">🗑️ Ẩn</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Bảng quest đã ẩn *@
+    @if (inactive.Any())
+    {
+        <h5 class="mb-3 text-muted">Đã ẩn (@inactive.Count)</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle opacity-75">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Icon</th>
+                        <th>Tên</th>
+                        <th>Danh mục</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var q in inactive)
+                    {
+                        <tr>
+                            <td>@q.Icon</td>
+                            <td class="text-decoration-line-through text-muted">@q.Name</td>
+                            <td><span class="badge bg-secondary">@q.Category</span></td>
+                            <td>
+                                <form asp-action="Restore" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="@q.Id" />
+                                    <button class="btn btn-sm btn-outline-success">♻️ Khôi phục</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

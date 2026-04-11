@@ -1,0 +1,25 @@
+﻿@model HabitTracker.Models.Quest
+
+@{
+    ViewData["Title"] = "Thêm Quest mới";
+}
+
+<div class="container py-4" style="max-width: 650px;">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+        <h4 class="mb-0">➕ Thêm Quest mới</h4>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <partial name="_QuestForm" model="Model" />
+                <hr />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">💾 Lưu Quest</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
