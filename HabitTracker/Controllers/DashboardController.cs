@@ -11,6 +11,7 @@ namespace HabitTracker.Controllers
     /// <summary>
     /// Dashboard của user - hiển thị thống kê, streak, badges
     /// </summary>
+    [Route("[controller]")]
     public class DashboardController : Controller
     {
         private readonly AppDbContext _context;
@@ -28,6 +29,8 @@ namespace HabitTracker.Controllers
         }
 
         // ===== MAIN DASHBOARD =====
+        [HttpGet("")]
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             var userId = GetUserId();
@@ -54,6 +57,7 @@ namespace HabitTracker.Controllers
         }
 
         // ===== QUESTS HISTORY =====
+        [HttpGet("History")]
         public async Task<IActionResult> History(int page = 1, int pageSize = 10)
         {
             var userId = GetUserId();
@@ -84,6 +88,7 @@ namespace HabitTracker.Controllers
         }
 
         // ===== BADGES VIEW =====
+        [HttpGet("Badges")]
         public async Task<IActionResult> Badges()
         {
             var userId = GetUserId();

@@ -78,7 +78,7 @@ app.UseAuthorization();
 // ===== ROUTE CONFIGURATION =====
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // ===== DATABASE INITIALIZATION =====
 using (var scope = app.Services.CreateScope())
@@ -118,7 +118,7 @@ using (var scope = app.Services.CreateScope())
         }
         else if (!admin.IsAdmin)
         {
-            // N?u user này t?n t?i nh?ng ch?a là admin, c?p nh?t
+            // N?u user n?y t?n t?i nh?ng ch?a l? admin, c?p nh?t
             admin.IsAdmin = true;
             dbContext.SaveChanges();
         }

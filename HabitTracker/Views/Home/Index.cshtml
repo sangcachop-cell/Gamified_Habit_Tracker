@@ -1,6 +1,1140 @@
-﻿<h2>Gamified Habit Tracker</h2>
+﻿@model HabitTracker.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "HabitTracker - Gamify Your Life";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitTracker — Gamify Your Life</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0a0a12;
+            --paper: #f5f3ef;
+            --gold: #f0b429;
+            --violet: #5c3dde;
+            --rose: #e8436a;
+            --teal: #00b89c;
+            --soft: #edeaf5;
+        }
 
-<a href="/Account/Login">Login</a> |
-<a href="/Account/Register">Register</a> |
-<a href="/Dashboard">Dashboard</a> |
-<a href="/Habit">Habits</a>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "DM Sans", sans-serif;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .brand {
+            font-family: "Syne", sans-serif;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 48px;
+            background: rgba(245,243,239,.88);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(0,0,0,.07);
+            transition: padding .3s;
+        }
+
+        .brand {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+            .brand span {
+                color: var(--violet);
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+            .nav-links a {
+                padding: 9px 20px;
+                border-radius: 50px;
+                font-weight: 500;
+                font-size: .92rem;
+                text-decoration: none;
+                color: var(--ink);
+                transition: background .2s;
+            }
+
+                .nav-links a:hover {
+                    background: var(--soft);
+                }
+
+        .btn-nav-cta {
+            background: var(--ink) !important;
+            color: var(--paper) !important;
+            font-weight: 700 !important;
+        }
+
+            .btn-nav-cta:hover {
+                background: var(--violet) !important;
+                color: #fff !important;
+            }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 48px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .hero::before {
+                content: "";
+                position: absolute;
+                width: 700px;
+                height: 700px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(92,61,222,.13) 0%, transparent 70%);
+                top: -160px;
+                right: -180px;
+                animation: blobFloat 8s ease-in-out infinite;
+            }
+
+            .hero::after {
+                content: "";
+                position: absolute;
+                width: 500px;
+                height: 500px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(240,180,41,.12) 0%, transparent 70%);
+                bottom: -100px;
+                left: -100px;
+                animation: blobFloat 11s ease-in-out infinite reverse;
+            }
+
+        @@keyframes blobFloat {
+            0%, 100% {
+                transform: translate(0,0) scale(1);
+            }
+
+            50% {
+                transform: translate(30px,-30px) scale(1.05);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 680px;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--soft);
+            border: 1px solid rgba(92,61,222,.2);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--violet);
+            margin-bottom: 28px;
+            opacity: 0;
+            animation: fadeUp .7s .1s forwards;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: fadeUp .7s .25s forwards;
+        }
+
+            .hero h1 .accent-gold {
+                color: var(--gold);
+            }
+
+            .hero h1 .accent-violet {
+                color: var(--violet);
+            }
+
+        .hero-sub {
+            font-size: 1.15rem;
+            color: #555;
+            line-height: 1.7;
+            max-width: 520px;
+            margin-bottom: 40px;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeUp .7s .4s forwards;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeUp .7s .55s forwards;
+        }
+
+        .btn-primary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--ink);
+            color: var(--paper);
+            padding: 15px 34px;
+            border-radius: 50px;
+            font-family: "Syne", sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform .2s, background .2s, box-shadow .2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,.18);
+        }
+
+            .btn-primary-hero:hover {
+                background: var(--violet);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 30px rgba(92,61,222,.35);
+                color: #fff;
+            }
+
+        .btn-secondary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--ink);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1.5px solid rgba(0,0,0,.18);
+            transition: all .2s;
+        }
+
+            .btn-secondary-hero:hover {
+                border-color: var(--violet);
+                color: var(--violet);
+                background: var(--soft);
+            }
+
+        /* FLOATING CARDS */
+        .hero-visual {
+            position: absolute;
+            right: 6vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 380px;
+            opacity: 0;
+            animation: fadeLeft .9s .6s forwards;
+        }
+
+        .card-stack {
+            position: relative;
+            height: 460px;
+        }
+
+        .hcard {
+            position: absolute;
+            background: white;
+            border-radius: 20px;
+            padding: 22px 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.1);
+        }
+
+            .hcard:hover {
+                transform: translateY(-6px) !important;
+                transition: transform .3s;
+            }
+
+        .hcard-main {
+            width: 320px;
+            left: 30px;
+            top: 20px;
+            z-index: 3;
+            border: 1.5px solid rgba(92,61,222,.12);
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        .hcard-xp {
+            width: 200px;
+            right: 0;
+            top: 200px;
+            z-index: 4;
+            background: var(--violet);
+            color: white;
+            animation: cardFloat 7s 1s ease-in-out infinite;
+        }
+
+        .hcard-streak {
+            width: 180px;
+            left: 0;
+            bottom: 30px;
+            z-index: 2;
+            background: var(--gold);
+            animation: cardFloat 5s 2s ease-in-out infinite;
+        }
+
+        @@keyframes cardFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hcard-main .card-title {
+            font-family: "Syne",sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            color: var(--ink);
+        }
+
+        .quest-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .quest-row:last-child {
+                border: none;
+            }
+
+        .quest-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .quest-name {
+            font-size: .85rem;
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+        }
+
+        .quest-xp {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--violet);
+        }
+
+        .xp-label {
+            font-size: .75rem;
+            opacity: .8;
+            margin-bottom: 4px;
+        }
+
+        .xp-big {
+            font-family: "Syne",sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .xp-sub {
+            font-size: .8rem;
+            opacity: .8;
+            margin-top: 2px;
+        }
+
+        .streak-label {
+            font-size: .75rem;
+            font-weight: 600;
+            color: rgba(0,0,0,.6);
+            margin-bottom: 4px;
+        }
+
+        .streak-big {
+            font-family: "Syne",sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        /* STATS */
+        .stats-strip {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 40px 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .stat-block {
+            flex: 1;
+            text-align: center;
+            max-width: 220px;
+            padding: 0 30px;
+            border-right: 1px solid rgba(255,255,255,.1);
+            opacity: 0;
+        }
+
+            .stat-block:last-child {
+                border: none;
+            }
+
+            .stat-block.visible {
+                animation: fadeUp .6s forwards;
+            }
+
+        .stat-num {
+            font-family: "Syne",sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--gold), var(--rose));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-desc {
+            font-size: .85rem;
+            color: rgba(255,255,255,.55);
+            margin-top: 6px;
+        }
+
+        /* FEATURES */
+        .features {
+            padding: 100px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--violet);
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 60px;
+            max-width: 520px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px 28px;
+            border: 1.5px solid rgba(0,0,0,.06);
+            transition: transform .25s, box-shadow .25s, border-color .25s;
+            opacity: 0;
+        }
+
+            .feat-card.visible {
+                animation: fadeUp .6s forwards;
+            }
+
+            .feat-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 16px 48px rgba(0,0,0,.1);
+                border-color: var(--violet);
+            }
+
+        .feat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+        }
+
+        .feat-title {
+            font-family: "Syne",sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .feat-desc {
+            font-size: .9rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .fi-violet {
+            background: #ede9ff;
+        }
+
+        .fi-gold {
+            background: #fff5d6;
+        }
+
+        .fi-teal {
+            background: #d4f5ef;
+        }
+
+        .fi-rose {
+            background: #fde8ed;
+        }
+
+        .fi-ink {
+            background: #e8e8f0;
+        }
+
+        .fi-green {
+            background: #e2f5e2;
+        }
+
+        /* HOW */
+        .how {
+            background: var(--soft);
+            padding: 100px 48px;
+        }
+
+        .how-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .step {
+            text-align: center;
+            opacity: 0;
+        }
+
+            .step.visible {
+                animation: fadeUp .6s forwards;
+            }
+
+        .step-num {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+        }
+
+        .step h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            font-size: .88rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* LEADERBOARD */
+        .preview-section {
+            padding: 100px 48px;
+            max-width: 960px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .lb-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,.08);
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .lb-head {
+            display: grid;
+            grid-template-columns: 64px 1fr 120px 140px;
+            padding: 14px 28px;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: "Syne",sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            gap: 10px;
+        }
+
+        .lb-row {
+            display: grid;
+            grid-template-columns: 64px 1fr 120px 140px;
+            padding: 18px 28px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: background .2s;
+        }
+
+            .lb-row.visible {
+                animation: fadeLeft .5s forwards;
+            }
+
+            .lb-row:hover {
+                background: var(--soft);
+            }
+
+            .lb-row:last-child {
+                border: none;
+            }
+
+        .lb-rank {
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            color: #bbb;
+            font-size: 1.1rem;
+        }
+
+            .lb-rank.gold {
+                color: #f0b429;
+            }
+
+            .lb-rank.silver {
+                color: #9e9e9e;
+            }
+
+            .lb-rank.bronze {
+                color: #cd7f32;
+            }
+
+        .lb-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lb-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .lb-name {
+            font-weight: 700;
+            font-size: .95rem;
+        }
+
+        .lb-level {
+            font-size: .78rem;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .lb-xp {
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            color: var(--violet);
+            font-size: 1rem;
+        }
+
+        .lb-badge {
+            font-size: .82rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rarity-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .r-Legendary {
+            background: #FF8000;
+        }
+
+        .r-Epic {
+            background: #A335EE;
+        }
+
+        .r-Rare {
+            background: #0070DD;
+        }
+
+        .r-Common {
+            background: #808080;
+        }
+
+        /* CTA */
+        .cta-banner {
+            margin: 0 48px 80px;
+            background: var(--ink);
+            border-radius: 28px;
+            padding: 70px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .cta-banner::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(ellipse at 30% 50%, rgba(92,61,222,.4), transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(240,180,41,.25), transparent 60%);
+                pointer-events: none;
+            }
+
+            .cta-banner h2 {
+                font-size: clamp(2rem, 4vw, 3.2rem);
+                font-weight: 800;
+                letter-spacing: -1.5px;
+                color: white;
+                margin-bottom: 16px;
+                position: relative;
+            }
+
+            .cta-banner p {
+                color: rgba(255,255,255,.6);
+                font-size: 1.05rem;
+                margin-bottom: 36px;
+                position: relative;
+            }
+
+        .cta-btn-group {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .btn-cta-white {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: var(--ink);
+            padding: 15px 36px;
+            border-radius: 50px;
+            font-family: "Syne",sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+            .btn-cta-white:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 30px rgba(255,255,255,.2);
+                color: var(--violet);
+            }
+
+        .btn-cta-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1.5px solid rgba(255,255,255,.3);
+            transition: border-color .2s, background .2s;
+        }
+
+            .btn-cta-ghost:hover {
+                border-color: white;
+                background: rgba(255,255,255,.08);
+                color: white;
+            }
+
+        /* FOOTER */
+        footer {
+            background: var(--ink);
+            color: rgba(255,255,255,.4);
+            padding: 30px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .85rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+            footer a {
+                color: rgba(255,255,255,.5);
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    color: white;
+                }
+
+        /* ANIMATIONS */
+        @@keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeLeft {
+            from {
+                opacity: 0;
+                transform: translateX(28px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 960px) {
+            nav {
+                padding: 16px 24px;
+            }
+
+            .hero {
+                padding: 110px 24px 60px;
+            }
+
+            .hero-visual {
+                display: none;
+            }
+
+            .stats-strip {
+                padding: 40px 24px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .stat-block {
+                border: none;
+                flex: 0 0 45%;
+            }
+
+            .features {
+                padding: 70px 24px;
+            }
+
+            .how {
+                padding: 70px 24px;
+            }
+
+            .preview-section {
+                padding: 70px 24px;
+            }
+
+            .cta-banner {
+                margin: 0 24px 60px;
+                padding: 50px 30px;
+            }
+
+            footer {
+                padding: 24px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .lb-head, .lb-row {
+                grid-template-columns: 48px 1fr 90px;
+            }
+
+            .lb-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <a href="/" class="brand">🚀 Habit<span>Tracker</span></a>
+        <div class="nav-links">
+            <a href="#features">Tính năng</a>
+            <a href="#how">Cách dùng</a>
+            <a href="/Account/Leaderboard">Leaderboard</a>
+            <a href="/Account/Login">Đăng nhập</a>
+            <a href="/Account/Register" class="btn-nav-cta">Bắt đầu miễn phí →</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-eyebrow"><span>🎮</span> Gamify Your Daily Life</div>
+            <h1>Biến thói quen<br>thành <span class="accent-gold">cuộc phiêu lưu</span><br><span class="accent-violet">epic.</span></h1>
+            <p class="hero-sub">HabitTracker giúp bạn xây dựng thói quen tốt thông qua hệ thống quest, XP, level và badge — như chơi game, nhưng là cuộc sống thật của bạn.</p>
+            <div class="hero-ctas">
+                <a href="/Account/Register" class="btn-primary-hero">🚀 Bắt đầu ngay — Miễn phí</a>
+                <a href="#features" class="btn-secondary-hero">Xem tính năng ↓</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="card-stack">
+                <div class="hcard hcard-main">
+                    <div class="card-title">📋 Quests hôm nay</div>
+                    <div class="quest-row"><div class="quest-dot" style="background:#5c3dde"></div><span class="quest-name">Thiền 10 phút</span><span class="quest-xp">+10 XP</span><span>✅</span></div>
+                    <div class="quest-row"><div class="quest-dot" style="background:#00b89c"></div><span class="quest-name">Đọc sách 20 phút</span><span class="quest-xp">+10 XP</span><span>✅</span></div>
+                    <div class="quest-row"><div class="quest-dot" style="background:#f0b429"></div><span class="quest-name">Tập thể dục 30 phút</span><span class="quest-xp">+25 XP</span><span>⬜</span></div>
+                    <div class="quest-row"><div class="quest-dot" style="background:#e8436a"></div><span class="quest-name">Uống 2L nước</span><span class="quest-xp">+10 XP</span><span>⬜</span></div>
+                </div>
+                <div class="hcard hcard-xp">
+                    <div class="xp-label">⚡ Total XP</div>
+                    <div class="xp-big">@(Model.TopUsers.FirstOrDefault()?.XP.ToString("N0") ?? "0")</div>
+                    <div class="xp-sub">Top player · Level @(Model.TopUsers.FirstOrDefault()?.Level ?? 1)</div>
+                </div>
+                <div class="hcard hcard-streak">
+                    <div class="streak-label">🔥 Best Streak</div>
+                    <div class="streak-big">@(Model.TopUsers.OrderByDescending(u => u.CurrentStreak).FirstOrDefault()?.CurrentStreak ?? 0) ngày</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS STRIP — dữ liệu thật từ DB -->
+    <div class="stats-strip">
+        <div class="stat-block">
+            <div class="stat-num" data-target="@Model.TotalUsers">0</div>
+            <div class="stat-desc">Người dùng tích cực</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="@Model.TotalQuestsCompleted">0</div>
+            <div class="stat-desc">Quests hoàn thành</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="@Model.TotalBadges">0</div>
+            <div class="stat-desc">Badges đã kiếm</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num" data-target="@Model.TotalQuests">0</div>
+            <div class="stat-desc">Quests có sẵn</div>
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <div class="section-label">Tính năng</div>
+        <h2 class="section-title">Mọi thứ bạn cần để không bỏ cuộc.</h2>
+        <div class="features-grid">
+            <div class="feat-card" style="animation-delay:.05s"><div class="feat-icon fi-violet">🎯</div><div class="feat-title">Quest System</div><div class="feat-desc">Chuyển đổi thói quen thành nhiệm vụ với độ khó và phần thưởng XP rõ ràng. Daily, Weekly, Monthly quests.</div></div>
+            <div class="feat-card" style="animation-delay:.12s"><div class="feat-icon fi-gold">⚡</div><div class="feat-title">XP & Level Up</div><div class="feat-desc">Mỗi quest hoàn thành mang lại XP. Tích lũy đủ để lên level và mở khóa uy tín trong cộng đồng.</div></div>
+            <div class="feat-card" style="animation-delay:.19s"><div class="feat-icon fi-rose">🔥</div><div class="feat-title">Streak Tracking</div><div class="feat-desc">Theo dõi chuỗi ngày liên tiếp. Duy trì streak càng lâu, phần thưởng càng lớn và động lực càng cao.</div></div>
+            <div class="feat-card" style="animation-delay:.26s"><div class="feat-icon fi-teal">🏆</div><div class="feat-title">Badge Collection</div><div class="feat-desc">Kiếm huy hiệu theo độ hiếm Common → Rare → Epic → Legendary. Trưng bày trên profile của bạn.</div></div>
+            <div class="feat-card" style="animation-delay:.33s"><div class="feat-icon fi-ink">🏅</div><div class="feat-title">Leaderboard</div><div class="feat-desc">Cạnh tranh lành mạnh với người dùng khác. Xem bảng xếp hạng XP và cố gắng leo lên top.</div></div>
+            <div class="feat-card" style="animation-delay:.4s"><div class="feat-icon fi-green">📊</div><div class="feat-title">Statistics & Charts</div><div class="feat-desc">Dashboard thống kê chi tiết: XP trend 30 ngày, breakdown theo category, so sánh với trung bình.</div></div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="how">
+        <div class="how-inner">
+            <div class="section-label">Cách hoạt động</div>
+            <h2 class="section-title">4 bước đơn giản để bắt đầu.</h2>
+            <div class="steps">
+                <div class="step" style="animation-delay:.05s"><div class="step-num">1</div><h4>Đăng ký tài khoản</h4><p>Tạo profile chỉ mất 30 giây. Không cần thẻ tín dụng, hoàn toàn miễn phí.</p></div>
+                <div class="step" style="animation-delay:.15s"><div class="step-num">2</div><h4>Chọn Quest phù hợp</h4><p>Browse thư viện quest theo category, độ khó. Tìm những thói quen bạn muốn xây dựng.</p></div>
+                <div class="step" style="animation-delay:.25s"><div class="step-num">3</div><h4>Hoàn thành & nhận thưởng</h4><p>Tick quest mỗi ngày, nhận XP, duy trì streak và leo bảng xếp hạng cộng đồng.</p></div>
+                <div class="step" style="animation-delay:.35s"><div class="step-num">4</div><h4>Unlock badge & lên level</h4><p>Đạt đủ XP để lên level. Hoàn thành thử thách để unlock badge Rare, Epic, Legendary.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LEADERBOARD — dữ liệu thật từ DB -->
+    <section class="preview-section">
+        <div class="section-label">Leaderboard</div>
+        <h2 class="section-title" style="margin:0 auto 0;text-align:center;max-width:100%">Top người dùng hiện tại</h2>
+
+        @if (Model.TopUsers != null && Model.TopUsers.Count > 0)
+        {
+            <div class="lb-table">
+                <div class="lb-head">
+                    <span>#</span><span>Người dùng</span><span>XP</span><span>Badge hiếm nhất</span>
+                </div>
+
+                @for (int i = 0; i < Model.TopUsers.Count; i++)
+                {
+                    var u = Model.TopUsers[i];
+                    var rankClass = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "";
+                    var rankIcon = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : (i + 1).ToString();
+                    var bgColors = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" };
+                    var bg = bgColors[i % bgColors.Length];
+
+                    <div class="lb-row" style="animation-delay:@((i * 0.07).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))s">
+                        <span class="lb-rank @rankClass">@rankIcon</span>
+                        <div class="lb-user">
+                            @if (!string.IsNullOrEmpty(u.Avatar) && u.Avatar.StartsWith("http"))
+                            {
+                                <img src="@u.Avatar" class="lb-avatar" alt="@u.Username" />
+                            }
+                            else
+                            {
+                                <div class="lb-avatar" style="background:@bg">
+                                    @u.Username.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                            <div>
+                                <div class="lb-name">@u.Username</div>
+                                <div class="lb-level">Level @u.Level @(u.CurrentStreak > 0 ? $"· 🔥{u.CurrentStreak} ngày" : "")</div>
+                            </div>
+                        </div>
+                        <span class="lb-xp">@u.XP.ToString("N0")</span>
+                        <div class="lb-badge">
+                            @if (!string.IsNullOrEmpty(u.TopBadgeName))
+                            {
+                                <span class="rarity-dot r-@u.TopBadgeRarity"></span>
+                                <span>@u.TopBadgeIcon @u.TopBadgeName</span>
+                            }
+                            else
+                            {
+                                <span style="color:#ccc">—</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div style="margin-top:24px;">
+                <a href="/Account/Leaderboard" class="btn-secondary-hero" style="display:inline-flex;">
+                    Xem toàn bộ bảng xếp hạng →
+                </a>
+            </div>
+        }
+        else
+        {
+            <div style="text-align:center;padding:60px;color:#999;background:white;border-radius:20px;margin-top:40px;">
+                <div style="font-size:3em;margin-bottom:16px;">🏆</div>
+                <p>Chưa có người dùng nào. Hãy là người đầu tiên!</p>
+                <a href="/Account/Register" class="btn-primary-hero" style="display:inline-flex;margin-top:20px;">Đăng ký ngay</a>
+            </div>
+        }
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-banner">
+        <h2>Sẵn sàng level up<br>cuộc sống của bạn?</h2>
+        <p>Tham gia cùng @Model.TotalUsers người dùng — miễn phí, không cần thẻ tín dụng.</p>
+        <div class="cta-btn-group">
+            <a href="/Account/Register" class="btn-cta-white">🚀 Tạo tài khoản miễn phí</a>
+            <a href="/Account/Login" class="btn-cta-ghost">Đã có tài khoản →</a>
+        </div>
+    </div>
+
+    <footer>
+        <span>© 2026 HabitTracker 🚀 · Gamify Your Life</span>
+        <div style="display:flex;gap:24px;">
+            <a href="/Account/Login">Đăng nhập</a>
+            <a href="/Account/Register">Đăng ký</a>
+            <a href="/Account/Leaderboard">Leaderboard</a>
+        </div>
+    </footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add("visible"); observer.unobserve(el.target); } });
+        }, { threshold: 0.12 });
+        document.querySelectorAll(".stat-block, .feat-card, .step, .lb-row").forEach(el => observer.observe(el));
+
+        function countUp(el, target) {
+            let start = 0; const duration = 1600;
+            const step = (ts) => {
+                if (!start) start = ts;
+                const p = Math.min((ts - start) / duration, 1);
+                const e = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.floor(e * target).toLocaleString("vi");
+                if (p < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
+
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll("[data-target]").forEach(el => {
+                        countUp(el, parseInt(el.dataset.target));
+                    });
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        const strip = document.querySelector(".stats-strip");
+        if (strip) statsObserver.observe(strip);
+
+        window.addEventListener("scroll", () => {
+            document.getElementById("navbar").style.padding = window.scrollY > 60 ? "12px 48px" : "18px 48px";
+        });
+    </script>
+</body>
+</html>

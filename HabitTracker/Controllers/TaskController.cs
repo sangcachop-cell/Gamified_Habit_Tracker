@@ -10,6 +10,7 @@ namespace HabitTracker.Controllers
     /// <summary>
     /// Quản lý Quest của user - xem danh sách, hoàn thành quest
     /// </summary>
+    [Route("[controller]")]
     public class TaskController : Controller
     {
         private readonly AppDbContext _context;
@@ -30,6 +31,8 @@ namespace HabitTracker.Controllers
         }
 
         // ===== DANH SÁCH QUEST VỚI FILTER =====
+        [HttpGet("")]
+        [HttpGet("Index")]
         public async Task<IActionResult> Index(
             string? category,
             string? difficulty,
@@ -112,7 +115,7 @@ namespace HabitTracker.Controllers
         }
 
         // ===== XÁC NHẬN HOÀN THÀNH QUEST =====
-        [HttpPost]
+        [HttpPost("Confirm")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Confirm(List<int> questIds)
         {

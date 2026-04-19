@@ -164,8 +164,8 @@
     <!-- Profile Header -->
     <div class="profile-header">
         <img src="@(Model.Avatar != null && Model.Avatar.StartsWith("http")
-                                ? Model.Avatar
-                                : Url.Content("~/images/" + (Model.Avatar ?? "default.png")))"
+                                                          ? Model.Avatar
+                                                          : Url.Content("~/images/" + (Model.Avatar ?? "default.png")))"
              alt="Avatar"
              class="profile-avatar"
              onerror="this.src='@Url.Content("~/images/default.png")'">
@@ -349,8 +349,8 @@
                     <button type="submit" class="btn btn-primary btn-lg">
                         💾 Save Changes
                     </button>
-                    <a href="/account/profile" class="btn btn-secondary btn-lg">
-                        ↩️ Cancel
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
+                        ← Back
                     </a>
                 </div>
             </form>
