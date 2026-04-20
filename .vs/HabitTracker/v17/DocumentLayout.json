@@ -3,6 +3,38 @@
   "WorkspaceRootPath": "D:\\baitap\\lt\\HabitTracker\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -23,10 +55,6 @@
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -35,16 +63,8 @@
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\profile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\badges.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\badges.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -55,20 +75,8 @@
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\controllers\\taskcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -93,10 +101,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\controllers\\notificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\controllers\\notificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\services\\implementations\\categoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -251,10 +255,6 @@
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\editprofile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -314,7 +314,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -330,85 +330,115 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "HomeViewModel.cs",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
-              "RelativeDocumentMoniker": "HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
-              "RelativeToolTip": "HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-19T23:21:43.947Z",
+              "DocumentIndex": 7,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Login.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAgwGMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T14:24:18.172Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Register.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Register.cshtml",
+              "ViewState": "AgIAAEcBAAAAAAAAAAAgwFwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T14:24:35.965Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "ViewState": "AgIAAKQBAAAAAAAAAAAgwLkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T14:24:57.265Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Home\\Index.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAADoEAAAAAAAAAAAgwHMEAAAHAAAAAAAAAA==",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Index.cshtml",
+              "ViewState": "AgIAAD0BAAAAAAAAAAAgwFIBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T14:23:57.606Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Profile.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Profile.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Account\\Profile.cshtml",
-              "ViewState": "AgIAAIsAAAAAAAAAAAAswF4BAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-19T11:29:27.055Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
-              "RelativeDocumentMoniker": "HabitTracker\\Program.cs",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
-              "RelativeToolTip": "HabitTracker\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIQAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-18T14:35:39.097Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAADIAAAAAAAAAAAAgwEEAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T14:37:15.478Z",
+              "WhenOpened": "2026-03-31T14:41:36.772Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "CategoryController.cs",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CategoryController.cs",
-              "RelativeDocumentMoniker": "HabitTracker\\Controllers\\CategoryController.cs",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CategoryController.cs",
-              "RelativeToolTip": "HabitTracker\\Controllers\\CategoryController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T00:11:46.219Z",
+              "Title": "Search.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Search.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Search.cshtml",
+              "ViewState": "AgIAAHgBAAAAAAAAAAAgwIoBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-10T00:13:45.071Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Leaderboard.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "ViewState": "AgIAAIcBAAAAAAAAAAAgwJwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-26T13:25:47.235Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Statistics.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "ViewState": "AgIAAOYBAAAAAAAAAAAgwPsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-10T00:14:07.234Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAADUAAAAAAAAAAAAgwFYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T14:37:15.478Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\HomeController.cs",
@@ -420,12 +450,68 @@
               "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Controllers\\CategoryController.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "HabitTracker\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:11:46.219Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 13,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Program.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
+              "RelativeToolTip": "HabitTracker\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIQAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T14:35:39.097Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Profile.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Profile.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Profile.cshtml",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAswF4BAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-19T11:29:27.055Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAADoEAAAAAAAAAAAgwHMEAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T14:23:57.606Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "HomeViewModel.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
+              "RelativeToolTip": "HabitTracker\\Models\\ViewModels\\HomeViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-19T23:21:43.947Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "LoginViewModel.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\LoginViewModel.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\ViewModels\\LoginViewModel.cs",
@@ -433,25 +519,11 @@
               "RelativeToolTip": "HabitTracker\\Models\\ViewModels\\LoginViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-18T14:34:19.786Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-18T14:34:19.786Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Login.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Login.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Account\\Login.cshtml",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAAAC8AAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T14:24:18.172Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 17,
               "Title": "TaskController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\TaskController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\TaskController.cs",
@@ -459,37 +531,11 @@
               "RelativeToolTip": "HabitTracker\\Controllers\\TaskController.cs",
               "ViewState": "AgIAAP0AAAAAAAAAAAAIwAQBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-31T14:40:11.396Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-31T14:40:11.396Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "Register.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Register.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Account\\Register.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T14:24:35.965Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Statistics.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-04-10T00:14:07.234Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 18,
               "Title": "Privacy.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Privacy.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Home\\Privacy.cshtml",
@@ -501,7 +547,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 15,
               "Title": "Badges.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Badges.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Badges.cshtml",
@@ -509,37 +555,11 @@
               "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Badges.cshtml",
               "ViewState": "AgIAABQBAAAAAAAAAAAswCsBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-04-19T22:59:01.22Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-19T22:59:01.22Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 16,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Index.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Task\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF8AAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-31T14:41:36.772Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "Search.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Search.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Task\\Search.cshtml",
-              "ViewState": "AgIAADYBAAAAAAAAAAAswD0BAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-04-10T00:13:45.071Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
               "Title": "DashboardController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\DashboardController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\DashboardController.cs",
@@ -547,12 +567,11 @@
               "RelativeToolTip": "HabitTracker\\Controllers\\DashboardController.cs",
               "ViewState": "AgIAAL0AAAAAAAAAAAAswMgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-18T14:23:39.413Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-18T14:23:39.413Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "AccountController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\AccountController.cs",
@@ -564,7 +583,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "Badge.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\Badge.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\Badge.cs",
@@ -576,7 +595,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "StatisticsViewModel.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\StatisticsViewModel.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\ViewModels\\StatisticsViewModel.cs",
@@ -588,7 +607,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "Category.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\Category.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\Category.cs",
@@ -600,7 +619,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "ChangePassword.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\ChangePassword.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\ChangePassword.cshtml",
@@ -612,7 +631,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "NotificationController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\NotificationController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\NotificationController.cs",
@@ -621,18 +640,6 @@
               "ViewState": "AgIAADcAAAAAAAAAAAAswEAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-10T00:12:09.836Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T14:24:57.265Z"
             },
             {
               "$type": "Document",
@@ -648,7 +655,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "NotificationService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\NotificationService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\NotificationService.cs",
@@ -660,7 +667,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "QuestService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\QuestService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\QuestService.cs",
@@ -672,7 +679,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "SearchService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\SearchService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\SearchService.cs",
@@ -684,7 +691,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "FileService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\FileService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\FileService.cs",
@@ -696,7 +703,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "StatisticsService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\StatisticsService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\StatisticsService.cs",
@@ -708,7 +715,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "AuthService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\AuthService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\AuthService.cs",
@@ -720,7 +727,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "CategoryService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\CategoryService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\CategoryService.cs",
@@ -732,7 +739,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "Quest.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\Quest.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\Quest.cs",
@@ -744,7 +751,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Data\\AppDbContext.cs",
@@ -756,7 +763,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "User.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\User.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\User.cs",
@@ -768,7 +775,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "ErrorViewModel.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ErrorViewModel.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\ErrorViewModel.cs",
@@ -780,7 +787,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "Notification.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\Notification.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\Notification.cs",
@@ -792,7 +799,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "UserBadge.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\UserBadge.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\UserBadge.cs",
@@ -804,7 +811,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "UserQuest.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\UserQuest.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\UserQuest.cs",
@@ -816,7 +823,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "AdminController.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Controllers\\AdminController.cs",
@@ -828,7 +835,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "IAuthService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\IAuthService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\IAuthService.cs",
@@ -840,7 +847,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "ICategoryService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\ICategoryService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\ICategoryService.cs",
@@ -852,7 +859,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "IFileService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\IFileService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\IFileService.cs",
@@ -864,7 +871,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "INotificationService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\INotificationService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\INotificationService.cs",
@@ -876,7 +883,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "IQuestService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\IQuestService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\IQuestService.cs",
@@ -888,7 +895,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "ISearchService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\ISearchService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\ISearchService.cs",
@@ -900,7 +907,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "IStatisticsService.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\IStatisticsService.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Services\\IStatisticsService.cs",
@@ -912,7 +919,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.json",
               "RelativeDocumentMoniker": "HabitTracker\\appsettings.json",
@@ -924,7 +931,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "AppConstants.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Constants\\AppConstants.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Constants\\AppConstants.cs",
@@ -948,7 +955,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "20260409203117_moi.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Migrations\\20260409203117_moi.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Migrations\\20260409203117_moi.cs",
@@ -960,7 +967,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "RegisterViewModel.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\ViewModels\\RegisterViewModel.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Models\\ViewModels\\RegisterViewModel.cs",
@@ -972,7 +979,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "HabitTracker.csproj",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\HabitTracker.csproj",
               "RelativeDocumentMoniker": "HabitTracker\\HabitTracker.csproj",
@@ -984,7 +991,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "site.css",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "HabitTracker\\wwwroot\\css\\site.css",
@@ -996,7 +1003,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 56,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Index.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Index.cshtml",
@@ -1008,7 +1015,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "_QuestForm.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
@@ -1020,7 +1027,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 54,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Create.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Create.cshtml",
@@ -1032,7 +1039,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 55,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Edit.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Edit.cshtml",
@@ -1044,7 +1051,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 57,
               "Title": "20260331193327_AddIsAdminToUser.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Migrations\\20260331193327_AddIsAdminToUser.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Migrations\\20260331193327_AddIsAdminToUser.cs",
@@ -1055,7 +1062,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 58,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\_ViewStart.cshtml",
@@ -1067,7 +1074,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 59,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.Development.json",
               "RelativeDocumentMoniker": "HabitTracker\\appsettings.Development.json",
@@ -1079,7 +1086,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 61,
               "Title": "20260331145312_ReplaceHabitWithQuest.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Migrations\\20260331145312_ReplaceHabitWithQuest.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Migrations\\20260331145312_ReplaceHabitWithQuest.cs",
@@ -1090,7 +1097,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 60,
               "Title": "20260331145730_ReplaceHabitWithQuest.cs",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Migrations\\20260331145730_ReplaceHabitWithQuest.cs",
               "RelativeDocumentMoniker": "HabitTracker\\Migrations\\20260331145730_ReplaceHabitWithQuest.cs",
@@ -1101,7 +1108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 62,
               "Title": "EditProfile.cshtml",
               "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\EditProfile.cshtml",
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\EditProfile.cshtml",
@@ -1110,18 +1117,6 @@
               "ViewState": "AgIAAGAAAAAAAAAAAAAUwHcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-19T13:13:51.086Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 62,
-              "Title": "Leaderboard.cshtml",
-              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
-              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
-              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
-              "RelativeToolTip": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
-              "ViewState": "AgIAACwAAAAAAAAAAAAUwEMAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-26T13:25:47.235Z"
             },
             {
               "$type": "Document",

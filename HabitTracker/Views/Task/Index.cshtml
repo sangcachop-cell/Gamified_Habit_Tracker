@@ -1,96 +1,338 @@
-﻿@* Views/Quest/Index.cshtml *@
-@model List<HabitTracker.Models.Quest>
-
+﻿@model List<HabitTracker.Models.Quest>
 @{
-    ViewData["Title"] = "Nhiệm vụ hôm nay";
+    ViewData["Title"] = "Quest";
     var completedIds = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+    int doneCount = completedIds.Count;
 }
-
-<div class="container py-4">
-    <h2 class="mb-1">⚔️ Nhiệm vụ của bạn</h2>
-    <p class="text-muted mb-4">Tick vào nhiệm vụ đã hoàn thành và nhấn <strong>Xác nhận</strong></p>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
     }
-    @if (TempData["NewBadge"] != null)
-    {
-        <div class="alert alert-warning">@TempData["NewBadge"]</div>
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
     }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 12px
+    }
+
+        .page-header h2 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0
+        }
+
+        .page-header p {
+            color: #888;
+            font-size: .9rem;
+            margin: 4px 0 0
+        }
+    /* filter bar */
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+        padding: 16px 20px;
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07)
+    }
+
+        .filter-bar select {
+            padding: 8px 14px;
+            border: 1.5px solid rgba(0,0,0,.1);
+            border-radius: 50px;
+            font-family: "DM Sans",sans-serif;
+            font-size: .85rem;
+            background: white;
+            outline: none;
+            cursor: pointer;
+            transition: border-color .2s
+        }
+
+            .filter-bar select:hover {
+                border-color: var(--violet)
+            }
+    /* quest cards */
+    .quests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+        gap: 16px
+    }
+
+    .qcard {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 20px;
+        transition: all .25s;
+        position: relative;
+        overflow: hidden
+    }
+
+        .qcard:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,.1);
+            border-color: rgba(92,61,222,.3)
+        }
+
+        .qcard.done {
+            background: #f8fef9;
+            border-color: rgba(0,184,156,.3)
+        }
+
+            .qcard.done::after {
+                content: "✓";
+                position: absolute;
+                top: 12px;
+                right: 14px;
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                background: var(--teal);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: .85rem
+            }
+
+    .qcard-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px
+    }
+
+    .q-checkbox {
+        margin-top: 3px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--violet);
+        cursor: pointer;
+        flex-shrink: 0
+    }
+
+    .q-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0
+    }
+
+    .q-title {
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .95rem;
+        line-height: 1.3
+    }
+
+        .q-title.done-text {
+            text-decoration: line-through;
+            color: #aaa
+        }
+
+    .q-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px
+    }
+
+    .qtag {
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-size: .73rem;
+        font-weight: 600
+    }
+
+    .qtag-easy {
+        background: #e2f5e2;
+        color: #2e7d2e
+    }
+
+    .qtag-medium {
+        background: #fff5d6;
+        color: #b07800
+    }
+
+    .qtag-hard {
+        background: #fde8ed;
+        color: #c0392b
+    }
+
+    .qtag-cat {
+        background: #edeaf5;
+        color: var(--violet)
+    }
+
+    .qtag-freq {
+        background: #f0f4ff;
+        color: #4457aa
+    }
+
+    .q-xp {
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        color: var(--violet);
+        font-size: .9rem
+    }
+    /* submit bar */
+    .submit-bar {
+        position: sticky;
+        bottom: 24px;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 28px
+    }
+
+    .btn-confirm {
+        background: var(--ink);
+        color: white;
+        border: none;
+        padding: 14px 36px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background .2s,transform .2s;
+        box-shadow: 0 4px 20px rgba(0,0,0,.18);
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+
+        .btn-confirm:hover {
+            background: var(--violet);
+            transform: translateY(-2px)
+        }
+
+    .progress-bar-wrap {
+        height: 6px;
+        background: rgba(0,0,0,.06);
+        border-radius: 50px;
+        overflow: hidden;
+        margin-bottom: 4px
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg,var(--violet),var(--teal));
+        border-radius: 50px;
+        transition: width .5s ease
+    }
+
+    @@media(max-width:600px) {
+        .quests-grid {
+            grid-template-columns: 1fr
+        }
+    }
+</style>
+
+<div style="padding:8px 0 48px">
+
+    <div class="page-header">
+        <div>
+            <h2>⚔️ Nhiệm vụ hôm nay</h2>
+            <p>Tick quest đã hoàn thành, rồi nhấn Xác nhận để nhận XP</p>
+        </div>
+        <a href="/Task/search" style="display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--violet);padding:10px 18px;border-radius:50px;font-weight:600;font-size:.88rem;text-decoration:none;border:1.5px solid rgba(92,61,222,.2)">🔍 Tìm quest</a>
+    </div>
+
+    <!-- Progress -->
+    @if (Model.Count > 0)
+    {
+        int pct = doneCount * 100 / Model.Count;
+        <div style="background:white;border-radius:14px;border:1.5px solid rgba(0,0,0,.07);padding:18px 22px;margin-bottom:24px">
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin-bottom:8px">
+                <span>Tiến trình hôm nay</span>
+                <span style="color:var(--violet)">@doneCount / @Model.Count quest</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-fill" style="width:@pct%"></div></div>
+        </div>
+    }
+
+    <!-- Alerts -->
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div style="background:#fde8ed;color:#c0392b;padding:12px 18px;border-radius:10px;margin-bottom:18px;font-size:.9rem">❌ @TempData["Error"]</div>
     }
 
-    @* Filter *@
-    <form method="get" class="row g-2 mb-4">
-        <div class="col-auto">
-            <select name="category" class="form-select" onchange="this.form.submit()">
-                <option value="">📂 Tất cả danh mục</option>
-                @foreach (var cat in ViewBag.Categories as string[])
-                {
-                    <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
-                }
-            </select>
-        </div>
-        <div class="col-auto">
-            <select name="difficulty" class="form-select" onchange="this.form.submit()">
-                <option value="">⚡ Độ khó</option>
-                <option value="Easy" selected="@(ViewBag.SelectedDifficulty == "Easy")">🟢 Dễ</option>
-                <option value="Medium" selected="@(ViewBag.SelectedDifficulty == "Medium")">🟡 Trung bình</option>
-                <option value="Hard" selected="@(ViewBag.SelectedDifficulty == "Hard")">🔴 Khó</option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <select name="frequency" class="form-select" onchange="this.form.submit()">
-                <option value="">🔁 Tần suất</option>
-                <option value="Daily" selected="@(ViewBag.SelectedFrequency == "Daily")">Hàng ngày</option>
-                <option value="Weekly" selected="@(ViewBag.SelectedFrequency == "Weekly")">Hàng tuần</option>
-                <option value="Monthly" selected="@(ViewBag.SelectedFrequency == "Monthly")">Hàng tháng</option>
-            </select>
-        </div>
+    <!-- Filters -->
+    <form method="get" class="filter-bar">
+        <select name="category" onchange="this.form.submit()">
+            <option value="">📂 Tất cả danh mục</option>
+            @foreach (var cat in (ViewBag.Categories as string[] ?? new string[0]))
+            {
+                <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
+            }
+        </select>
+        <select name="difficulty" onchange="this.form.submit()">
+            <option value="">⚡ Độ khó</option>
+            <option value="Easy" selected="@(ViewBag.SelectedDifficulty == "Easy")">🟢 Dễ</option>
+            <option value="Medium" selected="@(ViewBag.SelectedDifficulty == "Medium")">🟡 Trung bình</option>
+            <option value="Hard" selected="@(ViewBag.SelectedDifficulty == "Hard")">🔴 Khó</option>
+        </select>
+        <select name="frequency" onchange="this.form.submit()">
+            <option value="">🔁 Tần suất</option>
+            <option value="Daily" selected="@(ViewBag.SelectedFrequency == "Daily")">Hàng ngày</option>
+            <option value="Weekly" selected="@(ViewBag.SelectedFrequency == "Weekly")">Hàng tuần</option>
+            <option value="Monthly" selected="@(ViewBag.SelectedFrequency == "Monthly")">Hàng tháng</option>
+        </select>
     </form>
 
-    @* Danh sách Quest *@
+    <!-- Quest Grid -->
     <form asp-action="Confirm" method="post">
-        <div class="row g-3">
+        <div class="quests-grid">
             @foreach (var quest in Model)
             {
                 var isDone = completedIds.Contains(quest.Id);
-                var diffColor = quest.Difficulty == "Easy" ? "success" : quest.Difficulty == "Medium" ? "warning" : "danger";
-
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm @(isDone ? "border-success bg-light" : "")">
-                        <div class="card-body d-flex align-items-start gap-3">
-                            <div class="form-check mt-1">
-                                <input class="form-check-input" type="checkbox"
-                                       name="questIds" value="@quest.Id"
-                                       id="quest_@quest.Id"
-                                       @(isDone ? "checked disabled" : "")>
-                            </div>
-                            <div class="flex-grow-1">
-                                <label class="fw-semibold @(isDone ? "text-decoration-line-through text-muted" : "")"
-                                       for="quest_@quest.Id">
-                                    @quest.Icon @quest.Name
-                                </label>
-                                <div class="mt-1">
-                                    <span class="badge bg-@diffColor">@quest.Difficulty</span>
-                                    <span class="badge bg-secondary">@quest.Category</span>
-                                    <span class="badge bg-info text-dark">@quest.Frequency</span>
-                                </div>
-                                <div class="mt-1 text-warning fw-bold">+@quest.XPReward XP</div>
-                            </div>
-                        </div>
+                var diffTag = quest.Difficulty == "Easy" ? "qtag-easy" : quest.Difficulty == "Medium" ? "qtag-medium" : "qtag-hard";
+                <div class="qcard @(isDone ? "done" : "")">
+                    <div class="qcard-top">
+                        <input class="q-checkbox" type="checkbox" name="questIds" value="@quest.Id"
+                               id="q_@quest.Id" @(isDone ? "checked disabled" : "") />
+                        <div class="q-icon-box">@quest.Icon</div>
+                        <label class="q-title @(isDone ? "done-text" : "")" for="q_@quest.Id">@quest.Name</label>
                     </div>
+                    <div class="q-tags">
+                        <span class="qtag @diffTag">@quest.Difficulty</span>
+                        <span class="qtag qtag-cat">@quest.Category</span>
+                        <span class="qtag qtag-freq">@quest.Frequency</span>
+                    </div>
+                    <div class="q-xp">+@quest.XPReward XP</div>
                 </div>
             }
         </div>
 
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-primary btn-lg px-5">
-                ✅ Xác nhận hoàn thành
-            </button>
+        <div class="submit-bar">
+            <button type="submit" class="btn-confirm">✅ Xác nhận hoàn thành</button>
         </div>
     </form>
 </div>

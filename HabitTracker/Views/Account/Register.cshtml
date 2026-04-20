@@ -1,60 +1,347 @@
 ﻿@model HabitTracker.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký — HabitTracker</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
 
-<div class="login-page">
+        body {
+            font-family: "DM Sans",sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr
+        }
 
-    <!-- LOGO -->
-    <div class="logo-top">
-        <img src="~/images/logoweb.png" class="logo-large" />
+        h1, h2, h3 {
+            font-family: "Syne",sans-serif
+        }
+
+        .left-panel {
+            background: #0a0a12;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            position: relative;
+            overflow: hidden
+        }
+
+            .left-panel::before {
+                content: "";
+                position: absolute;
+                width: 600px;
+                height: 600px;
+                border-radius: 50%;
+                background: radial-gradient(circle,rgba(92,61,222,.3) 0%,transparent 70%);
+                top: -200px;
+                right: -200px
+            }
+
+            .left-panel::after {
+                content: "";
+                position: absolute;
+                width: 400px;
+                height: 400px;
+                border-radius: 50%;
+                background: radial-gradient(circle,rgba(0,184,156,.2) 0%,transparent 70%);
+                bottom: -100px;
+                left: -100px
+            }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            position: relative;
+            z-index: 2
+        }
+
+            .brand span {
+                color: #f0b429
+            }
+
+        .steps-list {
+            position: relative;
+            z-index: 2
+        }
+
+            .steps-list h3 {
+                font-size: 1.6rem;
+                font-weight: 800;
+                letter-spacing: -1px;
+                margin-bottom: 24px
+            }
+
+        .step-item {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+            align-items: flex-start
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            font-size: .85rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,.15)
+        }
+
+        .step-text h5 {
+            font-size: .9rem;
+            font-weight: 600;
+            margin-bottom: 3px
+        }
+
+        .step-text p {
+            font-size: .8rem;
+            color: rgba(255,255,255,.5);
+            line-height: 1.5
+        }
+
+        .brand-bottom {
+            position: relative;
+            z-index: 2;
+            font-size: .82rem;
+            color: rgba(255,255,255,.4)
+        }
+        /* RIGHT */
+        .right-panel {
+            background: #f5f3ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            overflow-y: auto
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 440px;
+            padding: 8px 0
+        }
+
+            .auth-box h3 {
+                font-size: 1.7rem;
+                font-weight: 800;
+                letter-spacing: -1px;
+                margin-bottom: 6px
+            }
+
+            .auth-box .subtitle {
+                color: #777;
+                font-size: .9rem;
+                margin-bottom: 32px
+            }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        .form-field {
+            margin-bottom: 16px
+        }
+
+            .form-field label {
+                font-weight: 600;
+                font-size: .83rem;
+                color: #333;
+                display: block;
+                margin-bottom: 6px
+            }
+
+            .form-field input {
+                width: 100%;
+                padding: 11px 14px;
+                border: 1.5px solid rgba(0,0,0,.12);
+                border-radius: 10px;
+                font-family: "DM Sans",sans-serif;
+                font-size: .93rem;
+                background: white;
+                transition: border-color .2s,box-shadow .2s;
+                outline: none
+            }
+
+                .form-field input:focus {
+                    border-color: #5c3dde;
+                    box-shadow: 0 0 0 3px rgba(92,61,222,.1)
+                }
+
+        .avatar-area {
+            border: 2px dashed rgba(0,0,0,.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: 16px;
+            position: relative
+        }
+
+            .avatar-area:hover {
+                border-color: #5c3dde;
+                background: rgba(92,61,222,.03)
+            }
+
+            .avatar-area input[type=file] {
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                cursor: pointer
+            }
+
+        .avatar-preview-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 8px;
+            display: block;
+            border: 2px solid #e0e0e0
+        }
+
+        .avatar-area p {
+            font-size: .82rem;
+            color: #888;
+            margin: 0
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: #0a0a12;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-family: "Syne",sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background .2s,transform .2s;
+            margin-bottom: 16px
+        }
+
+            .btn-submit:hover {
+                background: #5c3dde;
+                transform: translateY(-1px)
+            }
+
+        .auth-footer {
+            text-align: center;
+            font-size: .88rem;
+            color: #777
+        }
+
+            .auth-footer a {
+                color: #5c3dde;
+                font-weight: 600;
+                text-decoration: none
+            }
+
+        .text-danger {
+            font-size: .8rem;
+            color: #c0392b;
+            display: block;
+            margin-top: 4px
+        }
+
+        @@media(max-width:768px) {
+            body {
+                grid-template-columns: 1fr
+            }
+
+            .left-panel {
+                display: none
+            }
+
+            .form-row {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <a href="/" class="brand">🚀 Habit<span>Tracker</span></a>
+        <div class="steps-list">
+            <h3>Bắt đầu hành trình<br>của bạn.</h3>
+            <div class="step-item"><div class="step-dot">1</div><div class="step-text"><h5>Tạo tài khoản</h5><p>Chỉ mất 30 giây, hoàn toàn miễn phí.</p></div></div>
+            <div class="step-item"><div class="step-dot">2</div><div class="step-text"><h5>Chọn quest yêu thích</h5><p>Browse qua 11+ quest theo thói quen bạn muốn.</p></div></div>
+            <div class="step-item"><div class="step-dot">3</div><div class="step-text"><h5>Hoàn thành & nhận XP</h5><p>Tick quest mỗi ngày, duy trì streak và lên level.</p></div></div>
+            <div class="step-item"><div class="step-dot">4</div><div class="step-text"><h5>Unlock badge & leo rank</h5><p>Cạnh tranh với cộng đồng trên bảng xếp hạng.</p></div></div>
+        </div>
+        <div class="brand-bottom">© 2026 HabitTracker 🚀</div>
     </div>
+    <div class="right-panel">
+        <div class="auth-box">
+            <h3>Tạo tài khoản mới 🎮</h3>
+            <p class="subtitle">Miễn phí mãi mãi — không cần thẻ tín dụng</p>
 
-    <!-- FORM -->
-    <div class="login-box">
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Username</label>
+                        <input asp-for="Username" placeholder="coolname123" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="form-field">
+                        <label>Email</label>
+                        <input asp-for="Email" placeholder="you@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>Mật khẩu</label>
+                    <input asp-for="Password" type="password" placeholder="Ít nhất 6 ký tự" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
 
-        <h3>Create Account</h3>
+                <div class="avatar-area" onclick="document.getElementById('avatarInput').click()">
+                    <img id="preview" src="~/images/default.png" class="avatar-preview-img" />
+                    <p>📷 Chọn ảnh đại diện (tuỳ chọn)</p>
+                    <input type="file" id="avatarInput" asp-for="AvatarFile" accept="image/*" style="display:none" onchange="previewImage(event)" />
+                </div>
 
-        <form method="post" enctype="multipart/form-data">
+                <button type="submit" class="btn-submit">Tạo tài khoản →</button>
+            </form>
 
-            <input asp-for="Username" placeholder="Username" />
-            <span asp-validation-for="Username" class="text-danger"></span>
-
-            <input asp-for="Email" class="form-control" placeholder="Email" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-
-            <input asp-for="Password" type="password" placeholder="Password" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-
-            <!-- Avatar -->
-            <input asp-for="AvatarFile" type="file" onchange="previewImage(event)" />
-
-            <!-- Preview -->
-            <div class="text-center mt-2">
-                <img id="preview"
-                     src="~/images/default.png"
-                     class="avatar-preview" />
+            <div class="auth-footer">
+                Đã có tài khoản? <a href="/Account/Login">Đăng nhập</a>
             </div>
-
-            <button type="submit">
-                Register
-            </button>
-        </form>
-
-        <hr />
-
-        <a href="/Account/Login" class="btn btn-outline-primary">
-            Already have account?
-        </a>
-
+        </div>
     </div>
-
-</div>
+</body>
+</html>
 
 @section Scripts {
     <script>
         function previewImage(event) {
-            var reader = new FileReader();
-            reader.onload = function () {
-                document.getElementById('preview').src = reader.result;
-            }
+            const reader = new FileReader();
+            reader.onload = () => { document.getElementById("preview").src = reader.result; };
             reader.readAsDataURL(event.target.files[0]);
         }
     </script>

@@ -1,346 +1,507 @@
 ﻿@using HabitTracker.Models.ViewModels
 @model StatisticsViewModel
 @{
-    ViewData["Title"] = "Thống kê chi tiết";
-    var dayOfWeekNames = new[] { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
+    ViewData["Title"] = "Thống kê";
+    var dayNames = new[] { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
 }
-
 <style>
-    .stat-card {
-        transition: transform 0.2s;
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
     }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .stat-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 32px 36px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden
+    }
+
+        .stat-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 50%,rgba(92,61,222,.5),transparent 55%),radial-gradient(ellipse at 80% 50%,rgba(240,180,41,.25),transparent 55%);
+            pointer-events: none
         }
 
-    .chart-container {
+        .stat-hero h2 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 6px
+        }
+
+        .stat-hero p {
+            color: rgba(255,255,255,.6);
+            position: relative;
+            z-index: 2;
+            font-size: .9rem
+        }
+    /* kpi cards */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 16px;
+        margin-bottom: 24px
+    }
+
+    .kpi {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px;
         position: relative;
-        height: 300px;
+        overflow: hidden
+    }
+
+        .kpi::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            opacity: .08
+        }
+
+    .kpi-violet::before {
+        background: var(--violet)
+    }
+
+    .kpi-gold::before {
+        background: var(--gold)
+    }
+
+    .kpi-teal::before {
+        background: var(--teal)
+    }
+
+    .kpi-rose::before {
+        background: var(--rose)
+    }
+
+    .kpi-icon {
+        font-size: 1.5rem;
+        margin-bottom: 10px
+    }
+
+    .kpi-label {
+        font-size: .73rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 6px
+    }
+
+    .kpi-val {
+        font-family: "Syne",sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1
+    }
+
+    .kpi-sub {
+        font-size: .8rem;
+        color: #aaa;
+        margin-top: 6px
+    }
+
+    .kpi-violet .kpi-val {
+        color: var(--violet)
+    }
+
+    .kpi-gold .kpi-val {
+        color: #b07800
+    }
+
+    .kpi-teal .kpi-val {
+        color: var(--teal)
+    }
+
+    .kpi-rose .kpi-val {
+        color: var(--rose)
+    }
+    /* comparison */
+    .compare-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px;
+        margin-bottom: 24px
+    }
+
+        .compare-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -.3px
+        }
+
+    .compare-bars {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+    }
+
+    .cbar-wrap {
+        background: #f8f8f8;
+        border-radius: 12px;
+        padding: 16px
+    }
+
+    .cbar-label {
+        font-size: .78rem;
+        font-weight: 600;
+        color: #888;
+        margin-bottom: 8px
+    }
+
+    .cbar-num {
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-bottom: 8px
+    }
+
+    .cbar {
+        height: 8px;
+        background: #e8e8e8;
+        border-radius: 50px;
+        overflow: hidden
+    }
+
+    .cbar-fill {
+        height: 100%;
+        border-radius: 50px;
+        transition: width 1s ease
+    }
+
+    .alert-above {
+        background: #d4f5ef;
+        color: #006651;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        font-weight: 600;
+        margin-top: 12px
+    }
+
+    .alert-below {
+        background: #fff5d6;
+        color: #7a5200;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        font-weight: 600;
+        margin-top: 12px
+    }
+    /* charts */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 24px
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 24px
+    }
+
+        .chart-card h4 {
+            font-size: .95rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            letter-spacing: -.3px
+        }
+
+    .chart-wrap {
+        position: relative;
+        height: 260px
+    }
+    /* achievements */
+    .ach-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+        gap: 14px
+    }
+
+    .ach-item {
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 18px;
+        text-align: center;
+        transition: all .25s
+    }
+
+        .ach-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.08)
+        }
+
+    .ach-icon {
+        font-size: 2rem;
+        margin-bottom: 8px
+    }
+
+    .ach-name {
+        font-weight: 700;
+        font-size: .85rem;
+        margin-bottom: 4px
+    }
+
+    .ach-date {
+        font-size: .75rem;
+        color: #aaa
+    }
+    /* summary */
+    .summary-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 24px;
+        margin-bottom: 24px
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 0
+    }
+
+    .sum-item {
+        padding: 12px 16px;
+        border-right: 1px solid #f0f0f0;
+        text-align: center
+    }
+
+        .sum-item:last-child {
+            border: none
+        }
+
+    .sum-num {
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--violet)
+    }
+
+    .sum-lbl {
+        font-size: .78rem;
+        color: #aaa;
+        margin-top: 4px
+    }
+
+    @@media(max-width:900px) {
+        .kpi-grid {
+            grid-template-columns: 1fr 1fr
+        }
+
+        .chart-grid {
+            grid-template-columns: 1fr
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr 1fr
+        }
+    }
+
+    @@media(max-width:600px) {
+        .kpi-grid {
+            grid-template-columns: 1fr
+        }
+
+        .compare-bars {
+            grid-template-columns: 1fr
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr 1fr
+        }
     }
 </style>
 
-<div class="container-fluid mt-4">
-    <h2 class="mb-4">📊 Thống kê chi tiết</h2>
+<div style="padding:8px 0 48px">
 
-    <!-- Performance Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card bg-primary text-white h-100">
-                <div class="card-body">
-                    <h6 class="card-title">Hoàn thành hôm nay</h6>
-                    <h2>@Model.QuestStats.Completed / @Model.QuestStats.Total</h2>
-                    <small>@((Model.QuestStats.Pending)) chưa làm</small>
-                </div>
-            </div>
+    <div class="stat-hero">
+        <h2>📊 Thống kê chi tiết</h2>
+        <p>Theo dõi tiến trình và hiệu suất của bạn trong 30 ngày qua</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi kpi-violet">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-label">Hôm nay</div>
+            <div class="kpi-val">@Model.QuestStats.Completed<span style="font-size:1.2rem;color:#aaa"> / @Model.QuestStats.Total</span></div>
+            <div class="kpi-sub">@Model.QuestStats.Pending quest còn lại</div>
         </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card bg-success text-white h-100">
-                <div class="card-body">
-                    <h6 class="card-title">Completion Rate</h6>
-                    <h2>@Model.PerformanceMetrics.CompletionRate.ToString("F1")%</h2>
-                    <small>@Model.GetPerformanceRating()</small>
-                </div>
-            </div>
+        <div class="kpi kpi-teal">
+            <div class="kpi-icon">📈</div>
+            <div class="kpi-label">Completion Rate</div>
+            <div class="kpi-val">@Model.PerformanceMetrics.CompletionRate.ToString("F0")%</div>
+            <div class="kpi-sub">@Model.GetPerformanceRating()</div>
         </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card bg-info text-white h-100">
-                <div class="card-body">
-                    <h6 class="card-title">XP / Ngày</h6>
-                    <h2>@Model.PerformanceMetrics.AverageXPPerDay.ToString("F0")</h2>
-                    <small>TB trong 30 ngày</small>
-                </div>
-            </div>
+        <div class="kpi kpi-gold">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-label">XP / Ngày</div>
+            <div class="kpi-val">@Model.PerformanceMetrics.AverageXPPerDay.ToString("F0")</div>
+            <div class="kpi-sub">Trung bình 30 ngày</div>
         </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card bg-warning text-white h-100">
-                <div class="card-body">
-                    <h6 class="card-title">Consistency</h6>
-                    <h2>@Model.PerformanceMetrics.ConsistencyScore%</h2>
-                    <small>@Model.GetConsistencyStatus()</small>
-                </div>
-            </div>
+        <div class="kpi kpi-rose">
+            <div class="kpi-icon">🎯</div>
+            <div class="kpi-label">Consistency</div>
+            <div class="kpi-val">@Model.PerformanceMetrics.ConsistencyScore%</div>
+            <div class="kpi-sub">@Model.GetConsistencyStatus()</div>
         </div>
     </div>
 
-    <!-- Comparison Card -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">📈 So sánh với người khác</h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p>Bạn hoàn thành (7 ngày): <strong>@Model.Comparison.UserCompletion</strong> quests</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p>Trung bình người khác: <strong>@Model.Comparison.AverageCompletion</strong> quests</p>
-                        </div>
-                    </div>
-                    @if (Model.IsAboveAverage())
-                    {
-                        <div class="alert alert-success" role="alert">
-                            ✅ Bạn hoàn thành nhiều hơn mức trung bình!
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info" role="alert">
-                            💪 Cố gắng thêm một chút nữa để vượt qua mức trung bình!
-                        </div>
-                    }
-                </div>
-            </div>
+    <!-- Summary strip -->
+    <div class="summary-card" style="margin-bottom:24px">
+        <div class="summary-grid">
+            <div class="sum-item"><div class="sum-num">@Model.GetTotalCompletions()</div><div class="sum-lbl">Tổng completions</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.GetTotalXP()</div><div class="sum-lbl">Tổng XP (30 ngày)</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.GetTopCategory()</div><div class="sum-lbl">Category hàng đầu</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.Comparison.UserCompletion</div><div class="sum-lbl">Quest (7 ngày)</div></div>
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="row mb-4">
-        <!-- XP Trend Chart -->
-        <div class="col-md-6 mb-3">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    📈 Trend XP (30 ngày gần nhất)
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="xpChart"></canvas>
-                    </div>
-                </div>
+    <!-- Comparison -->
+    <div class="compare-card">
+        <h4>📈 So sánh với cộng đồng (7 ngày)</h4>
+        <div class="compare-bars">
+            @{
+                int maxVal = Math.Max(Model.Comparison.UserCompletion, Model.Comparison.AverageCompletion);
+                int pctUser = maxVal > 0 ? Model.Comparison.UserCompletion * 100 / maxVal : 0;
+                int pctAvg = maxVal > 0 ? Model.Comparison.AverageCompletion * 100 / maxVal : 0;
+            }
+            <div class="cbar-wrap">
+                <div class="cbar-label">Bạn</div>
+                <div class="cbar-num" style="color:var(--violet)">@Model.Comparison.UserCompletion quests</div>
+                <div class="cbar"><div class="cbar-fill" style="width:@pctUser%;background:var(--violet)"></div></div>
+            </div>
+            <div class="cbar-wrap">
+                <div class="cbar-label">Trung bình cộng đồng</div>
+                <div class="cbar-num" style="color:#888">@Model.Comparison.AverageCompletion quests</div>
+                <div class="cbar"><div class="cbar-fill" style="width:@pctAvg%;background:#ccc"></div></div>
             </div>
         </div>
+        @if (Model.IsAboveAverage())
+        {
+            <div class="alert-above">✅ Bạn hoàn thành nhiều hơn mức trung bình cộng đồng! Xuất sắc!</div>
+        }
+        else
+        {
+            <div class="alert-below">💪 Cố thêm một chút nữa để vượt qua mức trung bình!</div>
+        }
+    </div>
 
-        <!-- Category Breakdown Chart -->
-        <div class="col-md-6 mb-3">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    🏆 Breakdown theo Category
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
+    <!-- Charts -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h4>📈 Trend XP — 30 ngày</h4>
+            <div class="chart-wrap"><canvas id="xpChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <h4>🏆 Breakdown theo Category</h4>
+            <div class="chart-wrap"><canvas id="catChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <h4>🔥 Hoạt động theo ngày trong tuần</h4>
+            <div class="chart-wrap"><canvas id="actChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <h4>⚔️ Breakdown theo Difficulty</h4>
+            <div class="chart-wrap"><canvas id="diffChart"></canvas></div>
         </div>
     </div>
 
-    <!-- More Charts -->
-    <div class="row mb-4">
-        <!-- Activity Heatmap -->
-        <div class="col-md-6 mb-3">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    🔥 Hoạt động theo ngày trong tuần
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="activityChart"></canvas>
+    <!-- Achievements -->
+    @if (Model.RecentAchievements?.Any() == true)
+    {
+        <div class="chart-card" style="margin-bottom:0">
+            <h4>🎖️ Achievements gần đây</h4>
+            <div class="ach-grid" style="margin-top:16px">
+                @foreach (var a in Model.RecentAchievements)
+                {
+                    <div class="ach-item">
+                        <div class="ach-icon">🏅</div>
+                        <div class="ach-name">@a.AchievementName</div>
+                        <div class="ach-date">@a.AchievedDate.ToString("dd/MM/yyyy")</div>
                     </div>
-                </div>
+                }
             </div>
         </div>
-
-        <!-- Difficulty Breakdown -->
-        <div class="col-md-6 mb-3">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    ⚔️ Breakdown theo Difficulty
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="difficultyChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Achievements -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    🎖️ Achievements gần đây
-                </div>
-                <div class="card-body">
-                    @if (Model.RecentAchievements?.Any() == true)
-                    {
-                        <div class="row">
-                            @foreach (var achievement in Model.RecentAchievements)
-                            {
-                                <div class="col-md-3 mb-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">🏅</h5>
-                                            <p class="card-text">
-                                                <strong>@achievement.AchievementName</strong>
-                                                <br />
-                                                <small class="text-muted">@achievement.AchievedDate.ToString("dd/MM/yyyy")</small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted">Chưa có achievements. Tiếp tục cố gắng! 💪</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Summary Stats -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    📋 Tóm tắt
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <p>Tổng quests hoàn thành: <strong>@Model.GetTotalCompletions()</strong></p>
-                        </div>
-                        <div class="col-md-3">
-                            <p>Tổng XP (30 ngày): <strong>@Model.GetTotalXP()</strong></p>
-                        </div>
-                        <div class="col-md-3">
-                            <p>Category hàng đầu: <strong>@Model.GetTopCategory()</strong></p>
-                        </div>
-                        <div class="col-md-3">
-                            <p>Ngày hoạt động: <strong>@Model.ActivityByDay.Sum(x => x.Count) / @(Model.ActivityByDay.Count * 7)</strong></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script>
-        // Color palette
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+        Chart.defaults.font.family = "'DM Sans', sans-serif";
+        Chart.defaults.color = '#888';
+        const palette = ['#5c3dde','#f0b429','#e8436a','#00b89c','#9966ff','#ff9f40'];
 
-        // ===== 1. XP TREND CHART =====
+        // XP Trend
         const xpData = @Html.Raw(Json.Serialize(Model.XPTrend));
-        const xpCtx = document.getElementById('xpChart')?.getContext('2d');
-        if (xpCtx) {
-            new Chart(xpCtx, {
-                type: 'line',
-                data: {
-                    labels: xpData.map(x => new Date(x.date).toLocaleDateString('vi-VN')),
-                    datasets: [{
-                        label: 'XP earned',
-                        data: xpData.map(x => x.xp),
-                        borderColor: '#36A2EB',
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#36A2EB'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+        new Chart(document.getElementById('xpChart'), {
+            type: 'line',
+            data: {
+                labels: xpData.map(x => new Date(x.date).toLocaleDateString('vi-VN')),
+                datasets: [{ label: 'XP', data: xpData.map(x => x.xp), borderColor: '#5c3dde', backgroundColor: 'rgba(92,61,222,.08)', borderWidth: 2.5, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: '#5c3dde' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.05)' } }, x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } } } }
+        });
 
-        // ===== 2. CATEGORY BREAKDOWN CHART =====
-        const categoryData = @Html.Raw(Json.Serialize(Model.CategoryBreakdown));
-        const catCtx = document.getElementById('categoryChart')?.getContext('2d');
-        if (catCtx) {
-            new Chart(catCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: categoryData.map(x => x.category),
-                    datasets: [{
-                        data: categoryData.map(x => x.count),
-                        backgroundColor: colors
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
+        // Category
+        const catData = @Html.Raw(Json.Serialize(Model.CategoryBreakdown));
+        new Chart(document.getElementById('catChart'), {
+            type: 'doughnut',
+            data: { labels: catData.map(x => x.category), datasets: [{ data: catData.map(x => x.count), backgroundColor: palette, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } }, cutout: '65%' }
+        });
 
-        // ===== 3. ACTIVITY BY DAY OF WEEK =====
-        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-        const activityData = @Html.Raw(Json.Serialize(Model.ActivityByDay));
-        const actCtx = document.getElementById('activityChart')?.getContext('2d');
-        if (actCtx) {
-            new Chart(actCtx, {
-                type: 'bar',
-                data: {
-                    labels: activityData.map(x => dayNames[x.dayOfWeek]),
-                    datasets: [{
-                        label: 'Quests completed',
-                        data: activityData.map(x => x.count),
-                        backgroundColor: '#4BC0C0',
-                        borderColor: '#36A2EB',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+        // Activity
+        const actData = @Html.Raw(Json.Serialize(Model.ActivityByDay));
+        const dayN = ['CN','T2','T3','T4','T5','T6','T7'];
+        new Chart(document.getElementById('actChart'), {
+            type: 'bar',
+            data: { labels: actData.map(x => dayN[x.dayOfWeek]), datasets: [{ label: 'Quests', data: actData.map(x => x.count), backgroundColor: 'rgba(92,61,222,.15)', borderColor: '#5c3dde', borderWidth: 2, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.05)' } }, x: { grid: { display: false } } } }
+        });
 
-        // ===== 4. DIFFICULTY BREAKDOWN =====
-        const difficultyData = @Html.Raw(Json.Serialize(Model.DifficultyBreakdown));
-        const diffCtx = document.getElementById('difficultyChart')?.getContext('2d');
-        if (diffCtx) {
-            new Chart(diffCtx, {
-                type: 'bar',
-                data: {
-                    labels: difficultyData.map(x => x.difficulty),
-                    datasets: [{
-                        label: 'Completions',
-                        data: difficultyData.map(x => x.count),
-                        backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+        // Difficulty
+        const diffData = @Html.Raw(Json.Serialize(Model.DifficultyBreakdown));
+        new Chart(document.getElementById('diffChart'), {
+            type: 'bar',
+            data: { labels: diffData.map(x => x.difficulty), datasets: [{ data: diffData.map(x => x.count), backgroundColor: ['rgba(0,184,156,.15)','rgba(240,180,41,.2)','rgba(232,67,106,.15)'], borderColor: ['#00b89c','#f0b429','#e8436a'], borderWidth: 2, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.05)' } }, x: { grid: { display: false } } } }
+        });
     </script>
 }
