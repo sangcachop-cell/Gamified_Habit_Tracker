@@ -1,433 +1,632 @@
-﻿@model User
+﻿@model HabitTracker.Models.User
 @{
-    ViewData["Title"] = "Profile - " + Model.Username;
+    ViewData["Title"] = "Hồ sơ — " + Model.Username;
 }
-
 <style>
-    .profile-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+    /* hero */
+    .profile-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 36px;
         color: white;
-        padding: 40px 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        text-align: center;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden
     }
 
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
+        .profile-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.5),transparent 55%),radial-gradient(ellipse at 80% 30%,rgba(240,180,41,.2),transparent 55%);
+            pointer-events: none
+        }
+
+    .hero-inner {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap
+    }
+
+    .hero-avatar {
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
-        border: 5px solid white;
         object-fit: cover;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        border: 3px solid rgba(255,255,255,.25);
+        flex-shrink: 0
     }
 
-    .profile-stats {
+    .hero-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.12);
+        border: 3px solid rgba(255,255,255,.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        font-size: 2.5rem;
+        color: white;
+        flex-shrink: 0
+    }
+
+    .hero-info h2 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 4px
+    }
+
+    .hero-info p {
+        color: rgba(255,255,255,.6);
+        font-size: .9rem;
+        margin-bottom: 12px
+    }
+
+    .hero-stats {
         display: flex;
         gap: 20px;
-        margin-top: 30px;
         flex-wrap: wrap;
-        justify-content: center;
+        margin-top: 4px
     }
 
-    .stat-item {
-        background: rgba(255,255,255,0.2);
-        padding: 15px 25px;
-        border-radius: 8px;
+    .hstat {
         text-align: center;
-    }
-
-    .stat-number {
-        font-size: 2em;
-        font-weight: bold;
-        display: block;
-    }
-
-    .stat-label {
-        font-size: 0.9em;
-        opacity: 0.9;
-    }
-
-    .profile-section {
-        background: white;
-        padding: 25px;
+        background: rgba(255,255,255,.08);
         border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 10px 16px;
+        border: 1px solid rgba(255,255,255,.1)
     }
 
-    .section-title {
-        font-size: 1.3em;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #333;
-        border-bottom: 3px solid #667eea;
-        padding-bottom: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-        .form-group label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
+        .hstat .n {
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            line-height: 1
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            width: 100%;
+        .hstat .l {
+            font-size: .72rem;
+            color: rgba(255,255,255,.5);
+            margin-top: 3px
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-    .social-links {
+    .social-row {
         display: flex;
-        gap: 15px;
-        margin-top: 15px;
+        gap: 8px;
+        margin-top: 12px
     }
 
-    .social-link {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        background: #667eea;
+    .soc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 50px;
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.15);
         color: white;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 40px;
         text-decoration: none;
-        transition: all 0.3s;
+        font-size: .8rem;
+        font-weight: 500;
+        transition: background .2s
     }
 
-        .social-link:hover {
-            background: #764ba2;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .soc-btn:hover {
+            background: rgba(255,255,255,.2);
+            color: white
+        }
+    /* layout */
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        align-items: start
+    }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 24px;
+        margin-bottom: 20px
+    }
+
+        .glass-card:last-child {
+            margin-bottom: 0
         }
 
-    .action-buttons {
+    .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -.3px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--soft);
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+    /* form */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+    }
+
+    .form-field {
+        margin-bottom: 16px
+    }
+
+        .form-field label {
+            font-weight: 600;
+            font-size: .82rem;
+            color: #555;
+            display: block;
+            margin-bottom: 6px
+        }
+
+        .form-field input, .form-field textarea, .form-field select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid rgba(0,0,0,.1);
+            border-radius: 10px;
+            font-family: "DM Sans",sans-serif;
+            font-size: .92rem;
+            background: white;
+            outline: none;
+            transition: border-color .2s,box-shadow .2s
+        }
+
+            .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+                border-color: var(--violet);
+                box-shadow: 0 0 0 3px rgba(92,61,222,.08)
+            }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 90px
+        }
+    /* avatar upload */
+    .avatar-upload {
+        border: 2px dashed rgba(0,0,0,.12);
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+        cursor: pointer;
+        transition: all .2s;
+        position: relative
+    }
+
+        .avatar-upload:hover {
+            border-color: var(--violet);
+            background: rgba(92,61,222,.02)
+        }
+
+        .avatar-upload input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%
+        }
+
+    .av-preview {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 8px;
+        display: block;
+        border: 2px solid rgba(0,0,0,.08)
+    }
+
+    .avatar-upload p {
+        font-size: .82rem;
+        color: #aaa;
+        margin: 0
+    }
+    /* buttons */
+    .action-row {
         display: flex;
         gap: 10px;
-        margin-top: 20px;
+        margin-top: 4px;
+        flex-wrap: wrap
     }
 
-        .action-buttons .btn {
-            flex: 1;
-            padding: 12px;
-            font-weight: 600;
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--ink);
+        color: white;
+        padding: 11px 28px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .9rem;
+        border: none;
+        cursor: pointer;
+        transition: background .2s,transform .2s
+    }
+
+        .btn-save:hover {
+            background: var(--violet);
+            transform: translateY(-1px)
         }
 
-    .badge-item {
-        display: inline-block;
-        background: #f0f0f0;
-        padding: 8px 15px;
-        border-radius: 20px;
-        margin: 5px;
-        font-size: 0.9em;
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: transparent;
+        color: var(--ink);
+        padding: 10px 22px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: .9rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(0,0,0,.12);
+        transition: all .2s
     }
 
-    .alert {
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
+        .btn-cancel:hover {
+            border-color: var(--violet);
+            color: var(--violet)
+        }
+    /* right sidebar */
+    .stat-mini {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f5f5f5
+    }
+
+        .stat-mini:last-child {
+            border: none
+        }
+
+        .stat-mini .sk {
+            font-size: .85rem;
+            color: #888;
+            font-weight: 500
+        }
+
+        .stat-mini .sv {
+            font-family: "Syne",sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--ink)
+        }
+    /* badges */
+    .badge-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px
+    }
+
+    .badge-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--soft);
+        border-radius: 50px;
+        padding: 5px 12px;
+        font-size: .78rem;
+        font-weight: 600;
+        color: var(--violet)
+    }
+    /* xp bar */
+    .xp-bar-outer {
+        height: 7px;
+        background: #e8e8e8;
+        border-radius: 50px;
+        overflow: hidden;
+        margin: 6px 0 4px
+    }
+
+    .xp-bar-inner {
+        height: 100%;
+        background: linear-gradient(90deg,var(--violet),var(--teal));
+        border-radius: 50px
+    }
+    /* alert */
+    .alert-s {
+        background: #d4f5ef;
+        color: #006651;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        margin-bottom: 20px
+    }
+
+    .alert-e {
+        background: #fde8ed;
+        color: #c0392b;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        margin-bottom: 20px
+    }
+
+    @@media(max-width:900px) {
+        .profile-layout {
+            grid-template-columns: 1fr
+        }
+
+        .form-row {
+            grid-template-columns: 1fr
+        }
     }
 </style>
 
-<div class="container mt-5 mb-5">
+<div style="padding:8px 0 48px">
 
-    <!-- Alert Messages -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            ✅ @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert-s">✅ @TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            ❌ @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert-e">❌ @TempData["Error"]</div>
     }
 
-    <!-- Profile Header -->
-    <div class="profile-header">
-        <img src="@(Model.Avatar != null && Model.Avatar.StartsWith("http")
-                                                          ? Model.Avatar
-                                                          : Url.Content("~/images/" + (Model.Avatar ?? "default.png")))"
-             alt="Avatar"
-             class="profile-avatar"
-             onerror="this.src='@Url.Content("~/images/default.png")'">
+    <!-- Hero -->
+    <div class="profile-hero">
+        <div class="hero-inner">
+            @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
+            {
+                <img src="@Model.Avatar" class="hero-avatar" alt="@Model.Username" />
+            }
+            else if (!string.IsNullOrEmpty(Model.Avatar))
+            {
+                <img src="@Url.Content("~/images/" + Model.Avatar)" class="hero-avatar"
+                     alt="@Model.Username"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <div class="hero-avatar-placeholder" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
+            }
+            else
+            {
+                <div class="hero-avatar-placeholder">@Model.Username.Substring(0, 1).ToUpper()</div>
+            }
 
-        <h1>@Model.Username</h1>
-        <p style="margin: 10px 0; opacity: 0.9;">@Model.Email</p>
+            <div class="hero-info">
+                <h2>@Model.Username</h2>
+                <p>@Model.Email @(!string.IsNullOrEmpty(Model.Location) ? $"· 📍 {Model.Location}" : "")</p>
 
-        @if (!string.IsNullOrEmpty(Model.Bio))
-        {
-            <p style="margin: 15px 0; font-size: 1.05em; font-style: italic;">
-                "@Model.Bio"
-            </p>
-        }
-
-        <!-- Social Links -->
-        @if (!string.IsNullOrEmpty(Model.FacebookLink) ||
-                !string.IsNullOrEmpty(Model.InstagramLink) ||
-                !string.IsNullOrEmpty(Model.LinkedInLink))
-        {
-            <div class="social-links" style="justify-content: center;">
-                @if (!string.IsNullOrEmpty(Model.FacebookLink))
+                @if (!string.IsNullOrEmpty(Model.Bio))
                 {
-                    <a href="@Model.FacebookLink" target="_blank" class="social-link" title="Facebook">f</a>
+                    <p style="color:rgba(255,255,255,.75);font-style:italic;font-size:.88rem">"@Model.Bio"</p>
                 }
-                @if (!string.IsNullOrEmpty(Model.InstagramLink))
-                {
-                    <a href="@Model.InstagramLink" target="_blank" class="social-link" title="Instagram">📷</a>
-                }
-                @if (!string.IsNullOrEmpty(Model.LinkedInLink))
-                {
-                    <a href="@Model.LinkedInLink" target="_blank" class="social-link" title="LinkedIn">in</a>
-                }
-            </div>
-        }
 
-        <!-- Stats -->
-        <div class="profile-stats">
-            <div class="stat-item">
-                <span class="stat-number">@Model.Level</span>
-                <span class="stat-label">Level</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">@Model.XP</span>
-                <span class="stat-label">Total XP</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">@(Model.UserQuests?.Count ?? 0)</span>
-                <span class="stat-label">Quests Done</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">@Model.CurrentStreak 🔥</span>
-                <span class="stat-label">Streak</span>
+                <div class="hero-stats">
+                    <div class="hstat"><div class="n">@Model.Level</div><div class="l">Level</div></div>
+                    <div class="hstat"><div class="n">@Model.XP.ToString("N0")</div><div class="l">Total XP</div></div>
+                    <div class="hstat"><div class="n">@Model.CurrentStreak🔥</div><div class="l">Streak</div></div>
+                    <div class="hstat"><div class="n">@(Model.UserQuests?.Count ?? 0)</div><div class="l">Quests</div></div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.FacebookLink) || !string.IsNullOrEmpty(Model.InstagramLink) || !string.IsNullOrEmpty(Model.LinkedInLink))
+                {
+                    <div class="social-row">
+                        @if (!string.IsNullOrEmpty(Model.FacebookLink))
+                        {
+                            <a href="@Model.FacebookLink" target="_blank" class="soc-btn">f Facebook</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.InstagramLink))
+                        {
+                            <a href="@Model.InstagramLink" target="_blank" class="soc-btn">📷 Instagram</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.LinkedInLink))
+                        {
+                            <a href="@Model.LinkedInLink" target="_blank" class="soc-btn">in LinkedIn</a>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="row">
+    <div class="profile-layout">
 
-        <!-- Left: Edit Form -->
-        <div class="col-lg-8">
+        <!-- LEFT: Edit Form -->
+        <div>
             <form method="post" asp-action="Profile" enctype="multipart/form-data">
-                <input type="hidden" name="Id" value="@Model.Id">
+                <input type="hidden" name="Id" value="@Model.Id" />
 
-                <!-- Basic Info Section -->
-                <div class="profile-section">
-                    <div class="section-title">👤 Thông tin cơ bản</div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input type="text" name="Username" class="form-control" value="@Model.Username">
-                            </div>
+                <!-- Basic Info -->
+                <div class="glass-card">
+                    <div class="card-title">👤 Thông tin cơ bản</div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Username</label>
+                            <input type="text" name="Username" value="@Model.Username" />
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="Email" class="form-control" value="@Model.Email">
-                            </div>
+                        <div class="form-field">
+                            <label>Email</label>
+                            <input type="email" name="Email" value="@Model.Email" />
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="tel" name="PhoneNumber" class="form-control" value="@(Model.PhoneNumber ?? "")">
-                            </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Số điện thoại</label>
+                            <input type="tel" name="PhoneNumber" value="@(Model.PhoneNumber ?? "")" />
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Location</label>
-                                <input type="text" name="Location" class="form-control" value="@(Model.Location ?? "")">
-                            </div>
+                        <div class="form-field">
+                            <label>Địa điểm</label>
+                            <input type="text" name="Location" value="@(Model.Location ?? "")" placeholder="TP. Hồ Chí Minh..." />
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Gender</label>
-                                <select name="Gender" class="form-control">
-                                    <option value="">-- Select --</option>
-                                    <option value="Male" selected="@(Model.Gender == "Male" ? "selected" : "")">Male</option>
-                                    <option value="Female" selected="@(Model.Gender == "Female" ? "selected" : "")">Female</option>
-                                    <option value="Other" selected="@(Model.Gender == "Other" ? "selected" : "")">Other</option>
-                                </select>
-                            </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Giới tính</label>
+                            <select name="Gender">
+                                <option value="">-- Chọn --</option>
+                                <option value="Male" selected="@(Model.Gender == "Male" ? "selected" : null)">Nam</option>
+                                <option value="Female" selected="@(Model.Gender == "Female" ? "selected" : null)">Nữ</option>
+                                <option value="Other" selected="@(Model.Gender == "Other" ? "selected" : null)">Khác</option>
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Date of Birth</label>
-                                <input type="date" name="DateOfBirth" class="form-control"
-                                       value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")">
-                            </div>
+                        <div class="form-field">
+                            <label>Ngày sinh</label>
+                            <input type="date" name="DateOfBirth"
+                                   value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Avatar Section -->
-                <div class="profile-section">
-                    <div class="section-title">🖼️ Avatar</div>
-
-                    @if (Model.Avatar != null)
-                    {
-                        <div style="margin-bottom: 15px;">
-                            <p style="color: #666; font-size: 0.9em;">Current Avatar:</p>
-                            <img src="@(Model.Avatar.StartsWith("http") ? Model.Avatar : Url.Content("~/images/" + Model.Avatar))"
-                                 style="max-width: 150px; height: 150px; object-fit: cover; border-radius: 8px;"
-                                 onerror="this.src='@Url.Content("~/images/default.png")'">
-                        </div>
-                    }
-
-                    <div class="form-group">
-                        <label>Upload New Avatar</label>
-                        <input type="file" name="AvatarFile" class="form-control" accept="image/*">
-                        <small style="color: #666;">Max 5MB. Supported: JPG, PNG, GIF</small>
+                <!-- Avatar -->
+                <div class="glass-card">
+                    <div class="card-title">🖼️ Ảnh đại diện</div>
+                    <div class="avatar-upload" onclick="document.getElementById('avFile').click()">
+                        @{
+                            var avSrc = !string.IsNullOrEmpty(Model.Avatar)
+                            ? (Model.Avatar.StartsWith("http") ? Model.Avatar : Url.Content("~/images/" + Model.Avatar))
+                            : Url.Content("~/images/default.png");
+                        }
+                        <img id="avPreview" src="@avSrc" class="av-preview"
+                             onerror="this.src='@Url.Content("~/images/default.png")'" />
+                        <p>📷 Nhấn để chọn ảnh mới (JPG, PNG · tối đa 5MB)</p>
+                        <input type="file" id="avFile" name="AvatarFile" accept="image/*"
+                               style="display:none" onchange="previewAv(event)" />
                     </div>
                 </div>
 
-                <!-- Bio Section -->
-                <div class="profile-section">
-                    <div class="section-title">📝 Bio</div>
-
-                    <div class="form-group">
-                        <label>About You</label>
-                        <textarea name="Bio" class="form-control" placeholder="Tell us about yourself...">@(Model.Bio ?? "")</textarea>
-                        <small style="color: #666;">Max 500 characters</small>
+                <!-- Bio -->
+                <div class="glass-card">
+                    <div class="card-title">📝 Giới thiệu bản thân</div>
+                    <div class="form-field" style="margin:0">
+                        <textarea name="Bio" placeholder="Kể về bản thân bạn...">@(Model.Bio ?? "")</textarea>
+                        <small style="color:#aaa;font-size:.78rem">Tối đa 500 ký tự</small>
                     </div>
                 </div>
 
-                <!-- Social Links Section -->
-                <div class="profile-section">
-                    <div class="section-title">🔗 Social Links</div>
-
-                    <div class="form-group">
+                <!-- Social -->
+                <div class="glass-card">
+                    <div class="card-title">🔗 Mạng xã hội</div>
+                    <div class="form-field">
                         <label>Facebook</label>
-                        <input type="url" name="FacebookLink" class="form-control"
-                               placeholder="https://facebook.com/yourprofile"
-                               value="@(Model.FacebookLink ?? "")">
+                        <input type="url" name="FacebookLink" value="@(Model.FacebookLink ?? "")"
+                               placeholder="https://facebook.com/yourprofile" />
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-field">
                         <label>Instagram</label>
-                        <input type="url" name="InstagramLink" class="form-control"
-                               placeholder="https://instagram.com/yourprofile"
-                               value="@(Model.InstagramLink ?? "")">
+                        <input type="url" name="InstagramLink" value="@(Model.InstagramLink ?? "")"
+                               placeholder="https://instagram.com/yourprofile" />
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-field" style="margin-bottom:0">
                         <label>LinkedIn</label>
-                        <input type="url" name="LinkedInLink" class="form-control"
-                               placeholder="https://linkedin.com/in/yourprofile"
-                               value="@(Model.LinkedInLink ?? "")">
+                        <input type="url" name="LinkedInLink" value="@(Model.LinkedInLink ?? "")"
+                               placeholder="https://linkedin.com/in/yourprofile" />
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        💾 Save Changes
-                    </button>
-                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
-                        ← Back
-                    </a>
+                <!-- Actions -->
+                <div class="action-row">
+                    <button type="submit" class="btn-save">💾 Lưu thay đổi</button>
+                    <a href="javascript:history.back()" class="btn-cancel">← Quay lại</a>
                 </div>
             </form>
         </div>
 
-        <!-- Right: Stats & Badges -->
-        <div class="col-lg-4">
-
-            <!-- Account Stats -->
-            <div class="profile-section">
-                <div class="section-title">📊 Account Stats</div>
-
-                <div style="margin-bottom: 15px;">
-                    <strong>Level:</strong> <span style="font-size: 1.2em; color: #667eea;">@Model.Level</span>
+        <!-- RIGHT: Stats Sidebar -->
+        <div>
+            <!-- XP Progress -->
+            <div class="glass-card">
+                <div class="card-title">⚡ Tiến trình</div>
+                @{
+                    int xpInLevel = Model.XP % 100;
+                }
+                <div style="margin-bottom:12px">
+                    <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;margin-bottom:4px">
+                        <span>Level @Model.Level</span>
+                        <span style="color:var(--violet)">@xpInLevel / 100 XP</span>
+                    </div>
+                    <div class="xp-bar-outer">
+                        <div class="xp-bar-inner" style="width:@xpInLevel%"></div>
+                    </div>
+                    <div style="font-size:.75rem;color:#aaa">→ Level @(Model.Level + 1)</div>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <strong>Total XP:</strong> <span style="font-size: 1.2em; color: #667eea;">@Model.XP</span>
-                </div>
+                <div class="stat-mini"><span class="sk">🏆 Tổng XP</span><span class="sv" style="color:var(--violet)">@Model.XP.ToString("N0")</span></div>
+                <div class="stat-mini"><span class="sk">🔥 Streak hiện tại</span><span class="sv" style="color:var(--rose)">@Model.CurrentStreak ngày</span></div>
+                <div class="stat-mini"><span class="sk">🏅 Streak dài nhất</span><span class="sv">@Model.LongestStreak ngày</span></div>
+                <div class="stat-mini"><span class="sk">✅ Quests hoàn thành</span><span class="sv">@Model.TotalQuestsCompleted</span></div>
+                <div class="stat-mini"><span class="sk">📅 Tham gia từ</span><span class="sv">@Model.CreatedAt.ToString("MM/yyyy")</span></div>
 
-                <div style="margin-bottom: 15px;">
-                    <strong>Quests Completed:</strong> <span style="font-size: 1.2em; color: #667eea;">@(Model.UserQuests?.Count ?? 0)</span>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <strong>Current Streak:</strong> <span style="font-size: 1.2em; color: #ff6b6b;">@Model.CurrentStreak 🔥</span>
-                </div>
-
-                <hr>
-
-                <a href="/account/changepassword" class="btn btn-outline-primary" style="width: 100%; margin-bottom: 10px;">
-                    🔐 Change Password
+                <a href="/account/changepassword" style="display:flex;align-items:center;gap:8px;margin-top:16px;padding:11px 16px;background:var(--soft);border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">
+                    🔐 Đổi mật khẩu
                 </a>
             </div>
 
-            <!-- Badges Section -->
+            <!-- Badges -->
             @if (Model.UserBadges != null && Model.UserBadges.Count > 0)
             {
-                <div class="profile-section">
-                    <div class="section-title">🏆 Badges (@Model.UserBadges.Count)</div>
-
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        @foreach (var badge in Model.UserBadges.Take(9))
+                <div class="glass-card">
+                    <div class="card-title" style="justify-content:space-between">
+                        <span>🏆 Badges (@Model.UserBadges.Count)</span>
+                        <a href="/Dashboard/Badges" style="font-size:.78rem;color:var(--violet);text-decoration:none;font-weight:600">Xem tất cả →</a>
+                    </div>
+                    <div class="badge-grid">
+                        @foreach (var ub in Model.UserBadges.Take(9))
                         {
-                            <div class="badge-item" title="@badge.Badge.Name">
-                                @badge.Badge.Icon @badge.Badge.Name
-                            </div>
+                            <div class="badge-chip">@(ub.Badge?.Icon ?? "🏅") @(ub.Badge?.Name ?? "Badge")</div>
+                        }
+                        @if (Model.UserBadges.Count > 9)
+                        {
+                            <div class="badge-chip" style="background:#f0f0f0;color:#888">+@(Model.UserBadges.Count - 9)</div>
                         }
                     </div>
-
-                    @if (Model.UserBadges.Count > 9)
-                    {
-                        <p style="margin-top: 15px; color: #666;">
-                            +@(Model.UserBadges.Count - 9) more badges
-                        </p>
-                    }
-
-                    <a href="/dashboard/badges" class="btn btn-sm btn-outline-primary mt-3" style="width: 100%;">
-                        View All Badges →
-                    </a>
                 </div>
             }
 
             <!-- Quick Actions -->
-            <div class="profile-section">
-                <div class="section-title">⚡ Quick Actions</div>
-
-                <a href="/task" class="btn btn-primary btn-block mb-2" style="width: 100%; margin-bottom: 10px;">
-                    📋 Do Quests
-                </a>
-                <a href="/dashboard" class="btn btn-info btn-block mb-2" style="width: 100%; margin-bottom: 10px;">
-                    📊 View Dashboard
-                </a>
-                <a href="/task/search" class="btn btn-success btn-block" style="width: 100%;">
-                    🔍 Search Quests
-                </a>
+            <div class="glass-card">
+                <div class="card-title">⚡ Nhanh</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <a href="/task" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📋 Danh sách Quest</a>
+                    <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📊 Dashboard</a>
+                    <a href="/Dashboard/Statistics" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📈 Thống kê</a>
+                    <a href="/account/leaderboard" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">🏅 Leaderboard</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function previewAv(e) {
+            const r = new FileReader();
+            r.onload = () => { document.getElementById('avPreview').src = r.result; };
+            r.readAsDataURL(e.target.files[0]);
+        }
+    </script>
+}
