@@ -252,8 +252,7 @@ namespace HabitTracker.Controllers
         {
             HttpContext.Session.Clear();
             _logger.LogInformation("User logged out");
-            TempData["Success"] = "Đã đăng xuất!";
-            return RedirectToAction(nameof(Login));
+            return Redirect("/");
         }
 
         // ===== GOOGLE LOGIN =====
@@ -307,12 +306,15 @@ namespace HabitTracker.Controllers
         // ===== LEADERBOARD =====
         public async Task<IActionResult> Leaderboard()
         {
+            // Exclude admin accounts
             var topXP = await _context.Users
+                .Where(u => !u.IsAdmin)
                 .OrderByDescending(u => u.XP)
                 .Take(AppConstants.LEADERBOARD_TOP_COUNT)
                 .ToListAsync();
 
             var topStreak = await _context.Users
+                .Where(u => !u.IsAdmin)
                 .OrderByDescending(u => u.CurrentStreak)
                 .Take(AppConstants.LEADERBOARD_TOP_COUNT)
                 .ToListAsync();
@@ -321,6 +323,12 @@ namespace HabitTracker.Controllers
             ViewBag.TopStreak = topStreak;
 
             return View();
+        }
+
+        // ===== VIEW OTHER USER PROFILE (public) =====
+        public async Task<IActionResult> PublicProfile(int id)
+        {
+            return RedirectToAction("ViewProfile", "Friend", new { id });
         }
 
         // ===== HELPER METHODS =====

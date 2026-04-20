@@ -1,0 +1,514 @@
+﻿@model HabitTracker.Models.User
+@{
+    ViewData["Title"] = Model.Username + " — Profile";
+    var relation = ViewBag.Relation as HabitTracker.Models.Friendship;
+    int me = (int)(ViewBag.CurrentUserId ?? 0);
+    bool isFriend = relation?.Status == "Accepted";
+    bool iSent = relation?.Status == "Pending" && relation?.RequesterId == me;
+    bool theyS = relation?.Status == "Pending" && relation?.ReceiverId == me;
+    int xpInLv = Model.XP % 100;
+    var recentBadges = Model.UserBadges?.OrderByDescending(b => b.EarnedDate).Take(6).ToList() ?? new();
+}
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .profile-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 36px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden
+    }
+
+        .profile-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.5),transparent 55%),radial-gradient(ellipse at 80% 30%,rgba(240,180,41,.2),transparent 55%);
+            pointer-events: none
+        }
+
+    .hero-inner {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap
+    }
+
+    .hero-av {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255,255,255,.25);
+        flex-shrink: 0
+    }
+
+    .hero-av-ph {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.12);
+        border: 3px solid rgba(255,255,255,.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        font-size: 2.5rem;
+        color: white;
+        flex-shrink: 0
+    }
+
+    .hero-info h2 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 4px
+    }
+
+    .hero-info p {
+        color: rgba(255,255,255,.6);
+        font-size: .88rem;
+        margin-bottom: 12px
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 4px
+    }
+
+    .hstat {
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center
+    }
+
+        .hstat .n {
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            line-height: 1
+        }
+
+        .hstat .l {
+            font-size: .7rem;
+            color: rgba(255,255,255,.5);
+            margin-top: 3px
+        }
+
+    .friend-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        position: relative;
+        z-index: 2
+    }
+
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        background: var(--violet);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .88rem;
+        cursor: pointer;
+        transition: all .2s
+    }
+
+        .btn-add:hover {
+            background: #4a2fc0;
+            transform: translateY(-1px)
+        }
+
+    .btn-pending {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        background: rgba(255,255,255,.1);
+        color: rgba(255,255,255,.6);
+        border: 1.5px solid rgba(255,255,255,.2);
+        border-radius: 50px;
+        font-size: .88rem;
+        cursor: default
+    }
+
+    .btn-friend {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        background: rgba(0,184,156,.2);
+        color: #00e6c3;
+        border: 1.5px solid rgba(0,184,156,.3);
+        border-radius: 50px;
+        font-size: .88rem
+    }
+
+    .btn-unfriend {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 20px;
+        background: rgba(232,67,106,.15);
+        color: #ff8fab;
+        border: 1.5px solid rgba(232,67,106,.25);
+        border-radius: 50px;
+        font-size: .88rem;
+        cursor: pointer;
+        border-style: none;
+        border: 1.5px solid rgba(232,67,106,.25)
+    }
+
+    .btn-accept {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        background: var(--teal);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .88rem;
+        cursor: pointer
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 20px;
+        background: rgba(255,255,255,.1);
+        color: rgba(255,255,255,.7);
+        border: 1.5px solid rgba(255,255,255,.15);
+        border-radius: 50px;
+        font-size: .88rem;
+        text-decoration: none;
+        transition: all .2s
+    }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,.18);
+            color: white
+        }
+    /* layout */
+    .playout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        align-items: start
+    }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px;
+        margin-bottom: 20px
+    }
+
+    .card-title {
+        font-size: .92rem;
+        font-weight: 700;
+        letter-spacing: -.3px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--soft)
+    }
+    /* xp bar */
+    .xp-bar-o {
+        height: 7px;
+        background: #e8e8e8;
+        border-radius: 50px;
+        overflow: hidden;
+        margin: 6px 0 4px
+    }
+
+    .xp-bar-i {
+        height: 100%;
+        background: linear-gradient(90deg,var(--violet),var(--teal));
+        border-radius: 50px
+    }
+    /* stat row */
+    .sr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 11px 0;
+        border-bottom: 1px solid #f5f5f5
+    }
+
+        .sr:last-child {
+            border: none
+        }
+
+        .sr .sk {
+            font-size: .85rem;
+            color: #888
+        }
+
+        .sr .sv {
+            font-family: "Syne",sans-serif;
+            font-weight: 700;
+            font-size: .9rem
+        }
+    /* badge */
+    .badge-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px
+    }
+
+    .badge-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--soft);
+        border-radius: 50px;
+        padding: 5px 12px;
+        font-size: .78rem;
+        font-weight: 600;
+        color: var(--violet)
+    }
+    /* quest */
+    .quest-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid #f5f5f5
+    }
+
+        .quest-row:last-child {
+            border: none
+        }
+
+    .q-ico {
+        font-size: 1.2rem;
+        width: 34px;
+        text-align: center;
+        flex-shrink: 0
+    }
+
+    .q-name {
+        font-weight: 600;
+        font-size: .85rem;
+        flex: 1
+    }
+
+    .q-xp {
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        color: var(--violet);
+        font-size: .82rem
+    }
+
+    @@media(max-width:800px) {
+        .playout {
+            grid-template-columns: 1fr
+        }
+    }
+</style>
+
+<div style="padding:8px 0 48px">
+
+    <!-- Hero -->
+    <div class="profile-hero">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;position:relative;z-index:2">
+            <a href="javascript:history.back()" class="btn-back">← Quay lại</a>
+        </div>
+        <div class="hero-inner">
+            @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
+            {
+                <img src="@Model.Avatar" class="hero-av" />
+            }
+            else if (!string.IsNullOrEmpty(Model.Avatar))
+            {
+
+                <img src="@Url.Content("~/images/" + Model.Avatar)" class="hero-av"
+                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <div class="hero-av-ph" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
+}
+            else
+            {
+                <div class="hero-av-ph">@Model.Username.Substring(0, 1).ToUpper()</div>
+            }
+
+            <div class="hero-info" style="flex:1">
+                <h2>@Model.Username</h2>
+                <p>@(!string.IsNullOrEmpty(Model.Location) ? "📍 " + Model.Location + " · " : "")Tham gia @Model.CreatedAt.ToString("MM/yyyy")</p>
+                @if (!string.IsNullOrEmpty(Model.Bio))
+                {
+                    <p style="color:rgba(255,255,255,.75);font-style:italic;font-size:.85rem">"@Model.Bio"</p>
+                }
+
+                <div class="hero-stats">
+                    <div class="hstat"><div class="n">@Model.Level</div><div class="l">Level</div></div>
+                    <div class="hstat"><div class="n">@Model.XP.ToString("N0")</div><div class="l">XP</div></div>
+                    <div class="hstat"><div class="n">@Model.CurrentStreak🔥</div><div class="l">Streak</div></div>
+                    <div class="hstat"><div class="n">@Model.TotalQuestsCompleted</div><div class="l">Quests</div></div>
+                </div>
+
+                <!-- Friend actions -->
+                <div class="friend-actions">
+                    @if (isFriend)
+                    {
+                        <span class="btn-friend">✓ Bạn bè</span>
+                        <form method="post" action="/Friend/Unfriend" style="display:inline">
+                            <input type="hidden" name="friendshipId" value="@relation!.Id" />
+                            <button type="submit" class="btn-unfriend">Huỷ kết bạn</button>
+                        </form>
+                    }
+                    else if (iSent)
+                    {
+
+                        <span class="btn-pending">⏳ Đã gửi lời mời</span>
+                    }
+                    else if (theyS)
+                    {
+                        <form method="post" action="/Friend/Accept" style="display:inline">
+                            <input type="hidden" name="friendshipId" value="@relation!.Id" />
+                            <button type="submit" class="btn-accept">✓ Chấp nhận lời mời</button>
+                        </form>
+                    }
+                    else
+                    {
+
+                        <button class="btn-add" onclick="sendReq(@Model.Id,this)">+ Kết bạn</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="playout">
+        <!-- LEFT: Badges + Recent quests -->
+        <div>
+            @if (recentBadges.Count > 0)
+            {
+                <div class="glass-card">
+                    <div class="card-title">🏆 Badges (@(Model.UserBadges?.Count ?? 0))</div>
+                    <div class="badge-grid">
+                        @foreach (var ub in recentBadges)
+                        {
+                            <div class="badge-chip">@(ub.Badge?.Icon ?? "🏅") @(ub.Badge?.Name ?? "Badge")</div>
+                        }
+                        @if ((Model.UserBadges?.Count ?? 0) > 6)
+                        {
+                            <div class="badge-chip" style="background:#f0f0f0;color:#888">+@((Model.UserBadges!.Count) - 6) nữa</div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @{
+                var recentQuests = Model.UserQuests?
+                .OrderByDescending(q => q.CompletedDate)
+                .Take(8).ToList() ?? new();
+            }
+            @if (recentQuests.Count > 0)
+            {
+                <div class="glass-card">
+                    <div class="card-title">📋 Quest gần đây</div>
+                    @foreach (var uq in recentQuests)
+                    {
+                        <div class="quest-row">
+                            <div class="q-ico">@(uq.Quest?.Icon ?? "⚔️")</div>
+                            <div class="q-name">@(uq.Quest?.Name ?? "Quest")</div>
+                            <div class="q-xp">+@uq.XPEarned XP</div>
+                            <div style="font-size:.72rem;color:#ccc">@uq.CompletedDate.ToString("dd/MM")</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT: Stats -->
+        <div>
+            <div class="glass-card">
+                <div class="card-title">⚡ Thống kê</div>
+                <div style="margin-bottom:14px">
+                    <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;margin-bottom:4px">
+                        <span>Level @Model.Level</span>
+                        <span style="color:var(--violet)">@xpInLv / 100 XP</span>
+                    </div>
+                    <div class="xp-bar-o"><div class="xp-bar-i" style="width:@xpInLv%"></div></div>
+                    <div style="font-size:.72rem;color:#aaa">→ Level @(Model.Level + 1)</div>
+                </div>
+                <div class="sr"><span class="sk">🏆 Tổng XP</span><span class="sv" style="color:var(--violet)">@Model.XP.ToString("N0")</span></div>
+                <div class="sr"><span class="sk">🔥 Streak hiện tại</span><span class="sv" style="color:var(--rose)">@Model.CurrentStreak ngày</span></div>
+                <div class="sr"><span class="sk">🏅 Streak dài nhất</span><span class="sv">@Model.LongestStreak ngày</span></div>
+                <div class="sr"><span class="sk">✅ Tổng quests</span><span class="sv">@Model.TotalQuestsCompleted</span></div>
+                <div class="sr"><span class="sk">🏆 Badges</span><span class="sv">@(Model.UserBadges?.Count ?? 0)</span></div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.FacebookLink) || !string.IsNullOrEmpty(Model.InstagramLink) || !string.IsNullOrEmpty(Model.LinkedInLink))
+            {
+                <div class="glass-card">
+                    <div class="card-title">🔗 Mạng xã hội</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        @if (!string.IsNullOrEmpty(Model.FacebookLink))
+                        {
+                            <a href="@Model.FacebookLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">f Facebook →</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.InstagramLink))
+                        {
+                            <a href="@Model.InstagramLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">📷 Instagram →</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.LinkedInLink))
+                        {
+                            <a href="@Model.LinkedInLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">in LinkedIn →</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function sendReq(uid, btn) {
+            btn.disabled = true; btn.textContent = '...';
+            const fd = new FormData(); fd.append('receiverId', uid);
+            const r = await fetch('/Friend/SendRequest', { method:'POST', body: fd });
+            const d = await r.json();
+            if (d.ok) { btn.textContent = '⏳ Đã gửi lời mời'; btn.className = 'btn-pending'; }
+            else { btn.textContent = '+ Kết bạn'; btn.disabled = false; alert(d.msg); }
+        }
+    </script>
+}

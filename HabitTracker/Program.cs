@@ -91,8 +91,8 @@ using (var scope = app.Services.CreateScope())
         dbContext.Database.Migrate();
 
         // Seed admin user n?u ch?a t?n t?i
-        var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@habittracker.local";
-        var adminPassword = builder.Configuration["Admin:Password"] ?? "DefaultPass123!";
+        var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@gmail.com";
+        var adminPassword = builder.Configuration["Admin:Password"] ?? "123456";
 
         var admin = dbContext.Users.FirstOrDefault(u => u.Email == adminEmail);
 
