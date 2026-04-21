@@ -8,6 +8,14 @@
     bool theyS = relation?.Status == "Pending" && relation?.ReceiverId == me;
     int xpInLv = Model.XP % 100;
     var recentBadges = Model.UserBadges?.OrderByDescending(b => b.EarnedDate).Take(6).ToList() ?? new();
+    var recentQuests = Model.UserQuests?.OrderByDescending(q => q.CompletedDate).Take(8).ToList() ?? new();
+}
+@functions {
+    string AvUrl(string? av)
+    {
+        if (string.IsNullOrEmpty(av)) return "";
+        return av.StartsWith("http") ? av : "/images/" + av;
+    }
 }
 <style>
     :root {
@@ -182,14 +190,12 @@
         align-items: center;
         gap: 7px;
         padding: 10px 20px;
-        background: rgba(232,67,106,.15);
+        background: transparent;
         color: #ff8fab;
         border: 1.5px solid rgba(232,67,106,.25);
         border-radius: 50px;
         font-size: .88rem;
-        cursor: pointer;
-        border-style: none;
-        border: 1.5px solid rgba(232,67,106,.25)
+        cursor: pointer
     }
 
     .btn-accept {
@@ -225,7 +231,7 @@
             background: rgba(255,255,255,.18);
             color: white
         }
-    /* layout */
+
     .playout {
         display: grid;
         grid-template-columns: 2fr 1fr;
@@ -249,7 +255,7 @@
         padding-bottom: 10px;
         border-bottom: 2px solid var(--soft)
     }
-    /* xp bar */
+
     .xp-bar-o {
         height: 7px;
         background: #e8e8e8;
@@ -263,7 +269,7 @@
         background: linear-gradient(90deg,var(--violet),var(--teal));
         border-radius: 50px
     }
-    /* stat row */
+
     .sr {
         display: flex;
         justify-content: space-between;
@@ -286,7 +292,7 @@
             font-weight: 700;
             font-size: .9rem
         }
-    /* badge */
+
     .badge-grid {
         display: flex;
         flex-wrap: wrap;
@@ -304,7 +310,7 @@
         font-weight: 600;
         color: var(--violet)
     }
-    /* quest */
+
     .quest-row {
         display: flex;
         align-items: center;
@@ -318,8 +324,8 @@
         }
 
     .q-ico {
-        font-size: 1.2rem;
-        width: 34px;
+        font-size: 1.1rem;
+        width: 30px;
         text-align: center;
         flex-shrink: 0
     }
@@ -327,14 +333,23 @@
     .q-name {
         font-weight: 600;
         font-size: .85rem;
-        flex: 1
+        flex: 1;
+        color: var(--ink)
     }
 
     .q-xp {
         font-family: "Syne",sans-serif;
         font-weight: 700;
         color: var(--violet);
-        font-size: .82rem
+        font-size: .8rem;
+        white-space: nowrap
+    }
+
+    .q-date {
+        font-size: .72rem;
+        color: #ccc;
+        white-space: nowrap;
+        margin-left: 6px
     }
 
     @@media(max-width:800px) {
@@ -346,23 +361,20 @@
 
 <div style="padding:8px 0 48px">
 
-    <!-- Hero -->
     <div class="profile-hero">
         <div style="display:flex;justify-content:flex-end;margin-bottom:16px;position:relative;z-index:2">
             <a href="javascript:history.back()" class="btn-back">← Quay lại</a>
         </div>
         <div class="hero-inner">
-            @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
-            {
-                <img src="@Model.Avatar" class="hero-av" />
+            @{
+                var avUrl = AvUrl(Model.Avatar);
             }
-            else if (!string.IsNullOrEmpty(Model.Avatar))
+            @if (!string.IsNullOrEmpty(avUrl))
             {
-
-                <img src="@Url.Content("~/images/" + Model.Avatar)" class="hero-av"
-                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <img src="@avUrl" class="hero-av" alt="@Model.Username"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <div class="hero-av-ph" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
-}
+            }
             else
             {
                 <div class="hero-av-ph">@Model.Username.Substring(0, 1).ToUpper()</div>
@@ -383,7 +395,6 @@
                     <div class="hstat"><div class="n">@Model.TotalQuestsCompleted</div><div class="l">Quests</div></div>
                 </div>
 
-                <!-- Friend actions -->
                 <div class="friend-actions">
                     @if (isFriend)
                     {
@@ -416,7 +427,6 @@
     </div>
 
     <div class="playout">
-        <!-- LEFT: Badges + Recent quests -->
         <div>
             @if (recentBadges.Count > 0)
             {
@@ -435,11 +445,6 @@
                 </div>
             }
 
-            @{
-                var recentQuests = Model.UserQuests?
-                .OrderByDescending(q => q.CompletedDate)
-                .Take(8).ToList() ?? new();
-            }
             @if (recentQuests.Count > 0)
             {
                 <div class="glass-card">
@@ -448,16 +453,15 @@
                     {
                         <div class="quest-row">
                             <div class="q-ico">@(uq.Quest?.Icon ?? "⚔️")</div>
-                            <div class="q-name">@(uq.Quest?.Name ?? "Quest")</div>
+                            <div class="q-name">@(uq.Quest?.Name ?? "(Quest đã xóa)")</div>
                             <div class="q-xp">+@uq.XPEarned XP</div>
-                            <div style="font-size:.72rem;color:#ccc">@uq.CompletedDate.ToString("dd/MM")</div>
+                            <div class="q-date">@uq.CompletedDate.ToString("dd/MM")</div>
                         </div>
                     }
                 </div>
             }
         </div>
 
-        <!-- RIGHT: Stats -->
         <div>
             <div class="glass-card">
                 <div class="card-title">⚡ Thống kê</div>
@@ -480,18 +484,18 @@
             {
                 <div class="glass-card">
                     <div class="card-title">🔗 Mạng xã hội</div>
-                    <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;flex-direction:column;gap:10px">
                         @if (!string.IsNullOrEmpty(Model.FacebookLink))
                         {
-                            <a href="@Model.FacebookLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">f Facebook →</a>
+                            <a href="@Model.FacebookLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none">f Facebook →</a>
                         }
                         @if (!string.IsNullOrEmpty(Model.InstagramLink))
                         {
-                            <a href="@Model.InstagramLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">📷 Instagram →</a>
+                            <a href="@Model.InstagramLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none">📷 Instagram →</a>
                         }
                         @if (!string.IsNullOrEmpty(Model.LinkedInLink))
                         {
-                            <a href="@Model.LinkedInLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none;display:flex;align-items:center;gap:6px">in LinkedIn →</a>
+                            <a href="@Model.LinkedInLink" target="_blank" style="font-size:.88rem;color:var(--violet);text-decoration:none">in LinkedIn →</a>
                         }
                     </div>
                 </div>

@@ -248,6 +248,108 @@ namespace HabitTracker.Controllers
             return RedirectToAction(nameof(Users));
         }
 
+
+        // ===== QUẢN LÝ BADGE =====
+        public async Task<IActionResult> Badges()
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var badges = await _context.Badges
+                .OrderBy(b => b.RequiredXP)
+                .ToListAsync();
+
+            return View(badges);
+        }
+
+        public IActionResult CreateBadge()
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+            return View(new Badge { CreatedAt = DateTime.UtcNow, IsActive = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateBadge(Badge model)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            model.CreatedAt = DateTime.UtcNow;
+            model.IsActive = true;
+            _context.Badges.Add(model);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"Admin created badge: {model.Name}");
+            TempData["Success"] = $"✅ Đã tạo badge: {model.Name}";
+            return RedirectToAction(nameof(Badges));
+        }
+
+        public async Task<IActionResult> EditBadge(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var badge = await _context.Badges.FindAsync(id);
+            if (badge == null) return RedirectToAction(nameof(Badges));
+            return View(badge);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBadge(Badge model)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var badge = await _context.Badges.FindAsync(model.Id);
+            if (badge == null) return RedirectToAction(nameof(Badges));
+
+            badge.Name = model.Name?.Trim() ?? badge.Name;
+            badge.Description = model.Description?.Trim();
+            badge.Icon = model.Icon?.Trim();
+            badge.RequiredXP = model.RequiredXP;
+            badge.Rarity = model.Rarity;
+            badge.IsActive = model.IsActive;
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"✅ Đã cập nhật badge: {badge.Name}";
+            return RedirectToAction(nameof(Badges));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreBadge(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var badge = await _context.Badges.FindAsync(id);
+            if (badge == null) return RedirectToAction(nameof(Badges));
+
+            badge.IsActive = true;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"✅ Đã khôi phục badge: {badge.Name}";
+            return RedirectToAction(nameof(Badges));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteBadge(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var badge = await _context.Badges.FindAsync(id);
+            if (badge == null) return RedirectToAction(nameof(Badges));
+
+            badge.IsActive = false;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"✅ Đã ẩn badge: {badge.Name}";
+            return RedirectToAction(nameof(Badges));
+        }
+
         // ===== STATS DASHBOARD =====
         public async Task<IActionResult> Stats()
         {

@@ -1,0 +1,236 @@
+﻿@model HabitTracker.Models.Badge
+@{
+    ViewData["Title"] = "Sửa Badge";
+}
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .form-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 24px 0 64px
+    }
+
+    .page-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #888;
+        text-decoration: none;
+        font-size: .85rem;
+        margin-bottom: 20px;
+        transition: color .2s
+    }
+
+        .page-back:hover {
+            color: var(--violet)
+        }
+
+    .form-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 26px 32px;
+        color: white;
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden
+    }
+
+        .form-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 80% 50%,rgba(92,61,222,.4),transparent 60%);
+            pointer-events: none
+        }
+
+        .form-hero h2 {
+            font-family: "Syne",sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            position: relative;
+            z-index: 2
+        }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 28px
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+    }
+
+    .form-field {
+        margin-bottom: 18px
+    }
+
+        .form-field label {
+            font-weight: 600;
+            font-size: .82rem;
+            color: #444;
+            display: block;
+            margin-bottom: 6px
+        }
+
+        .form-field input, .form-field select, .form-field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid rgba(0,0,0,.1);
+            border-radius: 10px;
+            font-family: "DM Sans",sans-serif;
+            font-size: .92rem;
+            background: white;
+            outline: none;
+            transition: border-color .2s,box-shadow .2s
+        }
+
+            .form-field input:focus, .form-field select:focus {
+                border-color: var(--violet);
+                box-shadow: 0 0 0 3px rgba(92,61,222,.08)
+            }
+
+    .action-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px
+    }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--ink);
+        color: white;
+        padding: 12px 28px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .9rem;
+        border: none;
+        cursor: pointer;
+        transition: background .2s,transform .2s
+    }
+
+        .btn-save:hover {
+            background: var(--violet);
+            transform: translateY(-1px)
+        }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: transparent;
+        color: var(--ink);
+        padding: 11px 22px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: .9rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(0,0,0,.12);
+        transition: all .2s
+    }
+
+        .btn-cancel:hover {
+            border-color: var(--violet);
+            color: var(--violet)
+        }
+
+    .icon-preview {
+        font-size: 3rem;
+        text-align: center;
+        padding: 14px;
+        background: var(--soft);
+        border-radius: 12px;
+        min-height: 60px
+    }
+
+    @@media(max-width:600px) {
+        .form-row {
+            grid-template-columns: 1fr
+        }
+    }
+</style>
+
+<div class="form-wrap">
+    <a asp-action="Badges" class="page-back">← Quay lại Badges</a>
+    <div class="form-hero"><h2>✏️ Sửa Badge: @Model.Name</h2></div>
+    <div class="glass-card">
+        <form asp-action="EditBadge" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Icon (emoji)</label>
+                    <input type="text" asp-for="Icon" maxlength="10"
+                           oninput="document.getElementById('iconPrev').textContent=this.value||'🏅'" />
+                </div>
+                <div class="form-field">
+                    <label>Xem trước</label>
+                    <div class="icon-preview" id="iconPrev">@(Model.Icon ?? "🏅")</div>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>Tên Badge</label>
+                <input type="text" asp-for="Name" required />
+            </div>
+
+            <div class="form-field">
+                <label>Mô tả</label>
+                <input type="text" asp-for="Description" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Rarity</label>
+                    <select asp-for="Rarity">
+                        <option value="Common">Common</option>
+                        <option value="Rare">Rare</option>
+                        <option value="Epic">Epic</option>
+                        <option value="Legendary">Legendary</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>XP yêu cầu</label>
+                    <input type="number" asp-for="RequiredXP" min="0" required />
+                </div>
+            </div>
+
+            <div class="form-field" style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" asp-for="IsActive" id="isActive" style="width:16px;height:16px;accent-color:var(--violet)" />
+                <label for="isActive" style="margin:0;font-weight:600;font-size:.88rem">Đang hiển thị (Active)</label>
+            </div>
+
+            <div class="action-row">
+                <button type="submit" class="btn-save">💾 Cập nhật</button>
+                <a asp-action="Badges" class="btn-cancel">Huỷ</a>
+            </div>
+        </form>
+    </div>
+</div>

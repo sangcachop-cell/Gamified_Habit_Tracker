@@ -1,8 +1,8 @@
-﻿@model List<HabitTracker.Models.Quest>
+﻿@model List<HabitTracker.Models.Badge>
 @{
-    ViewData["Title"] = "Admin — Quản lý Quest";
-    var active = Model.Where(q => q.IsActive).ToList();
-    var inactive = Model.Where(q => !q.IsActive).ToList();
+    ViewData["Title"] = "Admin — Quản lý Badge";
+    var active = Model.Where(b => b.IsActive).ToList();
+    var inactive = Model.Where(b => !b.IsActive).ToList();
 }
 <style>
     :root {
@@ -43,7 +43,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at 10% 60%,rgba(232,67,106,.35),transparent 50%),radial-gradient(ellipse at 90% 30%,rgba(92,61,222,.3),transparent 55%);
+            background: radial-gradient(ellipse at 10% 60%,rgba(240,180,41,.3),transparent 50%),radial-gradient(ellipse at 90% 30%,rgba(92,61,222,.3),transparent 55%);
             pointer-events: none
         }
 
@@ -68,8 +68,8 @@
         display: inline-flex;
         align-items: center;
         gap: 7px;
-        background: var(--teal);
-        color: white;
+        background: var(--gold);
+        color: var(--ink);
         padding: 11px 22px;
         border-radius: 50px;
         font-family: "Syne",sans-serif;
@@ -82,9 +82,9 @@
     }
 
         .btn-new:hover {
-            background: #009f87;
+            background: #d4a000;
             transform: translateY(-1px);
-            color: white
+            color: var(--ink)
         }
 
     .glass-card {
@@ -107,8 +107,7 @@
         .card-head h4 {
             font-size: .9rem;
             font-weight: 700;
-            margin: 0;
-            letter-spacing: -.2px
+            margin: 0
         }
 
     .count-chip {
@@ -152,58 +151,51 @@
         background: #fafcff
     }
 
-    .q-icon {
-        font-size: 1.4rem
+    .b-icon-cell {
+        font-size: 1.6rem;
+        text-align: center
     }
 
-    .q-name {
+    .b-name {
         font-weight: 700;
         font-size: .9rem
     }
 
-    .q-desc {
+    .b-desc {
         font-size: .77rem;
         color: #aaa;
         margin-top: 2px
     }
 
-    .pill {
+    .rarity-pill {
         display: inline-block;
         padding: 3px 10px;
         border-radius: 50px;
         font-size: .72rem;
-        font-weight: 700
+        font-weight: 700;
+        color: white
     }
 
-    .pill-cat {
-        background: var(--soft);
-        color: var(--violet)
+    .rp-Common {
+        background: #808080
     }
 
-    .pill-easy {
-        background: #e2f5e2;
-        color: #2e7d2e
+    .rp-Rare {
+        background: #0070DD
     }
 
-    .pill-medium {
-        background: #fff5d6;
-        color: #b07800
+    .rp-Epic {
+        background: #A335EE
     }
 
-    .pill-hard {
-        background: #fde8ed;
-        color: var(--rose)
-    }
-
-    .pill-freq {
-        background: #f0f4ff;
-        color: #4457aa
+    .rp-Legendary {
+        background: #FF8000
     }
 
     .xp-val {
         font-family: "Syne",sans-serif;
         font-weight: 800;
-        color: var(--gold)
+        color: var(--violet)
     }
 
     .btn-edit {
@@ -234,13 +226,8 @@
         border-radius: 50px;
         font-size: .78rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: background .2s
+        cursor: pointer
     }
-
-        .btn-del:hover {
-            background: #f9c9d4
-        }
 
     .btn-restore {
         padding: 6px 14px;
@@ -250,13 +237,8 @@
         border-radius: 50px;
         font-size: .78rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: background .2s
+        cursor: pointer
     }
-
-        .btn-restore:hover {
-            background: #b8ece4
-        }
 
     .alert-s {
         background: #d4f5ef;
@@ -266,6 +248,31 @@
         font-size: .88rem;
         margin-bottom: 18px
     }
+
+    .nav-tabs-custom {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px
+    }
+
+    .nav-tab {
+        padding: 9px 20px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .85rem;
+        text-decoration: none;
+        background: white;
+        color: #888;
+        border: 1.5px solid rgba(0,0,0,.07);
+        transition: all .2s
+    }
+
+        .nav-tab:hover, .nav-tab.active {
+            background: var(--ink);
+            color: white;
+            border-color: var(--ink)
+        }
 </style>
 
 <div style="padding:8px 0 48px">
@@ -277,63 +284,45 @@
 
     <div class="admin-hero">
         <div>
-            <h2>⚙️ Admin Panel</h2>
-            <p>Quản lý toàn bộ Quest trong hệ thống</p>
+            <h2>🏆 Quản lý Badge</h2>
+            <p>Tạo và quản lý huy hiệu phần thưởng</p>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:2">
-            <a asp-action="Badges" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);color:white;padding:11px 20px;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;text-decoration:none;border:1.5px solid rgba(255,255,255,.2);transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">🏆 Quản lý Badge</a>
-            <div style="display:flex;gap:10px;position:relative;z-index:2;flex-wrap:wrap">
-                <a asp-action="Index" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:50px;background:var(--ink);color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;text-decoration:none">⚙️ Quests</a>
-                <a asp-action="Badges" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:50px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;text-decoration:none;border:1.5px solid rgba(255,255,255,.2)">🏆 Badges</a>
-                <a asp-action="Create" class="btn-new">+ Thêm Quest</a>
-            </div>
+        <div style="display:flex;gap:10px;position:relative;z-index:2;flex-wrap:wrap">
+            <a asp-action="Index" class="nav-tab">⚙️ Quests</a>
+            <a asp-action="Badges" class="nav-tab active">🏆 Badges</a>
+            <a asp-action="CreateBadge" class="btn-new">+ Thêm Badge</a>
         </div>
     </div>
 
-    <!-- Active quests -->
     <div class="glass-card">
         <div class="card-head">
-            <h4>✅ Quest đang hiển thị</h4>
+            <h4>✅ Badge đang hoạt động</h4>
             <span class="count-chip">@active.Count</span>
         </div>
         <table>
             <thead>
-                <tr>
-                    <th>Icon</th>
-                    <th>Tên Quest</th>
-                    <th>Category</th>
-                    <th>Độ khó</th>
-                    <th>Tần suất</th>
-                    <th>XP</th>
-                    <th>Hành động</th>
-                </tr>
+                <tr><th>Icon</th><th>Tên Badge</th><th>Rarity</th><th>XP yêu cầu</th><th>Đã trao</th><th>Hành động</th></tr>
             </thead>
             <tbody>
-                @foreach (var q in active)
+                @foreach (var b in active)
                 {
                     <tr>
-                        <td><span class="q-icon">@q.Icon</span></td>
+                        <td class="b-icon-cell">@b.Icon</td>
                         <td>
-                            <div class="q-name">@q.Name</div>
-                            @if (!string.IsNullOrEmpty(q.Description))
+                            <div class="b-name">@b.Name</div>
+                            @if (!string.IsNullOrEmpty(b.Description))
                             {
-                                <div class="q-desc">@q.Description</div>
+                                <div class="b-desc">@b.Description</div>
                             }
                         </td>
-                        <td><span class="pill pill-cat">@q.Category</span></td>
+                        <td><span class="rarity-pill rp-@b.Rarity">@b.Rarity</span></td>
+                        <td><span class="xp-val">@b.RequiredXP XP</span></td>
+                        <td style="color:#aaa;font-size:.82rem">@(b.UserBadges?.Count ?? 0) người</td>
                         <td>
-                            @{
-                                var dc = q.Difficulty == "Easy" ? "easy" : q.Difficulty == "Medium" ? "medium" : "hard";
-                            }
-                            <span class="pill pill-@dc">@q.Difficulty</span>
-                        </td>
-                        <td><span class="pill pill-freq">@q.Frequency</span></td>
-                        <td><span class="xp-val">+@q.XPReward</span></td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@q.Id" class="btn-edit">✏️ Sửa</a>
-                            <form asp-action="Delete" method="post" style="display:inline"
-                                  onsubmit="return confirm('Ẩn quest «@q.Name»?')">
-                                <input type="hidden" name="id" value="@q.Id" />
+                            <a asp-action="EditBadge" asp-route-id="@b.Id" class="btn-edit">✏️ Sửa</a>
+                            <form asp-action="DeleteBadge" method="post" style="display:inline"
+                                  onsubmit="return confirm('Ẩn badge «@b.Name»?')">
+                                <input type="hidden" name="id" value="@b.Id" />
                                 <button class="btn-del">🗑️ Ẩn</button>
                             </form>
                         </td>
@@ -343,29 +332,26 @@
         </table>
     </div>
 
-    <!-- Inactive quests -->
     @if (inactive.Any())
     {
         <div class="glass-card">
             <div class="card-head">
-                <h4 style="color:#aaa">🚫 Quest đã ẩn</h4>
+                <h4 style="color:#aaa">🚫 Badge đã ẩn</h4>
                 <span class="count-chip" style="background:#f0f0f0;color:#888">@inactive.Count</span>
             </div>
             <table>
-                <thead>
-                    <tr><th>Icon</th><th>Tên Quest</th><th>Category</th><th>Hành động</th></tr>
-                </thead>
+                <thead><tr><th>Icon</th><th>Tên</th><th>Rarity</th><th>Hành động</th></tr></thead>
                 <tbody>
-                    @foreach (var q in inactive)
+                    @foreach (var b in inactive)
                     {
                         <tr style="opacity:.6">
-                            <td><span class="q-icon">@q.Icon</span></td>
-                            <td><div class="q-name" style="text-decoration:line-through">@q.Name</div></td>
-                            <td><span class="pill pill-cat">@q.Category</span></td>
+                            <td class="b-icon-cell">@b.Icon</td>
+                            <td><div class="b-name" style="text-decoration:line-through">@b.Name</div></td>
+                            <td><span class="rarity-pill rp-@b.Rarity">@b.Rarity</span></td>
                             <td>
-                                <form asp-action="Restore" method="post" style="display:inline">
-                                    <input type="hidden" name="id" value="@q.Id" />
-                                    <button class="btn-restore">♻️ Khôi phục</button>
+                                <form asp-action="DeleteBadge" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="@b.Id" />
+                                    <button class="btn-restore" formaction="/Admin/RestoreBadge">♻️ Khôi phục</button>
                                 </form>
                             </td>
                         </tr>

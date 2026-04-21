@@ -1,288 +1,323 @@
 ﻿@model List<HabitTracker.Models.UserBadge>
 @{
-    ViewData["Title"] = "Tất cả Badges";
+    ViewData["Title"] = "Badges của tôi";
 }
-
 <style>
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 35px 30px;
-        border-radius: 12px;
-        margin-bottom: 30px;
-        display: flex;
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .page-back {
+        display: inline-flex;
         align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-        .page-header h2 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-
-        .page-header p {
-            margin: 6px 0 0;
-            opacity: 0.9;
-            font-size: 0.95em;
-        }
-
-    .back-btn {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        border: 2px solid rgba(255,255,255,0.5);
-        padding: 10px 22px;
-        border-radius: 8px;
+        gap: 6px;
+        color: #888;
         text-decoration: none;
-        font-weight: 600;
-        transition: all 0.2s;
-        white-space: nowrap;
+        font-size: .85rem;
+        margin-bottom: 20px;
+        transition: color .2s
     }
 
-        .back-btn:hover {
-            background: rgba(255,255,255,0.35);
-            color: white;
-            border-color: white;
+        .page-back:hover {
+            color: var(--violet)
         }
+
+    .badges-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 30px 36px;
+        color: white;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px
+    }
+
+        .badges-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.45),transparent 55%),radial-gradient(ellipse at 80% 30%,rgba(240,180,41,.2),transparent 55%);
+            pointer-events: none
+        }
+
+        .badges-hero h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 2;
+            margin: 0
+        }
+
+        .badges-hero p {
+            color: rgba(255,255,255,.55);
+            font-size: .88rem;
+            margin: 4px 0 0;
+            position: relative;
+            z-index: 2
+        }
+
+    .stats-bar {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px
+    }
+
+    .stat-chip {
+        background: white;
+        border-radius: 12px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 14px 20px;
+        text-align: center;
+        flex: 1;
+        min-width: 110px
+    }
+
+        .stat-chip .n {
+            font-family: "Syne",sans-serif;
+            font-weight: 800;
+            font-size: 1.6rem;
+            line-height: 1
+        }
+
+        .stat-chip .l {
+            font-size: .73rem;
+            color: #aaa;
+            margin-top: 4px
+        }
+
+    .n-common {
+        color: #808080
+    }
+
+    .n-rare {
+        color: #0070DD
+    }
+
+    .n-epic {
+        color: #A335EE
+    }
+
+    .n-legendary {
+        color: #FF8000
+    }
+
+    .n-total {
+        color: var(--violet)
+    }
 
     .badges-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+        gap: 16px
     }
 
     .badge-card {
         background: white;
-        border-radius: 12px;
-        padding: 24px 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px 20px;
         text-align: center;
-        transition: all 0.25s;
-        border: 2px solid transparent;
+        transition: all .25s;
         position: relative;
-        overflow: hidden;
+        overflow: hidden
     }
 
         .badge-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+            box-shadow: 0 10px 32px rgba(0,0,0,.1)
         }
 
-        .badge-card.new-badge {
-            border-color: #ffc107;
+        .badge-card.new-card {
+            border-color: var(--gold)
         }
 
-    .new-badge-ribbon {
+    .new-ribbon {
         position: absolute;
-        top: 12px;
-        right: -20px;
-        background: #ffc107;
+        top: 10px;
+        right: -22px;
+        background: var(--gold);
         color: #333;
-        font-size: 0.7em;
-        font-weight: bold;
-        padding: 3px 28px;
+        font-size: .65rem;
+        font-weight: 800;
+        padding: 3px 32px;
         transform: rotate(35deg);
-        letter-spacing: 0.5px;
+        letter-spacing: .5px
     }
 
-    .badge-icon {
-        font-size: 3em;
-        margin-bottom: 12px;
-        display: block;
+    .b-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        display: block
     }
 
-    .badge-name {
-        font-size: 1.15em;
+    .b-name {
+        font-family: "Syne",sans-serif;
         font-weight: 700;
-        color: #222;
-        margin-bottom: 8px;
+        font-size: 1rem;
+        margin-bottom: 6px
     }
 
-    .badge-description {
-        font-size: 0.88em;
-        color: #666;
+    .b-desc {
+        font-size: .82rem;
+        color: #888;
         line-height: 1.5;
-        margin-bottom: 12px;
+        margin-bottom: 12px
     }
 
-    .badge-meta {
+    .b-meta {
         display: flex;
         justify-content: center;
         gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 12px;
+        flex-wrap: wrap
     }
 
-    .rarity-tag {
+    .rarity-pill {
         display: inline-block;
         padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
+        border-radius: 50px;
+        font-size: .73rem;
         font-weight: 700;
-        color: white;
+        color: white
     }
 
-    .rarity-Common {
-        background: #808080;
+    .rp-Common {
+        background: #808080
     }
 
-    .rarity-Rare {
-        background: #0070DD;
+    .rp-Rare {
+        background: #0070DD
     }
 
-    .rarity-Epic {
-        background: #A335EE;
+    .rp-Epic {
+        background: #A335EE
     }
 
-    .rarity-Legendary {
-        background: #FF8000;
+    .rp-Legendary {
+        background: #FF8000
     }
 
-    .earned-date {
-        font-size: 0.8em;
-        color: #999;
-        margin-top: 8px;
-    }
-
-    .xp-tag {
-        display: inline-block;
-        background: #e8f5e9;
-        color: #388e3c;
+    .xp-pill {
+        background: var(--soft);
+        color: var(--violet);
         padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 600;
+        border-radius: 50px;
+        font-size: .73rem;
+        font-weight: 700
+    }
+
+    .b-date {
+        font-size: .72rem;
+        color: #ccc;
+        margin-top: 10px
     }
 
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
-        color: #999;
+        padding: 64px 24px;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-radius: 20px
     }
 
-        .empty-state .emoji {
-            font-size: 4em;
-            display: block;
-            margin-bottom: 16px;
-        }
-
-    .stats-bar {
-        background: white;
-        border-radius: 10px;
-        padding: 18px 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        display: flex;
-        gap: 30px;
-        flex-wrap: wrap;
-        align-items: center;
+    .empty-emoji {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 14px
     }
 
-    .stat-chip {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    @@media(max-width:600px) {
+        .badges-grid {
+            grid-template-columns: 1fr 1fr
+        }
     }
-
-        .stat-chip .num {
-            font-size: 1.5em;
-            font-weight: 800;
-            color: #667eea;
-        }
-
-        .stat-chip .lbl {
-            font-size: 0.8em;
-            color: #888;
-        }
 </style>
 
-<div class="container mt-4 mb-5">
+<div style="padding:8px 0 48px">
+    <a href="javascript:history.back()" class="page-back">← Quay lại</a>
 
-    <!-- Header -->
-    <div class="page-header">
+    <div class="badges-hero">
         <div>
-            <h2>🏆 Tất cả Badges</h2>
-            <p>Bộ sưu tập huy hiệu của bạn</p>
+            <h2>🏆 Badges của tôi</h2>
+            <p>Bộ sưu tập huy hiệu — thể hiện thành tích của bạn</p>
         </div>
-        <a href="javascript:history.back()" class="back-btn">← Quay lại</a>
+        <div style="position:relative;z-index:2;font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:rgba(255,255,255,.15)">
+            @(Model?.Count ?? 0) badges
+        </div>
     </div>
 
     @if (Model != null && Model.Count > 0)
     {
-        <!-- Stats summary -->
-        var countByRarity = Model
-        .GroupBy(b => b.Badge?.Rarity ?? "Common")
-        .ToDictionary(g => g.Key, g => g.Count());
+        var byRarity = Model.GroupBy(b => b.Badge?.Rarity ?? "Common").ToDictionary(g => g.Key, g => g.Count());
+        int lgCount = byRarity.TryGetValue("Legendary", out int lg) ? lg : 0;
+        int epCount = byRarity.TryGetValue("Epic", out int ep) ? ep : 0;
+        int rrCount = byRarity.TryGetValue("Rare", out int rr) ? rr : 0;
+        int cmCount = byRarity.TryGetValue("Common", out int cm) ? cm : 0;
+
         <div class="stats-bar">
-            <div class="stat-chip">
-                <span class="num">@Model.Count</span>
-                <span class="lbl">Tổng badges</span>
-            </div>
-            @if (countByRarity.TryGetValue("Legendary", out int leg) && leg > 0)
+            <div class="stat-chip"><div class="n n-total">@Model.Count</div><div class="l">Tổng</div></div>
+            @if (lgCount > 0)
             {
-                <div class="stat-chip">
-                    <span class="num" style="color:#FF8000">@leg</span>
-                    <span class="lbl">Legendary</span>
-                </div>
+                <div class="stat-chip"><div class="n n-legendary">@lgCount</div><div class="l">Legendary</div></div>
             }
-            @if (countByRarity.TryGetValue("Epic", out int epic) && epic > 0)
+            @if (epCount > 0)
             {
-                <div class="stat-chip">
-                    <span class="num" style="color:#A335EE">@epic</span>
-                    <span class="lbl">Epic</span>
-                </div>
+                <div class="stat-chip"><div class="n n-epic">@epCount</div><div class="l">Epic</div></div>
             }
-            @if (countByRarity.TryGetValue("Rare", out int rare) && rare > 0)
+            @if (rrCount > 0)
             {
-                <div class="stat-chip">
-                    <span class="num" style="color:#0070DD">@rare</span>
-                    <span class="lbl">Rare</span>
-                </div>
+                <div class="stat-chip"><div class="n n-rare">@rrCount</div><div class="l">Rare</div></div>
             }
-            @if (countByRarity.TryGetValue("Common", out int common) && common > 0)
+            @if (cmCount > 0)
             {
-                <div class="stat-chip">
-                    <span class="num" style="color:#808080">@common</span>
-                    <span class="lbl">Common</span>
-                </div>
+                <div class="stat-chip"><div class="n n-common">@cmCount</div><div class="l">Common</div></div>
             }
         </div>
 
-        <!-- Badges Grid -->
         <div class="badges-grid">
             @foreach (var ub in Model.OrderByDescending(b => b.EarnedDate))
             {
                 var isNew = ub.IsNewlyEarned();
                 var rarity = ub.Badge?.Rarity ?? "Common";
-                <div class="badge-card @(isNew ? "new-badge" : "")">
+                <div class="badge-card @(isNew ? "new-card" : "")">
                     @if (isNew)
                     {
-                        <div class="new-badge-ribbon">NEW</div>
+                        <div class="new-ribbon">NEW</div>
                     }
-
-                    <span class="badge-icon">@(ub.Badge?.Icon ?? "🏅")</span>
-                    <div class="badge-name">@(ub.Badge?.Name ?? "Badge")</div>
-
+                    <span class="b-icon">@(ub.Badge?.Icon ?? "🏅")</span>
+                    <div class="b-name">@(ub.Badge?.Name ?? "Badge")</div>
                     @if (!string.IsNullOrEmpty(ub.Badge?.Description))
                     {
-                        <div class="badge-description">@ub.Badge.Description</div>
+                        <div class="b-desc">@ub.Badge.Description</div>
                     }
-
-                    <div class="badge-meta">
-                        <span class="rarity-tag rarity-@rarity">@rarity</span>
+                    <div class="b-meta">
+                        <span class="rarity-pill rp-@rarity">@rarity</span>
                         @if (ub.Badge != null && ub.Badge.RequiredXP > 0)
                         {
-                            <span class="xp-tag">@ub.Badge.RequiredXP XP</span>
+                            <span class="xp-pill">@ub.Badge.RequiredXP XP</span>
                         }
                     </div>
-
-                    <div class="earned-date">
-                        🗓️ Đạt được: @ub.EarnedDate.ToString("dd/MM/yyyy")
-                    </div>
+                    <div class="b-date">🗓️ @ub.EarnedDate.ToString("dd/MM/yyyy")</div>
                 </div>
             }
         </div>
@@ -290,10 +325,10 @@
     else
     {
         <div class="empty-state">
-            <span class="emoji">🏅</span>
-            <h4>Chưa có badge nào</h4>
-            <p style="margin-top: 8px;">Hoàn thành quest để nhận badge đầu tiên của bạn!</p>
-            <a href="/task" class="btn btn-primary mt-3">📋 Đi làm quest ngay</a>
+            <span class="empty-emoji">🏅</span>
+            <h4 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:8px">Chưa có badge nào</h4>
+            <p style="color:#aaa;font-size:.9rem;margin-bottom:24px">Hoàn thành quest để nhận badge đầu tiên!</p>
+            <a href="/Task" style="display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:white;padding:12px 28px;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;text-decoration:none">📋 Đi làm quest ngay</a>
         </div>
     }
 </div>
