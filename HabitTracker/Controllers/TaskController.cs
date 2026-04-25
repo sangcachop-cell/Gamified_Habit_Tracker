@@ -160,32 +160,46 @@ namespace HabitTracker.Controllers
             int oldXP = user.XP;
             int oldLevel = user.Level;
 
+            // XP bonus multiplier from INT stat (e.g. INT=10 → +5% XP)
+            double xpMultiplier = 1.0 + (user.XPGainPercent / 100.0);
+
             // Cộng XP và tạo UserQuest records
             int totalXP = 0;
             foreach (var quest in quests)
             {
+                int earnedXP = (int)Math.Round(quest.XPReward * xpMultiplier);
+
                 _context.UserQuests.Add(new UserQuest
                 {
                     UserId = user.Id,
                     QuestId = quest.Id,
                     CompletedDate = DateTime.Today,
                     Status = "Confirmed",
-                    XPEarned = quest.XPReward
+                    XPEarned = earnedXP
                 });
 
-                totalXP += quest.XPReward;
+                totalXP += earnedXP;
                 quest.TimesCompleted++; // Track for trending
             }
 
             // Update user stats
             user.XP += totalXP;
-            user.Level = _questService.CalculateLevel(user.XP);
+            int newLevel = _questService.CalculateLevel(user.XP);
+            int levelsGained = newLevel - oldLevel;
+            user.Level = newLevel;
             user.TotalQuestsCompleted += quests.Count;
             user.TotalXPEarned += totalXP;
             user.LastActiveDate = DateTime.UtcNow;
 
             // Update streak
             _questService.UpdateStreak(user);
+
+            // Update RPG stats based on completed quests
+            _questService.UpdateRpgStats(user, quests);
+
+            // Grant base stat bonus for each level gained
+            if (levelsGained > 0)
+                _questService.GrantLevelUpStats(user, levelsGained);
 
             // Save changes
             await _context.SaveChangesAsync();

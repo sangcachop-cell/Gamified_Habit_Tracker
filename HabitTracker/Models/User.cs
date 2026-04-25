@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HabitTracker.Models
 {
@@ -128,6 +129,30 @@ namespace HabitTracker.Models
         public int TotalQuestsCompleted { get; set; } = 0;
         public int TotalXPEarned { get; set; } = 0;
         public DateTime? LastActiveDate { get; set; }
+
+        // ===== RPG BASE STATS =====
+        public int STR { get; set; } = 0; // Strength — physical/health quests
+        public int WILL { get; set; } = 0; // Willpower — mindfulness/consistency
+        public int INT { get; set; } = 0; // Intelligence — study/finance quests
+        public int AGL { get; set; } = 0; // Agility — all quests, streaks
+        public int END { get; set; } = 0; // Endurance — daily frequency, hard difficulty
+
+        // ===== DERIVED COMBAT STATS =====
+        // Formula: base (scales with Level) + stat scaling
+        [NotMapped]
+        public int HP => (80 + Level * 5) + END * 10 + WILL * 5;
+
+        [NotMapped]
+        public int AttackDamage => (5 + Level) + STR * 2 + AGL;
+
+        [NotMapped]
+        public int Armor => (int)(Level * 0.5 + END * 1.5 + WILL * 0.5);
+
+        [NotMapped]
+        public double XPGainPercent => Level * 0.2 + INT * 0.5;
+
+        [NotMapped]
+        public int Stamina => (50 + Level * 2) + WILL * 5 + END * 3;
 
         // Relationships
         public virtual List<Notification>? Notifications { get; set; }

@@ -58,7 +58,40 @@
         }
 
         // ===== LEVEL & XP =====
-        public const int XP_PER_LEVEL = 100;
+        public const int XP_PER_LEVEL = 100; // kept for legacy reference
+        public const int MAX_LEVEL = 100;
+
+        // Scaling level system — XP to reach level N = 100 + (N-1)*50
+        // Total cumulative XP to reach level N = 25*(N-1)*(N+2)
+        public static class LevelSystem
+        {
+            // Total XP needed to reach the START of level N (level 1 = 0 XP)
+            public static int TotalXPForLevel(int level)
+            {
+                if (level <= 1) return 0;
+                level = Math.Min(level, MAX_LEVEL);
+                return 25 * (level - 1) * (level + 2);
+            }
+
+            // XP gap between level N and N+1
+            public static int XPToNextLevel(int level)
+            {
+                if (level >= MAX_LEVEL) return 0;
+                return 100 + (level - 1) * 50;
+            }
+
+            // Derive level from total accumulated XP, capped at MAX_LEVEL
+            public static int CalculateLevel(int xp)
+            {
+                if (xp <= 0) return 1;
+                // Solving 25*(N-1)*(N+2) = xp  →  N^2+N-(2+xp/25)=0
+                int level = (int)Math.Floor((-1.0 + Math.Sqrt(9.0 + 4.0 * xp / 25.0)) / 2.0) + 1;
+                return Math.Min(level, MAX_LEVEL);
+            }
+
+            // Bonus base-stat points granted per level gained
+            public const int STAT_POINTS_PER_LEVEL = 1; // +1 to every base stat per level
+        }
 
         // ===== BADGES =====
         public static class Badges
@@ -123,5 +156,36 @@
 
         // ===== LEADERBOARD =====
         public const int LEADERBOARD_TOP_COUNT = 10;
+
+        // ===== RPG STAT GROWTH =====
+        public static class RpgStats
+        {
+            // Returns (str, will, intel, agl, end) bonus per quest completion by category
+            public static (int str, int will, int intel, int agl, int end) GetCategoryBonus(string category) => category switch
+            {
+                "Sức khỏe" => (2, 0, 0, 1, 0),
+                "Học tập"  => (0, 0, 2, 0, 0),
+                "Tinh thần" => (0, 2, 0, 0, 1),
+                "Tài chính" => (0, 1, 1, 0, 0),
+                _           => (1, 0, 0, 0, 0) // custom categories → base STR
+            };
+
+            // Extra points added to the category's primary stat for harder quests
+            public static int GetDifficultyBonus(string difficulty) => difficulty switch
+            {
+                "Medium" => 1,
+                "Hard"   => 2,
+                _        => 0
+            };
+
+            // Hard quests always grant +1 END
+            public const int HARD_END_BONUS = 1;
+
+            // Daily quests grant +1 END (consistency training)
+            public const int DAILY_END_BONUS = 1;
+
+            // Every quest completion grants +1 AGL (reflexes improve with practice)
+            public const int QUEST_AGL_BONUS = 1;
+        }
     }
 }

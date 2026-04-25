@@ -36,5 +36,20 @@ namespace HabitTracker.Services
         /// Kiểm tra quest có được hoàn thành hôm nay chưa
         /// </summary>
         Task<bool> IsQuestCompletedTodayAsync(int userId, int questId);
+
+        /// <summary>
+        /// Update RPG base stats (STR/WILL/INT/AGL/END) based on completed quests
+        /// </summary>
+        void UpdateRpgStats(User user, IEnumerable<Quest> completedQuests);
+
+        /// <summary>
+        /// Grant +1 to every base stat for each level gained
+        /// </summary>
+        void GrantLevelUpStats(User user, int levelsGained);
+
+        /// <summary>
+        /// XP gap between level N and N+1
+        /// </summary>
+        int XPToNextLevel(int level);
     }
 }

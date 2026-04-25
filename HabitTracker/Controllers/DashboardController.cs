@@ -155,6 +155,22 @@ namespace HabitTracker.Controllers
             }
         }
 
+        // ===== CHARACTER STAT SHEET =====
+        [HttpGet("Character")]
+        public async Task<IActionResult> Character()
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            _logger.LogInformation($"User {userId} viewed character sheet");
+            return View(user);
+        }
+
         // ===== HELPER METHODS =====
         private int? GetUserId()
         {
