@@ -154,6 +154,12 @@ namespace HabitTracker.Models
         [NotMapped]
         public int Stamina => (50 + Level * 2) + WILL * 5 + END * 3;
 
+        // Speed — sqrt scaling for hard diminishing returns, hard cap 100
+        // Base 5 · +sqrt(Level)*3 · +sqrt(AGL)*5
+        [NotMapped]
+        public int Speed => Math.Min(100,
+            (int)(5.0 + Math.Sqrt(Level) * 3.0 + Math.Sqrt(AGL) * 5.0));
+
         // Relationships
         public virtual List<Notification>? Notifications { get; set; }
         public virtual List<Category>? CreatedCategories { get; set; }

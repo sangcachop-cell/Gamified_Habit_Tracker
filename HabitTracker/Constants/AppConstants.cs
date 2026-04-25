@@ -186,6 +186,29 @@
 
             // Every quest completion grants +1 AGL (reflexes improve with practice)
             public const int QUEST_AGL_BONUS = 1;
+
+            // Compute the exact stat gains for a given quest — mirrors QuestService.UpdateRpgStats
+            public static (int str, int will, int intel, int agl, int end) ComputeStatGains(
+                string category, string difficulty, string frequency)
+            {
+                var (str, will, intel, agl, end) = GetCategoryBonus(category ?? "");
+                int diffBonus = GetDifficultyBonus(difficulty ?? "");
+
+                if (diffBonus > 0)
+                {
+                    if (str   > 0) str   += diffBonus;
+                    else if (intel > 0) intel += diffBonus;
+                    else if (will  > 0) will  += diffBonus;
+                    else               str   += diffBonus;
+                }
+
+                if (difficulty == "Hard")  end += HARD_END_BONUS;
+                if (frequency  == "Daily") end += DAILY_END_BONUS;
+
+                agl += QUEST_AGL_BONUS;
+
+                return (str, will, intel, agl, end);
+            }
         }
     }
 }

@@ -1,8 +1,22 @@
 ﻿@model List<HabitTracker.Models.Quest>
+@using HabitTracker.Constants
+@using HabitTracker.Models
 @{
     ViewData["Title"] = "Quest";
     var completedIds = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+    var facilities   = (ViewBag.Facilities as List<Facility> ?? new List<Facility>())
+                           .ToDictionary(f => f.Id);
     int doneCount = completedIds.Count;
+
+    // Accent colours keyed by StatAffected
+    var accentColor = new Dictionary<string, string>
+    {
+        ["ATK"]    = "#e8436a",
+        ["HP"]     = "#e84343",
+        ["XPGain"] = "#f0b429",
+        ["Stamina"]= "#00b89c",
+        ["Armor"]  = "#4a9edd",
+    };
 }
 <style>
     :root {
@@ -202,6 +216,24 @@
         color: var(--violet);
         font-size: .9rem
     }
+
+    .stat-gains {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px
+    }
+
+    .sg-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 8px;
+        border-radius: 50px;
+        font-size: .7rem;
+        font-weight: 700;
+        opacity: .85
+    }
     /* submit bar */
     .submit-bar {
         position: sticky;
@@ -252,6 +284,49 @@
         .quests-grid {
             grid-template-columns: 1fr
         }
+    }
+
+    /* facility section headers */
+    .facility-section {
+        margin-bottom: 32px
+    }
+
+    .facility-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 20px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        border-left: 4px solid transparent
+    }
+
+    .facility-header-icon {
+        font-size: 1.6rem;
+        line-height: 1;
+        flex-shrink: 0
+    }
+
+    .facility-header-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        margin: 0
+    }
+
+    .facility-header-desc {
+        font-size: .78rem;
+        opacity: .6;
+        margin: 2px 0 0
+    }
+
+    .facility-header-stat {
+        margin-left: auto;
+        font-size: .75rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 50px;
+        white-space: nowrap
     }
 </style>
 
@@ -307,29 +382,87 @@
         </select>
     </form>
 
-    <!-- Quest Grid -->
+    <!-- Quest Grid — grouped by facility -->
     <form asp-action="Confirm" method="post">
-        <div class="quests-grid">
-            @foreach (var quest in Model)
-            {
-                var isDone = completedIds.Contains(quest.Id);
-                var diffTag = quest.Difficulty == "Easy" ? "qtag-easy" : quest.Difficulty == "Medium" ? "qtag-medium" : "qtag-hard";
-                <div class="qcard @(isDone ? "done" : "")">
-                    <div class="qcard-top">
-                        <input class="q-checkbox" type="checkbox" name="questIds" value="@quest.Id"
-                               id="q_@quest.Id" @(isDone ? "checked disabled" : "") />
-                        <div class="q-icon-box">@quest.Icon</div>
-                        <label class="q-title @(isDone ? "done-text" : "")" for="q_@quest.Id">@quest.Name</label>
-                    </div>
-                    <div class="q-tags">
-                        <span class="qtag @diffTag">@quest.Difficulty</span>
-                        <span class="qtag qtag-cat">@quest.Category</span>
-                        <span class="qtag qtag-freq">@quest.Frequency</span>
-                    </div>
-                    <div class="q-xp">+@quest.XPReward XP</div>
+    @{
+        var grouped = Model
+            .GroupBy(q => q.FacilityId)
+            .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+    }
+
+    @foreach (var group in grouped)
+    {
+        Facility? fac = group.Key.HasValue && facilities.ContainsKey(group.Key.Value)
+            ? facilities[group.Key.Value]
+            : null;
+
+        string color   = fac != null && accentColor.ContainsKey(fac.StatAffected)
+            ? accentColor[fac.StatAffected] : "#888";
+
+        <div class="facility-section">
+            <!-- Section header -->
+            <div class="facility-header"
+                 style="background:@(color)12; border-left-color:@color;">
+                <div class="facility-header-icon">
+                    @(fac?.Icon ?? "📋")
                 </div>
-            }
+                <div>
+                    <p class="facility-header-name" style="color:@color;">
+                        @(fac?.Name ?? "Other Quests")
+                    </p>
+                    <p class="facility-header-desc">
+                        @(fac?.Description ?? "Quests not assigned to a specific facility")
+                    </p>
+                </div>
+                @if (fac != null)
+                {
+                    <span class="facility-header-stat"
+                          style="background:@(color)18; color:@color;">
+                        @fac.BuffDescription
+                    </span>
+                }
+            </div>
+
+            <!-- Quest cards -->
+            <div class="quests-grid">
+                @foreach (var quest in group)
+                {
+                    var isDone  = completedIds.Contains(quest.Id);
+                    var diffTag = quest.Difficulty == "Easy" ? "qtag-easy"
+                                : quest.Difficulty == "Medium" ? "qtag-medium"
+                                : "qtag-hard";
+
+                    <div class="qcard @(isDone ? "done" : "")">
+                        <div class="qcard-top">
+                            <input class="q-checkbox" type="checkbox" name="questIds"
+                                   value="@quest.Id" id="q_@quest.Id"
+                                   @(isDone ? "checked disabled" : "") />
+                            <div class="q-icon-box">@quest.Icon</div>
+                            <label class="q-title @(isDone ? "done-text" : "")"
+                                   for="q_@quest.Id">@quest.Name</label>
+                        </div>
+                        <div class="q-tags">
+                            <span class="qtag @diffTag">@quest.Difficulty</span>
+                            <span class="qtag qtag-cat">@quest.Category</span>
+                            <span class="qtag qtag-freq">@quest.Frequency</span>
+                        </div>
+                        <div class="q-xp">+@quest.XPReward XP</div>
+                        @{
+                            var (gs, gw, gi, ga, ge) = AppConstants.RpgStats.ComputeStatGains(
+                                quest.Category, quest.Difficulty, quest.Frequency);
+                        }
+                        <div class="stat-gains">
+                            @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️ +@gs STR</span> }
+                            @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘 +@gw WILL</span> }
+                            @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚 +@gi INT</span> }
+                            @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹 +@ga AGL</span> }
+                            @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️ +@ge END</span> }
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
+    }
 
         <div class="submit-bar">
             <button type="submit" class="btn-confirm">✅ Xác nhận hoàn thành</button>

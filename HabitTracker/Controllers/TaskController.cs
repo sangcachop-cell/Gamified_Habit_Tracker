@@ -58,11 +58,18 @@ namespace HabitTracker.Controllers
                 query = query.Where(q => q.Frequency == frequency);
 
             var quests = await query
-                .OrderBy(q => q.Category)
+                .OrderBy(q => q.FacilityId.HasValue ? 0 : 1) // facility-assigned first
+                .ThenBy(q => q.FacilityId)
                 .ThenBy(q => q.Name)
                 .ToListAsync();
 
+            var facilities = await _context.Facilities
+                .Where(f => f.IsActive)
+                .OrderBy(f => f.Id)
+                .ToListAsync();
+
             ViewBag.CompletedTodayIds = completedTodayIds;
+            ViewBag.Facilities = facilities;
             ViewBag.Categories = AppConstants.Categories.All;
             ViewBag.Difficulties = AppConstants.Difficulty.All;
             ViewBag.Frequencies = AppConstants.Frequency.All;

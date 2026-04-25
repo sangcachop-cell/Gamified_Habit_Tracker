@@ -1,0 +1,158 @@
+@{
+    ViewData["Title"] = "Battle";
+    var monsters = ViewBag.Monsters as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<style>
+    body { background: #0d0d1a; color: white; font-family: "DM Sans", sans-serif; }
+    h1,h2,h3,h4 { font-family: "Syne", sans-serif; }
+
+    .lobby-hero {
+        text-align: center;
+        padding: 60px 20px 40px;
+    }
+    .lobby-title {
+        font-size: 3rem;
+        font-weight: 900;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #f0b429, #e8436a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+    .lobby-sub {
+        color: rgba(255,255,255,.45);
+        font-size: 1rem;
+        margin: 10px 0 0;
+    }
+
+    .monster-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px 60px;
+    }
+
+    .monster-card {
+        background: linear-gradient(145deg, #1a1a2e, #16213e);
+        border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 20px;
+        padding: 32px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: border-color .25s, transform .2s;
+    }
+    .monster-card::before {
+        content: "";
+        position: absolute;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(232,67,106,.15) 0%, transparent 70%);
+        top: -120px; left: 50%; transform: translateX(-50%);
+        pointer-events: none;
+    }
+    .monster-card:hover { border-color: #e8436a55; transform: translateY(-4px); }
+
+    .monster-sprite {
+        font-size: 5rem;
+        line-height: 1;
+        display: block;
+        margin-bottom: 18px;
+        filter: drop-shadow(0 0 24px rgba(232,67,106,.5));
+        animation: float 3s ease-in-out infinite;
+    }
+    @@keyframes float {
+        0%,100% { transform: translateY(0); }
+        50%      { transform: translateY(-10px); }
+    }
+
+    .monster-name { font-size: 1.4rem; font-weight: 900; color: #f0b429; margin: 0 0 8px; }
+    .monster-desc { font-size: .82rem; color: rgba(255,255,255,.5); line-height: 1.6; margin: 0 0 22px; }
+
+    .monster-stats {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+    .mstat {
+        display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .mstat-val { font-size: 1.2rem; font-weight: 800; }
+    .mstat-lbl { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; opacity: .5; }
+
+    .xp-badge {
+        display: inline-block;
+        background: rgba(240,180,41,.15);
+        border: 1px solid rgba(240,180,41,.4);
+        color: #f0b429;
+        border-radius: 50px;
+        padding: 4px 14px;
+        font-size: .78rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .btn-challenge {
+        width: 100%;
+        background: linear-gradient(135deg, #e8436a, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: "Syne", sans-serif;
+        letter-spacing: .04em;
+        transition: opacity .2s, transform .15s;
+        box-shadow: 0 6px 24px rgba(232,67,106,.35);
+    }
+    .btn-challenge:hover { opacity: .9; transform: scale(1.02); }
+</style>
+
+<div class="lobby-hero">
+    <h1 class="lobby-title">⚔️ Battle Arena</h1>
+    <p class="lobby-sub">Choose your opponent and prove your worth in combat</p>
+</div>
+
+<div class="monster-grid">
+    @foreach (var m in monsters)
+    {
+        <div class="monster-card">
+            <span class="monster-sprite">@m.Icon</span>
+            <h3 class="monster-name">@m.Name</h3>
+            <p class="monster-desc">@m.Description</p>
+
+            <div class="monster-stats">
+                <div class="mstat">
+                    <span class="mstat-val" style="color:#e84343;">@m.HP</span>
+                    <span class="mstat-lbl">❤️ HP</span>
+                </div>
+                <div class="mstat">
+                    <span class="mstat-val" style="color:#e8436a;">@m.Attack</span>
+                    <span class="mstat-lbl">⚔️ ATK</span>
+                </div>
+                <div class="mstat">
+                    <span class="mstat-val" style="color:#4a9edd;">@m.Armor</span>
+                    <span class="mstat-lbl">🛡️ ARM</span>
+                </div>
+                <div class="mstat">
+                    <span class="mstat-val" style="color:#00b89c;">@m.Speed</span>
+                    <span class="mstat-lbl">⚡ SPD</span>
+                </div>
+            </div>
+
+            <div class="xp-badge">+@m.XPReward XP on victory</div>
+
+            <form asp-action="Start" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="monsterId" value="@m.Id" />
+                <button type="submit" class="btn-challenge">⚔️ Challenge</button>
+            </form>
+        </div>
+    }
+</div>

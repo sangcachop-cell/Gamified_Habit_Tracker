@@ -1,11 +1,14 @@
 @model List<HabitTracker.Models.Quest>
 @using HabitTracker.Models
 @using HabitTracker.Constants
+@using static HabitTracker.Constants.AppConstants
 @{
     ViewData["Title"] = "Hideout";
 
     var user              = ViewBag.User as HabitTracker.Models.User;
     var facilities        = ViewBag.Facilities as List<UserFacility> ?? new List<UserFacility>();
+    var facilityMap       = facilities.Where(uf => uf.Facility != null)
+                                      .ToDictionary(uf => uf.FacilityId, uf => uf.Facility!);
     var completedIds      = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
 
     int buffAtk           = (int)(ViewBag.BuffAtk    ?? 0);
@@ -212,6 +215,8 @@
     .quest-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
     .quest-meta { font-size: .76rem; color: #999; margin-top: 2px; }
     .quest-xp   { font-size: .8rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
+    .stat-gains { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .sg-pill    { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 50px; font-size: .67rem; font-weight: 700; }
     .quest-check {
         position: absolute; top: 14px; right: 14px;
         width: 22px; height: 22px;
@@ -416,30 +421,76 @@
     }
     else
     {
-        <div class="quest-grid" id="quest-grid">
-            @foreach (var quest in Model)
-            {
-                bool done = completedIds.Contains(quest.Id);
-                <div class="quest-card @(done ? "done" : "")"
-                     onclick="@(done ? "" : $"toggleQuest({quest.Id}, this)")"
-                     id="card-@quest.Id">
-                    <div class="quest-icon">@quest.Icon</div>
-                    <div style="flex:1; min-width:0;">
-                        <div class="quest-name">@quest.Name</div>
-                        <div class="quest-meta">@quest.Category · @quest.Difficulty · @quest.Frequency</div>
-                        <div class="quest-xp">+@quest.XPReward XP</div>
-                    </div>
-                    <div class="quest-check" id="chk-@quest.Id">
-                        @if (done) { <span>✓</span> }
-                    </div>
-                    @if (!done)
-                    {
-                        <input type="checkbox" name="questIds" value="@quest.Id"
-                               id="cb-@quest.Id" style="display:none;" />
-                    }
+        var accentCol = new Dictionary<string, string>
+        {
+            ["ATK"]    = "#e8436a",
+            ["HP"]     = "#e84343",
+            ["XPGain"] = "#f0b429",
+            ["Stamina"]= "#00b89c",
+            ["Armor"]  = "#4a9edd",
+        };
+
+        var grouped = Model
+            .GroupBy(q => q.FacilityId)
+            .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+
+        foreach (var group in grouped)
+        {
+            Facility? fac = group.Key.HasValue && facilityMap.ContainsKey(group.Key.Value)
+                ? facilityMap[group.Key.Value] : null;
+
+            string col = fac != null && accentCol.ContainsKey(fac.StatAffected)
+                ? accentCol[fac.StatAffected] : "#888";
+
+            <!-- Facility section header -->
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:14px; background:@(col)12; border-left:4px solid @col; margin-bottom:14px;">
+                <span style="font-size:1.5rem; line-height:1;">@(fac?.Icon ?? "📋")</span>
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:.95rem; color:@col;">@(fac?.Name ?? "Other Quests")</div>
+                    <div style="font-size:.75rem; opacity:.6;">@(fac?.Description ?? "Unassigned quests")</div>
                 </div>
-            }
-        </div>
+                @if (fac != null)
+                {
+                    <span style="font-size:.72rem; font-weight:700; background:@(col)20; color:@col; padding:3px 10px; border-radius:50px;">@fac.BuffDescription</span>
+                }
+            </div>
+
+            <div class="quest-grid" id="quest-grid-@(group.Key ?? 0)" style="margin-bottom:28px;">
+                @foreach (var quest in group)
+                {
+                    bool done = completedIds.Contains(quest.Id);
+                    <div class="quest-card @(done ? "done" : "")"
+                         onclick="@(done ? "" : $"toggleQuest({quest.Id}, this)")"
+                         id="card-@quest.Id">
+                        <div class="quest-icon">@quest.Icon</div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="quest-name">@quest.Name</div>
+                            <div class="quest-meta">@quest.Category · @quest.Difficulty · @quest.Frequency</div>
+                            <div class="quest-xp">+@quest.XPReward XP</div>
+                            @{
+                                var (gs, gw, gi, ga, ge) = RpgStats.ComputeStatGains(
+                                    quest.Category, quest.Difficulty, quest.Frequency);
+                            }
+                            <div class="stat-gains">
+                                @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️+@gs STR</span> }
+                                @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘+@gw WILL</span> }
+                                @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚+@gi INT</span> }
+                                @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹+@ga AGL</span> }
+                                @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️+@ge END</span> }
+                            </div>
+                        </div>
+                        <div class="quest-check" id="chk-@quest.Id">
+                            @if (done) { <span>✓</span> }
+                        </div>
+                        @if (!done)
+                        {
+                            <input type="checkbox" name="questIds" value="@quest.Id"
+                                   id="cb-@quest.Id" style="display:none;" />
+                        }
+                    </div>
+                }
+            </div>
+        }
 
         <!-- Sticky submit bar -->
         <div class="submit-bar">
