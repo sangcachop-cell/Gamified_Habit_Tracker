@@ -1,0 +1,470 @@
+@model List<HabitTracker.Models.Quest>
+@using HabitTracker.Models
+@using HabitTracker.Constants
+@{
+    ViewData["Title"] = "Hideout";
+
+    var user              = ViewBag.User as HabitTracker.Models.User;
+    var facilities        = ViewBag.Facilities as List<UserFacility> ?? new List<UserFacility>();
+    var completedIds      = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+
+    int buffAtk           = (int)(ViewBag.BuffAtk    ?? 0);
+    int buffHp            = (int)(ViewBag.BuffHp     ?? 0);
+    int buffArmor         = (int)(ViewBag.BuffArmor  ?? 0);
+    double buffXpGain     = (double)(ViewBag.BuffXpGain   ?? 0.0);
+    int buffStamina       = (int)(ViewBag.BuffStamina ?? 0);
+
+    int doneToday = completedIds.Count;
+
+    // Facility accent colours per stat
+    var accentMap = new Dictionary<string, (string bg, string text, string glow)>
+    {
+        ["ATK"]     = ("#e8436a", "#fff",    "rgba(232,67,106,.35)"),
+        ["HP"]      = ("#e84343", "#fff",    "rgba(232,67,67,.30)"),
+        ["XPGain"]  = ("#f0b429", "#1a1a1a","rgba(240,180,41,.35)"),
+        ["Stamina"] = ("#00b89c", "#fff",    "rgba(0,184,156,.30)"),
+        ["Armor"]   = ("#4a9edd", "#fff",    "rgba(74,158,221,.30)"),
+    };
+}
+
+<style>
+    :root {
+        --ink:    #0a0a12;
+        --paper:  #f5f3ef;
+        --gold:   #f0b429;
+        --violet: #5c3dde;
+        --rose:   #e8436a;
+        --teal:   #00b89c;
+        --soft:   #edeaf5;
+        --stone:  #1a1a2e;
+        --stone2: #16213e;
+    }
+    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
+    h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
+
+    /* ── HERO ── */
+    .hideout-hero {
+        background: linear-gradient(135deg, var(--stone) 0%, var(--stone2) 100%);
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hideout-hero::before {
+        content: "";
+        position: absolute;
+        width: 600px; height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(92,61,222,.25) 0%, transparent 65%);
+        top: -250px; right: -200px;
+        pointer-events: none;
+    }
+    .hideout-hero::after {
+        content: "";
+        position: absolute;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(240,180,41,.12) 0%, transparent 70%);
+        bottom: -120px; left: -80px;
+        pointer-events: none;
+    }
+
+    /* ── BUFF PILL ROW ── */
+    .buff-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .buff-pill {
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 50px;
+        padding: 5px 14px;
+        font-size: .82rem; font-weight: 600;
+    }
+    .buff-pill-icon { font-size: 1rem; }
+
+    /* ── FACILITY GRID ── */
+    .facility-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+        margin-bottom: 36px;
+    }
+    .facility-card {
+        background: white;
+        border-radius: 20px;
+        padding: 22px 20px;
+        display: flex; flex-direction: column; gap: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        border: 1.5px solid transparent;
+        transition: transform .2s, box-shadow .2s, border-color .2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .facility-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 28px rgba(0,0,0,.1);
+    }
+    .facility-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 20px 20px 0 0;
+    }
+    .facility-icon-wrap {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.7rem;
+        flex-shrink: 0;
+    }
+    .facility-name  { font-weight: 800; font-size: 1rem; color: var(--ink); }
+    .facility-desc  { font-size: .78rem; color: #888; line-height: 1.5; flex: 1; }
+    .facility-buff  { font-size: .82rem; font-weight: 700; }
+    .facility-level {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 4px;
+    }
+    .lv-pips { display: flex; gap: 4px; }
+    .lv-pip {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: #e0e0e0;
+    }
+    .lv-pip.filled { background: currentColor; }
+    .upgrade-btn {
+        border: none; border-radius: 10px;
+        padding: 8px 0; width: 100%;
+        font-size: .8rem; font-weight: 700;
+        cursor: pointer;
+        margin-top: 6px;
+        opacity: .7;
+        position: relative;
+    }
+    .upgrade-btn:hover .tooltip-coming { display: block; }
+    .tooltip-coming {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 6px); left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink); color: white;
+        border-radius: 8px; padding: 5px 12px;
+        font-size: .73rem; white-space: nowrap;
+        z-index: 10;
+    }
+    .tooltip-coming::after {
+        content: "";
+        position: absolute;
+        top: 100%; left: 50%; transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: var(--ink);
+    }
+
+    /* ── QUEST SECTION ── */
+    .section-divider {
+        display: flex; align-items: center; gap: 14px;
+        margin: 8px 0 24px;
+    }
+    .section-divider hr { flex: 1; border-color: #e0ddd8; }
+    .section-divider span {
+        font-weight: 800; font-size: 1.1rem;
+        color: var(--ink); white-space: nowrap;
+    }
+
+    .filter-bar {
+        display: flex; gap: 10px; flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding: 14px 18px;
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07);
+    }
+    .filter-bar select {
+        padding: 7px 14px;
+        border: 1.5px solid rgba(0,0,0,.1);
+        border-radius: 50px;
+        font-family: "DM Sans", sans-serif;
+        font-size: .84rem;
+        background: white; outline: none;
+        cursor: pointer;
+    }
+
+    .quest-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 14px;
+    }
+    .quest-card {
+        background: white;
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex; align-items: flex-start; gap: 14px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+        position: relative;
+    }
+    .quest-card:hover { border-color: var(--violet); box-shadow: 0 4px 16px rgba(92,61,222,.12); }
+    .quest-card.selected { border-color: var(--violet); background: var(--soft); }
+    .quest-card.done { opacity: .5; cursor: not-allowed; }
+    .quest-icon { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+    .quest-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
+    .quest-meta { font-size: .76rem; color: #999; margin-top: 2px; }
+    .quest-xp   { font-size: .8rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
+    .quest-check {
+        position: absolute; top: 14px; right: 14px;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .8rem;
+    }
+    .quest-card.selected .quest-check { background: var(--violet); border-color: var(--violet); color: white; }
+    .quest-card.done .quest-check { background: var(--teal); border-color: var(--teal); color: white; }
+
+    .submit-bar {
+        position: sticky; bottom: 20px;
+        background: white;
+        border-radius: 16px;
+        padding: 16px 22px;
+        display: flex; align-items: center; justify-content: space-between; gap: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.12);
+        border: 1.5px solid rgba(0,0,0,.06);
+        margin-top: 20px;
+        z-index: 100;
+    }
+    .submit-bar-label { font-size: .9rem; color: #666; }
+    .submit-bar-count { font-weight: 800; color: var(--violet); }
+    .btn-confirm {
+        background: linear-gradient(135deg, var(--violet), #8b5cf6);
+        color: white; border: none;
+        border-radius: 12px;
+        padding: 12px 28px;
+        font-weight: 700; font-size: .95rem;
+        cursor: pointer;
+        transition: opacity .2s, transform .15s;
+    }
+    .btn-confirm:hover { opacity: .9; transform: scale(1.02); }
+</style>
+
+<!-- ── HIDEOUT HERO ── -->
+<div class="hideout-hero">
+    <div style="position:relative; z-index:1;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+            <span style="font-size:2.6rem; line-height:1;">🏰</span>
+            <div>
+                <h2 style="margin:0; font-size:2rem; letter-spacing:-1px;">Your Hideout</h2>
+                <p style="margin:0; opacity:.55; font-size:.88rem;">A sanctuary where discipline forges power</p>
+            </div>
+        </div>
+
+        <!-- Active buff summary -->
+        <div class="buff-pills">
+            <div class="buff-pill">
+                <span class="buff-pill-icon">⚔️</span>
+                <span>+@buffAtk ATK</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">❤️</span>
+                <span>+@buffHp HP</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">🛡️</span>
+                <span>+@buffArmor Armor</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">⚡</span>
+                <span>+@buffXpGain.ToString("F0")% XP Gain</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">💪</span>
+                <span>+@buffStamina Stamina</span>
+            </div>
+        </div>
+
+        <div style="margin-top:14px; font-size:.8rem; opacity:.4;">
+            @doneToday quest(s) completed today &nbsp;·&nbsp; Level @(user?.Level ?? 1)
+        </div>
+    </div>
+</div>
+
+<!-- ── FACILITY GRID ── -->
+<div style="margin-bottom:12px;">
+    <h4 style="font-weight:800; margin:0 0 6px; font-size:1.15rem;">⚒️ Facilities</h4>
+    <p style="color:#999; font-size:.84rem; margin:0;">Each facility passively buffs your character stats.</p>
+</div>
+
+<div class="facility-grid">
+    @foreach (var uf in facilities)
+    {
+        var f = uf.Facility;
+        if (f == null) continue;
+
+        var hasAccent = accentMap.ContainsKey(f.StatAffected);
+        var (bg, text, glow) = hasAccent ? accentMap[f.StatAffected] : ("#5c3dde", "#fff", "rgba(92,61,222,.3)");
+        int totalBuff = f.BuffPerLevel * uf.Level;
+        bool isMax = uf.Level >= f.MaxLevel;
+
+        <div class="facility-card" style="box-shadow: 0 4px 18px @glow; border-color: @(bg)22;">
+            <!-- colour bar on top -->
+            <div style="position:absolute; top:0; left:0; right:0; height:3px; background:@bg; border-radius:20px 20px 0 0;"></div>
+
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="facility-icon-wrap" style="background:@(bg)18;">
+                    @f.Icon
+                </div>
+                <div>
+                    <div class="facility-name">@f.Name</div>
+                    <div style="font-size:.72rem; font-weight:700; color:@bg; text-transform:uppercase; letter-spacing:.06em;">
+                        @f.StatAffected
+                    </div>
+                </div>
+            </div>
+
+            <p class="facility-desc">@f.Description</p>
+
+            <div class="facility-buff" style="color:@bg;">
+                +@totalBuff @(f.StatAffected == "XPGain" ? "% XP Gain" : f.StatAffected)
+                <span style="font-weight:400; color:#aaa; font-size:.75rem;">(@f.BuffDescription)</span>
+            </div>
+
+            <!-- Level pips -->
+            <div class="facility-level">
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                    <span style="font-size:.7rem; color:#999; text-transform:uppercase; letter-spacing:.06em;">Level @uf.Level / @f.MaxLevel</span>
+                    <div class="lv-pips" style="color:@bg;">
+                        @for (int i = 1; i <= f.MaxLevel; i++)
+                        {
+                            <div class="lv-pip @(i <= uf.Level ? "filled" : "")"
+                                 style="@(i <= uf.Level ? $"background:{bg};" : "")"></div>
+                        }
+                    </div>
+                </div>
+                @if (isMax)
+                {
+                    <span style="font-size:.7rem; font-weight:700; color:var(--gold); background:rgba(240,180,41,.12); padding:3px 8px; border-radius:6px;">MAX</span>
+                }
+            </div>
+
+            <!-- Upgrade button (placeholder) -->
+            @if (!isMax)
+            {
+                <form asp-action="Upgrade" asp-route-facilityId="@f.Id" method="post" style="margin-top:2px;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="upgrade-btn"
+                            style="background:@(bg)18; color:@bg;">
+                        ⚒️ Upgrade
+                        <div class="tooltip-coming">🔒 Coming in future update</div>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div style="text-align:center; font-size:.78rem; font-weight:700; color:var(--gold); padding:8px 0; background:rgba(240,180,41,.08); border-radius:10px; margin-top:2px;">
+                    ✦ Fully Upgraded
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- ── QUEST SECTION ── -->
+<div class="section-divider">
+    <span>📋 Complete Quests</span>
+    <hr />
+    <span style="font-size:.82rem; font-weight:400; color:#999; white-space:nowrap;">@doneToday done today</span>
+</div>
+
+<!-- Filter bar -->
+<form method="get" asp-action="Index">
+    <div class="filter-bar">
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            @foreach (var cat in (string[])ViewBag.Categories)
+            {
+                <option value="@cat" selected="@(ViewBag.SelectedCategory == cat ? "selected" : null)">@cat</option>
+            }
+        </select>
+        <select name="difficulty" onchange="this.form.submit()">
+            <option value="">All Difficulties</option>
+            @foreach (var diff in (string[])ViewBag.Difficulties)
+            {
+                <option value="@diff" selected="@(ViewBag.SelectedDifficulty == diff ? "selected" : null)">@diff</option>
+            }
+        </select>
+        <select name="frequency" onchange="this.form.submit()">
+            <option value="">All Frequencies</option>
+            @foreach (var freq in (string[])ViewBag.Frequencies)
+            {
+                <option value="@freq" selected="@(ViewBag.SelectedFrequency == freq ? "selected" : null)">@freq</option>
+            }
+        </select>
+    </div>
+</form>
+
+<!-- Quest cards form -->
+<form id="quest-form" asp-action="Confirm" method="post">
+    @Html.AntiForgeryToken()
+
+    @if (!Model.Any())
+    {
+        <div style="text-align:center; padding:48px; color:#bbb;">
+            <div style="font-size:3rem;">🏜️</div>
+            <p style="margin-top:12px;">No quests match your filters.</p>
+        </div>
+    }
+    else
+    {
+        <div class="quest-grid" id="quest-grid">
+            @foreach (var quest in Model)
+            {
+                bool done = completedIds.Contains(quest.Id);
+                <div class="quest-card @(done ? "done" : "")"
+                     onclick="@(done ? "" : $"toggleQuest({quest.Id}, this)")"
+                     id="card-@quest.Id">
+                    <div class="quest-icon">@quest.Icon</div>
+                    <div style="flex:1; min-width:0;">
+                        <div class="quest-name">@quest.Name</div>
+                        <div class="quest-meta">@quest.Category · @quest.Difficulty · @quest.Frequency</div>
+                        <div class="quest-xp">+@quest.XPReward XP</div>
+                    </div>
+                    <div class="quest-check" id="chk-@quest.Id">
+                        @if (done) { <span>✓</span> }
+                    </div>
+                    @if (!done)
+                    {
+                        <input type="checkbox" name="questIds" value="@quest.Id"
+                               id="cb-@quest.Id" style="display:none;" />
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Sticky submit bar -->
+        <div class="submit-bar">
+            <div class="submit-bar-label">
+                <span class="submit-bar-count" id="selected-count">0</span> quest(s) selected
+            </div>
+            <button type="submit" class="btn-confirm">
+                ⚔️ Complete in Hideout
+            </button>
+        </div>
+    }
+</form>
+
+@section Scripts {
+<script>
+    function toggleQuest(id, card) {
+        var cb = document.getElementById('cb-' + id);
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        card.classList.toggle('selected', cb.checked);
+        var chk = document.getElementById('chk-' + id);
+        if (chk) chk.innerHTML = cb.checked ? '✓' : '';
+
+        var count = document.querySelectorAll('#quest-form input[type=checkbox]:checked').length;
+        document.getElementById('selected-count').textContent = count;
+    }
+</script>
+}

@@ -50,6 +50,7 @@ builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IHideoutService, HideoutService>();
 
 // Logging
 builder.Services.AddLogging(config =>

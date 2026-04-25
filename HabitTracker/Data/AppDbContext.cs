@@ -17,6 +17,8 @@ namespace HabitTracker.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<Facility> Facilities { get; set; }
+        public DbSet<UserFacility> UserFacilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +50,57 @@ namespace HabitTracker.Data
                 new Badge { Id = 2, Name = "Chiến binh", Description = "Đạt 200 XP", Icon = "⚔️", RequiredXP = 200 },
                 new Badge { Id = 3, Name = "Huyền thoại", Description = "Đạt 500 XP", Icon = "🏆", RequiredXP = 500 }
             );
+
+            // ===== FACILITY SEED DATA =====
+            modelBuilder.Entity<Facility>().HasData(
+                new Facility
+                {
+                    Id = 1, Name = "Training Grounds", Icon = "🏋️",
+                    Description = "A dedicated space for physical conditioning. Forges raw combat power through daily drills.",
+                    StatAffected = "ATK", BuffDescription = "+5 ATK per level", BuffPerLevel = 5, MaxLevel = 5
+                },
+                new Facility
+                {
+                    Id = 2, Name = "Meditation Hall", Icon = "🧘",
+                    Description = "Silence the mind, fortify the spirit. Meditative practice expands your life force.",
+                    StatAffected = "HP", BuffDescription = "+20 HP per level", BuffPerLevel = 20, MaxLevel = 5
+                },
+                new Facility
+                {
+                    Id = 3, Name = "Archive", Icon = "📚",
+                    Description = "Ancient texts and ongoing studies. Knowledge accelerates growth and sharpens the mind.",
+                    StatAffected = "XPGain", BuffDescription = "+2% XP Gain per level", BuffPerLevel = 2, MaxLevel = 5
+                },
+                new Facility
+                {
+                    Id = 4, Name = "Agility Course", Icon = "🏃",
+                    Description = "Obstacle runs and reflex drills push your body to its limits. Speed is half the battle.",
+                    StatAffected = "Stamina", BuffDescription = "+10 Stamina per level", BuffPerLevel = 10, MaxLevel = 5
+                },
+                new Facility
+                {
+                    Id = 5, Name = "Barracks", Icon = "🛡️",
+                    Description = "Hardened defenses line the outer walls. A stalwart position from which to weather any storm.",
+                    StatAffected = "Armor", BuffDescription = "+5 Armor per level", BuffPerLevel = 5, MaxLevel = 5
+                }
+            );
+
+            // UserFacility relationships
+            modelBuilder.Entity<UserFacility>()
+                .HasOne(uf => uf.Facility_User)
+                .WithMany()
+                .HasForeignKey(uf => uf.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserFacility>()
+                .HasOne(uf => uf.Facility)
+                .WithMany(f => f.UserFacilities)
+                .HasForeignKey(uf => uf.FacilityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserFacility>()
+                .HasIndex(uf => new { uf.UserId, uf.FacilityId })
+                .IsUnique();
 
             // Friendship relationships
             modelBuilder.Entity<Friendship>()
