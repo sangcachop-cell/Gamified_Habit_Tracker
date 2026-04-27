@@ -130,6 +130,21 @@ namespace HabitTracker.Models
         public int TotalXPEarned { get; set; } = 0;
         public DateTime? LastActiveDate { get; set; }
 
+        // ===== MATERIALS =====
+        public int Wood  { get; set; } = 100;
+        public int Stone { get; set; } = 100;
+
+        // ===== EQUIPMENT SLOTS =====
+        public string? EquippedBackpackItem { get; set; }
+        public string? EquippedArmorItem    { get; set; }
+        public string? EquippedRigItem      { get; set; }
+
+        [NotMapped]
+        public double ArmorDamageReductionPct =>
+            EquippedArmorItem != null &&
+            HabitTracker.Constants.ItemCatalogue.Equipment.TryGetValue(EquippedArmorItem, out var eq)
+                ? eq.DamageReduction : 0;
+
         // ===== RPG BASE STATS =====
         public int STR { get; set; } = 0; // Strength — physical/health quests
         public int WILL { get; set; } = 0; // Willpower — mindfulness/consistency

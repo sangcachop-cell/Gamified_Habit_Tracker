@@ -29,7 +29,8 @@ namespace HabitTracker.Models
         public int          PlayerLevel        { get; set; }     // snapshotted at battle start — used for wave scaling
         public int          XPReward           { get; set; }     // XP for the current wave
         public int          TotalXPReward      { get; set; }     // XP accumulated across cleared waves
-        public int          ConsecutiveDefends { get; set; } = 0;
+        public int          ConsecutiveDefends       { get; set; } = 0;
+        public double       PlayerDamageReductionPct { get; set; } = 0;
         public List<string> Log                { get; set; } = new();
     }
 }

@@ -19,5 +19,11 @@ namespace HabitTracker.Services
         /// Moves an item to a new container/position. Returns false if invalid.
         /// </summary>
         Task<bool> MoveItemAsync(int userId, int itemId, string targetContainer, int x, int y);
+
+        /// <summary>Equips item from inventory. Removes UserInventoryItem, sets User slot column.</summary>
+        Task<bool> EquipItemAsync(int userId, int userInventoryItemId);
+
+        /// <summary>Unequips slot, returning item to Storage. Returns false if no free space.</summary>
+        Task<bool> UnequipSlotAsync(int userId, string slot);
     }
 }

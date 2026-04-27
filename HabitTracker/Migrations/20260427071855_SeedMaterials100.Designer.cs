@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427071855_SeedMaterials100")]
+    partial class SeedMaterials100
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -596,15 +599,6 @@ namespace HabitTracker.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("EquippedArmorItem")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EquippedBackpackItem")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EquippedRigItem")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FacebookLink")
                         .HasMaxLength(255)

@@ -119,13 +119,14 @@ namespace HabitTracker.Controllers
 
             var state = new BattleState
             {
-                PlayerName      = user.Username,
-                PlayerCurrentHP = user.HP,
-                PlayerMaxHP     = user.HP,
-                PlayerAttack    = user.AttackDamage,
-                PlayerArmor     = user.Armor,
-                PlayerSpeed     = user.Speed,
-                PlayerLevel     = user.Level,
+                PlayerName               = user.Username,
+                PlayerCurrentHP          = user.HP,
+                PlayerMaxHP              = user.HP,
+                PlayerAttack             = user.AttackDamage,
+                PlayerArmor              = user.Armor,
+                PlayerSpeed              = user.Speed,
+                PlayerLevel              = user.Level,
+                PlayerDamageReductionPct = user.ArmorDamageReductionPct,
 
                 MonsterName        = wave1.Name,
                 MonsterIcon        = wave1.Icon,
@@ -211,7 +212,8 @@ namespace HabitTracker.Controllers
             {
                 if (state.Status != "InProgress") return;
                 if (isFullBlock) { log.Add($"💥 {state.MonsterName} attacks — blocked completely!"); return; }
-                int dmg = Math.Max(0, state.MonsterAttack - state.PlayerArmor);
+                int rawDmg = Math.Max(0, state.MonsterAttack - state.PlayerArmor);
+                int dmg = (int)(rawDmg * (1.0 - state.PlayerDamageReductionPct / 100.0));
                 if (dmg == 0) { log.Add($"💥 {state.MonsterName} attacks — absorbed by armor!"); return; }
                 state.PlayerCurrentHP = Math.Max(0, state.PlayerCurrentHP - dmg);
                 log.Add($"💥 {state.MonsterName} hits you for {dmg} damage!");

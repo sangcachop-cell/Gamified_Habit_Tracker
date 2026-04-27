@@ -4,6 +4,7 @@ using HabitTracker.Models;
 using HabitTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace HabitTracker.Controllers
 {
@@ -13,17 +14,20 @@ namespace HabitTracker.Controllers
         private readonly AppDbContext _context;
         private readonly IQuestService _questService;
         private readonly IHideoutService _hideoutService;
+        private readonly IInventoryService _inventory;
         private readonly ILogger<HideoutController> _logger;
 
         public HideoutController(
             AppDbContext context,
             IQuestService questService,
             IHideoutService hideoutService,
+            IInventoryService inventory,
             ILogger<HideoutController> logger)
         {
             _context = context;
             _questService = questService;
             _hideoutService = hideoutService;
+            _inventory = inventory;
             _logger = logger;
         }
 
@@ -75,6 +79,20 @@ namespace HabitTracker.Controllers
             ViewBag.SelectedCategory  = category;
             ViewBag.SelectedDifficulty = difficulty;
             ViewBag.SelectedFrequency = frequency;
+
+            // Storage room (shared with Inventory page — same Storage container)
+            var storageRaw = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.STORAGE);
+            var storageItems = BuildPlaced(storageRaw);
+            var (hsCols, hsRows) = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+            var storageItemsJson = JsonSerializer.Serialize(storageItems.Select(i => new {
+                id = i.Id, container = i.Container, x = i.GridX, y = i.GridY, w = i.W, h = i.H
+            }));
+            ViewBag.HideoutStorageItems     = storageItems;
+            ViewBag.HideoutStorageItemsJson = storageItemsJson;
+            ViewBag.HideoutStorageCols      = hsCols;
+            ViewBag.HideoutStorageRows      = hsRows;
+            ViewBag.Wood  = user.Wood;
+            ViewBag.Stone = user.Stone;
 
             _logger.LogInformation($"User {userId} visited hideout");
 
@@ -183,6 +201,34 @@ namespace HabitTracker.Controllers
         {
             TempData["Info"] = "⚒️ Facility upgrades are coming in a future update!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private static List<PlacedItem> BuildPlaced(IEnumerable<UserInventoryItem> items)
+        {
+            var result = new List<PlacedItem>();
+            foreach (var item in items)
+            {
+                if (!ItemCatalogue.Items.TryGetValue(item.ItemId, out var def)) continue;
+                int w = item.IsRotated ? def.Height : def.Width;
+                int h = item.IsRotated ? def.Width  : def.Height;
+                result.Add(new PlacedItem(
+                    Id:          item.Id,
+                    ItemId:      item.ItemId,
+                    Name:        def.Name,
+                    Icon:        def.Icon,
+                    Description: def.Description,
+                    Category:    def.Category,
+                    TileColor:   def.TileColor,
+                    GridX:       item.GridX,
+                    GridY:       item.GridY,
+                    W:           w,
+                    H:           h,
+                    IsRotated:   item.IsRotated,
+                    CanRotate:   ItemCatalogue.CanRotate(item.ItemId),
+                    Container:   item.ContainerType
+                ));
+            }
+            return result;
         }
 
         private int? GetUserId() =>
