@@ -1,6 +1,7 @@
-@model List<HabitTracker.Models.Quest>
+﻿@model List<HabitTracker.Models.Quest>
 @using HabitTracker.Models
 @using HabitTracker.Constants
+@using HabitTracker.Controllers
 @using static HabitTracker.Constants.AppConstants
 @{
     ViewData["Title"] = "Hideout";
@@ -10,6 +11,14 @@
     var facilityMap       = facilities.Where(uf => uf.Facility != null)
                                       .ToDictionary(uf => uf.FacilityId, uf => uf.Facility!);
     var completedIds      = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+
+    var hsItems    = ViewBag.HideoutStorageItems as List<PlacedItem> ?? new List<PlacedItem>();
+    string hsJson  = ViewBag.HideoutStorageItemsJson as string ?? "[]";
+    int hsCols     = (int)(ViewBag.HideoutStorageCols ?? 10);
+    int hsRows     = (int)(ViewBag.HideoutStorageRows ?? 10);
+    int woodCount  = (int)(ViewBag.Wood  ?? 100);
+    int stoneCount = (int)(ViewBag.Stone ?? 100);
+    const int C    = ItemCatalogue.CELL_PX;
 
     int buffAtk           = (int)(ViewBag.BuffAtk    ?? 0);
     int buffHp            = (int)(ViewBag.BuffHp     ?? 0);
@@ -228,6 +237,64 @@
     .quest-card.selected .quest-check { background: var(--violet); border-color: var(--violet); color: white; }
     .quest-card.done .quest-check { background: var(--teal); border-color: var(--teal); color: white; }
 
+    /* ── STORAGE ROOM ── */
+    .storage-panel {
+        background: #12121f;
+        border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 32px;
+    }
+    .storage-label {
+        font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: rgba(255,255,255,.4); margin-bottom: 12px;
+        display: flex; justify-content: space-between;
+    }
+    .storage-label span { color: rgba(255,255,255,.2); }
+    .hs-grid {
+        position: relative;
+        background-color: #0a0a14;
+        background-image:
+            linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+        border: 1.5px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        user-select: none;
+    }
+    .hs-item {
+        position: absolute;
+        border-radius: 6px;
+        border: 2px solid rgba(255,255,255,.2);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        cursor: grab;
+        transition: border-color .15s, filter .15s;
+        box-sizing: border-box; overflow: hidden; z-index: 10;
+    }
+    .hs-item:hover  { border-color: #f0b429; filter: brightness(1.2); }
+    .hs-item.dragging { opacity: .35; cursor: grabbing; }
+    #hs-preview {
+        position: absolute; z-index: 50; pointer-events: none;
+        border-radius: 6px; box-sizing: border-box; display: none;
+    }
+    .material-bar {
+        display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .material-chip {
+        display: flex; align-items: center; gap: 8px;
+        background: white;
+        border: 1.5px solid rgba(0,0,0,.08);
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 700; font-size: .95rem;
+        color: var(--ink);
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .material-chip .mat-icon { font-size: 1.5rem; }
+    .material-chip .mat-count { font-size: 1.1rem; color: var(--violet); }
+    .material-chip .mat-label { font-size: .72rem; color: #999; font-weight: 500; }
+
     .submit-bar {
         position: sticky; bottom: 20px;
         background: white;
@@ -374,6 +441,74 @@
     }
 </div>
 
+<!-- ── STORAGE ROOM ── -->
+<div class="section-divider">
+    <hr />
+    <span>🏪 Storage Room</span>
+    <hr />
+    <button type="button" onclick="toggleHsRoom()" id="hs-room-btn"
+            style="flex-shrink:0; background:var(--violet); color:white; border:none;
+                   border-radius:50px; padding:5px 16px; font-size:.8rem; font-weight:700; cursor:pointer;">
+        ▼ Open
+    </button>
+</div>
+
+<div id="hs-room-body" style="display:none;">
+
+<!-- Materials -->
+<div class="material-bar">
+    <div class="material-chip">
+        <span class="mat-icon">🪵</span>
+        <div>
+            <div class="mat-count">@woodCount</div>
+            <div class="mat-label">Wood</div>
+        </div>
+    </div>
+    <div class="material-chip">
+        <span class="mat-icon">🪨</span>
+        <div>
+            <div class="mat-count">@stoneCount</div>
+            <div class="mat-label">Stone</div>
+        </div>
+    </div>
+</div>
+
+<!-- 10×10 Storage Grid -->
+<div class="storage-panel">
+    <div class="storage-label">
+        📦 Hideout Storage
+        <span>@hsCols×@hsRows · @(hsCols * hsRows) slots</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <div class="hs-grid" id="grid-HideoutStorage"
+             data-container="Storage"
+             data-cols="@hsCols" data-rows="@hsRows"
+             style="width:@(hsCols*C)px; height:@(hsRows*C)px;
+                    background-size:@(C)px @(C)px;">
+
+            @foreach (var item in hsItems)
+            {
+                <div class="hs-item"
+                     id="hs-item-@item.Id"
+                     draggable="true"
+                     style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
+                            width:@(item.W*C)px; height:@(item.H*C)px;
+                            background:@(item.TileColor)cc;"
+                     data-id="@item.Id"
+                     data-container="HideoutStorage"
+                     data-w="@item.W" data-h="@item.H">
+                    <span style="font-size:1.6rem; line-height:1; pointer-events:none;">@item.Icon</span>
+                    <span style="font-size:.6rem; font-weight:700; color:rgba(255,255,255,.7); margin-top:2px; pointer-events:none;">@item.Name</span>
+                </div>
+            }
+
+            <div id="hs-preview"></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /hs-room-body -->
+
 <!-- ── QUEST SECTION ── -->
 <div class="section-divider">
     <span>📋 Complete Quests</span>
@@ -504,8 +639,131 @@
     }
 </form>
 
+<!-- Hidden CSRF for fetch -->
+<form id="hs-csrf-form">@Html.AntiForgeryToken()</form>
+
 @section Scripts {
 <script>
+// ── Storage Room collapse ─────────────────────────────────────────────────────
+let hsRoomOpen = false;
+function toggleHsRoom() {
+    hsRoomOpen = !hsRoomOpen;
+    document.getElementById('hs-room-body').style.display = hsRoomOpen ? 'block' : 'none';
+    document.getElementById('hs-room-btn').textContent    = hsRoomOpen ? '▲ Close' : '▼ Open';
+}
+
+// ── Hideout Storage DnD ───────────────────────────────────────────────────────
+(function () {
+    const CELL = @C;
+    const COLS = @hsCols, ROWS = @hsRows;
+    const grid = document.getElementById('grid-HideoutStorage');
+    const preview = document.getElementById('hs-preview');
+    const CSRF = document.getElementById('hs-csrf-form')
+        .querySelector('[name=__RequestVerificationToken]').value;
+
+    let items = @Html.Raw(hsJson);
+    let drag = null;
+
+    function wireItem(el) {
+        el.addEventListener('dragstart', function (e) {
+            const rect = el.getBoundingClientRect();
+            drag = {
+                el,
+                itemId:  parseInt(el.dataset.id),
+                w:       parseInt(el.dataset.w),
+                h:       parseInt(el.dataset.h),
+                grabCol: Math.max(0, Math.floor((e.clientX - rect.left)  / CELL)),
+                grabRow: Math.max(0, Math.floor((e.clientY - rect.top)   / CELL)),
+            };
+            const ghost = new Image();
+            ghost.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+            e.dataTransfer.setDragImage(ghost, 0, 0);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => el.classList.add('dragging'), 0);
+        });
+        el.addEventListener('dragend', function () {
+            if (drag) drag.el.classList.remove('dragging');
+            drag = null;
+            preview.style.display = 'none';
+        });
+    }
+
+    document.querySelectorAll('.hs-item').forEach(wireItem);
+
+    function targetCell(e) {
+        const rect = grid.getBoundingClientRect();
+        return {
+            col: Math.floor((e.clientX - rect.left) / CELL) - (drag ? drag.grabCol : 0),
+            row: Math.floor((e.clientY - rect.top)  / CELL) - (drag ? drag.grabRow : 0),
+        };
+    }
+
+    function isValid(col, row, w, h, excludeId) {
+        if (col < 0 || row < 0 || col + w > COLS || row + h > ROWS) return false;
+        for (const it of items) {
+            if (it.id === excludeId) continue;
+            const noOverlap = col >= it.x + it.w || col + w <= it.x ||
+                              row >= it.y + it.h || row + h <= it.y;
+            if (!noOverlap) return false;
+        }
+        return true;
+    }
+
+    grid.addEventListener('dragover', function (e) {
+        if (!drag) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const { col, row } = targetCell(e);
+        const valid = isValid(col, row, drag.w, drag.h, drag.itemId);
+        preview.style.left       = (col * CELL) + 'px';
+        preview.style.top        = (row * CELL) + 'px';
+        preview.style.width      = (drag.w * CELL) + 'px';
+        preview.style.height     = (drag.h * CELL) + 'px';
+        preview.style.background = valid ? 'rgba(0,184,156,.25)' : 'rgba(232,67,106,.25)';
+        preview.style.border     = valid ? '2px solid #00b89c'   : '2px solid #e8436a';
+        preview.style.display    = 'block';
+    });
+
+    grid.addEventListener('dragleave', function (e) {
+        if (!grid.contains(e.relatedTarget)) preview.style.display = 'none';
+    });
+
+    grid.addEventListener('drop', async function (e) {
+        e.preventDefault();
+        if (!drag) return;
+        const { col, row } = targetCell(e);
+        preview.style.display = 'none';
+
+        if (!isValid(col, row, drag.w, drag.h, drag.itemId)) return;
+
+        const el = drag.el;
+        el.style.left = (col * CELL) + 'px';
+        el.style.top  = (row * CELL) + 'px';
+        el.classList.remove('dragging');
+
+        const local = items.find(i => i.id === drag.itemId);
+        if (local) { local.x = col; local.y = row; }
+
+        const { itemId } = drag;
+        drag = null;
+
+        const body = new URLSearchParams({
+            itemId, targetContainer: 'Storage',
+            targetX: col, targetY: row,
+            __RequestVerificationToken: CSRF
+        });
+        try {
+            const res  = await fetch('/Inventory/Move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            });
+            const json = await res.json();
+            if (!json.success) location.reload();
+        } catch { location.reload(); }
+    });
+})();
+
     function toggleQuest(id, card) {
         var cb = document.getElementById('cb-' + id);
         if (!cb) return;
@@ -519,3 +777,4 @@
     }
 </script>
 }
+

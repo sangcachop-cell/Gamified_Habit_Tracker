@@ -1,17 +1,24 @@
-@using HabitTracker.Constants
+﻿@using HabitTracker.Constants
 @using HabitTracker.Controllers
 @using System.Text.Json
 @{
     ViewData["Title"] = "Inventory";
     var storageItems  = ViewBag.StorageItems  as List<PlacedItem> ?? new();
     var backpackItems = ViewBag.BackpackItems as List<PlacedItem> ?? new();
+    var eqBpItems     = ViewBag.EquippedBackpackItems as List<PlacedItem> ?? new();
+    var eqRigItems    = ViewBag.EquippedRigItems      as List<PlacedItem> ?? new();
+
+    string? eqBpItemId  = ViewBag.EquippedBackpackItem as string;
+    string? eqArmorId   = ViewBag.EquippedArmorItem    as string;
+    string? eqRigItemId = ViewBag.EquippedRigItem      as string;
 
     const int C = ItemCatalogue.CELL_PX;
-    var (sCols, sRows) = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
-    var (bCols, bRows) = ItemCatalogue.ContainerSize(ItemCatalogue.BACKPACK);
+    var (sCols,   sRows)  = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+    var (bCols,   bRows)  = ItemCatalogue.ContainerSize(ItemCatalogue.BACKPACK);
+    var (ebCols,  ebRows) = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_BACKPACK);
+    var (erCols,  erRows) = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_RIG);
 
-    // Build JS-safe item list for client-side overlap validation
-    var allItems = storageItems.Concat(backpackItems).Select(i => new {
+    var allItems = storageItems.Concat(backpackItems).Concat(eqBpItems).Concat(eqRigItems).Select(i => new {
         id        = i.Id,
         container = i.Container,
         x         = i.GridX,
@@ -40,7 +47,7 @@
     }
 
     .inv-layout { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
-    .inv-grids  { display: flex; flex-direction: column; gap: 24px; }
+    .inv-col    { display: flex; flex-direction: column; gap: 18px; }
 
     .container-panel {
         background: #12121f;
@@ -69,6 +76,15 @@
         border-radius: 8px;
         overflow: hidden;
         user-select: none;
+    }
+
+    /* Slot cell — inset border showing individual slot boundaries */
+    .slot-cell {
+        position: absolute;
+        border: 1.5px solid rgba(255,255,255,.14);
+        border-radius: 5px;
+        pointer-events: none;
+        z-index: 1;
     }
 
     /* Drop preview */
@@ -131,6 +147,35 @@
     .info-meta-row { display: flex; justify-content: space-between; }
     .info-meta-row span:last-child { font-weight: 700; color: #f0b429; }
 
+    /* Equipment panel */
+    .equip-panel {
+        background: #12121f; border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 16px; padding: 18px 20px; margin-bottom: 24px;
+    }
+    .equip-panel-title {
+        font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: rgba(255,255,255,.4); margin-bottom: 14px;
+    }
+    .equip-slots { display: flex; gap: 14px; flex-wrap: wrap; }
+    .equip-slot {
+        background: #0a0a14; border: 1.5px solid rgba(255,255,255,.1);
+        border-radius: 12px; padding: 12px 16px;
+        display: flex; align-items: center; gap: 12px;
+        min-width: 200px; flex: 1;
+    }
+    .equip-slot.occupied { border-color: #f0b429; }
+    .equip-slot-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .equip-slot-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.35); }
+    .equip-slot-name  { font-size: .88rem; font-weight: 700; color: #f0b429; margin-top: 2px; }
+    .equip-slot-empty { font-size: .82rem; color: rgba(255,255,255,.2); margin-top: 2px; }
+    .unequip-btn {
+        margin-left: auto; background: rgba(232,67,106,.15);
+        border: 1px solid rgba(232,67,106,.3); border-radius: 8px;
+        color: #e8436a; font-size: .72rem; font-weight: 700;
+        padding: 4px 10px; cursor: pointer; white-space: nowrap;
+    }
+    .unequip-btn:hover { background: rgba(232,67,106,.3); }
+
     /* Toast */
     #inv-toast {
         position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
@@ -150,12 +195,72 @@
     </div>
 </div>
 
+<!-- ── EQUIPMENT PANEL ── -->
+<div class="equip-panel">
+    <div class="equip-panel-title">⚔️ Equipped</div>
+    <div class="equip-slots">
+
+        @{ // Backpack slot
+            var bpDef = eqBpItemId != null && ItemCatalogue.Equipment.TryGetValue(eqBpItemId, out var _bpDef) ? _bpDef : null; }
+        <div class="equip-slot @(eqBpItemId != null ? "occupied" : "")">
+            <div class="equip-slot-icon">🎒</div>
+            <div>
+                <div class="equip-slot-label">Backpack</div>
+                @if (bpDef != null) { <div class="equip-slot-name">@bpDef.Name</div> }
+                else { <div class="equip-slot-empty">Empty</div> }
+            </div>
+            @if (eqBpItemId != null)
+            {
+                <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_BACKPACK" method="post" style="margin-left:auto;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                </form>
+            }
+        </div>
+
+        @{ // Armor slot
+            var armDef = eqArmorId != null && ItemCatalogue.Equipment.TryGetValue(eqArmorId, out var _armDef) ? _armDef : null; }
+        <div class="equip-slot @(eqArmorId != null ? "occupied" : "")">
+            <div class="equip-slot-icon">🛡️</div>
+            <div>
+                <div class="equip-slot-label">Armor</div>
+                @if (armDef != null) { <div class="equip-slot-name">@armDef.Name <span style="font-size:.75rem; color:rgba(255,255,255,.4);">(-@armDef.DamageReduction% dmg)</span></div> }
+                else { <div class="equip-slot-empty">Empty</div> }
+            </div>
+            @if (eqArmorId != null)
+            {
+                <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_ARMOR" method="post" style="margin-left:auto;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                </form>
+            }
+        </div>
+
+        @{ // Rig slot
+            var rigDef = eqRigItemId != null && ItemCatalogue.Equipment.TryGetValue(eqRigItemId, out var _rigDef) ? _rigDef : null; }
+        <div class="equip-slot @(eqRigItemId != null ? "occupied" : "")">
+            <div class="equip-slot-icon">🦺</div>
+            <div>
+                <div class="equip-slot-label">Rig</div>
+                @if (rigDef != null) { <div class="equip-slot-name">@rigDef.Name</div> }
+                else { <div class="equip-slot-empty">Empty</div> }
+            </div>
+            @if (eqRigItemId != null)
+            {
+                <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_RIG" method="post" style="margin-left:auto;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                </form>
+            }
+        </div>
+
+    </div>
+</div>
+
 <div class="inv-layout">
 
-    <!-- ── GRIDS ── -->
-    <div class="inv-grids">
-
-        <!-- Storage 5×4 -->
+    <!-- ── COL 1: Storage ── -->
+    <div class="inv-col">
         <div class="container-panel" id="panel-Storage">
             <div class="container-label">
                 📦 Storage
@@ -174,7 +279,7 @@
                          style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
                                 width:@(item.W*C)px; height:@(item.H*C)px;
                                 background:@(item.TileColor)cc;"
-                         data-id="@item.Id"
+                         data-id="@item.Id" data-itemid="@item.ItemId"
                          data-container="Storage"
                          data-w="@item.W" data-h="@item.H"
                          data-name="@item.Name" data-icon="@item.Icon"
@@ -197,17 +302,26 @@
                 }
             </div>
         </div>
+    </div><!-- /col-1 -->
 
-        <!-- Backpack 4×2 -->
+    <!-- COL 2: Pocket + Equipped -->
+    <div class="inv-col">
+
+        <!-- Pocket 4×1 -->
         <div class="container-panel" id="panel-Backpack">
             <div class="container-label">
-                🎒 Backpack
+                👜 Pocket
                 <span>@bCols×@bRows · @(bCols * bRows) slots</span>
             </div>
             <div class="inv-grid" id="grid-Backpack"
                  data-container="Backpack" data-cols="@bCols" data-rows="@bRows"
                  style="width:@(bCols*C)px; height:@(bRows*C)px;
                         background-size:@(C)px @(C)px;">
+
+                @* Slot outlines — 4 × 1×1 *@
+                @for (int si = 0; si < bCols; si++) {
+                    <div class="slot-cell" style="left:@(si*C+4)px; top:4px; width:@(C-8)px; height:@(C-8)px;"></div>
+                }
 
                 @foreach (var item in backpackItems)
                 {
@@ -217,7 +331,7 @@
                          style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
                                 width:@(item.W*C)px; height:@(item.H*C)px;
                                 background:@(item.TileColor)cc;"
-                         data-id="@item.Id"
+                         data-id="@item.Id" data-itemid="@item.ItemId"
                          data-container="Backpack"
                          data-w="@item.W" data-h="@item.H"
                          data-name="@item.Name" data-icon="@item.Icon"
@@ -241,7 +355,65 @@
             </div>
         </div>
 
-    </div>
+        @* Equipped Backpack grid (visible only when equipped) *@
+        @if (eqBpItemId != null)
+        {
+            <div class="container-panel" id="panel-EquippedBackpack">
+                <div class="container-label">
+                    🎒 Equipped Backpack
+                    <span>@ebCols×@ebRows · @(ebCols * ebRows) slots</span>
+                </div>
+                <div class="inv-grid" id="grid-EquippedBackpack"
+                     data-container="EquippedBackpack" data-cols="@ebCols" data-rows="@ebRows"
+                     style="width:@(ebCols*C)px; height:@(ebRows*C)px; background-size:@(C)px @(C)px;">
+                    @foreach (var item in eqBpItems) {
+                        <div class="inv-item" id="item-@item.Id" draggable="true"
+                             style="left:@(item.GridX*C)px; top:@(item.GridY*C)px; width:@(item.W*C)px; height:@(item.H*C)px; background:@(item.TileColor)cc;"
+                             data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedRig" data-w="@item.W" data-h="@item.H"
+                             data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
+                             data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
+                             onclick="selectItem(this)">
+                            <span class="item-icon">@item.Icon</span>
+                            <span class="item-name">@item.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Equipped Rig grid (visible only when equipped) *@
+        @if (eqRigItemId != null)
+        {
+            <div class="container-panel" id="panel-EquippedRig">
+                <div class="container-label">
+                    🦺 Equipped Rig
+                    <span>@erCols×@erRows · 4×(2×1) slots</span>
+                </div>
+                <div class="inv-grid" id="grid-EquippedRig"
+                     data-container="EquippedRig" data-cols="@erCols" data-rows="@erRows"
+                     style="width:@(erCols*C)px; height:@(erRows*C)px; background-size:@(C)px @(C)px;">
+
+                    @* Slot outlines — 4 × 2×1 slots *@
+                    @for (int sc = 0; sc < erCols; sc++) {
+                            <div class="slot-cell" style="left:@(sc*C+4)px; top:4px; width:@(C-8)px; height:@(erRows*C-8)px;"></div>
+                        }
+
+                    @foreach (var item in eqRigItems) {
+                        <div class="inv-item" id="item-@item.Id" draggable="true"
+                             style="left:@(item.GridX*C)px; top:@(item.GridY*C)px; width:@(item.W*C)px; height:@(item.H*C)px; background:@(item.TileColor)cc;"
+                             data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedRig" data-w="@item.W" data-h="@item.H"
+                             data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
+                             data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
+                             onclick="selectItem(this)">
+                            <span class="item-icon">@item.Icon</span>
+                            <span class="item-name">@item.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+    </div><!-- /col-2 -->
 
     <!-- ── INFO PANEL ── -->
     <div class="info-panel">
@@ -255,6 +427,16 @@
                 <div class="info-meta-row"><span>Size</span><span id="info-size"></span></div>
                 <div class="info-meta-row"><span>Rotated</span><span id="info-rotated"></span></div>
                 <div class="info-meta-row" id="rotate-row"><span>Can rotate</span><span>↺ yes</span></div>
+            </div>
+            <div id="equip-action" style="display:none; margin-top:14px;">
+                <form id="equip-form" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="width:100%; background:linear-gradient(135deg,#f0b429,#e8436a);
+                        border:none; border-radius:10px; color:white; font-weight:700;
+                        padding:10px; cursor:pointer; font-size:.88rem;">
+                        ⚔️ Equip
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -271,9 +453,13 @@
 <script>
 const CELL = @C;
 const GRID_META = {
-    Storage:  { cols: @sCols, rows: @sRows },
-    Backpack: { cols: @bCols, rows: @bRows },
+    Storage:          { cols: @sCols,  rows: @sRows  },
+    Backpack:         { cols: @bCols,  rows: @bRows  },
+    EquippedBackpack: { cols: @ebCols, rows: @ebRows },
+    EquippedRig:      { cols: @erCols, rows: @erRows },
 };
+const EQUIPPABLE = ['simple_backpack','simple_armor','simple_rig'];
+const SLOT_CONSTRAINTS = { Backpack: {w:1,h:1}, EquippedRig: {w:1,h:2} };
 
 // Live item state for client-side overlap checks
 const items = @Html.Raw(itemsJson);
@@ -282,11 +468,10 @@ const items = @Html.Raw(itemsJson);
 const CSRF = document.getElementById('csrf-form')
     .querySelector('[name=__RequestVerificationToken]').value;
 
-// ── Drag state ────────────────────────────────────────────────────────────────
-let drag = null; // { el, itemId, w, h, grabCol, grabRow, fromContainer }
+// ── Drag state ──────────────────────────────────────────────────────────────
+let drag = null;
 const preview = document.getElementById('drop-preview');
 
-// ── Wire up all item tiles ────────────────────────────────────────────────────
 document.querySelectorAll('.inv-item').forEach(wireItem);
 
 function wireItem(el) {
@@ -295,11 +480,10 @@ function wireItem(el) {
 }
 
 function onDragStart(e) {
-    const el     = e.currentTarget;
-    const rect   = el.getBoundingClientRect();
-    const grabCol = Math.floor((e.clientX - rect.left)  / CELL);
-    const grabRow = Math.floor((e.clientY - rect.top)   / CELL);
-
+    const el      = e.currentTarget;
+    const rect    = el.getBoundingClientRect();
+    const grabCol = Math.floor((e.clientX - rect.left) / CELL);
+    const grabRow = Math.floor((e.clientY - rect.top)  / CELL);
     drag = {
         el,
         itemId:        parseInt(el.dataset.id),
@@ -309,13 +493,10 @@ function onDragStart(e) {
         grabRow:       Math.max(0, grabRow),
         fromContainer: el.dataset.container,
     };
-
-    // Use transparent drag image so we control the visual
     const ghost = new Image();
     ghost.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
     e.dataTransfer.setDragImage(ghost, 0, 0);
     e.dataTransfer.effectAllowed = 'move';
-
     setTimeout(() => el.classList.add('dragging'), 0);
 }
 
@@ -326,7 +507,6 @@ function onDragEnd() {
     document.querySelectorAll('.container-panel').forEach(p => p.classList.remove('drag-over'));
 }
 
-// ── Wire up both grids ────────────────────────────────────────────────────────
 document.querySelectorAll('.inv-grid').forEach(grid => {
     grid.addEventListener('dragover',  e => onGridDragOver(e, grid));
     grid.addEventListener('dragleave', e => onGridDragLeave(e, grid));
@@ -341,9 +521,10 @@ function targetCell(e, grid) {
 }
 
 function isValid(container, col, row, w, h, excludeId) {
+    const sc = SLOT_CONSTRAINTS[container];
+    if (sc && (w !== sc.w || h !== sc.h)) return false;
     const { cols, rows } = GRID_META[container];
     if (col < 0 || row < 0 || col + w > cols || row + h > rows) return false;
-
     for (const it of items) {
         if (it.id === excludeId || it.container !== container) continue;
         const noOverlap = col >= it.x + it.w || col + w <= it.x ||
@@ -357,41 +538,40 @@ function onGridDragOver(e, grid) {
     if (!drag) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-
     const container = grid.dataset.container;
+    if (!GRID_META[container]) return;
     const { col, row } = targetCell(e, grid);
     const valid = isValid(container, col, row, drag.w, drag.h, drag.itemId);
-
     showPreview(grid, col, row, drag.w, drag.h, valid);
-    document.getElementById('panel-' + container).classList.add('drag-over');
+    const panel = document.getElementById('panel-' + container);
+    if (panel) panel.classList.add('drag-over');
 }
 
 function onGridDragLeave(e, grid) {
-    // Only hide if truly leaving the grid (not entering a child)
     if (!grid.contains(e.relatedTarget)) {
         hidePreview();
-        document.getElementById('panel-' + grid.dataset.container).classList.remove('drag-over');
+        const panel = document.getElementById('panel-' + grid.dataset.container);
+        if (panel) panel.classList.remove('drag-over');
     }
 }
 
 async function onGridDrop(e, grid) {
     e.preventDefault();
     if (!drag) return;
-
     const container = grid.dataset.container;
+    if (!GRID_META[container]) return;
     const { col, row } = targetCell(e, grid);
-
     hidePreview();
-    document.getElementById('panel-' + container).classList.remove('drag-over');
+    const panel = document.getElementById('panel-' + container);
+    if (panel) panel.classList.remove('drag-over');
 
     if (!isValid(container, col, row, drag.w, drag.h, drag.itemId)) {
-        toast('❌ Cannot place item there');
+        toast('Cannot place item there');
         drag.el.classList.remove('dragging');
         drag = null;
         return;
     }
 
-    // Optimistically move DOM
     const el = drag.el;
     el.style.left = (col * CELL) + 'px';
     el.style.top  = (row * CELL) + 'px';
@@ -399,14 +579,12 @@ async function onGridDrop(e, grid) {
     el.dataset.container = container;
     el.classList.remove('dragging');
 
-    // Update local state
     const local = items.find(i => i.id === drag.itemId);
     if (local) { local.container = container; local.x = col; local.y = row; }
 
     const { itemId } = drag;
     drag = null;
 
-    // Persist to server
     const body = new URLSearchParams({
         itemId, targetContainer: container,
         targetX: col, targetY: row,
@@ -419,17 +597,10 @@ async function onGridDrop(e, grid) {
             body: body.toString()
         });
         const json = await res.json();
-        if (!json.success) {
-            toast('⚠️ ' + (json.error || 'Move failed'));
-            location.reload(); // rollback by reloading
-        }
-    } catch {
-        toast('⚠️ Network error — reloading');
-        location.reload();
-    }
+        if (!json.success) { toast(json.error || 'Move failed'); location.reload(); }
+    } catch { toast('Network error'); location.reload(); }
 }
 
-// ── Preview div ───────────────────────────────────────────────────────────────
 function showPreview(grid, col, row, w, h, valid) {
     preview.style.left       = (col * CELL) + 'px';
     preview.style.top        = (row * CELL) + 'px';
@@ -441,11 +612,9 @@ function showPreview(grid, col, row, w, h, valid) {
     if (preview.parentNode !== grid) grid.appendChild(preview);
 }
 
-function hidePreview() {
-    preview.style.display = 'none';
-}
+function hidePreview() { preview.style.display = 'none'; }
 
-// ── Item info panel ───────────────────────────────────────────────────────────
+// ── Item info panel ──────────────────────────────────────────────────────────
 let selected = null;
 
 function selectItem(el) {
@@ -461,17 +630,29 @@ function selectItem(el) {
     document.getElementById('info-name').textContent    = d.name;
     document.getElementById('info-cat').textContent     = d.cat;
     document.getElementById('info-desc').textContent    = d.desc;
-    document.getElementById('info-size').textContent    = d.w + ' × ' + d.h + ' cells';
+    document.getElementById('info-size').textContent    = d.w + ' x ' + d.h + ' cells';
     document.getElementById('info-rotated').textContent = d.rotated === 'true' ? 'Yes' : 'No';
     document.getElementById('rotate-row').style.display = d.canRotate === 'true' ? 'flex' : 'none';
+
+    // Show equip button only for equippable items in inventory containers (not already in equip slot)
+    const equipAction = document.getElementById('equip-action');
+    const isEquippable = EQUIPPABLE.includes(d.itemid);
+    const inEquipSlot  = d.container === 'EquippedBackpack' || d.container === 'EquippedRig';
+    if (isEquippable && !inEquipSlot) {
+        document.getElementById('equip-form').action = '/Inventory/Equip/' + d.id;
+        equipAction.style.display = 'block';
+    } else {
+        equipAction.style.display = 'none';
+    }
 }
 
 function resetPanel() {
     document.getElementById('info-empty').style.display   = 'block';
     document.getElementById('info-content').style.display = 'none';
+    document.getElementById('equip-action').style.display = 'none';
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg) {
     const el = document.getElementById('inv-toast');
@@ -482,3 +663,17 @@ function toast(msg) {
 }
 </script>
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
