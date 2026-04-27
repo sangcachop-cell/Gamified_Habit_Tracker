@@ -22,9 +22,14 @@ namespace HabitTracker.Models
         public int    MonsterSpeed       { get; set; }
 
         // Battle meta
-        public string       Status    { get; set; } = "InProgress"; // InProgress | Victory | Defeat | Fled
-        public int          Turn      { get; set; } = 1;
-        public int          XPReward  { get; set; }
-        public List<string> Log       { get; set; } = new();
+        public string       Status             { get; set; } = "InProgress"; // InProgress | WaveCleared | Victory | Defeat
+        public int          Turn               { get; set; } = 1;
+        public int          WaveNumber         { get; set; } = 1;
+        public int          TotalWaves         { get; set; } = 5;
+        public int          PlayerLevel        { get; set; }     // snapshotted at battle start — used for wave scaling
+        public int          XPReward           { get; set; }     // XP for the current wave
+        public int          TotalXPReward      { get; set; }     // XP accumulated across cleared waves
+        public int          ConsecutiveDefends { get; set; } = 0;
+        public List<string> Log                { get; set; } = new();
     }
 }

@@ -747,6 +747,46 @@ namespace HabitTracker.Migrations
                     b.ToTable("UserFacilities");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.UserInventoryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContainerType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("GridX")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GridY")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRotated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserInventoryItems");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.UserQuest", b =>
                 {
                     b.Property<int>("Id")
@@ -877,6 +917,17 @@ namespace HabitTracker.Migrations
                     b.Navigation("Facility");
 
                     b.Navigation("Facility_User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserInventoryItem", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.UserQuest", b =>

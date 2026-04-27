@@ -17,6 +17,18 @@
     bool   monsterBonus = Model.MonsterSpeed >= (int)(Model.PlayerSpeed  * 1.5);
     string speedLabel   = playerFaster ? "You act first" : $"{Model.MonsterName} acts first";
     string speedColor   = playerFaster ? "#00b89c" : "#e8436a";
+
+    // Next defend's fail chance based on current consecutive count
+    int nextDefendFail = Model.ConsecutiveDefends switch
+    {
+        0 => 0,
+        1 => 35,
+        2 => 65,
+        _ => 85
+    };
+    string defendSubtext = nextDefendFail == 0
+        ? "Full block (guaranteed)"
+        : $"Full block · ⚠️ {nextDefendFail}% fail risk";
 }
 
 <style>
@@ -227,12 +239,30 @@
 
 <div class="arena-wrap">
 
-    <!-- Turn badge -->
-    <div style="text-align:center;">
+    <!-- Wave progress + turn badge -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+
+        <!-- Wave pip track -->
+        <div style="display:flex; gap:6px; align-items:center;">
+            @for (int w = 1; w <= Model.TotalWaves; w++)
+            {
+                bool cleared = w < Model.WaveNumber || (w == Model.WaveNumber && (won || fled));
+                bool current = w == Model.WaveNumber && !won && !fled;
+                string pipColor = cleared ? "#00b89c" : current ? "#f0b429" : "rgba(255,255,255,.15)";
+                string pipBorder = current ? "2px solid #f0b429" : "2px solid transparent";
+                <div style="width:28px; height:8px; border-radius:50px; background:@pipColor; border:@pipBorder; transition:background .3s;"></div>
+            }
+            <span style="font-size:.75rem; font-weight:700; color:#f0b429; margin-left:4px;">
+                Wave @Model.WaveNumber / @Model.TotalWaves
+            </span>
+        </div>
+
         <span class="turn-badge">
             ⚔️ Turn @(Model.Turn - 1 > 0 ? Model.Turn - 1 : 1)
             @if (!inProgress) { <span style="margin-left:6px; color:white;">— Battle Over</span> }
+            @if (Model.TotalXPReward > 0) { <span style="margin-left:6px; color:#f0b429;">+@Model.TotalXPReward XP earned</span> }
         </span>
+
     </div>
 
     <!-- Combatant panels -->
@@ -301,11 +331,11 @@
     {
         string bannerClass = won ? "victory" : lost ? "defeat" : "fled";
         string emoji       = won ? "🏆" : lost ? "💀" : "🏃";
-        string title       = won  ? "Victory!"
-                           : lost ? "Defeated..."
+        string title       = won  ? "Gauntlet Cleared!"
+                           : lost ? $"Defeated on Wave {Model.WaveNumber}..."
                            :         "Retreated";
-        string sub         = won  ? $"+{Model.XPReward} XP awarded"
-                           : lost ? "You fought bravely. Train harder."
+        string sub         = won  ? $"All {Model.TotalWaves} waves defeated · {Model.TotalXPReward} XP earned"
+                           : lost ? $"You earned {Model.TotalXPReward} XP before falling. Train harder."
                            :         "You lived to fight another day.";
 
         <div class="outcome-banner @bannerClass">
@@ -353,20 +383,21 @@
             <form asp-action="Action" method="post" style="flex:1; display:contents;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="action" value="defend" />
-                <button type="submit" class="action-btn btn-defend" id="btn-defend">
+                <button type="submit" class="action-btn btn-defend" id="btn-defend"
+                        style="@(nextDefendFail >= 65 ? "border:2px solid #f0b429;" : "")">
                     🛡️ Defend
-                    <small>Double armor this turn</small>
+                    <small style="@(nextDefendFail > 0 ? "color:#f0b429;" : "")">@defendSubtext</small>
                 </button>
             </form>
 
-            <form asp-action="Action" method="post" style="flex:1; display:contents;">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="action" value="run" />
-                <button type="submit" class="action-btn btn-run" id="btn-run">
-                    🏃 Run Away
-                    <small>60% chance to escape</small>
+            <div style="flex:1; display:contents;">
+                <button class="action-btn btn-run" disabled
+                        style="opacity:.35; cursor:not-allowed; position:relative;"
+                        title="You need a Escape Scroll to flee">
+                    🔒 Flee
+                    <small>Requires: Escape Scroll</small>
                 </button>
-            </form>
+            </div>
         </div>
     }
 

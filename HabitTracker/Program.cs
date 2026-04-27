@@ -51,6 +51,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IHideoutService, HideoutService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 // Logging
 builder.Services.AddLogging(config =>

@@ -19,6 +19,7 @@ namespace HabitTracker.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<UserFacility> UserFacilities { get; set; }
+        public DbSet<UserInventoryItem> UserInventoryItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,6 +110,13 @@ namespace HabitTracker.Data
             modelBuilder.Entity<UserFacility>()
                 .HasIndex(uf => new { uf.UserId, uf.FacilityId })
                 .IsUnique();
+
+            // UserInventoryItem → User
+            modelBuilder.Entity<UserInventoryItem>()
+                .HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Friendship relationships
             modelBuilder.Entity<Friendship>()
