@@ -1,0 +1,484 @@
+@using HabitTracker.Constants
+@using HabitTracker.Controllers
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Inventory";
+    var storageItems  = ViewBag.StorageItems  as List<PlacedItem> ?? new();
+    var backpackItems = ViewBag.BackpackItems as List<PlacedItem> ?? new();
+
+    const int C = ItemCatalogue.CELL_PX;
+    var (sCols, sRows) = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+    var (bCols, bRows) = ItemCatalogue.ContainerSize(ItemCatalogue.BACKPACK);
+
+    // Build JS-safe item list for client-side overlap validation
+    var allItems = storageItems.Concat(backpackItems).Select(i => new {
+        id        = i.Id,
+        container = i.Container,
+        x         = i.GridX,
+        y         = i.GridY,
+        w         = i.W,
+        h         = i.H
+    });
+    string itemsJson = JsonSerializer.Serialize(allItems);
+}
+
+<!-- Hidden CSRF token for fetch -->
+<form id="csrf-form">@Html.AntiForgeryToken()</form>
+
+<style>
+    body { background: #0d0d1a; color: #e8e6f0; font-family: "DM Sans", sans-serif; }
+    h1,h2,h3,h4 { font-family: "Syne", sans-serif; }
+
+    .inv-header {
+        padding: 32px 0 24px;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .inv-title {
+        font-size: 1.9rem; font-weight: 900; letter-spacing: -1px;
+        background: linear-gradient(135deg, #f0b429, #e8436a);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .inv-layout { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+    .inv-grids  { display: flex; flex-direction: column; gap: 24px; }
+
+    .container-panel {
+        background: #12121f;
+        border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 16px;
+        padding: 18px 20px;
+        transition: border-color .2s;
+    }
+    .container-panel.drag-over { border-color: rgba(0,184,156,.5); }
+
+    .container-label {
+        font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: rgba(255,255,255,.4); margin-bottom: 12px;
+        display: flex; justify-content: space-between;
+    }
+    .container-label span { color: rgba(255,255,255,.2); }
+
+    /* Grid */
+    .inv-grid {
+        position: relative;
+        background-color: #0a0a14;
+        background-image:
+            linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+        border: 1.5px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    /* Drop preview */
+    #drop-preview {
+        position: absolute;
+        z-index: 50;
+        pointer-events: none;
+        border-radius: 6px;
+        box-sizing: border-box;
+        display: none;
+        transition: none;
+    }
+
+    /* Item tile */
+    .inv-item {
+        position: absolute;
+        border-radius: 6px;
+        border: 2px solid rgba(255,255,255,.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        transition: border-color .15s, filter .15s, opacity .15s;
+        box-sizing: border-box;
+        overflow: hidden;
+        z-index: 10;
+    }
+    .inv-item:hover  { border-color: #f0b429; filter: brightness(1.2); }
+    .inv-item.selected { border-color: #f0b429; box-shadow: 0 0 12px rgba(240,180,41,.4); }
+    .inv-item.dragging { opacity: 0.35; cursor: grabbing; }
+
+    .item-icon { font-size: 1.6rem; line-height: 1; pointer-events: none; }
+    .item-name { font-size: .6rem; font-weight: 700; text-align: center;
+        color: rgba(255,255,255,.7); margin-top: 2px; padding: 0 4px;
+        pointer-events: none; }
+
+    .rotate-form { position: absolute; top: 3px; right: 3px; }
+    .rotate-btn {
+        background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.2);
+        border-radius: 4px; color: white; font-size: .7rem; padding: 1px 5px;
+        cursor: pointer; line-height: 1.4; transition: background .15s;
+    }
+    .rotate-btn:hover { background: rgba(240,180,41,.45); border-color: #f0b429; }
+
+    /* Info panel */
+    .info-panel {
+        background: #12121f; border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 16px; padding: 24px;
+        min-width: 240px; max-width: 280px; flex: 1;
+    }
+    .info-empty { color: rgba(255,255,255,.25); font-size: .85rem; text-align: center; padding: 32px 0; }
+    .info-icon  { font-size: 3rem; text-align: center; margin-bottom: 12px; }
+    .info-name  { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+    .info-cat   { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+                  color: rgba(255,255,255,.4); margin-bottom: 12px; }
+    .info-desc  { font-size: .82rem; line-height: 1.6; color: rgba(255,255,255,.65); }
+    .info-meta  { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.08);
+                  display: flex; flex-direction: column; gap: 6px; font-size: .78rem; }
+    .info-meta-row { display: flex; justify-content: space-between; }
+    .info-meta-row span:last-child { font-weight: 700; color: #f0b429; }
+
+    /* Toast */
+    #inv-toast {
+        position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+        background: #1a1a2e; border: 1.5px solid rgba(255,255,255,.12);
+        border-radius: 50px; padding: 10px 22px;
+        font-size: .85rem; font-weight: 600; color: white;
+        opacity: 0; transition: opacity .25s;
+        pointer-events: none; z-index: 9999; white-space: nowrap;
+    }
+    #inv-toast.show { opacity: 1; }
+</style>
+
+<div class="inv-header">
+    <h2 class="inv-title">🎒 Inventory</h2>
+    <div style="font-size:.8rem; color:rgba(255,255,255,.35);">
+        Drag items between grids to move them
+    </div>
+</div>
+
+<div class="inv-layout">
+
+    <!-- ── GRIDS ── -->
+    <div class="inv-grids">
+
+        <!-- Storage 5×4 -->
+        <div class="container-panel" id="panel-Storage">
+            <div class="container-label">
+                📦 Storage
+                <span>@sCols×@sRows · @(sCols * sRows) slots</span>
+            </div>
+            <div class="inv-grid" id="grid-Storage"
+                 data-container="Storage" data-cols="@sCols" data-rows="@sRows"
+                 style="width:@(sCols*C)px; height:@(sRows*C)px;
+                        background-size:@(C)px @(C)px;">
+
+                @foreach (var item in storageItems)
+                {
+                    <div class="inv-item"
+                         id="item-@item.Id"
+                         draggable="true"
+                         style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
+                                width:@(item.W*C)px; height:@(item.H*C)px;
+                                background:@(item.TileColor)cc;"
+                         data-id="@item.Id"
+                         data-container="Storage"
+                         data-w="@item.W" data-h="@item.H"
+                         data-name="@item.Name" data-icon="@item.Icon"
+                         data-desc="@item.Description" data-cat="@item.Category"
+                         data-rotated="@item.IsRotated.ToString().ToLower()"
+                         data-can-rotate="@item.CanRotate.ToString().ToLower()"
+                         onclick="selectItem(this)">
+                        <span class="item-icon">@item.Icon</span>
+                        <span class="item-name">@item.Name</span>
+                        @if (item.CanRotate)
+                        {
+                            <form class="rotate-form"
+                                  asp-action="Rotate" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="rotate-btn"
+                                        onclick="event.stopPropagation()" title="Rotate">↺</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Backpack 4×2 -->
+        <div class="container-panel" id="panel-Backpack">
+            <div class="container-label">
+                🎒 Backpack
+                <span>@bCols×@bRows · @(bCols * bRows) slots</span>
+            </div>
+            <div class="inv-grid" id="grid-Backpack"
+                 data-container="Backpack" data-cols="@bCols" data-rows="@bRows"
+                 style="width:@(bCols*C)px; height:@(bRows*C)px;
+                        background-size:@(C)px @(C)px;">
+
+                @foreach (var item in backpackItems)
+                {
+                    <div class="inv-item"
+                         id="item-@item.Id"
+                         draggable="true"
+                         style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
+                                width:@(item.W*C)px; height:@(item.H*C)px;
+                                background:@(item.TileColor)cc;"
+                         data-id="@item.Id"
+                         data-container="Backpack"
+                         data-w="@item.W" data-h="@item.H"
+                         data-name="@item.Name" data-icon="@item.Icon"
+                         data-desc="@item.Description" data-cat="@item.Category"
+                         data-rotated="@item.IsRotated.ToString().ToLower()"
+                         data-can-rotate="@item.CanRotate.ToString().ToLower()"
+                         onclick="selectItem(this)">
+                        <span class="item-icon">@item.Icon</span>
+                        <span class="item-name">@item.Name</span>
+                        @if (item.CanRotate)
+                        {
+                            <form class="rotate-form"
+                                  asp-action="Rotate" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="rotate-btn"
+                                        onclick="event.stopPropagation()" title="Rotate">↺</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── INFO PANEL ── -->
+    <div class="info-panel">
+        <div class="info-empty" id="info-empty">← Drag items between grids<br>or click to view details</div>
+        <div id="info-content" style="display:none;">
+            <div class="info-icon" id="info-icon"></div>
+            <div class="info-name" id="info-name"></div>
+            <div class="info-cat"  id="info-cat"></div>
+            <div class="info-desc" id="info-desc"></div>
+            <div class="info-meta">
+                <div class="info-meta-row"><span>Size</span><span id="info-size"></span></div>
+                <div class="info-meta-row"><span>Rotated</span><span id="info-rotated"></span></div>
+                <div class="info-meta-row" id="rotate-row"><span>Can rotate</span><span>↺ yes</span></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Drop preview (appended into whichever grid is hovered) -->
+<div id="drop-preview"></div>
+
+<!-- Toast -->
+<div id="inv-toast"></div>
+
+@section Scripts {
+<script>
+const CELL = @C;
+const GRID_META = {
+    Storage:  { cols: @sCols, rows: @sRows },
+    Backpack: { cols: @bCols, rows: @bRows },
+};
+
+// Live item state for client-side overlap checks
+const items = @Html.Raw(itemsJson);
+
+// CSRF token
+const CSRF = document.getElementById('csrf-form')
+    .querySelector('[name=__RequestVerificationToken]').value;
+
+// ── Drag state ────────────────────────────────────────────────────────────────
+let drag = null; // { el, itemId, w, h, grabCol, grabRow, fromContainer }
+const preview = document.getElementById('drop-preview');
+
+// ── Wire up all item tiles ────────────────────────────────────────────────────
+document.querySelectorAll('.inv-item').forEach(wireItem);
+
+function wireItem(el) {
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('dragend',   onDragEnd);
+}
+
+function onDragStart(e) {
+    const el     = e.currentTarget;
+    const rect   = el.getBoundingClientRect();
+    const grabCol = Math.floor((e.clientX - rect.left)  / CELL);
+    const grabRow = Math.floor((e.clientY - rect.top)   / CELL);
+
+    drag = {
+        el,
+        itemId:        parseInt(el.dataset.id),
+        w:             parseInt(el.dataset.w),
+        h:             parseInt(el.dataset.h),
+        grabCol:       Math.max(0, grabCol),
+        grabRow:       Math.max(0, grabRow),
+        fromContainer: el.dataset.container,
+    };
+
+    // Use transparent drag image so we control the visual
+    const ghost = new Image();
+    ghost.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    e.dataTransfer.setDragImage(ghost, 0, 0);
+    e.dataTransfer.effectAllowed = 'move';
+
+    setTimeout(() => el.classList.add('dragging'), 0);
+}
+
+function onDragEnd() {
+    if (drag) drag.el.classList.remove('dragging');
+    drag = null;
+    hidePreview();
+    document.querySelectorAll('.container-panel').forEach(p => p.classList.remove('drag-over'));
+}
+
+// ── Wire up both grids ────────────────────────────────────────────────────────
+document.querySelectorAll('.inv-grid').forEach(grid => {
+    grid.addEventListener('dragover',  e => onGridDragOver(e, grid));
+    grid.addEventListener('dragleave', e => onGridDragLeave(e, grid));
+    grid.addEventListener('drop',      e => onGridDrop(e, grid));
+});
+
+function targetCell(e, grid) {
+    const rect = grid.getBoundingClientRect();
+    const col  = Math.floor((e.clientX - rect.left) / CELL) - (drag ? drag.grabCol : 0);
+    const row  = Math.floor((e.clientY - rect.top)  / CELL) - (drag ? drag.grabRow : 0);
+    return { col, row };
+}
+
+function isValid(container, col, row, w, h, excludeId) {
+    const { cols, rows } = GRID_META[container];
+    if (col < 0 || row < 0 || col + w > cols || row + h > rows) return false;
+
+    for (const it of items) {
+        if (it.id === excludeId || it.container !== container) continue;
+        const noOverlap = col >= it.x + it.w || col + w <= it.x ||
+                          row >= it.y + it.h || row + h <= it.y;
+        if (!noOverlap) return false;
+    }
+    return true;
+}
+
+function onGridDragOver(e, grid) {
+    if (!drag) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    const container = grid.dataset.container;
+    const { col, row } = targetCell(e, grid);
+    const valid = isValid(container, col, row, drag.w, drag.h, drag.itemId);
+
+    showPreview(grid, col, row, drag.w, drag.h, valid);
+    document.getElementById('panel-' + container).classList.add('drag-over');
+}
+
+function onGridDragLeave(e, grid) {
+    // Only hide if truly leaving the grid (not entering a child)
+    if (!grid.contains(e.relatedTarget)) {
+        hidePreview();
+        document.getElementById('panel-' + grid.dataset.container).classList.remove('drag-over');
+    }
+}
+
+async function onGridDrop(e, grid) {
+    e.preventDefault();
+    if (!drag) return;
+
+    const container = grid.dataset.container;
+    const { col, row } = targetCell(e, grid);
+
+    hidePreview();
+    document.getElementById('panel-' + container).classList.remove('drag-over');
+
+    if (!isValid(container, col, row, drag.w, drag.h, drag.itemId)) {
+        toast('❌ Cannot place item there');
+        drag.el.classList.remove('dragging');
+        drag = null;
+        return;
+    }
+
+    // Optimistically move DOM
+    const el = drag.el;
+    el.style.left = (col * CELL) + 'px';
+    el.style.top  = (row * CELL) + 'px';
+    if (el.parentNode !== grid) grid.appendChild(el);
+    el.dataset.container = container;
+    el.classList.remove('dragging');
+
+    // Update local state
+    const local = items.find(i => i.id === drag.itemId);
+    if (local) { local.container = container; local.x = col; local.y = row; }
+
+    const { itemId } = drag;
+    drag = null;
+
+    // Persist to server
+    const body = new URLSearchParams({
+        itemId, targetContainer: container,
+        targetX: col, targetY: row,
+        __RequestVerificationToken: CSRF
+    });
+    try {
+        const res  = await fetch('/Inventory/Move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString()
+        });
+        const json = await res.json();
+        if (!json.success) {
+            toast('⚠️ ' + (json.error || 'Move failed'));
+            location.reload(); // rollback by reloading
+        }
+    } catch {
+        toast('⚠️ Network error — reloading');
+        location.reload();
+    }
+}
+
+// ── Preview div ───────────────────────────────────────────────────────────────
+function showPreview(grid, col, row, w, h, valid) {
+    preview.style.left       = (col * CELL) + 'px';
+    preview.style.top        = (row * CELL) + 'px';
+    preview.style.width      = (w * CELL) + 'px';
+    preview.style.height     = (h * CELL) + 'px';
+    preview.style.background = valid ? 'rgba(0,184,156,.25)' : 'rgba(232,67,106,.25)';
+    preview.style.border     = valid ? '2px solid #00b89c'   : '2px solid #e8436a';
+    preview.style.display    = 'block';
+    if (preview.parentNode !== grid) grid.appendChild(preview);
+}
+
+function hidePreview() {
+    preview.style.display = 'none';
+}
+
+// ── Item info panel ───────────────────────────────────────────────────────────
+let selected = null;
+
+function selectItem(el) {
+    if (selected) selected.classList.remove('selected');
+    if (selected === el) { selected = null; resetPanel(); return; }
+    el.classList.add('selected');
+    selected = el;
+
+    const d = el.dataset;
+    document.getElementById('info-empty').style.display   = 'none';
+    document.getElementById('info-content').style.display = 'block';
+    document.getElementById('info-icon').textContent    = d.icon;
+    document.getElementById('info-name').textContent    = d.name;
+    document.getElementById('info-cat').textContent     = d.cat;
+    document.getElementById('info-desc').textContent    = d.desc;
+    document.getElementById('info-size').textContent    = d.w + ' × ' + d.h + ' cells';
+    document.getElementById('info-rotated').textContent = d.rotated === 'true' ? 'Yes' : 'No';
+    document.getElementById('rotate-row').style.display = d.canRotate === 'true' ? 'flex' : 'none';
+}
+
+function resetPanel() {
+    document.getElementById('info-empty').style.display   = 'block';
+    document.getElementById('info-content').style.display = 'none';
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+    const el = document.getElementById('inv-toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+}
