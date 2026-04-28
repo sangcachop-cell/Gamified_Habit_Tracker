@@ -1,0 +1,71 @@
+namespace HabitTracker.Constants
+{
+    public static class ForestMap
+    {
+        public const int WIDTH  = 128;
+        public const int HEIGHT = 128;
+        public const int CELL_PX = 6;          // pixels per cell on canvas
+        public const int WATER_BORDER = 8;     // outer tiles = water (impassable)
+
+        // ── Zones ────────────────────────────────────────────────────────────
+        public record Zone(string Id, string Name, string Icon, string Color,
+                           int X, int Y, int W, int H, string Description);
+
+        public static readonly Zone[] Locations =
+        {
+            new("cave",      "Cave",      "🦇", "#5a4a3a", 18, 15, 12,  8,
+                "A dark cavern carved into the rock. Something stirs inside."),
+            new("warehouse", "Warehouse", "🏚️", "#7a5c3a", 54, 58, 14, 10,
+                "An abandoned storage facility. Shelves line the crumbling walls."),
+            new("lake",      "Lake",      "🌊", "#2a7abf", 88, 22, 16, 10,
+                "A still body of water. Mist hangs low over the surface."),
+        };
+
+        // ── Spawn points ─────────────────────────────────────────────────────
+        public record SpawnPoint(string Id, int X, int Y, int W, int H,
+                                 string Label, string Color, string RequiredExtract);
+
+        public static readonly SpawnPoint[] Spawns =
+        {
+            new("A", 5, 5, 4, 4, "Spawn A", "#4a90d9", "Alpha"),   // NW → must exit NE
+            new("B", 118, 118, 4, 4, "Spawn B", "#d94a4a", "Beta"), // SE → must exit SW
+        };
+
+        // ── Extract points ────────────────────────────────────────────────────
+        public record ExtractPoint(string Id, int X, int Y, int W, int H,
+                                   string Label, string Color);
+
+        public static readonly ExtractPoint[] Extracts =
+        {
+            new("Alpha", 118, 5,   4, 4, "Extract α", "#00b89c"),  // NE
+            new("Beta",  5,   118, 4, 4, "Extract β", "#00b89c"),  // SW
+        };
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        public static bool IsWater(int x, int y) =>
+            x < WATER_BORDER || y < WATER_BORDER ||
+            x >= WIDTH - WATER_BORDER || y >= HEIGHT - WATER_BORDER;
+
+        public static Zone? GetZone(int x, int y) =>
+            Array.Find(Locations, z => x >= z.X && x < z.X + z.W &&
+                                       y >= z.Y && y < z.Y + z.H);
+
+        public static SpawnPoint? GetSpawn(int x, int y) =>
+            Array.Find(Spawns, s => x >= s.X && x < s.X + s.W &&
+                                    y >= s.Y && y < s.Y + s.H);
+
+        public static ExtractPoint? GetExtract(int x, int y) =>
+            Array.Find(Extracts, e => x >= e.X && x < e.X + e.W &&
+                                      y >= e.Y && y < e.Y + e.H);
+
+        public static int Distance(int x1, int y1, int x2, int y2) =>
+            (int)Math.Round(Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)));
+
+        public static SpawnPoint RandomSpawn() =>
+            Spawns[new Random().Next(Spawns.Length)];
+
+        public static (int cx, int cy) SpawnCenter(SpawnPoint s) =>
+            (s.X + s.W / 2, s.Y + s.H / 2);
+    }
+}

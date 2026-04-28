@@ -1,0 +1,51 @@
+@{ ViewData["Title"] = "Extraction Successful"; }
+
+<style>
+    .result-card {
+        max-width: 480px; margin: 60px auto;
+        background: linear-gradient(135deg, #0f1f0f, #1a3a1a);
+        border: 1.5px solid rgba(76,175,80,.3); border-radius: 24px;
+        padding: 48px 40px; text-align: center; color: white;
+    }
+    .result-icon { font-size: 4rem; margin-bottom: 16px; }
+    .result-title { font-size: 2rem; font-weight: 900; color: #81c784; margin-bottom: 8px; }
+    .result-sub   { font-size: .9rem; color: rgba(255,255,255,.5); margin-bottom: 28px; }
+    .stat-list { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+    .stat-box {
+        background: rgba(255,255,255,.06); border-radius: 12px; padding: 16px 20px;
+    }
+    .stat-num { font-size: 1.8rem; font-weight: 900; color: #81c784; }
+    .stat-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; opacity: .5; margin-top: 2px; }
+    .back-btn {
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+        border: none; border-radius: 12px; color: white;
+        font-weight: 800; font-size: 1rem; padding: 14px 36px;
+        cursor: pointer; text-decoration: none; display: inline-block;
+    }
+</style>
+
+<div class="result-card">
+    <div class="result-icon">🌲✅</div>
+    <div class="result-title">Extracted!</div>
+    <p class="result-sub">
+        You escaped the forest via <strong style="color:#00b89c;">Extract @TempData["ExtractId"]</strong>.
+        Spawned at <strong>@TempData["ExtractSpawn"]</strong>.
+    </p>
+
+    <div class="stat-list">
+        <div class="stat-box">
+            <div class="stat-num">@TempData["ExtractMoves"]</div>
+            <div class="stat-lbl">Moves Spent</div>
+        </div>
+        <div class="stat-box">
+            @{
+                int secs = (int)(TempData["ExtractDuration"] ?? 0);
+                string dur = secs >= 60 ? $"{secs/60}m {secs%60}s" : $"{secs}s";
+            }
+            <div class="stat-num">@dur</div>
+            <div class="stat-lbl">Time Survived</div>
+        </div>
+    </div>
+
+    <a asp-action="Index" class="back-btn">🌲 Enter Again</a>
+</div>

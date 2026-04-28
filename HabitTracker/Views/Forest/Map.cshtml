@@ -1,0 +1,462 @@
+@using HabitTracker.Constants
+@{
+    ViewData["Title"] = "The Forest — Map";
+    var s = ViewBag.Session as HabitTracker.Models.ForestSession;
+    string sessionJson = ViewBag.SessionJson as string ?? "{}";
+
+    var reqExtract = ForestMap.Extracts.FirstOrDefault(e => e.Id == s?.RequiredExtractId);
+    var spawnInfo  = ForestMap.Spawns.FirstOrDefault(sp => sp.Id == s?.SpawnId);
+
+    const int W = ForestMap.WIDTH;
+    const int H = ForestMap.HEIGHT;
+}
+
+<style>
+    body { background: #0a120a; color: #e8f0e8; }
+    .map-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+
+    .canvas-wrap {
+        position: relative;
+        border: 2px solid rgba(76,175,80,.3);
+        border-radius: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 0 40px rgba(0,100,0,.25);
+    }
+    #forest-canvas { display: block; cursor: crosshair; }
+
+    .map-panel {
+        background: #0f1f0f; border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 14px; padding: 20px; min-width: 240px; max-width: 280px;
+        flex-shrink: 0;
+    }
+    .panel-title { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
+                   color: rgba(255,255,255,.3); margin-bottom: 10px; }
+    .stat-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 8px; }
+    .stat-val  { font-weight: 700; color: #81c784; }
+
+    .location-chip {
+        background: rgba(76,175,80,.15); border: 1px solid rgba(76,175,80,.3);
+        border-radius: 8px; padding: 8px 12px; font-size: .82rem;
+        margin-top: 12px; display: none;
+    }
+    .location-chip.show { display: block; }
+
+    .extract-btn {
+        width: 100%; margin-top: 16px; padding: 12px;
+        background: linear-gradient(135deg, #00b89c, #00897b);
+        border: none; border-radius: 10px; color: white;
+        font-weight: 800; font-size: .95rem; cursor: pointer; display: none;
+    }
+    .extract-btn.show { display: block; animation: pulse-btn 1.5s infinite; }
+    @@keyframes pulse-btn {
+        0%,100% { box-shadow: 0 0 0 0 rgba(0,184,156,.5); }
+        50%      { box-shadow: 0 0 0 8px rgba(0,184,156,0); }
+    }
+
+    .legend { display: flex; flex-direction: column; gap: 5px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: .75rem; }
+    .legend-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+    .move-log {
+        margin-top: 6px; max-height: 130px; overflow-y: auto;
+        font-size: .73rem; color: rgba(255,255,255,.35);
+        display: flex; flex-direction: column; gap: 2px;
+    }
+    .hint-bar { font-size: .7rem; color: rgba(255,255,255,.25); margin-top: 10px; line-height: 1.6; }
+</style>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+    <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:#81c784;">🌲 The Forest</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <span style="font-size:.8rem; color:rgba(255,255,255,.4);">
+            Required exit: <strong style="color:#00b89c;">@reqExtract?.Label (Extract @s?.RequiredExtractId)</strong>
+        </span>
+        <form asp-action="Index" method="get">
+            <button type="submit" style="background:rgba(232,67,106,.15); border:1px solid rgba(232,67,106,.3);
+                border-radius:8px; color:#e8436a; padding:6px 14px; font-size:.8rem; cursor:pointer;">
+                ✕ Abandon
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="map-layout">
+
+    <!-- CANVAS MAP -->
+    <div class="canvas-wrap">
+        <canvas id="forest-canvas"></canvas>
+    </div>
+
+    <!-- INFO PANEL -->
+    <div class="map-panel">
+        <div class="panel-title">Player Status</div>
+        <div class="stat-row"><span>Spawn</span><span class="stat-val">@spawnInfo?.Label</span></div>
+        <div class="stat-row"><span>Position</span><span class="stat-val" id="pos-display">(@s?.PlayerX, @s?.PlayerY)</span></div>
+        <div class="stat-row"><span>Moves</span><span class="stat-val" id="moves-display">@s?.MovesSpent</span></div>
+        <div class="stat-row"><span>Cursor</span><span class="stat-val" id="hover-display" style="color:rgba(255,255,255,.4);">—</span></div>
+
+        <div class="location-chip" id="location-chip">
+            <span id="location-icon"></span> <strong id="location-name"></strong><br>
+            <span id="location-desc" style="font-size:.75rem; opacity:.7;"></span>
+        </div>
+
+        <form asp-action="Extract" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="extract-btn" id="extract-btn">⬆️ Extract Here</button>
+        </form>
+
+        <div class="hint-bar">💡 Click to move &nbsp;|&nbsp; WASD / ↑↓←→ to step</div>
+
+        <div class="panel-title" style="margin-top:18px;">Legend</div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#2d5a2d;"></div> Forest</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c;"></div> Water (blocked)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#5a4a3a;"></div> 🦇 Cave</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7a5c3a;"></div> 🏚️ Warehouse</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2a7abf;"></div> 🌊 Lake</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4a90d9;"></div> Spawn A (NW)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d94a4a;"></div> Spawn B (SE)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00b89c;"></div> ⬆️ Extract (target)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+        </div>
+
+        <div class="panel-title" style="margin-top:18px;">Log</div>
+        <div class="move-log" id="move-log">
+            <div>Spawned at @spawnInfo?.Label (@s?.SpawnId)</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const MAP_W = @W, MAP_H = @H;
+const WATER_BORDER = @ForestMap.WATER_BORDER;
+
+const LOCATIONS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    ForestMap.Locations.Select(z => new { z.Id, z.Name, z.Icon, z.Color, z.X, z.Y, z.W, z.H })));
+const SPAWNS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    ForestMap.Spawns.Select(s => new { s.Id, s.X, s.Y, s.W, s.H, s.Label, s.Color })));
+const EXTRACTS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    ForestMap.Extracts.Select(e => new { e.Id, e.X, e.Y, e.W, e.H, e.Label, e.Color })));
+
+let session = @Html.Raw(sessionJson);
+
+// Viewport: 21 cells visible, 30px per cell → 630×630 canvas
+const VP = 21, VC = 30;
+// Minimap: 140×140 overlay
+const MINI = 140;
+const MC   = MINI / MAP_W;
+
+const canvas = document.getElementById('forest-canvas');
+canvas.width = canvas.height = VP * VC;
+const ctx = canvas.getContext('2d');
+
+let camX = 0, camY = 0, hoverWX = -1, hoverWY = -1;
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function updateCamera() {
+    camX = clamp(session.PlayerX - Math.floor(VP / 2), 0, MAP_W - VP);
+    camY = clamp(session.PlayerY - Math.floor(VP / 2), 0, MAP_H - VP);
+}
+
+// Pre-render static minimap once
+const miniCanvas = document.createElement('canvas');
+miniCanvas.width = miniCanvas.height = MINI;
+const mctx = miniCanvas.getContext('2d');
+
+(function buildMinimap() {
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if (x < WATER_BORDER || y < WATER_BORDER || x >= MAP_W - WATER_BORDER || y >= MAP_H - WATER_BORDER) {
+                mctx.fillStyle = '#1a3a5c';
+            } else {
+                mctx.fillStyle = ((x * 13 + y * 7) % 5 < 2) ? '#254a25' : '#2d5a2d';
+            }
+            mctx.fillRect(x * MC, y * MC, Math.ceil(MC), Math.ceil(MC));
+        }
+    }
+    LOCATIONS.forEach(function(l) {
+        mctx.fillStyle = l.Color;
+        mctx.fillRect(l.X * MC, l.Y * MC, l.W * MC, l.H * MC);
+    });
+    SPAWNS.forEach(function(sp) {
+        mctx.fillStyle = sp.Color;
+        mctx.fillRect(sp.X * MC, sp.Y * MC, sp.W * MC, sp.H * MC);
+    });
+    EXTRACTS.forEach(function(ex) {
+        mctx.fillStyle = ex.Id === session.RequiredExtractId ? '#00e5c0' : '#007060';
+        mctx.fillRect(ex.X * MC, ex.Y * MC, ex.W * MC, ex.H * MC);
+    });
+})();
+
+function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+}
+
+function drawMap() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Terrain cells
+    for (let dy = 0; dy < VP; dy++) {
+        for (let dx = 0; dx < VP; dx++) {
+            const wx = camX + dx, wy = camY + dy;
+            const px = dx * VC, py = dy * VC;
+            const isHover = wx === hoverWX && wy === hoverWY;
+
+            if (wx < WATER_BORDER || wy < WATER_BORDER || wx >= MAP_W - WATER_BORDER || wy >= MAP_H - WATER_BORDER) {
+                const v = (wx * 3 + wy * 7) % 3;
+                ctx.fillStyle = v === 0 ? '#1a3a5c' : v === 1 ? '#1c3f63' : '#1e4268';
+            } else {
+                const v = (wx * 13 + wy * 7) % 7;
+                ctx.fillStyle = v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633';
+            }
+            ctx.fillRect(px, py, VC, VC);
+
+            if (isHover) {
+                ctx.fillStyle = 'rgba(255,255,255,.12)';
+                ctx.fillRect(px, py, VC, VC);
+            }
+            ctx.strokeStyle = 'rgba(0,0,0,.07)'; ctx.lineWidth = 0.5;
+            ctx.strokeRect(px, py, VC, VC);
+        }
+    }
+
+    // 2. Locations
+    LOCATIONS.forEach(function(loc) {
+        const vx1 = Math.max(loc.X, camX), vy1 = Math.max(loc.Y, camY);
+        const vx2 = Math.min(loc.X + loc.W, camX + VP), vy2 = Math.min(loc.Y + loc.H, camY + VP);
+        if (vx2 <= vx1 || vy2 <= vy1) return;
+
+        const px = (vx1 - camX) * VC, py = (vy1 - camY) * VC;
+        const pw = (vx2 - vx1) * VC, ph = (vy2 - vy1) * VC;
+
+        ctx.fillStyle = loc.Color; ctx.globalAlpha = 0.88;
+        rr(ctx, px, py, pw, ph, 4); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = 1.5;
+        rr(ctx, px, py, pw, ph, 4); ctx.stroke();
+
+        const cVX = (loc.X + loc.W / 2 - camX) * VC, cVY = (loc.Y + loc.H / 2 - camY) * VC;
+        if (cVX >= 0 && cVX <= canvas.width && cVY >= 0 && cVY <= canvas.height) {
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = '18px serif'; ctx.fillStyle = 'white';
+            ctx.fillText(loc.Icon, cVX, cVY - 8);
+            ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.9)';
+            ctx.fillText(loc.Name, cVX, cVY + 11);
+        }
+    });
+
+    // 3. Spawns
+    SPAWNS.forEach(function(sp) {
+        const vx1 = Math.max(sp.X, camX), vy1 = Math.max(sp.Y, camY);
+        const vx2 = Math.min(sp.X + sp.W, camX + VP), vy2 = Math.min(sp.Y + sp.H, camY + VP);
+        if (vx2 <= vx1 || vy2 <= vy1) return;
+
+        const px = (vx1 - camX) * VC, py = (vy1 - camY) * VC;
+        const pw = (vx2 - vx1) * VC, ph = (vy2 - vy1) * VC;
+
+        ctx.fillStyle = sp.Color; ctx.globalAlpha = 0.72;
+        rr(ctx, px, py, pw, ph, 3); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = sp.Color; ctx.lineWidth = 2;
+        rr(ctx, px, py, pw, ph, 3); ctx.stroke();
+
+        const cVX = (sp.X + sp.W / 2 - camX) * VC, cVY = (sp.Y + sp.H / 2 - camY) * VC;
+        if (cVX >= 0 && cVX <= canvas.width && cVY >= 0 && cVY <= canvas.height) {
+            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = 'white';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(sp.Label, cVX, cVY);
+        }
+    });
+
+    // 4. Extracts
+    EXTRACTS.forEach(function(ex) {
+        const vx1 = Math.max(ex.X, camX), vy1 = Math.max(ex.Y, camY);
+        const vx2 = Math.min(ex.X + ex.W, camX + VP), vy2 = Math.min(ex.Y + ex.H, camY + VP);
+        if (vx2 <= vx1 || vy2 <= vy1) return;
+
+        const px = (vx1 - camX) * VC, py = (vy1 - camY) * VC;
+        const pw = (vx2 - vx1) * VC, ph = (vy2 - vy1) * VC;
+        const isReq = ex.Id === session.RequiredExtractId;
+
+        ctx.fillStyle = isReq ? '#00b89c' : '#005f50'; ctx.globalAlpha = isReq ? 0.82 : 0.35;
+        rr(ctx, px, py, pw, ph, 3); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = isReq ? '#00e5c0' : '#007060'; ctx.lineWidth = isReq ? 2.5 : 1;
+        rr(ctx, px, py, pw, ph, 3); ctx.stroke();
+
+        const cVX = (ex.X + ex.W / 2 - camX) * VC, cVY = (ex.Y + ex.H / 2 - camY) * VC;
+        if (cVX >= 0 && cVX <= canvas.width && cVY >= 0 && cVY <= canvas.height) {
+            ctx.font = (isReq ? 'bold 10px' : '9px') + ' sans-serif'; ctx.fillStyle = 'white';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText((isReq ? '⬆ ' : '') + ex.Label, cVX, cVY);
+        }
+    });
+
+    // 5. Player
+    const pVX = (session.PlayerX - camX + 0.5) * VC;
+    const pVY = (session.PlayerY - camY + 0.5) * VC;
+
+    const grd = ctx.createRadialGradient(pVX, pVY, 0, pVX, pVY, VC * 1.7);
+    grd.addColorStop(0, 'rgba(240,180,41,.55)');
+    grd.addColorStop(1, 'rgba(240,180,41,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(pVX, pVY, VC * 1.7, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#f0b429';
+    ctx.beginPath(); ctx.arc(pVX, pVY, VC * 0.38, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+
+    // 6. Minimap overlay (bottom-right corner)
+    drawMinimap();
+}
+
+function drawMinimap() {
+    const mx = canvas.width  - MINI - 8;
+    const my = canvas.height - MINI - 8;
+
+    // background panel
+    ctx.fillStyle = 'rgba(0,8,0,.84)';
+    rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.fill();
+
+    // terrain image
+    ctx.drawImage(miniCanvas, mx, my);
+
+    // player dot
+    ctx.fillStyle = '#f0b429';
+    ctx.beginPath();
+    ctx.arc(mx + (session.PlayerX + 0.5) * MC, my + (session.PlayerY + 0.5) * MC, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
+
+    // viewport rect
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
+    ctx.strokeRect(mx + camX * MC, my + camY * MC, VP * MC, VP * MC);
+
+    // border
+    ctx.strokeStyle = 'rgba(76,175,80,.4)'; ctx.lineWidth = 1;
+    rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.stroke();
+
+    // label
+    ctx.font = '8px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.28)';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText('MAP', mx, my - 2);
+}
+
+function minimapHitbox(cx, cy) {
+    const mx = canvas.width - MINI - 11, my = canvas.height - MINI - 11;
+    return cx >= mx && cx <= mx + MINI + 6 && cy >= my && cy <= my + MINI + 6;
+}
+
+// Init
+updateCamera();
+drawMap();
+
+// Hover
+canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
+
+    if (minimapHitbox(cx, cy)) {
+        hoverWX = hoverWY = -1;
+        canvas.style.cursor = 'default';
+        document.getElementById('hover-display').textContent = '—';
+    } else {
+        hoverWX = camX + Math.floor(cx / VC);
+        hoverWY = camY + Math.floor(cy / VC);
+        document.getElementById('hover-display').textContent = '(' + hoverWX + ', ' + hoverWY + ')';
+        const water = hoverWX < WATER_BORDER || hoverWY < WATER_BORDER ||
+                      hoverWX >= MAP_W - WATER_BORDER || hoverWY >= MAP_H - WATER_BORDER;
+        canvas.style.cursor = water ? 'not-allowed' : 'crosshair';
+    }
+    drawMap();
+});
+
+canvas.addEventListener('mouseleave', function() {
+    hoverWX = hoverWY = -1; drawMap();
+});
+
+// Click to move
+canvas.addEventListener('click', async function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
+    if (minimapHitbox(cx, cy)) return;
+
+    const tx = camX + Math.floor(cx / VC), ty = camY + Math.floor(cy / VC);
+    if (tx < WATER_BORDER || ty < WATER_BORDER || tx >= MAP_W - WATER_BORDER || ty >= MAP_H - WATER_BORDER) {
+        addLog('Cannot enter water.');
+        return;
+    }
+    await doMove(tx, ty);
+});
+
+// WASD / arrow keys
+document.addEventListener('keydown', async function(e) {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const dirs = {
+        ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0],
+        w: [0,-1], s: [0,1], a: [-1,0], d: [1,0]
+    };
+    const dir = dirs[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    const tx = session.PlayerX + dir[0], ty = session.PlayerY + dir[1];
+    if (tx < WATER_BORDER || ty < WATER_BORDER || tx >= MAP_W - WATER_BORDER || ty >= MAP_H - WATER_BORDER) return;
+    await doMove(tx, ty);
+});
+
+async function doMove(tx, ty) {
+    const res  = await fetch('/Forest/Move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ x: tx, y: ty })
+    });
+    const data = await res.json();
+    if (!data.ok) { addLog(data.error); return; }
+
+    session.PlayerX = data.x; session.PlayerY = data.y; session.MovesSpent = data.moves;
+    document.getElementById('pos-display').textContent   = '(' + data.x + ', ' + data.y + ')';
+    document.getElementById('moves-display').textContent = data.moves;
+
+    const chip = document.getElementById('location-chip');
+    if (data.zoneName) {
+        const loc = LOCATIONS.find(function(l) { return l.Name === data.zoneName; });
+        document.getElementById('location-icon').textContent = loc ? loc.Icon : '';
+        document.getElementById('location-name').textContent = data.zoneName;
+        document.getElementById('location-desc').textContent = data.zoneDesc || '';
+        chip.classList.add('show');
+    } else {
+        chip.classList.remove('show');
+    }
+
+    const btn = document.getElementById('extract-btn');
+    if (data.canExtract) {
+        btn.classList.add('show');
+        addLog('Reached ' + data.extractId + ' — ready to extract!');
+    } else {
+        btn.classList.remove('show');
+    }
+    addLog('→ (' + data.x + ', ' + data.y + ')  +' + data.dist + ' moves' + (data.zoneName ? '  [' + data.zoneName + ']' : ''));
+
+    updateCamera();
+    drawMap();
+}
+
+function addLog(msg) {
+    const log = document.getElementById('move-log');
+    const div = document.createElement('div'); div.textContent = msg;
+    log.prepend(div);
+}
+</script>
+}
