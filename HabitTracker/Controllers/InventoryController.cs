@@ -1,5 +1,6 @@
 using HabitTracker.Constants;
 using HabitTracker.Data;
+using Microsoft.EntityFrameworkCore;
 using HabitTracker.Models;
 using HabitTracker.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +34,15 @@ namespace HabitTracker.Controllers
             var user     = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var storage  = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.STORAGE);
             var backpack = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.BACKPACK);
+
+            int storageLevel = await _context.UserFacilities
+                .Where(uf => uf.UserId == userId && uf.FacilityId == FacilityCatalogue.STORAGE_FACILITY_ID)
+                .Select(uf => uf.Level)
+                .FirstOrDefaultAsync();
+            if (storageLevel == 0) storageLevel = 1;
+            var (sCols, sRows) = ItemCatalogue.StorageSizeForLevel(storageLevel);
+            ViewBag.StorageCols = sCols;
+            ViewBag.StorageRows = sRows;
 
             ViewBag.StorageItems  = BuildPlaced(storage);
             ViewBag.BackpackItems = BuildPlaced(backpack);

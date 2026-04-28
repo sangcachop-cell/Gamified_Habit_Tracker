@@ -13,7 +13,8 @@
     string? eqRigItemId = ViewBag.EquippedRigItem      as string;
 
     const int C = ItemCatalogue.CELL_PX;
-    var (sCols,   sRows)  = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+    int sCols = (int)(ViewBag.StorageCols ?? 10);
+    int sRows = (int)(ViewBag.StorageRows ?? 10);
     var (bCols,   bRows)  = ItemCatalogue.ContainerSize(ItemCatalogue.BACKPACK);
     var (ebCols,  ebRows) = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_BACKPACK);
     var (erCols,  erRows) = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_RIG);
@@ -369,12 +370,21 @@
                     @foreach (var item in eqBpItems) {
                         <div class="inv-item" id="item-@item.Id" draggable="true"
                              style="left:@(item.GridX*C)px; top:@(item.GridY*C)px; width:@(item.W*C)px; height:@(item.H*C)px; background:@(item.TileColor)cc;"
-                             data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedRig" data-w="@item.W" data-h="@item.H"
+                             data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedBackpack" data-w="@item.W" data-h="@item.H"
                              data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
                              data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
                              onclick="selectItem(this)">
                             <span class="item-icon">@item.Icon</span>
                             <span class="item-name">@item.Name</span>
+                            @if (item.CanRotate)
+                            {
+                                <form class="rotate-form"
+                                      asp-action="Rotate" asp-route-id="@item.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="rotate-btn"
+                                            onclick="event.stopPropagation()" title="Rotate">↺</button>
+                                </form>
+                            }
                         </div>
                     }
                 </div>

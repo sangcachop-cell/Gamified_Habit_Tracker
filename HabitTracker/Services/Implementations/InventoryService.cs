@@ -1,6 +1,7 @@
 using HabitTracker.Constants;
 using HabitTracker.Data;
 using HabitTracker.Models;
+using HabitTracker.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HabitTracker.Services.Implementations
@@ -104,8 +105,8 @@ namespace HabitTracker.Services.Implementations
             int newW = item.IsRotated ? def.Width  : def.Height;
             int newH = item.IsRotated ? def.Height : def.Width;
 
-            // Check container bounds
-            var (cols, rows) = ItemCatalogue.ContainerSize(item.ContainerType);
+            // Check container bounds (dynamic for Storage)
+            var (cols, rows) = await GetEffectiveContainerSizeAsync(userId, item.ContainerType);
             if (item.GridX + newW > cols || item.GridY + newH > rows)
             {
                 _logger.LogInformation($"Rotate rejected: item {itemId} would exceed container bounds");
@@ -139,13 +140,13 @@ namespace HabitTracker.Services.Implementations
             int w = item.IsRotated ? def.Height : def.Width;
             int h = item.IsRotated ? def.Width  : def.Height;
 
-            // Slot-size constraint (Pocket = 1×1, Rig = 2×1)
+            // Slot-size constraint (Pocket = 1×1, Rig = 1×2)
             var slotConstraint = ItemCatalogue.SlotConstraint(targetContainer);
             if (slotConstraint != null && (w != slotConstraint.Value.W || h != slotConstraint.Value.H))
                 return false;
 
-            // Bounds check
-            var (cols, rows) = ItemCatalogue.ContainerSize(targetContainer);
+            // Bounds check (Storage uses dynamic size based on facility level)
+            var (cols, rows) = await GetEffectiveContainerSizeAsync(userId, targetContainer);
             if (x < 0 || y < 0 || x + w > cols || y + h > rows) return false;
 
             // Overlap check (exclude self)
@@ -219,7 +220,7 @@ namespace HabitTracker.Services.Implementations
             var storageItems = await _context.UserInventoryItems
                 .Where(i => i.UserId == userId && i.ContainerType == ItemCatalogue.STORAGE)
                 .ToListAsync();
-            var (cols, rows) = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+            var (cols, rows) = await GetEffectiveContainerSizeAsync(userId, ItemCatalogue.STORAGE);
             var freePos = FindFreeSlot(storageItems, def.Width, def.Height, cols, rows);
             if (freePos == null) return false;
 
@@ -244,6 +245,19 @@ namespace HabitTracker.Services.Implementations
         }
 
         // ── helpers ──────────────────────────────────────────────────────────
+
+        private async Task<(int Cols, int Rows)> GetEffectiveContainerSizeAsync(int userId, string containerType)
+        {
+            if (containerType == ItemCatalogue.STORAGE)
+            {
+                int level = await _context.UserFacilities
+                    .Where(uf => uf.UserId == userId && uf.FacilityId == FacilityCatalogue.STORAGE_FACILITY_ID)
+                    .Select(uf => uf.Level)
+                    .FirstOrDefaultAsync();
+                return ItemCatalogue.StorageSizeForLevel(level == 0 ? 1 : level);
+            }
+            return ItemCatalogue.ContainerSize(containerType);
+        }
 
         private static (int x, int y)? FindFreeSlot(
             List<UserInventoryItem> existing, int w, int h, int cols, int rows)

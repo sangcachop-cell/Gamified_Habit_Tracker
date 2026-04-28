@@ -85,6 +85,10 @@ namespace HabitTracker.Constants
             _                  => (10, 10)
         };
 
+        // Dynamic storage size based on Storage Room facility level
+        public static (int Cols, int Rows) StorageSizeForLevel(int level) =>
+            (10, 10 + (level - 1) * 3);
+
         // Exact item size required to enter a container (null = no restriction)
         public static (int W, int H)? SlotConstraint(string containerType) => containerType switch {
             "Backpack"    => (1, 1),
