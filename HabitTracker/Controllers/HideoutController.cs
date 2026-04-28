@@ -5,6 +5,7 @@ using HabitTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HabitTracker.Controllers
 {
@@ -45,6 +46,7 @@ namespace HabitTracker.Controllers
 
             // Ensure user has all facilities unlocked at level 1
             await _hideoutService.EnsureUserFacilitiesAsync(userId.Value);
+            await _hideoutService.CompleteReadyUpgradesAsync(userId.Value);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
@@ -81,9 +83,15 @@ namespace HabitTracker.Controllers
             ViewBag.SelectedFrequency = frequency;
 
             // Storage room (shared with Inventory page — same Storage container)
-            var storageRaw = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.STORAGE);
+            var storageRaw   = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.STORAGE);
             var storageItems = BuildPlaced(storageRaw);
-            var (hsCols, hsRows) = ItemCatalogue.ContainerSize(ItemCatalogue.STORAGE);
+            int storageLevel = _hideoutService.GetStorageLevel(facilities);
+            var (hsCols, hsRows) = ItemCatalogue.StorageSizeForLevel(storageLevel);
+
+            // Pass upgrade cost info per facility
+            ViewBag.UpgradeCosts = facilities.ToDictionary(
+                uf => uf.FacilityId,
+                uf => FacilityCatalogue.GetCost(uf.FacilityId, uf.Level));
             var storageItemsJson = JsonSerializer.Serialize(storageItems.Select(i => new {
                 id = i.Id, container = i.Container, x = i.GridX, y = i.GridY, w = i.W, h = i.H
             }));
@@ -194,12 +202,19 @@ namespace HabitTracker.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ===== UPGRADE FACILITY (placeholder) =====
+        // ===== UPGRADE FACILITY =====
         [HttpPost("Upgrade/{facilityId}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Upgrade(int facilityId)
+        public async Task<IActionResult> Upgrade(int facilityId)
         {
-            TempData["Info"] = "⚒️ Facility upgrades are coming in a future update!";
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            var (ok, error) = await _hideoutService.StartUpgradeAsync(userId.Value, facilityId);
+            TempData[ok ? "ToastXP" : "Error"] = ok
+                ? "⚒️ Upgrade started!"
+                : $"Cannot upgrade: {error}";
+
             return RedirectToAction(nameof(Index));
         }
 

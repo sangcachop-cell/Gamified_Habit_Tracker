@@ -14,6 +14,9 @@ namespace HabitTracker.Models
 
         public DateTime UnlockedAt { get; set; }
 
+        // Set when upgrade begins; null = idle
+        public DateTime? UpgradeStartedAt { get; set; }
+
         public virtual User Facility_User { get; set; }
         public virtual Facility Facility { get; set; }
     }

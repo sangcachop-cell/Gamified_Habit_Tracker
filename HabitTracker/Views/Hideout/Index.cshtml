@@ -3,6 +3,7 @@
 @using HabitTracker.Constants
 @using HabitTracker.Controllers
 @using static HabitTracker.Constants.AppConstants
+@using static HabitTracker.Constants.FacilityCatalogue
 @{
     ViewData["Title"] = "Hideout";
 
@@ -19,6 +20,9 @@
     int woodCount  = (int)(ViewBag.Wood  ?? 100);
     int stoneCount = (int)(ViewBag.Stone ?? 100);
     const int C    = ItemCatalogue.CELL_PX;
+
+    var upgradeCosts = ViewBag.UpgradeCosts as Dictionary<int, FacilityCatalogue.UpgradeCost?>
+                       ?? new Dictionary<int, FacilityCatalogue.UpgradeCost?>();
 
     int buffAtk           = (int)(ViewBag.BuffAtk    ?? 0);
     int buffHp            = (int)(ViewBag.BuffHp     ?? 0);
@@ -419,22 +423,50 @@
                 }
             </div>
 
-            <!-- Upgrade button (placeholder) -->
-            @if (!isMax)
-            {
-                <form asp-action="Upgrade" asp-route-facilityId="@f.Id" method="post" style="margin-top:2px;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="upgrade-btn"
-                            style="background:@(bg)18; color:@bg;">
-                        ⚒️ Upgrade
-                        <div class="tooltip-coming">🔒 Coming in future update</div>
-                    </button>
-                </form>
-            }
-            else
+            @* Upgrade section *@
+            @if (isMax)
             {
                 <div style="text-align:center; font-size:.78rem; font-weight:700; color:var(--gold); padding:8px 0; background:rgba(240,180,41,.08); border-radius:10px; margin-top:2px;">
                     ✦ Fully Upgraded
+                </div>
+            }
+            else if (uf.UpgradeStartedAt != null)
+            {
+                @* Upgrade in progress *@
+                var cost2 = FacilityCatalogue.GetCost(f.Id, uf.Level);
+                var completesAt = uf.UpgradeStartedAt.Value.Add(cost2?.Duration ?? TimeSpan.Zero);
+                var secsLeft = Math.Max(0, (int)(completesAt - DateTime.UtcNow).TotalSeconds);
+                <div class="upgrade-timer" data-secs="@secsLeft"
+                     style="background:rgba(92,61,222,.1); border:1px solid rgba(92,61,222,.3);
+                            border-radius:10px; padding:8px 12px; margin-top:2px;
+                            text-align:center; font-size:.82rem; font-weight:700; color:var(--violet);">
+                    ⏳ <span class="timer-display">@(secsLeft > 0 ? "..." : "Ready!")</span>
+                </div>
+            }
+            else
+            {
+                @* Show cost + upgrade button *@
+                upgradeCosts.TryGetValue(f.Id, out var cost);
+                bool canAfford = cost != null && (user?.Wood ?? 0) >= cost.Wood && (user?.Stone ?? 0) >= cost.Stone;
+                <div style="margin-top:6px;">
+                    @if (cost != null)
+                    {
+                        <div style="display:flex; gap:8px; margin-bottom:6px; font-size:.78rem; font-weight:600; flex-wrap:wrap;">
+                            <span style="color:#c9a227;">🪵 @cost.Wood</span>
+                            @if (cost.Stone > 0) { <span style="color:#888;">🪨 @cost.Stone</span> }
+                            <span style="color:#aaa; margin-left:auto;">⏱ @(cost.Duration.TotalMinutes < 60 ? $"{(int)cost.Duration.TotalMinutes}m" : $"{cost.Duration.TotalHours:F0}h")</span>
+                        </div>
+                    }
+                    <form asp-action="Upgrade" asp-route-facilityId="@f.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="upgrade-btn" @(canAfford ? "" : "disabled")
+                                style="background:@(canAfford ? $"{bg}25" : "rgba(100,100,100,.1)");
+                                       color:@(canAfford ? bg : "#666");
+                                       cursor:@(canAfford ? "pointer" : "not-allowed");
+                                       opacity:@(canAfford ? "1" : ".6"); width:100%;">
+                            ⚒️ Upgrade
+                        </button>
+                    </form>
                 </div>
             }
         </div>
@@ -644,6 +676,32 @@
 
 @section Scripts {
 <script>
+// ── Upgrade timers ───────────────────────────────────────────────────────────
+document.querySelectorAll('.upgrade-timer').forEach(function(el) {
+    var secs = parseInt(el.dataset.secs, 10);
+    var display = el.querySelector('.timer-display');
+    if (secs <= 0) { display.textContent = 'Ready! Refresh to collect.'; return; }
+    var interval = setInterval(function() {
+        secs--;
+        if (secs <= 0) {
+            clearInterval(interval);
+            display.textContent = 'Ready! Refresh to collect.';
+            el.style.borderColor = 'rgba(0,184,156,.5)';
+            el.style.color = '#00b89c';
+            return;
+        }
+        var h = Math.floor(secs / 3600);
+        var m = Math.floor((secs % 3600) / 60);
+        var s = secs % 60;
+        display.textContent = h > 0
+            ? h + 'h ' + m + 'm ' + s + 's'
+            : m > 0 ? m + 'm ' + s + 's' : s + 's';
+    }, 1000);
+    // init display immediately
+    var h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs%60;
+    display.textContent = h>0 ? h+'h '+m+'m '+s+'s' : m>0 ? m+'m '+s+'s' : s+'s';
+});
+
 // ── Storage Room collapse ─────────────────────────────────────────────────────
 let hsRoomOpen = false;
 function toggleHsRoom() {

@@ -1,3 +1,4 @@
+using HabitTracker.Constants;
 using HabitTracker.Data;
 using HabitTracker.Models;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,60 @@ namespace HabitTracker.Services.Implementations
             }
 
             return (atk, hp, armor, xpGain, stamina);
+        }
+
+        public int GetStorageLevel(List<UserFacility> facilities) =>
+            facilities.FirstOrDefault(uf => uf.FacilityId == FacilityCatalogue.STORAGE_FACILITY_ID)?.Level ?? 1;
+
+        public async Task<(bool Success, string? Error)> StartUpgradeAsync(int userId, int facilityId)
+        {
+            var uf = await _context.UserFacilities
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.FacilityId == facilityId);
+            if (uf == null) return (false, "Facility not found.");
+
+            if (uf.Level >= 5) return (false, "Already at max level.");
+            if (uf.UpgradeStartedAt != null) return (false, "Upgrade already in progress.");
+
+            var cost = FacilityCatalogue.GetCost(facilityId, uf.Level);
+            if (cost == null) return (false, "No upgrade available.");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return (false, "User not found.");
+
+            if (user.Wood < cost.Wood || user.Stone < cost.Stone)
+                return (false, $"Need {cost.Wood} Wood and {cost.Stone} Stone.");
+
+            user.Wood  -= cost.Wood;
+            user.Stone -= cost.Stone;
+            uf.UpgradeStartedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"User {userId} started upgrade on facility {facilityId} (lv{uf.Level}→{uf.Level+1})");
+            return (true, null);
+        }
+
+        public async Task CompleteReadyUpgradesAsync(int userId)
+        {
+            var upgrading = await _context.UserFacilities
+                .Where(uf => uf.UserId == userId && uf.UpgradeStartedAt != null)
+                .ToListAsync();
+
+            bool any = false;
+            foreach (var uf in upgrading)
+            {
+                var cost = FacilityCatalogue.GetCost(uf.FacilityId, uf.Level);
+                if (cost == null) { uf.UpgradeStartedAt = null; any = true; continue; }
+
+                if (DateTime.UtcNow >= uf.UpgradeStartedAt!.Value + cost.Duration)
+                {
+                    uf.Level++;
+                    uf.UpgradeStartedAt = null;
+                    any = true;
+                    _logger.LogInformation($"User {userId} facility {uf.FacilityId} upgraded to lv{uf.Level}");
+                }
+            }
+
+            if (any) await _context.SaveChangesAsync();
         }
     }
 }

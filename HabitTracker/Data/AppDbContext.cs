@@ -91,6 +91,12 @@ namespace HabitTracker.Data
                     Id = 5, Name = "Barracks", Icon = "🛡️",
                     Description = "Hardened defenses line the outer walls. A stalwart position from which to weather any storm.",
                     StatAffected = "Armor", BuffDescription = "+5 Armor per level", BuffPerLevel = 5, MaxLevel = 5
+                },
+                new Facility
+                {
+                    Id = 6, Name = "Storage Room", Icon = "📦",
+                    Description = "Expand your hideout's storage capacity. Each upgrade adds 30 more grid slots (10×3).",
+                    StatAffected = "Storage", BuffDescription = "+30 slots per level", BuffPerLevel = 30, MaxLevel = 5
                 }
             );
 
