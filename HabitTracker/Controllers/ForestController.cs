@@ -73,12 +73,63 @@ namespace HabitTracker.Controllers
 
             int tx = req.X, ty = req.Y;
 
-            if (ForestMap.IsWater(tx, ty))
-                return Json(new { ok = false, error = "Cannot enter water" });
             if (tx < 0 || ty < 0 || tx >= ForestMap.WIDTH || ty >= ForestMap.HEIGHT)
                 return Json(new { ok = false, error = "Out of bounds" });
+            if (ForestMap.IsWater(tx, ty))
+                return Json(new { ok = false, error = "Cannot enter water" });
 
-            int dist = ForestMap.Distance(session.PlayerX, session.PlayerY, tx, ty);
+            int dist;
+            var events = new List<object>();
+            var rng    = new Random();
+
+            if (req.Path is { Count: > 1 })
+            {
+                // Validate: each step adjacent (Chebyshev ≤ 1), no water
+                for (int i = 1; i < req.Path.Count; i++)
+                {
+                    var prev = req.Path[i - 1];
+                    var curr = req.Path[i];
+                    if (Math.Abs(curr.X - prev.X) > 1 || Math.Abs(curr.Y - prev.Y) > 1)
+                        return Json(new { ok = false, error = "Invalid path: non-adjacent step" });
+                    if (ForestMap.IsWater(curr.X, curr.Y))
+                        return Json(new { ok = false, error = "Invalid path: enters water" });
+                }
+                var last = req.Path[^1];
+                if (last.X != tx || last.Y != ty)
+                    return Json(new { ok = false, error = "Path end mismatch" });
+
+                dist = req.Path.Count - 1;
+
+                foreach (var cell in req.Path.Skip(1))
+                {
+                    if (rng.NextDouble() < ForestMap.GetEventChance(cell.X, cell.Y))
+                    {
+                        var z = ForestMap.GetZone(cell.X, cell.Y);
+                        events.Add(new {
+                            x    = cell.X,
+                            y    = cell.Y,
+                            tier = ForestMap.GetEventTier(cell.X, cell.Y),
+                            zone = z?.Name
+                        });
+                    }
+                }
+            }
+            else
+            {
+                // Single-step move (WASD)
+                dist = 1;
+                if (rng.NextDouble() < ForestMap.GetEventChance(tx, ty))
+                {
+                    var z = ForestMap.GetZone(tx, ty);
+                    events.Add(new {
+                        x    = tx,
+                        y    = ty,
+                        tier = ForestMap.GetEventTier(tx, ty),
+                        zone = z?.Name
+                    });
+                }
+            }
+
             session.PlayerX    = tx;
             session.PlayerY    = ty;
             session.MovesSpent += dist;
@@ -98,7 +149,8 @@ namespace HabitTracker.Controllers
                 zoneName   = zone?.Name,
                 zoneDesc   = zone?.Description,
                 canExtract,
-                extractId  = extract?.Id
+                extractId  = extract?.Id,
+                events
             });
         }
 
@@ -155,5 +207,6 @@ namespace HabitTracker.Controllers
         private int? GetUserId() => HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
     }
 
-    public class MoveRequest { public int X { get; set; } public int Y { get; set; } }
+    public class CellPoint  { public int X { get; set; } public int Y { get; set; } }
+    public class MoveRequest { public int X { get; set; } public int Y { get; set; } public List<CellPoint>? Path { get; set; } }
 }

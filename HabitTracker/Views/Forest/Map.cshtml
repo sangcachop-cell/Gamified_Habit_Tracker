@@ -59,10 +59,12 @@
     .legend-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
 
     .move-log {
-        margin-top: 6px; max-height: 130px; overflow-y: auto;
+        margin-top: 6px; max-height: 160px; overflow-y: auto;
         font-size: .73rem; color: rgba(255,255,255,.35);
         display: flex; flex-direction: column; gap: 2px;
     }
+    .move-log .ev-common { color: #aed6f1; }
+    .move-log .ev-rare   { color: #f9ca24; }
     .hint-bar { font-size: .7rem; color: rgba(255,255,255,.25); margin-top: 10px; line-height: 1.6; }
 </style>
 
@@ -142,26 +144,119 @@ const EXTRACTS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
 
 let session = @Html.Raw(sessionJson);
 
-// Viewport: 21 cells visible, 30px per cell → 630×630 canvas
+// Viewport: 21 cells × 30px = 630px canvas
 const VP = 21, VC = 30;
-// Minimap: 140×140 overlay
-const MINI = 140;
-const MC   = MINI / MAP_W;
+const MINI = 140, MC = MINI / MAP_W;
 
 const canvas = document.getElementById('forest-canvas');
 canvas.width = canvas.height = VP * VC;
 const ctx = canvas.getContext('2d');
 
-let camX = 0, camY = 0, hoverWX = -1, hoverWY = -1;
+let camX = 0, camY = 0;
+let hoverWX = -1, hoverWY = -1;
+let lastHoverWX = -2, lastHoverWY = -2;
+let hoverPath = null;
+let activePath = null;   // path currently being animated
+let activePathIdx = 0;
+let isMoving = false;
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function isWater(x, y) {
+    return x < WATER_BORDER || y < WATER_BORDER ||
+           x >= MAP_W - WATER_BORDER || y >= MAP_H - WATER_BORDER;
+}
 
 function updateCamera() {
     camX = clamp(session.PlayerX - Math.floor(VP / 2), 0, MAP_W - VP);
     camY = clamp(session.PlayerY - Math.floor(VP / 2), 0, MAP_H - VP);
 }
 
-// Pre-render static minimap once
+// ── A* Pathfinding ─────────────────────────────────────────────────────────────
+class MinHeap {
+    constructor() { this.h = []; }
+    push(n) { this.h.push(n); this._up(this.h.length - 1); }
+    pop() {
+        const top = this.h[0], last = this.h.pop();
+        if (this.h.length) { this.h[0] = last; this._down(0); }
+        return top;
+    }
+    get size() { return this.h.length; }
+    _up(i) {
+        while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (this.h[p].f <= this.h[i].f) break;
+            [this.h[p], this.h[i]] = [this.h[i], this.h[p]]; i = p;
+        }
+    }
+    _down(i) {
+        const n = this.h.length;
+        while (true) {
+            let m = i, l = 2*i+1, r = 2*i+2;
+            if (l < n && this.h[l].f < this.h[m].f) m = l;
+            if (r < n && this.h[r].f < this.h[m].f) m = r;
+            if (m === i) break;
+            [this.h[m], this.h[i]] = [this.h[i], this.h[m]]; i = m;
+        }
+    }
+}
+
+function aStar(sx, sy, tx, ty) {
+    if (isWater(tx, ty)) return null;
+    if (sx === tx && sy === ty) return [{x: sx, y: sy}];
+
+    const key = (x, y) => y * MAP_W + x;
+    const h   = (x, y) => Math.max(Math.abs(x - tx), Math.abs(y - ty)); // Chebyshev
+
+    const open   = new MinHeap();
+    const gScore = new Map();
+    const parent = new Map();
+    const closed = new Set();
+
+    const sk = key(sx, sy);
+    gScore.set(sk, 0);
+    open.push({ x: sx, y: sy, f: h(sx, sy) });
+
+    const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+    while (open.size > 0) {
+        const cur = open.pop();
+        const ck  = key(cur.x, cur.y);
+        if (closed.has(ck)) continue;
+        closed.add(ck);
+
+        if (cur.x === tx && cur.y === ty) {
+            // Reconstruct
+            const path = [];
+            let k = ck;
+            while (k !== undefined) {
+                const [px, py] = [k % MAP_W, Math.floor(k / MAP_W)];
+                path.unshift({ x: px, y: py });
+                k = parent.get(k);
+            }
+            return path;
+        }
+
+        const cg = gScore.get(ck);
+        for (const [dx, dy] of DIRS) {
+            const nx = cur.x + dx, ny = cur.y + dy;
+            if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+            if (isWater(nx, ny)) continue;
+            const nk = key(nx, ny);
+            if (closed.has(nk)) continue;
+            const ng = cg + 1;
+            if (ng < (gScore.get(nk) ?? Infinity)) {
+                gScore.set(nk, ng);
+                parent.set(nk, ck);
+                open.push({ x: nx, y: ny, f: ng + h(nx, ny) });
+            }
+        }
+    }
+    return null; // no path
+}
+
+// ── Minimap (pre-rendered) ─────────────────────────────────────────────────────
 const miniCanvas = document.createElement('canvas');
 miniCanvas.width = miniCanvas.height = MINI;
 const mctx = miniCanvas.getContext('2d');
@@ -169,7 +264,7 @@ const mctx = miniCanvas.getContext('2d');
 (function buildMinimap() {
     for (let y = 0; y < MAP_H; y++) {
         for (let x = 0; x < MAP_W; x++) {
-            if (x < WATER_BORDER || y < WATER_BORDER || x >= MAP_W - WATER_BORDER || y >= MAP_H - WATER_BORDER) {
+            if (isWater(x, y)) {
                 mctx.fillStyle = '#1a3a5c';
             } else {
                 mctx.fillStyle = ((x * 13 + y * 7) % 5 < 2) ? '#254a25' : '#2d5a2d';
@@ -191,6 +286,7 @@ const mctx = miniCanvas.getContext('2d');
     });
 })();
 
+// ── Draw helpers ───────────────────────────────────────────────────────────────
 function rr(c, x, y, w, h, r) {
     c.beginPath();
     c.moveTo(x + r, y);
@@ -201,6 +297,30 @@ function rr(c, x, y, w, h, r) {
     c.closePath();
 }
 
+function drawPathLine(path, startIdx, color, alpha, dashOn, dashOff) {
+    if (!path || path.length <= startIdx + 1) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([dashOn, dashOff]);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    let moved = false;
+    for (let i = startIdx; i < path.length; i++) {
+        const vx = (path[i].x - camX + 0.5) * VC;
+        const vy = (path[i].y - camY + 0.5) * VC;
+        if (vx >= -VC && vx <= canvas.width + VC && vy >= -VC && vy <= canvas.height + VC) {
+            if (!moved) { ctx.moveTo(vx, vy); moved = true; }
+            else ctx.lineTo(vx, vy);
+        }
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+}
+
+// ── Main draw ──────────────────────────────────────────────────────────────────
 function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -209,9 +329,8 @@ function drawMap() {
         for (let dx = 0; dx < VP; dx++) {
             const wx = camX + dx, wy = camY + dy;
             const px = dx * VC, py = dy * VC;
-            const isHover = wx === hoverWX && wy === hoverWY;
 
-            if (wx < WATER_BORDER || wy < WATER_BORDER || wx >= MAP_W - WATER_BORDER || wy >= MAP_H - WATER_BORDER) {
+            if (isWater(wx, wy)) {
                 const v = (wx * 3 + wy * 7) % 3;
                 ctx.fillStyle = v === 0 ? '#1a3a5c' : v === 1 ? '#1c3f63' : '#1e4268';
             } else {
@@ -220,7 +339,7 @@ function drawMap() {
             }
             ctx.fillRect(px, py, VC, VC);
 
-            if (isHover) {
+            if (wx === hoverWX && wy === hoverWY && !isMoving) {
                 ctx.fillStyle = 'rgba(255,255,255,.12)';
                 ctx.fillRect(px, py, VC, VC);
             }
@@ -301,7 +420,24 @@ function drawMap() {
         }
     });
 
-    // 5. Player
+    // 5. Path overlays
+    // Hover path: dotted yellow, full path
+    if (!isMoving && hoverPath && hoverPath.length > 1) {
+        drawPathLine(hoverPath, 0, 'rgba(240,220,80,.35)', 1, 3, 4);
+        // Destination marker
+        const dest = hoverPath[hoverPath.length - 1];
+        const dvx = (dest.x - camX + 0.5) * VC, dvy = (dest.y - camY + 0.5) * VC;
+        if (dvx >= 0 && dvx <= canvas.width && dvy >= 0 && dvy <= canvas.height) {
+            ctx.strokeStyle = 'rgba(240,220,80,.7)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(dvx, dvy, VC * 0.42, 0, Math.PI * 2); ctx.stroke();
+        }
+    }
+    // Active path: solid bright, remaining segment only
+    if (isMoving && activePath) {
+        drawPathLine(activePath, activePathIdx, 'rgba(240,200,50,.7)', 1, 0, 0);
+    }
+
+    // 6. Player
     const pVX = (session.PlayerX - camX + 0.5) * VC;
     const pVY = (session.PlayerY - camY + 0.5) * VC;
 
@@ -315,7 +451,7 @@ function drawMap() {
     ctx.beginPath(); ctx.arc(pVX, pVY, VC * 0.38, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
 
-    // 6. Minimap overlay (bottom-right corner)
+    // 7. Minimap overlay (bottom-right)
     drawMinimap();
 }
 
@@ -323,35 +459,40 @@ function drawMinimap() {
     const mx = canvas.width  - MINI - 8;
     const my = canvas.height - MINI - 8;
 
-    // background panel
     ctx.fillStyle = 'rgba(0,8,0,.84)';
     rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.fill();
 
-    // terrain image
     ctx.drawImage(miniCanvas, mx, my);
 
-    // player dot
+    // Active path on minimap
+    if (activePath && activePath.length > 1) {
+        ctx.strokeStyle = 'rgba(240,200,50,.6)'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        activePath.forEach(function(c, i) {
+            const px = mx + (c.x + 0.5) * MC, py = my + (c.y + 0.5) * MC;
+            i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+    }
+
     ctx.fillStyle = '#f0b429';
     ctx.beginPath();
     ctx.arc(mx + (session.PlayerX + 0.5) * MC, my + (session.PlayerY + 0.5) * MC, 3.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
 
-    // viewport rect
     ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
     ctx.strokeRect(mx + camX * MC, my + camY * MC, VP * MC, VP * MC);
 
-    // border
     ctx.strokeStyle = 'rgba(76,175,80,.4)'; ctx.lineWidth = 1;
     rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.stroke();
 
-    // label
     ctx.font = '8px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.28)';
     ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
     ctx.fillText('MAP', mx, my - 2);
 }
 
-function minimapHitbox(cx, cy) {
+function minimapHit(cx, cy) {
     const mx = canvas.width - MINI - 11, my = canvas.height - MINI - 11;
     return cx >= mx && cx <= mx + MINI + 6 && cy >= my && cy <= my + MINI + 6;
 }
@@ -360,48 +501,66 @@ function minimapHitbox(cx, cy) {
 updateCamera();
 drawMap();
 
-// Hover
+// ── Mouse hover ────────────────────────────────────────────────────────────────
 canvas.addEventListener('mousemove', function(e) {
+    if (isMoving) return;
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
     const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
 
-    if (minimapHitbox(cx, cy)) {
+    if (minimapHit(cx, cy)) {
         hoverWX = hoverWY = -1;
+        hoverPath = null;
         canvas.style.cursor = 'default';
         document.getElementById('hover-display').textContent = '—';
-    } else {
-        hoverWX = camX + Math.floor(cx / VC);
-        hoverWY = camY + Math.floor(cy / VC);
-        document.getElementById('hover-display').textContent = '(' + hoverWX + ', ' + hoverWY + ')';
-        const water = hoverWX < WATER_BORDER || hoverWY < WATER_BORDER ||
-                      hoverWX >= MAP_W - WATER_BORDER || hoverWY >= MAP_H - WATER_BORDER;
-        canvas.style.cursor = water ? 'not-allowed' : 'crosshair';
+        drawMap(); return;
     }
+
+    hoverWX = camX + Math.floor(cx / VC);
+    hoverWY = camY + Math.floor(cy / VC);
+
+    const water = isWater(hoverWX, hoverWY);
+    canvas.style.cursor = water ? 'not-allowed' : 'crosshair';
+
+    // Recompute A* only when hovered cell changes
+    if (hoverWX !== lastHoverWX || hoverWY !== lastHoverWY) {
+        lastHoverWX = hoverWX; lastHoverWY = hoverWY;
+        hoverPath = water ? null : aStar(session.PlayerX, session.PlayerY, hoverWX, hoverWY);
+    }
+
+    const pathLen = hoverPath ? hoverPath.length - 1 : 0;
+    document.getElementById('hover-display').textContent =
+        '(' + hoverWX + ', ' + hoverWY + ')' + (pathLen > 0 ? '  –  ' + pathLen + ' moves' : '');
+
     drawMap();
 });
 
 canvas.addEventListener('mouseleave', function() {
-    hoverWX = hoverWY = -1; drawMap();
+    if (isMoving) return;
+    hoverWX = hoverWY = -1; hoverPath = null; drawMap();
 });
 
-// Click to move
+// ── Click to move ──────────────────────────────────────────────────────────────
 canvas.addEventListener('click', async function(e) {
+    if (isMoving) return;
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
     const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
-    if (minimapHitbox(cx, cy)) return;
+    if (minimapHit(cx, cy)) return;
 
     const tx = camX + Math.floor(cx / VC), ty = camY + Math.floor(cy / VC);
-    if (tx < WATER_BORDER || ty < WATER_BORDER || tx >= MAP_W - WATER_BORDER || ty >= MAP_H - WATER_BORDER) {
-        addLog('Cannot enter water.');
-        return;
-    }
-    await doMove(tx, ty);
+    if (isWater(tx, ty)) { addLog('Cannot enter water.'); return; }
+    if (tx === session.PlayerX && ty === session.PlayerY) return;
+
+    const path = hoverPath || aStar(session.PlayerX, session.PlayerY, tx, ty);
+    if (!path || path.length <= 1) { addLog('No path found.'); return; }
+
+    await doMove(tx, ty, path);
 });
 
-// WASD / arrow keys
+// ── WASD / arrow keys ──────────────────────────────────────────────────────────
 document.addEventListener('keydown', async function(e) {
+    if (isMoving) return;
     const tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     const dirs = {
@@ -412,20 +571,45 @@ document.addEventListener('keydown', async function(e) {
     if (!dir) return;
     e.preventDefault();
     const tx = session.PlayerX + dir[0], ty = session.PlayerY + dir[1];
-    if (tx < WATER_BORDER || ty < WATER_BORDER || tx >= MAP_W - WATER_BORDER || ty >= MAP_H - WATER_BORDER) return;
-    await doMove(tx, ty);
+    if (isWater(tx, ty)) return;
+    await doMove(tx, ty, null); // single step — no full path needed
 });
 
-async function doMove(tx, ty) {
+// ── Move logic + animation ─────────────────────────────────────────────────────
+async function doMove(tx, ty, path) {
+    isMoving = true;
+    hoverPath = null;
+
+    // Fetch first — server validates and rolls events
     const res  = await fetch('/Forest/Move', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ x: tx, y: ty })
+        body: JSON.stringify({ x: tx, y: ty, path: path })
     });
     const data = await res.json();
-    if (!data.ok) { addLog(data.error); return; }
 
-    session.PlayerX = data.x; session.PlayerY = data.y; session.MovesSpent = data.moves;
+    if (!data.ok) { addLog(data.error); isMoving = false; drawMap(); return; }
+
+    // Animate along path (or snap for single step)
+    if (path && path.length > 2) {
+        activePath  = path;
+        activePathIdx = 0;
+        for (let i = 1; i < path.length; i++) {
+            session.PlayerX = path[i].x;
+            session.PlayerY = path[i].y;
+            activePathIdx = i;
+            updateCamera();
+            drawMap();
+            await sleep(35);
+        }
+        activePath = null;
+    } else {
+        session.PlayerX = data.x;
+        session.PlayerY = data.y;
+        updateCamera();
+    }
+
+    session.MovesSpent = data.moves;
     document.getElementById('pos-display').textContent   = '(' + data.x + ', ' + data.y + ')';
     document.getElementById('moves-display').textContent = data.moves;
 
@@ -447,15 +631,32 @@ async function doMove(tx, ty) {
     } else {
         btn.classList.remove('show');
     }
-    addLog('→ (' + data.x + ', ' + data.y + ')  +' + data.dist + ' moves' + (data.zoneName ? '  [' + data.zoneName + ']' : ''));
 
-    updateCamera();
+    // Events
+    if (data.events && data.events.length > 0) {
+        data.events.forEach(function(ev) {
+            const cls  = ev.tier === 'rare' ? 'ev-rare' : 'ev-common';
+            const icon = ev.tier === 'rare' ? '⭐' : '⚡';
+            const loc  = ev.zone ? ' [' + ev.zone + ']' : '';
+            addLog(icon + ' ' + ev.tier.charAt(0).toUpperCase() + ev.tier.slice(1) +
+                   ' encounter at (' + ev.x + ', ' + ev.y + ')' + loc, cls);
+        });
+    }
+
+    if (path && path.length > 1) {
+        addLog('→ (' + data.x + ', ' + data.y + ')  +' + data.dist + ' moves' +
+               (data.zoneName ? '  [' + data.zoneName + ']' : ''));
+    }
+
+    isMoving = false;
     drawMap();
 }
 
-function addLog(msg) {
+function addLog(msg, cls) {
     const log = document.getElementById('move-log');
-    const div = document.createElement('div'); div.textContent = msg;
+    const div = document.createElement('div');
+    div.textContent = msg;
+    if (cls) div.className = cls;
     log.prepend(div);
 }
 </script>

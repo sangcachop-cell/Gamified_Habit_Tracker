@@ -67,5 +67,16 @@ namespace HabitTracker.Constants
 
         public static (int cx, int cy) SpawnCenter(SpawnPoint s) =>
             (s.X + s.W / 2, s.Y + s.H / 2);
+
+        // ── Event system ──────────────────────────────────────────────────────
+        public const double BaseEventChance     = 0.05;  // 5% per open-forest cell
+        public const double LocationEventChance = 0.25;  // 25% per location cell
+
+        public static double GetEventChance(int x, int y) =>
+            GetZone(x, y) != null ? LocationEventChance : BaseEventChance;
+
+        // "common" in open forest, "rare" inside named locations
+        public static string GetEventTier(int x, int y) =>
+            GetZone(x, y) != null ? "rare" : "common";
     }
 }
