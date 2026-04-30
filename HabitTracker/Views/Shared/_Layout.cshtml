@@ -65,6 +65,12 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Friend" asp-action="Index">
+                                    👥 Bạn bè
+                                </a>
+                            </li>
+
                             <!-- 🔍 SEARCH BUTTON -->
                             <li class="nav-item ms-3">
                                 <a class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
@@ -86,6 +92,16 @@
 
                         </ul>
 
+                        <!-- CENTER - QUICK STATS (Optional) -->
+                        @if (Context.Session.GetString("Username") != null)
+                        {
+                            <div style="margin: 0 20px; display: flex; gap: 20px; align-items: center;">
+                                <small style="color: #666;">
+                                    <strong style="color: #667eea;">Level:</strong> <span id="navbar-level">-</span>
+                                </small>
+                            </div>
+                        }
+
                         <!-- RIGHT USER MENU -->
                         <ul class="navbar-nav align-items-center">
 
@@ -97,9 +113,9 @@
                                        data-bs-toggle="dropdown"
                                        style="gap:10px;">
                                         <img src="@(Context.Session.GetString("Avatar") != null
-                                                                                                                                                  && Context.Session.GetString("Avatar").StartsWith("http")
-                                                                                                                                                  ? Context.Session.GetString("Avatar")
-                                                                                                                                                  : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
+                                                                                                                                                                                               && Context.Session.GetString("Avatar").StartsWith("http")
+                                                                                                                                                                                               ? Context.Session.GetString("Avatar")
+                                                                                                                                                                                               : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
                                      width="40" height="40"
                                      class="rounded-circle border"
                                      style="object-fit:cover;" />

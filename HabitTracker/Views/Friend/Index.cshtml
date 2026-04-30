@@ -1,0 +1,518 @@
+﻿@{
+    ViewData["Title"] = "Bạn bè";
+    var friends = ViewBag.Friends as List<HabitTracker.Models.Friendship> ?? new();
+    var pendingReceived = ViewBag.PendingReceived as List<HabitTracker.Models.Friendship> ?? new();
+    var pendingSent = ViewBag.PendingSent as List<HabitTracker.Models.Friendship> ?? new();
+    var searchResults = ViewBag.SearchResults as List<HabitTracker.Models.User> ?? new();
+    var friendIds = ViewBag.FriendIds as HashSet<int> ?? new();
+    var pendingIds = ViewBag.PendingIds as HashSet<int> ?? new();
+    int me = (int)(ViewBag.CurrentUserId ?? 0);
+}
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
+
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .page-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 30px 36px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap
+    }
+
+        .page-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.4),transparent 55%);
+            pointer-events: none
+        }
+
+        .page-hero h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 2;
+            margin: 0
+        }
+
+        .page-hero p {
+            color: rgba(255,255,255,.55);
+            font-size: .88rem;
+            margin: 4px 0 0;
+            position: relative;
+            z-index: 2
+        }
+    /* search */
+    .search-wrap {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        position: relative;
+        z-index: 2
+    }
+
+    .search-input {
+        padding: 11px 18px;
+        border: none;
+        border-radius: 50px;
+        font-family: "DM Sans",sans-serif;
+        font-size: .9rem;
+        width: 260px;
+        outline: none;
+        background: rgba(255,255,255,.12);
+        color: white;
+        border: 1.5px solid rgba(255,255,255,.2)
+    }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,.4)
+        }
+
+        .search-input:focus {
+            background: rgba(255,255,255,.18);
+            border-color: rgba(255,255,255,.4)
+        }
+
+    .btn-search {
+        padding: 11px 20px;
+        background: var(--violet);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-search:hover {
+            background: #4a2fc0
+        }
+    /* layout */
+    .fl-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start
+    }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px;
+        margin-bottom: 20px
+    }
+
+    .card-title {
+        font-size: .95rem;
+        font-weight: 700;
+        letter-spacing: -.3px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between
+    }
+
+    .badge-count {
+        background: var(--violet);
+        color: white;
+        border-radius: 50px;
+        padding: 2px 9px;
+        font-size: .72rem;
+        font-weight: 700
+    }
+    /* user row */
+    .user-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f5f5f5
+    }
+
+        .user-row:last-child {
+            border: none
+        }
+
+    .u-av {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        flex-shrink: 0;
+        object-fit: cover;
+        text-decoration: none
+    }
+
+    .u-name {
+        font-weight: 700;
+        font-size: .9rem;
+        margin-bottom: 1px
+    }
+
+    .u-sub {
+        font-size: .75rem;
+        color: #aaa
+    }
+
+    .u-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0
+    }
+
+    .btn-accept {
+        padding: 6px 14px;
+        background: var(--teal);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-accept:hover {
+            background: #009f87
+        }
+
+    .btn-reject {
+        padding: 6px 14px;
+        background: #f0f0f0;
+        color: #666;
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-reject:hover {
+            background: #e0e0e0
+        }
+
+    .btn-unfriend {
+        padding: 6px 14px;
+        background: #fde8ed;
+        color: var(--rose);
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-unfriend:hover {
+            background: #f9c9d4
+        }
+
+    .btn-add {
+        padding: 6px 16px;
+        background: var(--violet);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s
+    }
+
+        .btn-add:hover {
+            background: #4a2fc0
+        }
+
+    .btn-pending {
+        padding: 6px 14px;
+        background: #f0f0f0;
+        color: #888;
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        cursor: default
+    }
+
+    .btn-view {
+        padding: 6px 14px;
+        background: var(--soft);
+        color: var(--violet);
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background .2s
+    }
+
+        .btn-view:hover {
+            background: #ddd8f5;
+            color: var(--violet)
+        }
+
+    .empty {
+        text-align: center;
+        padding: 28px 16px;
+        color: #ccc;
+        font-size: .88rem
+    }
+
+    .empty-emoji {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 8px
+    }
+    /* search results */
+    .search-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 22px;
+        margin-bottom: 24px
+    }
+
+    .results-label {
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 14px
+    }
+
+    .alert-s {
+        background: #d4f5ef;
+        color: #006651;
+        padding: 11px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        margin-bottom: 20px
+    }
+
+    @@media(max-width:800px) {
+        .fl-layout {
+            grid-template-columns: 1fr
+        }
+
+        .search-input {
+            width: 180px
+        }
+    }
+</style>
+
+<div style="padding:8px 0 48px">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-s">@TempData["Success"]</div>
+    }
+
+    <!-- Hero -->
+    <div class="page-hero">
+        <div style="position:relative;z-index:2">
+            <h2>👥 Bạn bè</h2>
+            <p>@friends.Count bạn bè · @pendingReceived.Count lời mời đang chờ</p>
+        </div>
+        <form method="get" class="search-wrap">
+            <input type="text" name="q" class="search-input"
+                   placeholder="Tìm theo tên hoặc email..."
+                   value="@ViewBag.SearchQuery" />
+            <button type="submit" class="btn-search">🔍 Tìm</button>
+        </form>
+    </div>
+
+    <!-- Search Results -->
+    @if (!string.IsNullOrEmpty(ViewBag.SearchQuery as string))
+    {
+        <div class="search-card">
+            <div class="results-label">Kết quả tìm kiếm cho "@ViewBag.SearchQuery"</div>
+            @if (searchResults.Count > 0)
+            {
+                foreach (var u in searchResults)
+                {
+                    var isFriend = friendIds.Contains(u.Id);
+                    var isPending = pendingIds.Contains(u.Id);
+                    var avBg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" };
+                    var bg = avBg[Math.Abs(u.Id) % avBg.Length];
+                    <div class="user-row">
+                        <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">
+                            @u.Username.Substring(0, 1).ToUpper()
+                        </a>
+                        <div>
+                            <div class="u-name">@u.Username</div>
+                            <div class="u-sub">Level @u.Level · @u.XP XP</div>
+                        </div>
+                        <div class="u-actions">
+                            <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem profile</a>
+                            @if (isFriend)
+                            {
+                                <span class="btn-pending">✓ Bạn bè</span>
+                            }
+                            else if (isPending)
+                            {
+
+                                <span class="btn-pending">⏳ Đang chờ</span>
+                            }
+                            else
+                            {
+                                <button class="btn-add" onclick="sendRequest(@u.Id, this)">+ Kết bạn</button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+
+                <div class="empty"><span class="empty-emoji">🔍</span>Không tìm thấy người dùng nào</div>
+            }
+        </div>
+    }
+
+    <div class="fl-layout">
+        <!-- LEFT -->
+        <div>
+            <!-- Pending received -->
+            @if (pendingReceived.Count > 0)
+            {
+                <div class="glass-card">
+                    <div class="card-title">
+                        <span>🔔 Lời mời kết bạn</span>
+                        <span class="badge-count">@pendingReceived.Count</span>
+                    </div>
+                    @foreach (var f in pendingReceived)
+                    {
+                        var u = f.Requester!;
+                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
+                        <div class="user-row">
+                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
+                            <div>
+                                <div class="u-name">@u.Username</div>
+                                <div class="u-sub">Level @u.Level · @u.XP XP</div>
+                            </div>
+                            <div class="u-actions">
+                                <form method="post" action="/Friend/Accept" style="display:inline">
+                                    <input type="hidden" name="friendshipId" value="@f.Id" />
+                                    <button type="submit" class="btn-accept">✓ Chấp nhận</button>
+                                </form>
+                                <form method="post" action="/Friend/Reject" style="display:inline">
+                                    <input type="hidden" name="friendshipId" value="@f.Id" />
+                                    <button type="submit" class="btn-reject">✕ Từ chối</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Sent pending -->
+            @if (pendingSent.Count > 0)
+            {
+                <div class="glass-card">
+                    <div class="card-title"><span>⏳ Đã gửi lời mời</span><span class="badge-count">@pendingSent.Count</span></div>
+                    @foreach (var f in pendingSent)
+                    {
+                        var u = f.Receiver!;
+                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
+                        <div class="user-row">
+                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
+                            <div><div class="u-name">@u.Username</div><div class="u-sub">Level @u.Level</div></div>
+                            <div class="u-actions">
+                                <form method="post" action="/Friend/Reject" style="display:inline">
+                                    <input type="hidden" name="friendshipId" value="@f.Id" />
+                                    <button type="submit" class="btn-reject">✕ Huỷ</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT: Friend list -->
+        <div>
+            <div class="glass-card">
+                <div class="card-title">
+                    <span>👥 Danh sách bạn bè</span>
+                    <span class="badge-count">@friends.Count</span>
+                </div>
+                @if (friends.Count > 0)
+                {
+                    foreach (var f in friends)
+                    {
+                        var u = f.RequesterId == me ? f.Receiver! : f.Requester!;
+                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
+                        <div class="user-row">
+                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
+                            <div>
+                                <div class="u-name">@u.Username</div>
+                                <div class="u-sub">Level @u.Level · @u.XP XP · 🔥@u.CurrentStreak</div>
+                            </div>
+                            <div class="u-actions">
+                                <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem</a>
+                                <form method="post" action="/Friend/Unfriend" style="display:inline">
+                                    <input type="hidden" name="friendshipId" value="@f.Id" />
+                                    <button type="submit" class="btn-unfriend">Huỷ bạn</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+
+                    <div class="empty"><span class="empty-emoji">👥</span>Chưa có bạn bè nào.<br />Tìm kiếm và kết bạn ngay!</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function sendRequest(uid, btn) {
+            btn.disabled = true; btn.textContent = '...';
+            const form = new FormData();
+            form.append('receiverId', uid);
+            const r = await fetch('/Friend/SendRequest', { method:'POST', body: form, headers:{'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value ?? ''} });
+            const d = await r.json();
+            btn.textContent = d.ok ? '⏳ Đã gửi' : '❌ Lỗi';
+            if (!d.ok) { btn.disabled = false; }
+        }
+    </script>
+}

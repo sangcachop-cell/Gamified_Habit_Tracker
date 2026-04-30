@@ -1,31 +1,300 @@
 ﻿@model List<HabitTracker.Models.Quest>
-
 @{
-    ViewData["Title"] = "Admin - Quản lý Quest";
+    ViewData["Title"] = "Admin — Quản lý Quest";
     var active = Model.Where(q => q.IsActive).ToList();
     var inactive = Model.Where(q => !q.IsActive).ToList();
 }
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>⚙️ Quản lý Quest</h3>
-        <a asp-action="Create" class="btn btn-primary">+ Thêm Quest mới</a>
-    </div>
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .admin-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 28px 36px;
+        color: white;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px
+    }
+
+        .admin-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 10% 60%,rgba(232,67,106,.35),transparent 50%),radial-gradient(ellipse at 90% 30%,rgba(92,61,222,.3),transparent 55%);
+            pointer-events: none
+        }
+
+        .admin-hero h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 2;
+            margin: 0
+        }
+
+        .admin-hero p {
+            color: rgba(255,255,255,.55);
+            font-size: .85rem;
+            margin: 4px 0 0;
+            position: relative;
+            z-index: 2
+        }
+
+    .btn-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--teal);
+        color: white;
+        padding: 11px 22px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .88rem;
+        text-decoration: none;
+        transition: all .2s;
+        position: relative;
+        z-index: 2
+    }
+
+        .btn-new:hover {
+            background: #009f87;
+            transform: translateY(-1px);
+            color: white
+        }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.04)
+    }
+
+    .card-head {
+        padding: 16px 22px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between
+    }
+
+        .card-head h4 {
+            font-size: .9rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -.2px
+        }
+
+    .count-chip {
+        background: var(--soft);
+        color: var(--violet);
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-size: .73rem;
+        font-weight: 700
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse
+    }
+
+    th {
+        padding: 11px 16px;
+        text-align: left;
+        font-size: .73rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #aaa;
+        background: #fafafa;
+        border-bottom: 1px solid #f0f0f0
+    }
+
+    td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #f8f8f8;
+        vertical-align: middle;
+        font-size: .88rem
+    }
+
+    tr:last-child td {
+        border: none
+    }
+
+    tr:hover td {
+        background: #fafcff
+    }
+
+    .q-icon {
+        font-size: 1.4rem
+    }
+
+    .q-name {
+        font-weight: 700;
+        font-size: .9rem
+    }
+
+    .q-desc {
+        font-size: .77rem;
+        color: #aaa;
+        margin-top: 2px
+    }
+
+    .pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-size: .72rem;
+        font-weight: 700
+    }
+
+    .pill-cat {
+        background: var(--soft);
+        color: var(--violet)
+    }
+
+    .pill-easy {
+        background: #e2f5e2;
+        color: #2e7d2e
+    }
+
+    .pill-medium {
+        background: #fff5d6;
+        color: #b07800
+    }
+
+    .pill-hard {
+        background: #fde8ed;
+        color: var(--rose)
+    }
+
+    .pill-freq {
+        background: #f0f4ff;
+        color: #4457aa
+    }
+
+    .xp-val {
+        font-family: "Syne",sans-serif;
+        font-weight: 800;
+        color: var(--gold)
+    }
+
+    .btn-edit {
+        padding: 6px 14px;
+        background: var(--soft);
+        color: var(--violet);
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px
+    }
+
+        .btn-edit:hover {
+            background: #ddd8f5;
+            color: var(--violet)
+        }
+
+    .btn-del {
+        padding: 6px 14px;
+        background: #fde8ed;
+        color: var(--rose);
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-del:hover {
+            background: #f9c9d4
+        }
+
+    .btn-restore {
+        padding: 6px 14px;
+        background: #d4f5ef;
+        color: var(--teal);
+        border: none;
+        border-radius: 50px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s
+    }
+
+        .btn-restore:hover {
+            background: #b8ece4
+        }
+
+    .alert-s {
+        background: #d4f5ef;
+        color: #006651;
+        padding: 11px 16px;
+        border-radius: 10px;
+        font-size: .88rem;
+        margin-bottom: 18px
+    }
+</style>
+
+<div style="padding:8px 0 48px">
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">@TempData["Success"]</div>
+        <div class="alert-s">✅ @TempData["Success"]</div>
     }
 
-    @* Bảng quest đang active *@
-    <h5 class="mb-3">Đang hiển thị (@active.Count)</h5>
-    <div class="table-responsive mb-5">
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-dark">
+    <div class="admin-hero">
+        <div>
+            <h2>⚙️ Admin Panel</h2>
+            <p>Quản lý toàn bộ Quest trong hệ thống</p>
+        </div>
+        <a asp-action="Create" class="btn-new">+ Thêm Quest mới</a>
+    </div>
+
+    <!-- Active quests -->
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>✅ Quest đang hiển thị</h4>
+            <span class="count-chip">@active.Count</span>
+        </div>
+        <table>
+            <thead>
                 <tr>
                     <th>Icon</th>
-                    <th>Tên</th>
-                    <th>Danh mục</th>
+                    <th>Tên Quest</th>
+                    <th>Category</th>
                     <th>Độ khó</th>
                     <th>Tần suất</th>
                     <th>XP</th>
@@ -36,33 +305,29 @@
                 @foreach (var q in active)
                 {
                     <tr>
-                        <td class="text-center" style="font-size:1.4rem">@q.Icon</td>
+                        <td><span class="q-icon">@q.Icon</span></td>
                         <td>
-                            <b>@q.Name</b>
+                            <div class="q-name">@q.Name</div>
                             @if (!string.IsNullOrEmpty(q.Description))
                             {
-                                <br>
-                        
-                                <small class="text-muted">@q.Description</small>
+                                <div class="q-desc">@q.Description</div>
                             }
                         </td>
-                        <td><span class="badge bg-secondary">@q.Category</span></td>
+                        <td><span class="pill pill-cat">@q.Category</span></td>
                         <td>
                             @{
-                                var diffClass = q.Difficulty == "Easy" ? "success"
-                                : q.Difficulty == "Medium" ? "warning" : "danger";
+                                var dc = q.Difficulty == "Easy" ? "easy" : q.Difficulty == "Medium" ? "medium" : "hard";
                             }
-                            <span class="badge bg-@diffClass">@q.Difficulty</span>
+                            <span class="pill pill-@dc">@q.Difficulty</span>
                         </td>
-                        <td>@q.Frequency</td>
-                        <td><b class="text-warning">+@q.XPReward</b></td>
+                        <td><span class="pill pill-freq">@q.Frequency</span></td>
+                        <td><span class="xp-val">+@q.XPReward</span></td>
                         <td>
-                            <a asp-action="Edit" asp-route-id="@q.Id"
-                               class="btn btn-sm btn-outline-primary me-1">✏️ Sửa</a>
+                            <a asp-action="Edit" asp-route-id="@q.Id" class="btn-edit">✏️ Sửa</a>
                             <form asp-action="Delete" method="post" style="display:inline"
-                                  onsubmit="return confirm('Ẩn quest này?')">
+                                  onsubmit="return confirm('Ẩn quest «@q.Name»?')">
                                 <input type="hidden" name="id" value="@q.Id" />
-                                <button class="btn btn-sm btn-outline-danger">🗑️ Ẩn</button>
+                                <button class="btn-del">🗑️ Ẩn</button>
                             </form>
                         </td>
                     </tr>
@@ -71,31 +336,29 @@
         </table>
     </div>
 
-    @* Bảng quest đã ẩn *@
+    <!-- Inactive quests -->
     @if (inactive.Any())
     {
-        <h5 class="mb-3 text-muted">Đã ẩn (@inactive.Count)</h5>
-        <div class="table-responsive">
-            <table class="table table-bordered table-sm align-middle opacity-75">
-                <thead class="table-secondary">
-                    <tr>
-                        <th>Icon</th>
-                        <th>Tên</th>
-                        <th>Danh mục</th>
-                        <th>Hành động</th>
-                    </tr>
+        <div class="glass-card">
+            <div class="card-head">
+                <h4 style="color:#aaa">🚫 Quest đã ẩn</h4>
+                <span class="count-chip" style="background:#f0f0f0;color:#888">@inactive.Count</span>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Icon</th><th>Tên Quest</th><th>Category</th><th>Hành động</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var q in inactive)
                     {
-                        <tr>
-                            <td>@q.Icon</td>
-                            <td class="text-decoration-line-through text-muted">@q.Name</td>
-                            <td><span class="badge bg-secondary">@q.Category</span></td>
+                        <tr style="opacity:.6">
+                            <td><span class="q-icon">@q.Icon</span></td>
+                            <td><div class="q-name" style="text-decoration:line-through">@q.Name</div></td>
+                            <td><span class="pill pill-cat">@q.Category</span></td>
                             <td>
                                 <form asp-action="Restore" method="post" style="display:inline">
                                     <input type="hidden" name="id" value="@q.Id" />
-                                    <button class="btn btn-sm btn-outline-success">♻️ Khôi phục</button>
+                                    <button class="btn-restore">♻️ Khôi phục</button>
                                 </form>
                             </td>
                         </tr>

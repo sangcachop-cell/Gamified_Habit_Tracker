@@ -1,25 +1,197 @@
 ﻿@model HabitTracker.Models.Quest
-
 @{
     ViewData["Title"] = "Thêm Quest mới";
 }
+<style>
+    :root {
+        --ink: #0a0a12;
+        --paper: #f5f3ef;
+        --violet: #5c3dde;
+        --gold: #f0b429;
+        --rose: #e8436a;
+        --teal: #00b89c;
+        --soft: #edeaf5
+    }
 
-<div class="container py-4" style="max-width: 650px;">
-    <div class="d-flex align-items-center gap-2 mb-4">
-        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
-        <h4 class="mb-0">➕ Thêm Quest mới</h4>
-    </div>
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form asp-action="Create" method="post">
-                @Html.AntiForgeryToken()
-                <partial name="_QuestForm" model="Model" />
-                <hr />
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4">💾 Lưu Quest</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
-                </div>
-            </form>
-        </div>
+    body {
+        background: var(--paper);
+        font-family: "DM Sans",sans-serif
+    }
+
+    h1, h2, h3, h4 {
+        font-family: "Syne",sans-serif
+    }
+
+    .form-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 24px 0 64px
+    }
+
+    .page-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #888;
+        text-decoration: none;
+        font-size: .85rem;
+        margin-bottom: 20px;
+        transition: color .2s
+    }
+
+        .page-back:hover {
+            color: var(--violet)
+        }
+
+    .form-hero {
+        background: var(--ink);
+        border-radius: 20px;
+        padding: 26px 32px;
+        color: white;
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden
+    }
+
+        .form-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 80% 50%,rgba(92,61,222,.4),transparent 60%);
+            pointer-events: none
+        }
+
+        .form-hero h2 {
+            font-family: "Syne",sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            position: relative;
+            z-index: 2
+        }
+
+    .glass-card {
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 28px
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+    }
+
+    .form-field {
+        margin-bottom: 18px
+    }
+
+        .form-field label {
+            font-weight: 600;
+            font-size: .82rem;
+            color: #444;
+            display: block;
+            margin-bottom: 6px
+        }
+
+        .form-field input, .form-field select, .form-field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid rgba(0,0,0,.1);
+            border-radius: 10px;
+            font-family: "DM Sans",sans-serif;
+            font-size: .92rem;
+            background: white;
+            outline: none;
+            transition: border-color .2s,box-shadow .2s
+        }
+
+            .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                border-color: var(--violet);
+                box-shadow: 0 0 0 3px rgba(92,61,222,.08)
+            }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 80px
+        }
+
+    .action-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px
+    }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--ink);
+        color: white;
+        padding: 12px 28px;
+        border-radius: 50px;
+        font-family: "Syne",sans-serif;
+        font-weight: 700;
+        font-size: .9rem;
+        border: none;
+        cursor: pointer;
+        transition: background .2s,transform .2s
+    }
+
+        .btn-save:hover {
+            background: var(--violet);
+            transform: translateY(-1px)
+        }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: transparent;
+        color: var(--ink);
+        padding: 11px 22px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: .9rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(0,0,0,.12);
+        transition: all .2s
+    }
+
+        .btn-cancel:hover {
+            border-color: var(--violet);
+            color: var(--violet)
+        }
+
+    .icon-preview {
+        font-size: 2.5rem;
+        text-align: center;
+        padding: 12px;
+        background: var(--soft);
+        border-radius: 12px;
+        margin-bottom: 4px
+    }
+
+    @@media(max-width:600px) {
+        .form-row {
+            grid-template-columns: 1fr
+        }
+    }
+</style>
+
+<div class="form-wrap">
+    <a asp-action="Index" class="page-back">← Quay lại Admin</a>
+    <div class="form-hero"><h2>➕ Thêm Quest mới</h2></div>
+    <div class="glass-card">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <partial name="_QuestForm" model="Model" />
+            <div class="action-row">
+                <button type="submit" class="btn-save">💾 Lưu Quest</button>
+                <a asp-action="Index" class="btn-cancel">Huỷ</a>
+            </div>
+        </form>
     </div>
 </div>

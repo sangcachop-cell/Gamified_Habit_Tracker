@@ -1,6 +1,7 @@
 ﻿// Data/AppDbContext.cs
-using Microsoft.EntityFrameworkCore;
 using HabitTracker.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace HabitTracker.Data
 {
@@ -9,17 +10,18 @@ namespace HabitTracker.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Quest> Quests { get; set; }    
-        public DbSet<UserQuest> UserQuests { get; set; } 
+        public DbSet<Quest> Quests { get; set; }
+        public DbSet<UserQuest> UserQuests { get; set; }
         public DbSet<Badge> Badges { get; set; }
         public DbSet<UserBadge> UserBadges { get; set; }
-        public DbSet<Category> Categories { get; set; }       
-        public DbSet<Notification> Notifications { get; set; } 
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Seed dữ liệu Quest có sẵn
-            modelBuilder.Entity<Quest>().HasData(
+                // Seed dữ liệu Quest có sẵn
+                modelBuilder.Entity<Quest>().HasData(
                 // === SỨC KHỎE ===
                 new Quest { Id = 1, Name = "Uống 2 lít nước", Category = "Sức khỏe", Difficulty = "Easy", Frequency = "Daily", XPReward = 10, Icon = "💧" },
                 new Quest { Id = 2, Name = "Tập thể dục 30 phút", Category = "Sức khỏe", Difficulty = "Medium", Frequency = "Daily", XPReward = 25, Icon = "🏃" },
@@ -46,6 +48,19 @@ namespace HabitTracker.Data
                 new Badge { Id = 2, Name = "Chiến binh", Description = "Đạt 200 XP", Icon = "⚔️", RequiredXP = 200 },
                 new Badge { Id = 3, Name = "Huyền thoại", Description = "Đạt 500 XP", Icon = "🏆", RequiredXP = 500 }
             );
+
+            // Friendship relationships
+            modelBuilder.Entity<Friendship>()
+                .HasOne(f => f.Requester)
+                .WithMany()
+                .HasForeignKey(f => f.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(f => f.Receiver)
+                .WithMany()
+                .HasForeignKey(f => f.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
