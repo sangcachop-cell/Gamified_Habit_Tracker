@@ -44,6 +44,12 @@ namespace HabitTracker.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Account");
 
+            if (IsForestActive())
+            {
+                TempData["HideoutInfo"] = "Hideout is locked while you're in the forest.";
+                return RedirectToAction("Map", "Forest");
+            }
+
             // Ensure user has all facilities unlocked at level 1
             await _hideoutService.EnsureUserFacilitiesAsync(userId.Value);
             await _hideoutService.CompleteReadyUpgradesAsync(userId.Value);
@@ -210,6 +216,12 @@ namespace HabitTracker.Controllers
             var userId = GetUserId();
             if (userId == null) return RedirectToAction("Login", "Account");
 
+            if (IsForestActive())
+            {
+                TempData["Error"] = "Cannot upgrade facilities while in the forest.";
+                return RedirectToAction("Map", "Forest");
+            }
+
             var (ok, error) = await _hideoutService.StartUpgradeAsync(userId.Value, facilityId);
             TempData[ok ? "ToastXP" : "Error"] = ok
                 ? "⚒️ Upgrade started!"
@@ -248,5 +260,17 @@ namespace HabitTracker.Controllers
 
         private int? GetUserId() =>
             HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+
+        private bool IsForestActive()
+        {
+            var json = HttpContext.Session.GetString("ForestSession");
+            if (string.IsNullOrEmpty(json)) return false;
+            try
+            {
+                var fs = JsonSerializer.Deserialize<HabitTracker.Models.ForestSession>(json);
+                return fs?.IsActive ?? false;
+            }
+            catch { return false; }
+        }
     }
 }

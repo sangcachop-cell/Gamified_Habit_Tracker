@@ -1,0 +1,381 @@
+@using HabitTracker.Models
+@using HabitTracker.Constants
+@using HabitTracker.Controllers
+@{
+    ViewData["Title"] = "Loot";
+    var session   = ViewBag.Session as ForestSession;
+    int bodyCols  = ViewBag.BodyCols ?? 4;
+    int bodyRows  = ViewBag.BodyRows ?? 2;
+    var pocketItems   = ViewBag.PocketItems   as List<PlacedItem> ?? new();
+    var backpackItems = ViewBag.BackpackItems as List<PlacedItem> ?? new();
+    var rigItems      = ViewBag.RigItems      as List<PlacedItem> ?? new();
+    bool hasBackpack  = ViewBag.HasBackpack ?? false;
+    bool hasRig       = ViewBag.HasRig      ?? false;
+    const int CELL = 64;
+    var (pCols, pRows)   = ItemCatalogue.ContainerSize(ItemCatalogue.BACKPACK);
+    var (bpCols, bpRows) = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_BACKPACK);
+    var (rCols, rRows)   = ItemCatalogue.ContainerSize(ItemCatalogue.EQUIPPED_RIG);
+}
+
+<style>
+    body { background: #0a120a; color: #e8f0e8; }
+
+    .loot-wrap {
+        max-width: 1100px; margin: 24px auto;
+        background: linear-gradient(135deg, #0f1f0f, #1a3a1a);
+        border: 1.5px solid rgba(76,175,80,.25);
+        border-radius: 24px; padding: 24px 28px;
+    }
+    .loot-header { text-align: center; margin-bottom: 18px; }
+    .loot-title  { font-size: 1.5rem; font-weight: 900; color: #f9ca24; }
+    .loot-sub    { font-size: .78rem; color: rgba(255,255,255,.45); margin-top: 4px; }
+
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
+
+    .panel {
+        background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.06);
+        border-radius: 14px; padding: 14px 16px;
+    }
+    .panel.body  { border-color: rgba(231,76,60,.3); }
+    .panel.inv   { border-color: rgba(76,175,80,.25); }
+
+    .panel-title {
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: .75rem; font-weight: 700; letter-spacing: .12em;
+        color: rgba(255,255,255,.55); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .panel-title .pt-meta { color: rgba(255,255,255,.3); font-size: .7rem; letter-spacing: .06em; }
+
+    .grid-box {
+        position: relative; margin: 0 auto;
+        background-color: rgba(0,0,0,.7);
+        background-image:
+            linear-gradient(rgba(76,175,80,.85) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(76,175,80,.85) 2px, transparent 2px);
+        background-size: 64px 64px;
+        background-position: 0 0;
+        border: 2px solid rgba(255,255,255,.85);
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 2px rgba(0,0,0,.7);
+        box-sizing: content-box;
+    }
+    .panel.body .grid-box  { border-color: rgba(231,76,60,.85); }
+    .panel.inv  .grid-box  { border-color: rgba(76,175,80,.85); }
+    .grid-box.drop-active  { border-color: rgba(249,202,36,.9) !important; box-shadow: inset 0 0 0 2px rgba(249,202,36,.4); }
+
+    .item {
+        position: absolute; cursor: grab;
+        border-radius: 8px; box-sizing: border-box;
+        border: 2px solid rgba(255,255,255,.18);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; color: white; user-select: none;
+        background: linear-gradient(135deg, rgba(0,0,0,.3), rgba(0,0,0,.1));
+        transition: box-shadow .12s, transform .12s;
+    }
+    .item.dragging { opacity: .35; }
+    .item:hover    { box-shadow: 0 0 0 2px rgba(255,255,255,.3) inset; }
+    .trash-zone {
+        background: rgba(231,76,60,.1); border: 2px dashed rgba(231,76,60,.4);
+        border-radius: 8px; padding: 14px; margin-top: 12px; text-align: center;
+        font-size: .8rem; color: rgba(231,76,60,.8); font-weight: 600;
+    }
+    .trash-zone.drop-active { background: rgba(231,76,60,.3); color: white; }
+
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+
+    .actions-row {
+        display: flex; justify-content: center; gap: 12px; margin-top: 22px; flex-wrap: wrap;
+    }
+    .btn-loot {
+        border: none; border-radius: 12px; color: white;
+        font-weight: 800; font-size: .92rem; padding: 14px 24px;
+        cursor: pointer; transition: transform .12s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-done { background: linear-gradient(135deg, #2e7d32, #43a047); }
+    .btn-inv  { background: linear-gradient(135deg, #b7791f, #d6911f); }
+    .btn-loot:hover  { transform: translateY(-2px); }
+    .btn-loot:active { transform: scale(.97); }
+
+    .empty-msg { font-size: .78rem; color: rgba(255,255,255,.35); text-align: center; padding: 12px; }
+    .hint { text-align: center; font-size: .72rem; color: rgba(255,255,255,.4); margin-top: 14px; }
+</style>
+
+<div class="loot-wrap">
+    <div class="loot-header">
+        <div class="loot-title">💰 Loot</div>
+        <div class="loot-sub">Drag items from the monster body into your equipped inventory. Items left behind are abandoned.</div>
+    </div>
+
+    <div class="layout">
+        <!-- Left: Monster body -->
+        <div class="panel body">
+            <div class="panel-title">
+                <span>🩸 Monster Body</span>
+                <span class="pt-meta">@bodyCols×@bodyRows</span>
+            </div>
+            <div id="grid-body" class="grid-box"
+                 data-side="body" data-container="body"
+                 data-cols="@bodyCols" data-rows="@bodyRows"
+                 style="width:@(bodyCols * CELL)px; height:@(bodyRows * CELL)px;"></div>
+        </div>
+
+        <!-- Right: Player containers -->
+        <div class="stack">
+            <div class="panel inv">
+                <div class="panel-title">
+                    <span>🪙 Pocket</span>
+                    <span class="pt-meta">@pCols×@pRows · 1×1 slots</span>
+                </div>
+                <div id="grid-pocket" class="grid-box drop-target"
+                     data-side="player" data-container="@ItemCatalogue.BACKPACK"
+                     data-cols="@pCols" data-rows="@pRows"
+                     style="width:@(pCols * CELL)px; height:@(pRows * CELL)px;"></div>
+            </div>
+
+            @if (hasBackpack)
+            {
+                <div class="panel inv">
+                    <div class="panel-title">
+                        <span>🎒 Equipped Backpack</span>
+                        <span class="pt-meta">@bpCols×@bpRows · @(bpCols*bpRows) cells</span>
+                    </div>
+                    <div id="grid-backpack" class="grid-box drop-target"
+                         data-side="player" data-container="@ItemCatalogue.EQUIPPED_BACKPACK"
+                         data-cols="@bpCols" data-rows="@bpRows"
+                         style="width:@(bpCols * CELL)px; height:@(bpRows * CELL)px;"></div>
+                </div>
+            }
+            else
+            {
+                <div class="panel inv">
+                    <div class="panel-title"><span>🎒 Equipped Backpack</span><span class="pt-meta">none</span></div>
+                    <div class="empty-msg">No backpack equipped — equip one in <a href="/Inventory" target="_blank" style="color:#f9ca24;">inventory</a>.</div>
+                </div>
+            }
+
+            @if (hasRig)
+            {
+                <div class="panel inv">
+                    <div class="panel-title">
+                        <span>🦺 Equipped Rig</span>
+                        <span class="pt-meta">@rCols×@rRows · 2×1 slots</span>
+                    </div>
+                    <div id="grid-rig" class="grid-box drop-target"
+                         data-side="player" data-container="@ItemCatalogue.EQUIPPED_RIG"
+                         data-cols="@rCols" data-rows="@rRows"
+                         style="width:@(rCols * CELL)px; height:@(rRows * CELL)px;"></div>
+                </div>
+            }
+            else
+            {
+                <div class="panel inv">
+                    <div class="panel-title"><span>🦺 Equipped Rig</span><span class="pt-meta">none</span></div>
+                    <div class="empty-msg">No rig equipped.</div>
+                </div>
+            }
+
+            <div class="panel inv">
+                <div class="panel-title"><span>🗑️ Discard</span><span class="pt-meta">drop to delete</span></div>
+                <div id="loot-trash" class="trash-zone">drop item here to discard</div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="LootClose" asp-controller="Forest" method="post" class="actions-row">
+        @Html.AntiForgeryToken()
+        <a href="/Inventory" target="_blank" class="btn-loot btn-inv">🎒 Open Full Inventory</a>
+        <button type="submit" class="btn-loot btn-done">✅ Done — Return to Map</button>
+    </form>
+
+    <div class="hint">Tip: items left in the body are lost. Picked items are saved to your inventory immediately.</div>
+</div>
+
+<script>
+    const CELL = @CELL;
+    const CATALOGUE = {
+        @foreach (var kv in ItemCatalogue.Items)
+        {
+            @:'@kv.Key': { name: '@kv.Value.Name', icon: '@kv.Value.Icon', w: @kv.Value.Width, h: @kv.Value.Height, color: '@kv.Value.TileColor' },
+        }
+    };
+
+    let bodyItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(session?.MonsterBody ?? new List<LootItem>()));
+
+    const playerContainers = {
+        '@ItemCatalogue.BACKPACK':         @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pocketItems)),
+        '@ItemCatalogue.EQUIPPED_BACKPACK':@Html.Raw(System.Text.Json.JsonSerializer.Serialize(backpackItems)),
+        '@ItemCatalogue.EQUIPPED_RIG':     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(rigItems))
+    };
+
+    function get(o, k) { return o[k] ?? o[k.charAt(0).toLowerCase() + k.slice(1)]; }
+
+    function bodyDims(loot) {
+        const def = CATALOGUE[get(loot,'ItemId')] || { w:1, h:1, name:'?', icon:'❓', color:'#444' };
+        const r = !!get(loot,'Rotated');
+        return { w: r? def.h : def.w, h: r? def.w : def.h, name: def.name, icon: def.icon, color: def.color };
+    }
+    function placedDims(p) {
+        return { w: get(p,'W'), h: get(p,'H'), name: get(p,'Name'), icon: get(p,'Icon'), color: get(p,'TileColor') };
+    }
+
+    function renderBody() {
+        const grid = document.getElementById('grid-body');
+        grid.innerHTML = '';
+        bodyItems.forEach((loot, idx) => {
+            const d = bodyDims(loot);
+            const x = get(loot,'GridX'), y = get(loot,'GridY');
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.style.left   = (x*CELL) + 'px';
+            el.style.top    = (y*CELL) + 'px';
+            el.style.width  = (d.w*CELL - 4) + 'px';
+            el.style.height = (d.h*CELL - 4) + 'px';
+            el.style.background = `linear-gradient(135deg, ${d.color}cc, ${d.color}66)`;
+            el.draggable = true;
+            el.dataset.idx = idx;
+            el.innerHTML = `<span title="${d.name}">${d.icon}</span>`;
+            el.addEventListener('dragstart', e => {
+                dragData = { idx, rotated: !!get(loot,'Rotated'), w: d.w, h: d.h,
+                    offX: Math.floor((e.clientX - el.getBoundingClientRect().left) / CELL),
+                    offY: Math.floor((e.clientY - el.getBoundingClientRect().top)  / CELL) };
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            el.addEventListener('dragend', () => { el.classList.remove('dragging'); dragData = null; });
+            grid.appendChild(el);
+        });
+    }
+
+    function renderPlayer(containerId, gridId) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = '';
+        (playerContainers[containerId] || []).forEach(p => {
+            const d = placedDims(p);
+            const id = get(p,'Id');
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.style.left   = (get(p,'GridX')*CELL) + 'px';
+            el.style.top    = (get(p,'GridY')*CELL) + 'px';
+            el.style.width  = (d.w*CELL - 4) + 'px';
+            el.style.height = (d.h*CELL - 4) + 'px';
+            el.style.background = `linear-gradient(135deg, ${d.color}cc, ${d.color}66)`;
+            el.draggable = true;
+            el.dataset.id = id;
+            el.innerHTML = `<span title="${d.name}">${d.icon}</span>`;
+            el.addEventListener('dragstart', e => {
+                playerDrag = { id, w: d.w, h: d.h };
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            el.addEventListener('dragend', () => { el.classList.remove('dragging'); playerDrag = null; });
+            el.addEventListener('contextmenu', async e => {
+                e.preventDefault();
+                if (busy) return;
+                busy = true;
+                const res = await fetch(`/Inventory/RotateAjax/${id}`, { method: 'POST' });
+                const r = await res.json();
+                if (r.success) location.reload();
+                else { alert(r.error || 'Cannot rotate'); busy = false; }
+            });
+            grid.appendChild(el);
+        });
+    }
+
+    let playerDrag = null;
+
+    let dragData = null;
+    let busy = false;
+
+    document.querySelectorAll('.drop-target').forEach(grid => {
+        grid.addEventListener('dragenter', e => { if (dragData || playerDrag) grid.classList.add('drop-active'); });
+        grid.addEventListener('dragleave', e => { grid.classList.remove('drop-active'); });
+        grid.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+        grid.addEventListener('drop', async e => {
+            e.preventDefault();
+            e.stopPropagation();
+            grid.classList.remove('drop-active');
+            if (busy) return;
+
+            // Player → Player container move (rearrange between containers)
+            if (playerDrag) {
+                const captured = playerDrag; playerDrag = null; busy = true;
+                const rect = grid.getBoundingClientRect();
+                const cx = Math.floor((e.clientX - rect.left) / CELL);
+                const cy = Math.floor((e.clientY - rect.top)  / CELL);
+                const target = grid.dataset.container;
+                const fd = new FormData();
+                fd.append('itemId', captured.id);
+                fd.append('targetContainer', target);
+                fd.append('targetX', cx);
+                fd.append('targetY', cy);
+                const res = await fetch('/Inventory/Move', { method: 'POST', body: fd });
+                const r = await res.json();
+                if (r.success) location.reload();
+                else { alert(r.error || 'Cannot place'); busy = false; }
+                return;
+            }
+
+            if (!dragData) return;
+            const captured = dragData;
+            dragData = null;
+            busy = true;
+
+            const rect = grid.getBoundingClientRect();
+            const cx = Math.floor((e.clientX - rect.left) / CELL) - captured.offX;
+            const cy = Math.floor((e.clientY - rect.top)  / CELL) - captured.offY;
+            const targetContainer = grid.dataset.container;
+
+            try {
+                const res = await fetch('/Forest/Loot/Pickup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        Index:   captured.idx,
+                        To:      targetContainer,
+                        GridX:   cx,
+                        GridY:   cy,
+                        Rotated: captured.rotated
+                    })
+                });
+                const data = await res.json();
+                if (!data.ok) {
+                    alert('Cannot place: ' + (data.error || 'unknown'));
+                    busy = false;
+                    return;
+                }
+                // Reload to fully sync with server state — avoids stale index issues
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+                alert('Network error: ' + err);
+                busy = false;
+            }
+        });
+    });
+
+    const trash = document.getElementById('loot-trash');
+    if (trash) {
+        trash.addEventListener('dragover', e => { e.preventDefault(); if (playerDrag || dragData) trash.classList.add('drop-active'); });
+        trash.addEventListener('dragleave', () => trash.classList.remove('drop-active'));
+        trash.addEventListener('drop', async e => {
+            e.preventDefault(); e.stopPropagation();
+            trash.classList.remove('drop-active');
+            if (busy) return;
+            // Discard from player inventory only (real DB delete). Body items use Close button.
+            if (!playerDrag) { alert('Drag from your inventory to discard. Body items get abandoned via Done.'); return; }
+            const captured = playerDrag; playerDrag = null;
+            if (!confirm('Discard this item permanently?')) return;
+            busy = true;
+            const res = await fetch(`/Inventory/Discard/${captured.id}`, { method: 'POST' });
+            const r = await res.json();
+            if (r.success) location.reload();
+            else { alert(r.error || 'Cannot discard'); busy = false; }
+        });
+    }
+
+    renderBody();
+    renderPlayer('@ItemCatalogue.BACKPACK',         'grid-pocket');
+    renderPlayer('@ItemCatalogue.EQUIPPED_BACKPACK','grid-backpack');
+    renderPlayer('@ItemCatalogue.EQUIPPED_RIG',     'grid-rig');
+</script>

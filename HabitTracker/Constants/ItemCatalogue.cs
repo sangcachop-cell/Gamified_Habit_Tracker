@@ -50,6 +50,11 @@ namespace HabitTracker.Constants
                 Name: "Simple Rig", Icon: "🦺",
                 Description: "A tactical rig. Equip to unlock a 4×2 quick-access grid.",
                 Width: 2, Height: 1, Category: "Equipment", TileColor: "#6b3a2b"),
+
+            ["wood"] = new ItemDef(
+                Name: "Wood", Icon: "🪵",
+                Description: "Raw wood from the forest. Process at the hideout for crafting material.",
+                Width: 2, Height: 1, Category: "Material", TileColor: "#5a3a1a"),
         };
 
         public static readonly Dictionary<string, EquipDef> Equipment = new()

@@ -4,6 +4,11 @@
     var s = ViewBag.Session as HabitTracker.Models.ForestSession;
     string sessionJson = ViewBag.SessionJson as string ?? "{}";
 
+    // TempData from combat win redirect
+    string? combatWinLoot   = TempData["ForestLootMsg"]      as string;
+    bool    combatWin       = TempData["ForestCombatWin"]    as string == "true";
+    string? pendingPathJson = TempData["ForestPendingPath"]  as string;
+
     var reqExtract = ForestMap.Extracts.FirstOrDefault(e => e.Id == s?.RequiredExtractId);
     var spawnInfo  = ForestMap.Spawns.FirstOrDefault(sp => sp.Id == s?.SpawnId);
 
@@ -66,6 +71,57 @@
     .move-log .ev-common { color: #aed6f1; }
     .move-log .ev-rare   { color: #f9ca24; }
     .hint-bar { font-size: .7rem; color: rgba(255,255,255,.25); margin-top: 10px; line-height: 1.6; }
+
+    /* Full-map modal */
+    #fullmap-modal {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,.88); z-index: 2000;
+        align-items: center; justify-content: center;
+    }
+    #fullmap-modal.open { display: flex; }
+    #fullmap-wrap {
+        position: relative; border: 2px solid rgba(76,175,80,.35);
+        border-radius: 12px; overflow: hidden;
+        box-shadow: 0 0 60px rgba(0,100,0,.4);
+    }
+    #fullmap-canvas { display: block; cursor: crosshair; }
+    #fullmap-close {
+        position: absolute; top: 8px; right: 8px;
+        background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.2);
+        border-radius: 8px; color: white; font-size: .85rem; font-weight: 700;
+        padding: 4px 10px; cursor: pointer;
+    }
+    #fullmap-hint {
+        position: absolute; bottom: 8px; left: 10px;
+        font-size: .68rem; color: rgba(255,255,255,.3); pointer-events: none;
+    }
+</style>
+
+<!-- Full-map modal -->
+<div id="fullmap-modal">
+    <div id="fullmap-wrap">
+        <canvas id="fullmap-canvas"></canvas>
+        <button id="fullmap-close">✕ Close</button>
+        <div id="fullmap-hint">Click to navigate · Wheel or +/- to zoom</div>
+        <div style="position:absolute; top:8px; left:8px; display:flex; gap:6px; z-index:10;">
+            <button data-zoom="full" data-dir="-" class="zoom-btn">−</button>
+            <button data-zoom="full" data-dir="+" class="zoom-btn">+</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .zoom-btn {
+        width: 28px; height: 28px; border-radius: 6px;
+        background: rgba(0,0,0,.6); color: white; border: 1px solid rgba(255,255,255,.2);
+        font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .zoom-btn:hover { background: rgba(76,175,80,.4); }
+    .zoom-row {
+        display: flex; gap: 6px; align-items: center;
+        font-size: .7rem; color: rgba(255,255,255,.5);
+        padding: 4px 0;
+    }
 </style>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
@@ -74,6 +130,17 @@
         <span style="font-size:.8rem; color:rgba(255,255,255,.4);">
             Required exit: <strong style="color:#00b89c;">@reqExtract?.Label (Extract @s?.RequiredExtractId)</strong>
         </span>
+        <button onclick="openFullMap()" style="background:rgba(76,175,80,.12);
+            border:1px solid rgba(76,175,80,.3); border-radius:8px; color:#81c784;
+            padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
+            🗺️ Full Map
+        </button>
+        <button type="button" onclick="toggleInventory()" id="btn-inventory-toggle"
+            style="background:rgba(249,202,36,.12);
+            border:1px solid rgba(249,202,36,.3); border-radius:8px; color:#f9ca24;
+            padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
+            🎒 Inventory
+        </button>
         <form asp-action="Index" method="get">
             <button type="submit" style="background:rgba(232,67,106,.15); border:1px solid rgba(232,67,106,.3);
                 border-radius:8px; color:#e8436a; padding:6px 14px; font-size:.8rem; cursor:pointer;">
@@ -90,9 +157,29 @@
         <canvas id="forest-canvas"></canvas>
     </div>
 
+    @* Hidden TempData carriers for post-combat redirect *@
+    @if (combatWin)
+    {
+        <div id="combat-win-data" data-loot="@combatWinLoot" style="display:none"></div>
+    }
+    @if (pendingPathJson != null)
+    {
+        <div id="pending-path-data" data-path='@pendingPathJson' style="display:none"></div>
+    }
+
     <!-- INFO PANEL -->
     <div class="map-panel">
-        <div class="panel-title">Player Status</div>
+        <div class="zoom-row">
+            <span style="flex:1;">🔍 Map zoom</span>
+            <button data-zoom="main" data-dir="-" class="zoom-btn">−</button>
+            <button data-zoom="main" data-dir="+" class="zoom-btn">+</button>
+        </div>
+        <div class="zoom-row">
+            <span style="flex:1;">🔎 Minimap</span>
+            <button data-zoom="mini" data-dir="-" class="zoom-btn">−</button>
+            <button data-zoom="mini" data-dir="+" class="zoom-btn">+</button>
+        </div>
+        <div class="panel-title" style="margin-top:8px;">Player Status</div>
         <div class="stat-row"><span>Spawn</span><span class="stat-val">@spawnInfo?.Label</span></div>
         <div class="stat-row"><span>Position</span><span class="stat-val" id="pos-display">(@s?.PlayerX, @s?.PlayerY)</span></div>
         <div class="stat-row"><span>Moves</span><span class="stat-val" id="moves-display">@s?.MovesSpent</span></div>
@@ -108,7 +195,26 @@
             <button type="submit" class="extract-btn" id="extract-btn">⬆️ Extract Here</button>
         </form>
 
-        <div class="hint-bar">💡 Click to move &nbsp;|&nbsp; WASD / ↑↓←→ to step</div>
+        <!-- Post-combat path continuation panel -->
+        <div id="continue-panel" style="display:none; background:rgba(0,184,156,.1);
+            border:1px solid rgba(0,184,156,.3); border-radius:10px; padding:12px; margin-top:12px;">
+            <div style="font-size:.8rem; font-weight:700; color:#00b89c; margin-bottom:6px;">✅ Victory!</div>
+            <div id="continue-dest" style="font-size:.75rem; opacity:.6; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:8px;">
+                <button id="btn-continue" style="flex:1; background:rgba(0,184,156,.3);
+                    border:1px solid rgba(0,184,156,.5); border-radius:8px; color:#00e5c0;
+                    font-size:.8rem; font-weight:700; padding:7px; cursor:pointer;">
+                    ➤ Continue
+                </button>
+                <button id="btn-stop" style="flex:1; background:rgba(255,255,255,.06);
+                    border:1px solid rgba(255,255,255,.15); border-radius:8px; color:rgba(255,255,255,.5);
+                    font-size:.8rem; font-weight:700; padding:7px; cursor:pointer;">
+                    ✋ Stop
+                </button>
+            </div>
+        </div>
+
+        <div class="hint-bar">💡 Click map or minimap to move &nbsp;|&nbsp; WASD / ↑↓←→ to step</div>
 
         <div class="panel-title" style="margin-top:18px;">Legend</div>
         <div class="legend">
@@ -128,7 +234,227 @@
             <div>Spawned at @spawnInfo?.Label (@s?.SpawnId)</div>
         </div>
     </div>
+
+    @* INVENTORY PANEL — third column, toggleable *@
+    @{
+        var pocketItems   = ViewBag.PocketItems   as List<HabitTracker.Controllers.PlacedItem> ?? new();
+        var bpItems       = ViewBag.BackpackItems as List<HabitTracker.Controllers.PlacedItem> ?? new();
+        var rigItems      = ViewBag.RigItems      as List<HabitTracker.Controllers.PlacedItem> ?? new();
+        bool hasBackpack  = ViewBag.HasBackpack ?? false;
+        bool hasRig       = ViewBag.HasRig      ?? false;
+        var (pCols, pRows)   = HabitTracker.Constants.ItemCatalogue.ContainerSize(HabitTracker.Constants.ItemCatalogue.BACKPACK);
+        var (bpCols, bpRows) = HabitTracker.Constants.ItemCatalogue.ContainerSize(HabitTracker.Constants.ItemCatalogue.EQUIPPED_BACKPACK);
+        var (rCols, rRows)   = HabitTracker.Constants.ItemCatalogue.ContainerSize(HabitTracker.Constants.ItemCatalogue.EQUIPPED_RIG);
+        const int IC = 64;
+    }
+    <div id="inventory-panel" class="map-panel" style="display:none; min-width:300px;">
+        <div class="panel-title">Equipped Inventory</div>
+
+        <div class="inv-section">
+            <div class="inv-label">🪙 POCKET <span class="inv-meta">@pCols×@pRows</span></div>
+            <div id="inv-pocket" class="inv-grid"
+                 data-container="@HabitTracker.Constants.ItemCatalogue.BACKPACK"
+                 data-cols="@pCols" data-rows="@pRows"
+                 style="width:@(pCols * IC)px; height:@(pRows * IC)px;"></div>
+        </div>
+
+        @if (hasBackpack)
+        {
+            <div class="inv-section">
+                <div class="inv-label">🎒 EQUIPPED BACKPACK <span class="inv-meta">@bpCols×@bpRows</span></div>
+                <div id="inv-backpack" class="inv-grid"
+                     data-container="@HabitTracker.Constants.ItemCatalogue.EQUIPPED_BACKPACK"
+                     data-cols="@bpCols" data-rows="@bpRows"
+                     style="width:@(bpCols * IC)px; height:@(bpRows * IC)px;"></div>
+            </div>
+        }
+        else
+        {
+            <div class="inv-section"><div class="inv-empty">🎒 No backpack equipped</div></div>
+        }
+
+        @if (hasRig)
+        {
+            <div class="inv-section">
+                <div class="inv-label">🦺 EQUIPPED RIG <span class="inv-meta">@rCols×@rRows</span></div>
+                <div id="inv-rig" class="inv-grid"
+                     data-container="@HabitTracker.Constants.ItemCatalogue.EQUIPPED_RIG"
+                     data-cols="@rCols" data-rows="@rRows"
+                     style="width:@(rCols * IC)px; height:@(rRows * IC)px;"></div>
+            </div>
+        }
+        else
+        {
+            <div class="inv-section"><div class="inv-empty">🦺 No rig equipped</div></div>
+        }
+
+        <div class="inv-section">
+            <div class="inv-label">🗑️ DISCARD <span class="inv-meta">drag here to delete</span></div>
+            <div id="inv-trash" class="inv-trash">drop item to discard</div>
+        </div>
+
+        <div class="hint-bar" style="margin-top:14px;">
+            Drag to move · Right-click to rotate · Drop on trash to discard
+        </div>
+    </div>
+
+    <div id="inv-data" data-pocket='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(pocketItems))'
+         data-backpack='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(bpItems))'
+         data-rig='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(rigItems))'
+         data-cell="@IC" style="display:none;"></div>
 </div>
+
+<style>
+    .inv-section { margin-bottom: 14px; }
+    .inv-label {
+        font-size: .68rem; font-weight: 700; letter-spacing: .12em;
+        color: rgba(255,255,255,.5); margin-bottom: 6px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .inv-meta { color: rgba(255,255,255,.3); font-weight: 500; }
+    .inv-grid {
+        position: relative;
+        background-color: rgba(0,0,0,.7);
+        background-image:
+            linear-gradient(rgba(76,175,80,.85) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(76,175,80,.85) 2px, transparent 2px);
+        background-size: 64px 64px;
+        background-position: 0 0;
+        border: 2px solid rgba(76,175,80,1);
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 2px rgba(0,0,0,.7);
+        box-sizing: content-box;
+    }
+    .inv-empty {
+        background: rgba(0,0,0,.2); border: 1px dashed rgba(255,255,255,.1);
+        border-radius: 8px; padding: 12px; text-align: center;
+        font-size: .75rem; color: rgba(255,255,255,.35);
+    }
+    .inv-item {
+        position: absolute; box-sizing: border-box; cursor: grab;
+        border-radius: 8px; border: 2px solid rgba(255,255,255,.18);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; color: white; user-select: none;
+        background: linear-gradient(135deg, rgba(0,0,0,.3), rgba(0,0,0,.1));
+        transition: box-shadow .12s;
+    }
+    .inv-item:hover { box-shadow: 0 0 0 2px rgba(255,255,255,.3) inset; }
+    .inv-item.dragging { opacity: .35; }
+    .inv-grid.drop-active { border-color: rgba(76,175,80,.7); box-shadow: 0 0 0 2px rgba(76,175,80,.25) inset; }
+    .inv-trash {
+        background: rgba(231,76,60,.1); border: 2px dashed rgba(231,76,60,.4);
+        border-radius: 8px; padding: 14px; text-align: center;
+        font-size: .72rem; color: rgba(231,76,60,.7); font-weight: 600; letter-spacing: .04em;
+        transition: background .15s;
+    }
+    .inv-trash.drop-active { background: rgba(231,76,60,.3); color: white; }
+</style>
+
+<script>
+(function(){
+    const data = document.getElementById('inv-data');
+    if (!data) return;
+    const CELL = parseInt(data.dataset.cell, 10);
+    let invDrag = null;
+    let invBusy = false;
+
+    function getProp(o, k) { return o[k] ?? o[k.charAt(0).toLowerCase() + k.slice(1)]; }
+
+    function renderInv(gridId, items) {
+        const g = document.getElementById(gridId);
+        if (!g) return;
+        g.innerHTML = '';
+        items.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'inv-item';
+            const x = getProp(p,'GridX'), y = getProp(p,'GridY');
+            const w = getProp(p,'W'),     h = getProp(p,'H');
+            el.style.left   = (x * CELL) + 'px';
+            el.style.top    = (y * CELL) + 'px';
+            el.style.width  = (w * CELL - 4) + 'px';
+            el.style.height = (h * CELL - 4) + 'px';
+            const tile = getProp(p,'TileColor') ?? '#444';
+            el.style.background = `linear-gradient(135deg, ${tile}cc, ${tile}66)`;
+            const id   = getProp(p,'Id');
+            const name = getProp(p,'Name') ?? '?';
+            const icon = getProp(p,'Icon') ?? '❓';
+            el.draggable = true;
+            el.dataset.id = id;
+            el.innerHTML = `<span title="${name}">${icon}</span>`;
+            el.addEventListener('dragstart', e => {
+                invDrag = { id, w, h };
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            el.addEventListener('dragend', () => { el.classList.remove('dragging'); invDrag = null; });
+            el.addEventListener('contextmenu', async e => {
+                e.preventDefault();
+                if (invBusy) return;
+                invBusy = true;
+                const res = await fetch(`/Inventory/RotateAjax/${id}`, { method: 'POST' });
+                const r = await res.json();
+                if (r.success) location.reload();
+                else { alert(r.error || 'Cannot rotate'); invBusy = false; }
+            });
+            g.appendChild(el);
+        });
+    }
+
+    document.querySelectorAll('.inv-grid').forEach(g => {
+        g.addEventListener('dragover', e => { e.preventDefault(); if (invDrag) g.classList.add('drop-active'); });
+        g.addEventListener('dragleave', () => g.classList.remove('drop-active'));
+        g.addEventListener('drop', async e => {
+            e.preventDefault(); e.stopPropagation();
+            g.classList.remove('drop-active');
+            if (!invDrag || invBusy) return;
+            const captured = invDrag; invDrag = null; invBusy = true;
+            const rect = g.getBoundingClientRect();
+            const cx = Math.floor((e.clientX - rect.left) / CELL);
+            const cy = Math.floor((e.clientY - rect.top)  / CELL);
+            const target = g.dataset.container;
+            const fd = new FormData();
+            fd.append('itemId', captured.id);
+            fd.append('targetContainer', target);
+            fd.append('targetX', cx);
+            fd.append('targetY', cy);
+            const res = await fetch('/Inventory/Move', { method: 'POST', body: fd });
+            const r = await res.json();
+            if (r.success) location.reload();
+            else { alert(r.error || 'Cannot place'); invBusy = false; }
+        });
+    });
+
+    const trash = document.getElementById('inv-trash');
+    if (trash) {
+        trash.addEventListener('dragover', e => { e.preventDefault(); if (invDrag) trash.classList.add('drop-active'); });
+        trash.addEventListener('dragleave', () => trash.classList.remove('drop-active'));
+        trash.addEventListener('drop', async e => {
+            e.preventDefault(); e.stopPropagation();
+            trash.classList.remove('drop-active');
+            if (!invDrag || invBusy) return;
+            const captured = invDrag; invDrag = null;
+            if (!confirm('Discard this item permanently?')) return;
+            invBusy = true;
+            const res = await fetch(`/Inventory/Discard/${captured.id}`, { method: 'POST' });
+            const r = await res.json();
+            if (r.success) location.reload();
+            else { alert(r.error || 'Cannot discard'); invBusy = false; }
+        });
+    }
+
+    try {
+        renderInv('inv-pocket',   JSON.parse(data.dataset.pocket   || '[]'));
+        renderInv('inv-backpack', JSON.parse(data.dataset.backpack || '[]'));
+        renderInv('inv-rig',      JSON.parse(data.dataset.rig      || '[]'));
+    } catch (e) { console.warn('Inventory render failed', e); }
+})();
+
+function toggleInventory() {
+    const p = document.getElementById('inventory-panel');
+    if (!p) return;
+    p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+}
+</script>
 
 @section Scripts {
 <script>
@@ -144,13 +470,36 @@ const EXTRACTS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
 
 let session = @Html.Raw(sessionJson);
 
-// Viewport: 21 cells × 30px = 630px canvas
-const VP = 21, VC = 30;
-const MINI = 140, MC = MINI / MAP_W;
+// Viewport: cells × cell-px = canvas size (mutable for zoom)
+const CANVAS_PX = 630;
+let VP = 21, VC = 30;
+const MINI = 140;       // minimap display size (px) — fixed
+const MC_BASE = 4;      // pre-rendered world resolution (px/cell)
+let miniRange = 64;     // cells visible on minimap (smaller = more zoomed in)
 
 const canvas = document.getElementById('forest-canvas');
-canvas.width = canvas.height = VP * VC;
+canvas.width = canvas.height = CANVAS_PX;
 const ctx = canvas.getContext('2d');
+
+function recomputeVP() { VP = Math.max(5, Math.ceil(CANVAS_PX / VC)); }
+function setMainZoom(newVC) {
+    VC = Math.max(12, Math.min(60, Math.round(newVC)));
+    recomputeVP();
+    if (typeof updateCamera === 'function') updateCamera();
+    if (typeof drawMap === 'function') drawMap();
+}
+// Mini zoom: positive delta = zoom in (smaller range), negative = zoom out
+function setMiniRange(newRange) {
+    miniRange = Math.max(16, Math.min(MAP_W, Math.round(newRange)));
+    if (typeof drawMap === 'function') drawMap();
+}
+// Compute the top-left world cell of the minimap viewport (centered on player)
+function miniOrigin() {
+    const halfR = miniRange / 2;
+    const ox = Math.max(0, Math.min(MAP_W - miniRange, session.PlayerX - halfR));
+    const oy = Math.max(0, Math.min(MAP_H - miniRange, session.PlayerY - halfR));
+    return { ox, oy, scale: MINI / miniRange };
+}
 
 let camX = 0, camY = 0;
 let hoverWX = -1, hoverWY = -1;
@@ -206,8 +555,13 @@ function aStar(sx, sy, tx, ty) {
     if (isWater(tx, ty)) return null;
     if (sx === tx && sy === ty) return [{x: sx, y: sy}];
 
+    const SQRT2 = Math.SQRT2;
     const key = (x, y) => y * MAP_W + x;
-    const h   = (x, y) => Math.max(Math.abs(x - tx), Math.abs(y - ty)); // Chebyshev
+    // Octile distance — true shortest Euclidean path on 8-dir grid
+    const h = (x, y) => {
+        const dx = Math.abs(x - tx), dy = Math.abs(y - ty);
+        return (dx + dy) + (SQRT2 - 2) * Math.min(dx, dy);
+    };
 
     const open   = new MinHeap();
     const gScore = new Map();
@@ -218,7 +572,11 @@ function aStar(sx, sy, tx, ty) {
     gScore.set(sk, 0);
     open.push({ x: sx, y: sy, f: h(sx, sy) });
 
-    const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+    // Cardinal first (cheaper), diagonal after — stable tie-break
+    const DIRS = [
+        [-1, 0, 1], [1, 0, 1], [0, -1, 1], [0, 1, 1],
+        [-1,-1, SQRT2], [-1, 1, SQRT2], [1, -1, SQRT2], [1, 1, SQRT2]
+    ];
 
     while (open.size > 0) {
         const cur = open.pop();
@@ -227,11 +585,10 @@ function aStar(sx, sy, tx, ty) {
         closed.add(ck);
 
         if (cur.x === tx && cur.y === ty) {
-            // Reconstruct
             const path = [];
             let k = ck;
             while (k !== undefined) {
-                const [px, py] = [k % MAP_W, Math.floor(k / MAP_W)];
+                const px = k % MAP_W, py = Math.floor(k / MAP_W);
                 path.unshift({ x: px, y: py });
                 k = parent.get(k);
             }
@@ -239,29 +596,126 @@ function aStar(sx, sy, tx, ty) {
         }
 
         const cg = gScore.get(ck);
-        for (const [dx, dy] of DIRS) {
+        for (const [dx, dy, cost] of DIRS) {
             const nx = cur.x + dx, ny = cur.y + dy;
             if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
             if (isWater(nx, ny)) continue;
+            // Block diagonal corner-cutting through water
+            if (dx !== 0 && dy !== 0) {
+                if (isWater(cur.x + dx, cur.y) || isWater(cur.x, cur.y + dy)) continue;
+            }
             const nk = key(nx, ny);
             if (closed.has(nk)) continue;
-            const ng = cg + 1;
+            const ng = cg + cost;
             if (ng < (gScore.get(nk) ?? Infinity)) {
                 gScore.set(nk, ng);
                 parent.set(nk, ck);
-                open.push({ x: nx, y: ny, f: ng + h(nx, ny) });
+                // Tie-breaker: nudge h up slightly so paths bend toward goal
+                open.push({ x: nx, y: ny, f: ng + h(nx, ny) * 1.0001 });
             }
         }
     }
-    return null; // no path
+    return null;
 }
 
-// ── Minimap (pre-rendered) ─────────────────────────────────────────────────────
-const miniCanvas = document.createElement('canvas');
-miniCanvas.width = miniCanvas.height = MINI;
-const mctx = miniCanvas.getContext('2d');
+// ── Full map (pre-rendered, zoomable) ─────────────────────────────────────────
+let FM_CELL = 5;
+const fmCanvas = document.getElementById('fullmap-canvas');
+const fmCtx = fmCanvas.getContext('2d');
+const fullMapBg = document.createElement('canvas');
+const fmbg = fullMapBg.getContext('2d');
 
-(function buildMinimap() {
+function setFullMapZoom(newCell) {
+    FM_CELL = Math.max(3, Math.min(12, Math.round(newCell)));
+    buildFullMap();
+    renderFullMap();
+}
+
+function buildFullMap() {
+    fmCanvas.width = fmCanvas.height = MAP_W * FM_CELL;
+    fullMapBg.width = fullMapBg.height = MAP_W * FM_CELL;
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if (isWater(x, y)) {
+                const v = (x * 3 + y * 7) % 3;
+                fmbg.fillStyle = v === 0 ? '#1a3a5c' : v === 1 ? '#1c3f63' : '#1e4268';
+            } else {
+                const v = (x * 13 + y * 7) % 7;
+                fmbg.fillStyle = v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633';
+            }
+            fmbg.fillRect(x * FM_CELL, y * FM_CELL, FM_CELL, FM_CELL);
+        }
+    }
+    LOCATIONS.forEach(function(l) {
+        fmbg.fillStyle = l.Color; fmbg.globalAlpha = 0.85;
+        fmbg.fillRect(l.X * FM_CELL, l.Y * FM_CELL, l.W * FM_CELL, l.H * FM_CELL);
+        fmbg.globalAlpha = 1;
+        fmbg.strokeStyle = 'rgba(255,255,255,.3)'; fmbg.lineWidth = 1;
+        fmbg.strokeRect(l.X * FM_CELL, l.Y * FM_CELL, l.W * FM_CELL, l.H * FM_CELL);
+        fmbg.font = '10px serif'; fmbg.textAlign = 'center'; fmbg.textBaseline = 'middle'; fmbg.fillStyle = 'white';
+        fmbg.fillText(l.Icon, (l.X + l.W / 2) * FM_CELL, (l.Y + l.H / 2) * FM_CELL - 3);
+        fmbg.font = 'bold 6px sans-serif';
+        fmbg.fillText(l.Name, (l.X + l.W / 2) * FM_CELL, (l.Y + l.H / 2) * FM_CELL + 6);
+    });
+    SPAWNS.forEach(function(sp) {
+        fmbg.fillStyle = sp.Color; fmbg.globalAlpha = 0.7;
+        fmbg.fillRect(sp.X * FM_CELL, sp.Y * FM_CELL, sp.W * FM_CELL, sp.H * FM_CELL);
+        fmbg.globalAlpha = 1;
+        fmbg.strokeStyle = sp.Color; fmbg.lineWidth = 1;
+        fmbg.strokeRect(sp.X * FM_CELL, sp.Y * FM_CELL, sp.W * FM_CELL, sp.H * FM_CELL);
+    });
+    EXTRACTS.forEach(function(ex) {
+        const isReq = ex.Id === session.RequiredExtractId;
+        fmbg.fillStyle = isReq ? '#00b89c' : '#005f50'; fmbg.globalAlpha = isReq ? 0.85 : 0.4;
+        fmbg.fillRect(ex.X * FM_CELL, ex.Y * FM_CELL, ex.W * FM_CELL, ex.H * FM_CELL);
+        fmbg.globalAlpha = 1;
+        fmbg.strokeStyle = isReq ? '#00e5c0' : '#007060'; fmbg.lineWidth = isReq ? 1.5 : 0.5;
+        fmbg.strokeRect(ex.X * FM_CELL, ex.Y * FM_CELL, ex.W * FM_CELL, ex.H * FM_CELL);
+        fmbg.font = 'bold 6px sans-serif'; fmbg.fillStyle = 'white';
+        fmbg.textAlign = 'center'; fmbg.textBaseline = 'middle';
+        fmbg.fillText(ex.Label, (ex.X + ex.W / 2) * FM_CELL, (ex.Y + ex.H / 2) * FM_CELL);
+    });
+}
+buildFullMap();
+
+function renderFullMap() {
+    fmCtx.drawImage(fullMapBg, 0, 0);
+    // Viewport rect
+    fmCtx.strokeStyle = 'rgba(255,255,255,.5)'; fmCtx.lineWidth = 1.5;
+    fmCtx.strokeRect(camX * FM_CELL, camY * FM_CELL, VP * FM_CELL, VP * FM_CELL);
+    // Player dot
+    fmCtx.fillStyle = '#f0b429';
+    fmCtx.beginPath(); fmCtx.arc((session.PlayerX + 0.5) * FM_CELL, (session.PlayerY + 0.5) * FM_CELL, 5, 0, Math.PI * 2); fmCtx.fill();
+    fmCtx.strokeStyle = '#fff'; fmCtx.lineWidth = 1.5; fmCtx.stroke();
+}
+
+function openFullMap() { renderFullMap(); document.getElementById('fullmap-modal').classList.add('open'); }
+function closeFullMap() { document.getElementById('fullmap-modal').classList.remove('open'); }
+
+document.getElementById('fullmap-close').addEventListener('click', closeFullMap);
+document.getElementById('fullmap-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeFullMap();
+});
+fmCanvas.addEventListener('click', async function(e) {
+    if (isMoving) return;
+    const rect = fmCanvas.getBoundingClientRect();
+    const sx = fmCanvas.width / rect.width, sy = fmCanvas.height / rect.height;
+    const tx = Math.floor((e.clientX - rect.left) * sx / FM_CELL);
+    const ty = Math.floor((e.clientY - rect.top)  * sy / FM_CELL);
+    if (isWater(tx, ty) || (tx === session.PlayerX && ty === session.PlayerY)) return;
+    closeFullMap();
+    const path = aStar(session.PlayerX, session.PlayerY, tx, ty);
+    if (!path || path.length <= 1) { addLog('No path found.'); return; }
+    await doMove(tx, ty, path);
+});
+
+// ── Minimap (pre-rendered full world at MC_BASE px/cell, viewport renders sub-rect) ──
+const miniCanvas = document.createElement('canvas');
+let mctx;
+
+function buildMinimap() {
+    miniCanvas.width = miniCanvas.height = MAP_W * MC_BASE;
+    mctx = miniCanvas.getContext('2d');
     for (let y = 0; y < MAP_H; y++) {
         for (let x = 0; x < MAP_W; x++) {
             if (isWater(x, y)) {
@@ -269,22 +723,23 @@ const mctx = miniCanvas.getContext('2d');
             } else {
                 mctx.fillStyle = ((x * 13 + y * 7) % 5 < 2) ? '#254a25' : '#2d5a2d';
             }
-            mctx.fillRect(x * MC, y * MC, Math.ceil(MC), Math.ceil(MC));
+            mctx.fillRect(x * MC_BASE, y * MC_BASE, MC_BASE, MC_BASE);
         }
     }
     LOCATIONS.forEach(function(l) {
         mctx.fillStyle = l.Color;
-        mctx.fillRect(l.X * MC, l.Y * MC, l.W * MC, l.H * MC);
+        mctx.fillRect(l.X * MC_BASE, l.Y * MC_BASE, l.W * MC_BASE, l.H * MC_BASE);
     });
     SPAWNS.forEach(function(sp) {
         mctx.fillStyle = sp.Color;
-        mctx.fillRect(sp.X * MC, sp.Y * MC, sp.W * MC, sp.H * MC);
+        mctx.fillRect(sp.X * MC_BASE, sp.Y * MC_BASE, sp.W * MC_BASE, sp.H * MC_BASE);
     });
     EXTRACTS.forEach(function(ex) {
         mctx.fillStyle = ex.Id === session.RequiredExtractId ? '#00e5c0' : '#007060';
-        mctx.fillRect(ex.X * MC, ex.Y * MC, ex.W * MC, ex.H * MC);
+        mctx.fillRect(ex.X * MC_BASE, ex.Y * MC_BASE, ex.W * MC_BASE, ex.H * MC_BASE);
     });
-})();
+}
+buildMinimap();
 
 // ── Draw helpers ───────────────────────────────────────────────────────────────
 function rr(c, x, y, w, h, r) {
@@ -458,38 +913,48 @@ function drawMap() {
 function drawMinimap() {
     const mx = canvas.width  - MINI - 8;
     const my = canvas.height - MINI - 8;
+    const { ox, oy, scale } = miniOrigin();
 
     ctx.fillStyle = 'rgba(0,8,0,.84)';
     rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.fill();
 
-    ctx.drawImage(miniCanvas, mx, my);
+    // Crop pre-rendered world centered on player
+    ctx.drawImage(
+        miniCanvas,
+        ox * MC_BASE, oy * MC_BASE, miniRange * MC_BASE, miniRange * MC_BASE,
+        mx, my, MINI, MINI
+    );
 
     // Active path on minimap
     if (activePath && activePath.length > 1) {
         ctx.strokeStyle = 'rgba(240,200,50,.6)'; ctx.lineWidth = 1;
         ctx.beginPath();
         activePath.forEach(function(c, i) {
-            const px = mx + (c.x + 0.5) * MC, py = my + (c.y + 0.5) * MC;
+            const px = mx + (c.x - ox + 0.5) * scale;
+            const py = my + (c.y - oy + 0.5) * scale;
             i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         });
         ctx.stroke();
     }
 
+    // Player dot
     ctx.fillStyle = '#f0b429';
     ctx.beginPath();
-    ctx.arc(mx + (session.PlayerX + 0.5) * MC, my + (session.PlayerY + 0.5) * MC, 3.5, 0, Math.PI * 2);
+    ctx.arc(mx + (session.PlayerX - ox + 0.5) * scale, my + (session.PlayerY - oy + 0.5) * scale, 3.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
 
+    // Camera viewport rect
     ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
-    ctx.strokeRect(mx + camX * MC, my + camY * MC, VP * MC, VP * MC);
+    ctx.strokeRect(mx + (camX - ox) * scale, my + (camY - oy) * scale, VP * scale, VP * scale);
 
+    // Outer border + label
     ctx.strokeStyle = 'rgba(76,175,80,.4)'; ctx.lineWidth = 1;
     rr(ctx, mx - 3, my - 3, MINI + 6, MINI + 6, 4); ctx.stroke();
 
     ctx.font = '8px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.28)';
     ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-    ctx.fillText('MAP', mx, my - 2);
+    ctx.fillText('MAP ' + miniRange + '×' + miniRange, mx, my - 2);
 }
 
 function minimapHit(cx, cy) {
@@ -501,60 +966,125 @@ function minimapHit(cx, cy) {
 updateCamera();
 drawMap();
 
-// ── Mouse hover ────────────────────────────────────────────────────────────────
+// ── Zoom (wheel + buttons) ─────────────────────────────────────────────────────
+canvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const cy = (e.clientY - rect.top)  * (canvas.height / rect.height);
+    const dir = e.deltaY < 0 ? 1 : -1;
+    // dir=+1 = zoom in. For minimap, smaller range = more zoomed.
+    if (minimapHit(cx, cy)) setMiniRange(miniRange - dir * 16);
+    else                    setMainZoom(VC + dir * 4);
+}, { passive: false });
+
+fmCanvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const dir = e.deltaY < 0 ? 1 : -1;
+    setFullMapZoom(FM_CELL + dir);
+}, { passive: false });
+
+document.querySelectorAll('[data-zoom]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const tgt = btn.dataset.zoom;
+        const dir = btn.dataset.dir === '+' ? 1 : -1;
+        if (tgt === 'main') setMainZoom(VC + dir * 4);
+        if (tgt === 'mini') setMiniRange(miniRange - dir * 16); // + = zoom in = smaller range
+        if (tgt === 'full') setFullMapZoom(FM_CELL + dir);
+    });
+});
+
+// ── Pan state ──────────────────────────────────────────────────────────────────
+let panStartX = 0, panStartY = 0, panStartCamX = 0, panStartCamY = 0, didPan = false;
+
+canvas.addEventListener('mousedown', function(e) {
+    if (isMoving || e.button !== 0) return;
+    const rect = canvas.getBoundingClientRect();
+    panStartX = e.clientX; panStartY = e.clientY;
+    panStartCamX = camX;   panStartCamY = camY;
+    didPan = false;
+});
+
+// ── Mouse hover + pan ──────────────────────────────────────────────────────────
 canvas.addEventListener('mousemove', function(e) {
     if (isMoving) return;
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
     const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
 
+    // Pan while LMB held (if moved > 5 canvas-px)
+    if (e.buttons === 1) {
+        const dx = (e.clientX - panStartX) * sx, dy = (e.clientY - panStartY) * sy;
+        if (!didPan && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) didPan = true;
+        if (didPan) {
+            camX = clamp(panStartCamX - Math.round(dx / VC), 0, MAP_W - VP);
+            camY = clamp(panStartCamY - Math.round(dy / VC), 0, MAP_H - VP);
+            hoverWX = hoverWY = -1; hoverPath = null;
+            canvas.style.cursor = 'grabbing';
+            drawMap(); return;
+        }
+    }
+
+    // Minimap hover → show world coords
     if (minimapHit(cx, cy)) {
-        hoverWX = hoverWY = -1;
-        hoverPath = null;
-        canvas.style.cursor = 'default';
-        document.getElementById('hover-display').textContent = '—';
+        hoverWX = hoverWY = -1; hoverPath = null;
+        canvas.style.cursor = 'crosshair';
+        const mmx = canvas.width - MINI - 8, mmy = canvas.height - MINI - 8;
+        const { ox, oy, scale } = miniOrigin();
+        const wx = ox + Math.floor((cx - mmx) / scale);
+        const wy = oy + Math.floor((cy - mmy) / scale);
+        document.getElementById('hover-display').textContent = '(' + wx + ', ' + wy + ') [map]';
         drawMap(); return;
     }
 
     hoverWX = camX + Math.floor(cx / VC);
     hoverWY = camY + Math.floor(cy / VC);
-
     const water = isWater(hoverWX, hoverWY);
     canvas.style.cursor = water ? 'not-allowed' : 'crosshair';
 
-    // Recompute A* only when hovered cell changes
     if (hoverWX !== lastHoverWX || hoverWY !== lastHoverWY) {
         lastHoverWX = hoverWX; lastHoverWY = hoverWY;
         hoverPath = water ? null : aStar(session.PlayerX, session.PlayerY, hoverWX, hoverWY);
     }
-
     const pathLen = hoverPath ? hoverPath.length - 1 : 0;
     document.getElementById('hover-display').textContent =
         '(' + hoverWX + ', ' + hoverWY + ')' + (pathLen > 0 ? '  –  ' + pathLen + ' moves' : '');
-
     drawMap();
 });
 
 canvas.addEventListener('mouseleave', function() {
     if (isMoving) return;
-    hoverWX = hoverWY = -1; hoverPath = null; drawMap();
+    hoverWX = hoverWY = -1; hoverPath = null; canvas.style.cursor = 'crosshair'; drawMap();
 });
 
-// ── Click to move ──────────────────────────────────────────────────────────────
+// ── Click to move (canvas + minimap) — skipped if pan occurred ────────────────
 canvas.addEventListener('click', async function(e) {
-    if (isMoving) return;
+    if (isMoving || didPan) { didPan = false; return; }
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
     const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
-    if (minimapHit(cx, cy)) return;
 
+    // Minimap click → navigate to world position
+    const mmx = canvas.width - MINI - 8, mmy = canvas.height - MINI - 8;
+    if (cx >= mmx && cx <= mmx + MINI && cy >= mmy && cy <= mmy + MINI) {
+        const { ox, oy, scale } = miniOrigin();
+        const wx = ox + Math.floor((cx - mmx) / scale);
+        const wy = oy + Math.floor((cy - mmy) / scale);
+        const tx = Math.max(WATER_BORDER, Math.min(MAP_W - WATER_BORDER - 1, wx));
+        const ty = Math.max(WATER_BORDER, Math.min(MAP_H - WATER_BORDER - 1, wy));
+        if (isWater(tx, ty) || (tx === session.PlayerX && ty === session.PlayerY)) return;
+        const path = aStar(session.PlayerX, session.PlayerY, tx, ty);
+        if (!path || path.length <= 1) { addLog('No path found.'); return; }
+        await doMove(tx, ty, path);
+        return;
+    }
+
+    // Regular canvas click
     const tx = camX + Math.floor(cx / VC), ty = camY + Math.floor(cy / VC);
     if (isWater(tx, ty)) { addLog('Cannot enter water.'); return; }
     if (tx === session.PlayerX && ty === session.PlayerY) return;
-
     const path = hoverPath || aStar(session.PlayerX, session.PlayerY, tx, ty);
     if (!path || path.length <= 1) { addLog('No path found.'); return; }
-
     await doMove(tx, ty, path);
 });
 
@@ -580,7 +1110,6 @@ async function doMove(tx, ty, path) {
     isMoving = true;
     hoverPath = null;
 
-    // Fetch first — server validates and rolls events
     const res  = await fetch('/Forest/Move', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -590,17 +1119,39 @@ async function doMove(tx, ty, path) {
 
     if (!data.ok) { addLog(data.error); isMoving = false; drawMap(); return; }
 
-    // Animate along path (or snap for single step)
+    // ── MIA ────────────────────────────────────────────────────────────────
+    if (data.mia) {
+        session.PlayerX = data.x; session.PlayerY = data.y;
+        session.MovesSpent = data.moves;
+        updateCamera(); drawMap();
+        addLog('⚠️ Move limit reached — Missing in Action!', 'ev-rare');
+        setTimeout(function() { window.location.href = '/Forest/Result'; }, 1200);
+        return;
+    }
+
+    // ── Combat triggered ───────────────────────────────────────────────────
+    if (data.combatTriggered) {
+        session.PlayerX = data.x; session.PlayerY = data.y;
+        session.MovesSpent = data.moves;
+        updateCamera(); drawMap();
+        const tier = data.monsterTier === 'rare' ? '⭐ Rare' : '⚡ Normal';
+        addLog(tier + ' encounter! Entering combat...', data.monsterTier === 'rare' ? 'ev-rare' : 'ev-common');
+        setTimeout(function() { window.location.href = '/Forest/Combat'; }, 700);
+        return;
+    }
+
+    // ── Normal move ────────────────────────────────────────────────────────
+    // Animate along path
     if (path && path.length > 2) {
-        activePath  = path;
+        activePath    = path;
         activePathIdx = 0;
         for (let i = 1; i < path.length; i++) {
             session.PlayerX = path[i].x;
             session.PlayerY = path[i].y;
-            activePathIdx = i;
+            activePathIdx   = i;
             updateCamera();
             drawMap();
-            await sleep(35);
+            await sleep(160);
         }
         activePath = null;
     } else {
@@ -632,25 +1183,53 @@ async function doMove(tx, ty, path) {
         btn.classList.remove('show');
     }
 
-    // Events
-    if (data.events && data.events.length > 0) {
-        data.events.forEach(function(ev) {
-            const cls  = ev.tier === 'rare' ? 'ev-rare' : 'ev-common';
-            const icon = ev.tier === 'rare' ? '⭐' : '⚡';
-            const loc  = ev.zone ? ' [' + ev.zone + ']' : '';
-            addLog(icon + ' ' + ev.tier.charAt(0).toUpperCase() + ev.tier.slice(1) +
-                   ' encounter at (' + ev.x + ', ' + ev.y + ')' + loc, cls);
-        });
-    }
-
     if (path && path.length > 1) {
         addLog('→ (' + data.x + ', ' + data.y + ')  +' + data.dist + ' moves' +
                (data.zoneName ? '  [' + data.zoneName + ']' : ''));
     }
 
     isMoving = false;
+    updateCamera(); // re-center after move (clears any manual pan)
     drawMap();
 }
+
+// Post-combat setup on page load
+(function() {
+    // Combat win log entry
+    const winEl = document.getElementById('combat-win-data');
+    if (winEl) addLog('✅ Monster defeated! ' + (winEl.dataset.loot || ''), 'ev-common');
+
+    // Pending path continuation
+    const pathEl = document.getElementById('pending-path-data');
+    if (pathEl) {
+        try {
+            // Server serializes as [[x,y],...], convert to [{x,y},...]
+            const raw  = JSON.parse(pathEl.dataset.path);
+            const path = raw.map(function(c) { return { x: c[0], y: c[1] }; });
+            if (path.length > 1) {
+                const dest = path[path.length - 1];
+                const panel = document.getElementById('continue-panel');
+                document.getElementById('continue-dest').textContent =
+                    'Resume path to (' + dest.x + ', ' + dest.y + ')? — ' + (path.length - 1) + ' moves remaining';
+                panel.style.display = 'block';
+
+                document.getElementById('btn-continue').addEventListener('click', async function() {
+                    panel.style.display = 'none';
+                    // Recompute from current player position — player may have moved manually
+                    const fresh = aStar(session.PlayerX, session.PlayerY, dest.x, dest.y);
+                    if (!fresh || fresh.length <= 1) {
+                        addLog('No path to (' + dest.x + ', ' + dest.y + ').');
+                        return;
+                    }
+                    await doMove(dest.x, dest.y, fresh);
+                });
+                document.getElementById('btn-stop').addEventListener('click', function() {
+                    panel.style.display = 'none';
+                });
+            }
+        } catch(e) { /* bad JSON — ignore */ }
+    }
+})();
 
 function addLog(msg, cls) {
     const log = document.getElementById('move-log');

@@ -27,8 +27,8 @@ namespace HabitTracker.Constants
 
         public static readonly SpawnPoint[] Spawns =
         {
-            new("A", 5, 5, 4, 4, "Spawn A", "#4a90d9", "Alpha"),   // NW → must exit NE
-            new("B", 118, 118, 4, 4, "Spawn B", "#d94a4a", "Beta"), // SE → must exit SW
+            new("A", 10, 10, 4, 4, "Spawn A", "#4a90d9", "Alpha"),    // NW → must exit NE
+            new("B", 114, 114, 4, 4, "Spawn B", "#d94a4a", "Beta"),   // SE → must exit SW
         };
 
         // ── Extract points ────────────────────────────────────────────────────
@@ -37,8 +37,8 @@ namespace HabitTracker.Constants
 
         public static readonly ExtractPoint[] Extracts =
         {
-            new("Alpha", 118, 5,   4, 4, "Extract α", "#00b89c"),  // NE
-            new("Beta",  5,   118, 4, 4, "Extract β", "#00b89c"),  // SW
+            new("Alpha", 114, 10,  4, 4, "Extract α", "#00b89c"),  // NE
+            new("Beta",  10,  114, 4, 4, "Extract β", "#00b89c"),  // SW
         };
 
         // ── Helpers ───────────────────────────────────────────────────────────
@@ -67,6 +67,26 @@ namespace HabitTracker.Constants
 
         public static (int cx, int cy) SpawnCenter(SpawnPoint s) =>
             (s.X + s.W / 2, s.Y + s.H / 2);
+
+        // ── Monster factory ───────────────────────────────────────────────────
+        public record ForestMonster(string Name, string Icon, int HP, int Attack, int Armor, int Speed, string Tier);
+
+        // Normal = wave-1 (mult 1.0), Rare = wave-3 (mult 1.6) — stats scale with player level
+        public static ForestMonster MakeMonster(string tier, int playerLevel)
+        {
+            int    lvl  = Math.Max(1, playerLevel);
+            double mult = tier == "rare" ? 1.6 : 1.0;
+            int    spd  = Math.Min(100, (int)(5 + Math.Sqrt(lvl) * 3) + (tier == "rare" ? 4 : 0));
+            return new ForestMonster(
+                tier == "rare" ? "Forest Brute" : "Forest Scout",
+                tier == "rare" ? "👹" : "🐺",
+                Math.Max(20, (int)((80 + lvl * 5) * mult)),
+                Math.Max(3,  (int)((5  + lvl)     * mult)),
+                Math.Max(0,  (int)((lvl * 0.5)    * mult)),
+                spd,
+                tier
+            );
+        }
 
         // ── Event system ──────────────────────────────────────────────────────
         public const double BaseEventChance     = 0.05;  // 5% per open-forest cell

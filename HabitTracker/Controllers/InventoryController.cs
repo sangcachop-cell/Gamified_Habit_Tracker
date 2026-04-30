@@ -29,6 +29,12 @@ namespace HabitTracker.Controllers
             var userId = GetUserId();
             if (userId == null) return RedirectToAction("Login", "Account");
 
+            if (IsForestActive())
+            {
+                TempData["InventoryInfo"] = "Inventory is locked while you're in the forest.";
+                return RedirectToAction("Map", "Forest");
+            }
+
             await _inventory.EnsureStarterItemsAsync(userId.Value);
 
             var user     = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -69,7 +75,6 @@ namespace HabitTracker.Controllers
         }
 
         [HttpPost("Move")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Move(int itemId, string targetContainer, int targetX, int targetY)
         {
             var userId = GetUserId();
@@ -77,6 +82,32 @@ namespace HabitTracker.Controllers
 
             bool ok = await _inventory.MoveItemAsync(userId.Value, itemId, targetContainer, targetX, targetY);
             return Json(new { success = ok, error = ok ? null : "Position out of bounds or overlaps another item" });
+        }
+
+        [HttpPost("RotateAjax/{id}")]
+        public async Task<IActionResult> RotateAjax(int id)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false, error = "Not logged in" });
+
+            bool ok = await _inventory.RotateItemAsync(userId.Value, id);
+            return Json(new { success = ok, error = ok ? null : "Cannot rotate (overlap or out of bounds)" });
+        }
+
+        [HttpPost("Discard/{id}")]
+        public async Task<IActionResult> Discard(int id)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false, error = "Not logged in" });
+
+            var item = await _context.UserInventoryItems
+                .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId.Value);
+            if (item == null) return Json(new { success = false, error = "Item not found" });
+
+            _context.UserInventoryItems.Remove(item);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"User {userId} discarded inventory item {id} ({item.ItemId})");
+            return Json(new { success = true });
         }
 
         [HttpPost("Rotate/{id}")]
@@ -149,6 +180,18 @@ namespace HabitTracker.Controllers
         }
 
         private int? GetUserId() => HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+
+        private bool IsForestActive()
+        {
+            var json = HttpContext.Session.GetString("ForestSession");
+            if (string.IsNullOrEmpty(json)) return false;
+            try
+            {
+                var fs = System.Text.Json.JsonSerializer.Deserialize<HabitTracker.Models.ForestSession>(json);
+                return fs?.IsActive ?? false;
+            }
+            catch { return false; }
+        }
     }
 
     // ── Shared view-model record ─────────────────────────────────────────────

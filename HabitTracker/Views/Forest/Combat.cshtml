@@ -1,0 +1,220 @@
+@using HabitTracker.Models
+@{
+    ViewData["Title"] = "Forest — Encounter";
+    var combat  = ViewBag.Combat  as ForestCombatState;
+    var session = ViewBag.Session as ForestSession;
+    bool isRare = combat?.MonsterTier == "rare";
+    double monsterHpPct = combat == null ? 0 : Math.Max(0, (double)combat.MonsterCurrentHP / combat.MonsterMaxHP * 100);
+    double playerHpPct  = combat == null ? 0 : Math.Max(0, (double)combat.PlayerCurrentHP  / combat.PlayerMaxHP  * 100);
+}
+
+<style>
+    body { background: #0a120a; color: #e8f0e8; }
+
+    .encounter-wrap {
+        max-width: 600px; margin: 40px auto;
+        background: linear-gradient(135deg, #0f1f0f, #1a3a1a);
+        border: 1.5px solid rgba(76,175,80,.25); border-radius: 24px;
+        padding: 36px 32px;
+    }
+
+    .encounter-header {
+        text-align: center; margin-bottom: 28px;
+    }
+    .encounter-tag {
+        display: inline-block;
+        padding: 3px 12px; border-radius: 20px; font-size: .72rem;
+        font-weight: 700; letter-spacing: .08em; margin-bottom: 10px;
+        background: @(isRare ? "rgba(249,202,36,.2)" : "rgba(100,180,255,.15)");
+        color: @(isRare ? "#f9ca24" : "#7ec8e3");
+        border: 1px solid @(isRare ? "rgba(249,202,36,.4)" : "rgba(100,180,255,.3)");
+    }
+    .encounter-title {
+        font-size: 1.8rem; font-weight: 900;
+        color: @(isRare ? "#f9ca24" : "#81c784");
+    }
+
+    .combatant-row {
+        display: grid; grid-template-columns: 1fr 60px 1fr; gap: 16px;
+        align-items: center; margin-bottom: 24px;
+    }
+    .combatant { background: rgba(255,255,255,.05); border-radius: 14px; padding: 16px; }
+    .combatant-icon { font-size: 2.4rem; text-align: center; margin-bottom: 6px; }
+    .combatant-name { font-weight: 800; font-size: .9rem; text-align: center; margin-bottom: 10px; }
+    .hp-label { font-size: .68rem; opacity: .5; margin-bottom: 4px; }
+    .hp-bar-bg { background: rgba(255,255,255,.1); border-radius: 6px; height: 10px; overflow: hidden; }
+    .hp-bar-fill { height: 100%; border-radius: 6px; transition: width .3s; }
+    .hp-text { font-size: .75rem; font-weight: 700; margin-top: 4px; text-align: center; }
+
+    .vs-badge {
+        text-align: center; font-size: 1.1rem; font-weight: 900;
+        opacity: .4;
+    }
+
+    .stat-pills {
+        display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px;
+    }
+    .stat-pill {
+        font-size: .65rem; padding: 2px 8px; border-radius: 10px;
+        background: rgba(255,255,255,.08); color: rgba(255,255,255,.6);
+    }
+    .stat-pill.spd-fast { background: rgba(129,199,132,.2); color: #81c784; }
+    .stat-pill.spd-slow { background: rgba(231,76,60,.15);  color: #e74c3c; }
+
+    .combat-log {
+        background: rgba(0,0,0,.3); border-radius: 10px; padding: 12px 14px;
+        max-height: 140px; overflow-y: auto;
+        font-size: .78rem; color: rgba(255,255,255,.45);
+        display: flex; flex-direction: column; gap: 4px;
+        margin-bottom: 20px;
+    }
+    .combat-log .log-hit    { color: #e74c3c; }
+    .combat-log .log-player { color: #81c784; }
+    .combat-log .log-system { color: rgba(255,255,255,.25); }
+
+    .action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .action-row form { display: block; width: 100%; }
+    .btn-action {
+        border: none; border-radius: 16px; color: white;
+        font-weight: 800; font-size: 1.1rem;
+        padding: 22px 10px;
+        cursor: pointer; transition: transform .12s, box-shadow .12s;
+        width: 100%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+        box-shadow: 0 3px 0 rgba(0,0,0,.25);
+        line-height: 1.15;
+    }
+    .btn-action:hover  { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,.25); }
+    .btn-action:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+    .btn-action .ico { font-size: 1.7rem; line-height: 1; }
+    .btn-action small { display: block; font-size: .72rem; opacity: .8; margin-top: 2px; font-weight: 500; letter-spacing: .02em; }
+    .btn-attack { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+    .btn-defend { background: linear-gradient(135deg, #1f618d, #2980b9); }
+    .btn-flee   { background: linear-gradient(135deg, #4a4a4a, #6b6b6b); opacity: .85; }
+
+    .moves-badge {
+        text-align: center; font-size: .72rem; opacity: .35; margin-top: 14px;
+    }
+</style>
+
+<div class="encounter-wrap">
+    <div class="encounter-header">
+        <div class="encounter-tag">@(isRare ? "⭐ Rare Encounter" : "⚡ Encounter")</div>
+        <div class="encounter-title">@combat?.MonsterName</div>
+    </div>
+
+    <div class="combatant-row">
+        <!-- Player -->
+        <div class="combatant">
+            <div class="combatant-icon">🧍</div>
+            <div class="combatant-name">You</div>
+            <div class="hp-label">HP</div>
+            <div class="hp-bar-bg">
+                <div class="hp-bar-fill" style="width:@playerHpPct%;
+                    background: @(playerHpPct > 50 ? "#27ae60" : playerHpPct > 25 ? "#f39c12" : "#c0392b");"></div>
+            </div>
+            <div class="hp-text" style="color:#81c784;">@combat?.PlayerCurrentHP / @combat?.PlayerMaxHP</div>
+            <div class="stat-pills">
+                <div class="stat-pill">ATK @combat?.PlayerAttack</div>
+                <div class="stat-pill">ARM @combat?.PlayerArmor</div>
+                <div class="stat-pill @(combat?.PlayerSpeed >= combat?.MonsterSpeed ? "spd-fast" : "spd-slow")">
+                    SPD @combat?.PlayerSpeed
+                </div>
+            </div>
+        </div>
+
+        <div class="vs-badge">VS</div>
+
+        <!-- Monster -->
+        <div class="combatant">
+            <div class="combatant-icon">@combat?.MonsterIcon</div>
+            <div class="combatant-name">@combat?.MonsterName</div>
+            <div class="hp-label">HP</div>
+            <div class="hp-bar-bg">
+                <div class="hp-bar-fill" style="width:@monsterHpPct%;
+                    background: @(monsterHpPct > 50 ? "#e74c3c" : monsterHpPct > 25 ? "#e67e22" : "#c0392b");"></div>
+            </div>
+            <div class="hp-text" style="color:#e74c3c;">@combat?.MonsterCurrentHP / @combat?.MonsterMaxHP</div>
+            <div class="stat-pills">
+                <div class="stat-pill">ATK @combat?.MonsterAttack</div>
+                <div class="stat-pill">ARM @combat?.MonsterArmor</div>
+                <div class="stat-pill">SPD @combat?.MonsterSpeed</div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        bool playerGoesFirst = (combat?.PlayerSpeed ?? 0) >= (combat?.MonsterSpeed ?? 0);
+        bool playerDbl = (combat?.PlayerSpeed ?? 0) >= (int)((combat?.MonsterSpeed ?? 0) * 1.5);
+        bool monsterDbl = (combat?.MonsterSpeed ?? 0) >= (int)((combat?.PlayerSpeed ?? 0) * 1.5);
+    }
+    <div style="text-align:center; font-size:.72rem; color:rgba(255,255,255,.3); margin-bottom:14px;">
+        @if (playerGoesFirst)
+        {
+            <span style="color:rgba(129,199,132,.6);">
+                ⚡ You act first@(playerDbl ? " — bonus strike!" : "")
+            </span>
+        }
+        else
+        {
+            <span style="color:rgba(231,76,60,.6);">
+                ⚠️ @combat?.MonsterName acts first@(monsterDbl ? " — double strike!" : "")
+            </span>
+        }
+    </div>
+
+    <!-- Combat log -->
+    <div class="combat-log">
+        @if (combat?.Log != null)
+        {
+            @foreach (var entry in combat.Log)
+            {
+                var cls = entry.Contains("You strike")    ? "log-player"
+                        : entry.Contains("hits you")      ? "log-hit"
+                        : entry.Contains("blocked")       ? "log-player"
+                        : entry.Contains("guard breaks")  ? "log-hit"
+                        : entry.Contains("Escape Scroll") ? "log-hit"
+                        : "log-system";
+                <div class="@cls">@entry</div>
+            }
+        }
+    </div>
+
+    <!-- Actions -->
+    @{
+        int[] failChances = { 0, 35, 65, 85 };
+        int defIdx = Math.Min(combat?.ConsecutiveDefends ?? 0, 3);
+        int defFail = failChances[defIdx];
+        string defRisk = defIdx == 0 ? "Always blocks" : $"{defFail}% fail";
+    }
+    <div class="action-row">
+        <form asp-action="CombatAttack" asp-controller="Forest" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-action btn-attack">
+                <span class="ico">⚔️</span>
+                <span>Attack</span>
+                <small>Resets guard</small>
+            </button>
+        </form>
+        <form asp-action="CombatDefend" asp-controller="Forest" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-action btn-defend">
+                <span class="ico">🛡️</span>
+                <span>Defend</span>
+                <small>@defRisk</small>
+            </button>
+        </form>
+        <form asp-action="CombatFlee" asp-controller="Forest" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-action btn-flee">
+                <span class="ico">🏃</span>
+                <span>Flee</span>
+                <small>Needs Escape Scroll</small>
+            </button>
+        </form>
+    </div>
+
+    <div class="moves-badge">
+        @session?.MovesSpent moves spent &nbsp;|&nbsp; @(session?.Pouch?.Count ?? 0) loot in pouch
+    </div>
+</div>
