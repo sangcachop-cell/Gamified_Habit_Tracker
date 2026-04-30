@@ -61,6 +61,10 @@ namespace HabitTracker.Models
         // ===== RELATIONSHIPS =====
         public virtual List<UserQuest>? UserQuests { get; set; }
 
+        // Which hideout facility this quest is completed at (null = no specific facility)
+        public int? FacilityId { get; set; }
+        public virtual Facility? AssignedFacility { get; set; }
+
         // ===== METHODS =====
         /// <summary>
         /// Tính XP reward dựa vào difficulty

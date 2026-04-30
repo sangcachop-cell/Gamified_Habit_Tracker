@@ -1,0 +1,96 @@
+@using HabitTracker.Constants
+@{ ViewData["Title"] = "The Forest"; }
+
+<style>
+    .forest-hero {
+        background: linear-gradient(135deg, #0d1f0d 0%, #1a3a1a 60%, #0d2a0d 100%);
+        border-radius: 24px; padding: 48px 40px; color: white;
+        position: relative; overflow: hidden; margin-bottom: 32px;
+    }
+    .forest-hero::before {
+        content: "";
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at 30% 50%, rgba(0,180,60,.15) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(0,80,160,.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .forest-title {
+        font-size: 3rem; font-weight: 900; letter-spacing: -2px;
+        background: linear-gradient(135deg, #4caf50, #81c784);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        margin: 0 0 8px;
+    }
+    .forest-subtitle { font-size: 1rem; opacity: .6; margin-bottom: 28px; }
+    .enter-btn {
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+        border: none; border-radius: 14px; color: white; font-size: 1.1rem;
+        font-weight: 800; padding: 16px 40px; cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 4px 20px rgba(76,175,80,.35);
+    }
+    .enter-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(76,175,80,.5); }
+    .resume-btn {
+        background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.2);
+        border-radius: 14px; color: white; font-size: 1rem;
+        font-weight: 700; padding: 14px 36px; cursor: pointer;
+        margin-left: 14px; transition: background .15s;
+    }
+    .resume-btn:hover { background: rgba(255,255,255,.14); }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .info-card {
+        background: white; border-radius: 16px; padding: 20px 18px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .info-card-icon { font-size: 2rem; margin-bottom: 10px; }
+    .info-card-title { font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
+    .info-card-desc  { font-size: .8rem; color: #777; line-height: 1.5; }
+</style>
+
+<div class="forest-hero">
+    <div style="position:relative; z-index:1;">
+        <h1 class="forest-title">🌲 The Forest</h1>
+        <p class="forest-subtitle">An untamed wilderness. Enter, explore, and extract — or be lost forever.</p>
+        <div>
+            <form asp-action="Enter" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="enter-btn">🌲 Enter the Forest</button>
+            </form>
+            @if ((bool)(ViewBag.HasActiveSession ?? false))
+            {
+                <a asp-action="Map" class="resume-btn" style="display:inline-block; text-decoration:none; line-height:1; padding:14px 36px;">
+                    ↩ Resume Session
+                </a>
+            }
+        </div>
+        <div style="margin-top:20px; font-size:.8rem; opacity:.4;">
+            Each run is random. Spawn location determines your required extract point.
+        </div>
+    </div>
+</div>
+
+<div class="info-grid">
+    @foreach (var loc in ForestMap.Locations)
+    {
+        <div class="info-card">
+            <div class="info-card-icon">@loc.Icon</div>
+            <div class="info-card-title">@loc.Name</div>
+            <div class="info-card-desc">@loc.Description</div>
+        </div>
+    }
+    <div class="info-card">
+        <div class="info-card-icon">🔵🔴</div>
+        <div class="info-card-title">Spawn Points</div>
+        <div class="info-card-desc">Two opposing spawn locations. Randomly assigned each run.</div>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon">⬆️</div>
+        <div class="info-card-title">Extract Points</div>
+        <div class="info-card-desc">Two extraction zones. You must reach the one opposite your spawn.</div>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon">👣</div>
+        <div class="info-card-title">Movement</div>
+        <div class="info-card-desc">Click any cell to move. Distance = moves spent. Water is impassable.</div>
+    </div>
+</div>

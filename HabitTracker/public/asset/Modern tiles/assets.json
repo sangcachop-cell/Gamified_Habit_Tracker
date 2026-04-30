@@ -1,0 +1,724 @@
+{
+  "_comment": "Asset index for Phaser 3. All paths are relative to /public/. Character sprites are 16px wide x 32px tall (1 tile wide, 2 tiles tall). Tileset tile sizes match the folder/filename suffix.",
+  "basePath": "asset/Modern tiles",
+
+  "characters": {
+    "_comment": "Load with: this.load.spritesheet(key, basePath + path, { frameWidth, frameHeight })",
+    "frameWidth": 16,
+    "frameHeight": 32,
+    "sprites": {
+      "adam": {
+        "sheet": {
+          "key": "adam_sheet",
+          "path": "Characters_free/Adam_16x16.png",
+          "frameWidth": 16,
+          "frameHeight": 32,
+          "cols": 24,
+          "rows": 7,
+          "totalFrames": 168,
+          "_layout": "Row 0: walk-down (24f), Row 1: walk-up, Row 2: walk-left, Row 3: walk-right, Row 4-6: extra poses"
+        },
+        "animations": [
+          {
+            "key": "adam_idle",
+            "path": "Characters_free/Adam_idle_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 4,
+            "rows": 1,
+            "totalFrames": 4,
+            "anims": [
+              { "key": "adam_idle_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+              { "key": "adam_idle_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+              { "key": "adam_idle_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+              { "key": "adam_idle_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_idle_anim",
+            "path": "Characters_free/Adam_idle_anim_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "adam_idle_anim_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "adam_idle_anim_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "adam_idle_anim_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "adam_idle_anim_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_run",
+            "path": "Characters_free/Adam_run_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "adam_run_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "adam_run_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "adam_run_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "adam_run_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_phone",
+            "path": "Characters_free/Adam_phone_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 9,
+            "rows": 1,
+            "totalFrames": 9,
+            "anims": [
+              { "key": "adam_phone", "start": 0, "end": 8, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_sit",
+            "path": "Characters_free/Adam_sit_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "adam_sit_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_sit2",
+            "path": "Characters_free/Adam_sit2_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "adam_sit2_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit2_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit2_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit2_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "adam_sit3",
+            "path": "Characters_free/Adam_sit3_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 12,
+            "rows": 1,
+            "totalFrames": 12,
+            "anims": [
+              { "key": "adam_sit3_down",  "start": 0, "end": 2, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit3_up",    "start": 3, "end": 5, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit3_left",  "start": 6, "end": 8, "frameRate": 6, "repeat": -1 },
+              { "key": "adam_sit3_right", "start": 9, "end": 11, "frameRate": 6, "repeat": -1 }
+            ]
+          }
+        ]
+      },
+
+      "alex": {
+        "sheet": {
+          "key": "alex_sheet",
+          "path": "Characters_free/Alex_16x16.png",
+          "frameWidth": 16,
+          "frameHeight": 32,
+          "cols": 24,
+          "rows": 7,
+          "totalFrames": 168
+        },
+        "animations": [
+          {
+            "key": "alex_idle",
+            "path": "Characters_free/Alex_idle_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 4,
+            "rows": 1,
+            "totalFrames": 4,
+            "anims": [
+              { "key": "alex_idle_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+              { "key": "alex_idle_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+              { "key": "alex_idle_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+              { "key": "alex_idle_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_idle_anim",
+            "path": "Characters_free/Alex_idle_anim_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "alex_idle_anim_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "alex_idle_anim_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "alex_idle_anim_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "alex_idle_anim_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_run",
+            "path": "Characters_free/Alex_run_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "alex_run_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "alex_run_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "alex_run_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "alex_run_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_phone",
+            "path": "Characters_free/Alex_phone_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 9,
+            "rows": 1,
+            "totalFrames": 9,
+            "anims": [
+              { "key": "alex_phone", "start": 0, "end": 8, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_sit",
+            "path": "Characters_free/Alex_sit_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "alex_sit_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_sit2",
+            "path": "Characters_free/Alex_sit2_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "alex_sit2_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit2_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit2_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit2_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "alex_sit3",
+            "path": "Characters_free/Alex_sit3_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 12,
+            "rows": 1,
+            "totalFrames": 12,
+            "anims": [
+              { "key": "alex_sit3_down",  "start": 0, "end": 2,  "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit3_up",    "start": 3, "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit3_left",  "start": 6, "end": 8,  "frameRate": 6, "repeat": -1 },
+              { "key": "alex_sit3_right", "start": 9, "end": 11, "frameRate": 6, "repeat": -1 }
+            ]
+          }
+        ]
+      },
+
+      "amelia": {
+        "sheet": {
+          "key": "amelia_sheet",
+          "path": "Characters_free/Amelia_16x16.png",
+          "frameWidth": 16,
+          "frameHeight": 32,
+          "cols": 24,
+          "rows": 7,
+          "totalFrames": 168
+        },
+        "animations": [
+          {
+            "key": "amelia_idle",
+            "path": "Characters_free/Amelia_idle_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 4,
+            "rows": 1,
+            "totalFrames": 4,
+            "anims": [
+              { "key": "amelia_idle_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+              { "key": "amelia_idle_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+              { "key": "amelia_idle_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+              { "key": "amelia_idle_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_idle_anim",
+            "path": "Characters_free/Amelia_idle_anim_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "amelia_idle_anim_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_idle_anim_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_idle_anim_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_idle_anim_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_run",
+            "path": "Characters_free/Amelia_run_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "amelia_run_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_run_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_run_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "amelia_run_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_phone",
+            "path": "Characters_free/Amelia_phone_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 9,
+            "rows": 1,
+            "totalFrames": 9,
+            "anims": [
+              { "key": "amelia_phone", "start": 0, "end": 8, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_sit",
+            "path": "Characters_free/Amelia_sit_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "amelia_sit_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_sit2",
+            "path": "Characters_free/Amelia_sit2_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "amelia_sit2_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit2_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit2_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit2_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "amelia_sit3",
+            "path": "Characters_free/Amelia_sit3_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 12,
+            "rows": 1,
+            "totalFrames": 12,
+            "anims": [
+              { "key": "amelia_sit3_down",  "start": 0, "end": 2,  "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit3_up",    "start": 3, "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit3_left",  "start": 6, "end": 8,  "frameRate": 6, "repeat": -1 },
+              { "key": "amelia_sit3_right", "start": 9, "end": 11, "frameRate": 6, "repeat": -1 }
+            ]
+          }
+        ]
+      },
+
+      "bob": {
+        "sheet": {
+          "key": "bob_sheet",
+          "path": "Characters_free/Bob_16x16.png",
+          "frameWidth": 16,
+          "frameHeight": 32,
+          "cols": 24,
+          "rows": 7,
+          "totalFrames": 168
+        },
+        "animations": [
+          {
+            "key": "bob_idle",
+            "path": "Characters_free/Bob_idle_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 4,
+            "rows": 1,
+            "totalFrames": 4,
+            "anims": [
+              { "key": "bob_idle_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+              { "key": "bob_idle_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+              { "key": "bob_idle_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+              { "key": "bob_idle_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_idle_anim",
+            "path": "Characters_free/Bob_idle_anim_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "bob_idle_anim_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "bob_idle_anim_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "bob_idle_anim_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "bob_idle_anim_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_run",
+            "path": "Characters_free/Bob_run_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "bob_run_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+              { "key": "bob_run_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+              { "key": "bob_run_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+              { "key": "bob_run_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_phone",
+            "path": "Characters_free/Bob_phone_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 9,
+            "rows": 1,
+            "totalFrames": 9,
+            "anims": [
+              { "key": "bob_phone", "start": 0, "end": 8, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_sit",
+            "path": "Characters_free/Bob_sit_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "bob_sit_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_sit2",
+            "path": "Characters_free/Bob_sit2_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 24,
+            "rows": 1,
+            "totalFrames": 24,
+            "anims": [
+              { "key": "bob_sit2_down",  "start": 0,  "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit2_up",    "start": 6,  "end": 11, "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit2_left",  "start": 12, "end": 17, "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit2_right", "start": 18, "end": 23, "frameRate": 6, "repeat": -1 }
+            ]
+          },
+          {
+            "key": "bob_sit3",
+            "path": "Characters_free/Bob_sit3_16x16.png",
+            "frameWidth": 16,
+            "frameHeight": 32,
+            "cols": 12,
+            "rows": 1,
+            "totalFrames": 12,
+            "anims": [
+              { "key": "bob_sit3_down",  "start": 0, "end": 2,  "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit3_up",    "start": 3, "end": 5,  "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit3_left",  "start": 6, "end": 8,  "frameRate": 6, "repeat": -1 },
+              { "key": "bob_sit3_right", "start": 9, "end": 11, "frameRate": 6, "repeat": -1 }
+            ]
+          }
+        ]
+      }
+    },
+
+    "rpgmakerMV": {
+      "_comment": "Load with: this.load.image(key, basePath + path) — use as a standard RPGMV character sheet",
+      "key": "characters_mv",
+      "path": "Characters_free/RPGMAKERMV/Characters_MV.png",
+      "width": 576,
+      "height": 768,
+      "format": "RPGMV 4-char sheet (144x192 per character, 3 cols x 4 rows per character)"
+    }
+  },
+
+  "tilesets": {
+    "_comment": "Load with: this.load.image(key, basePath + path). Use in Tiled maps or manually via this.add.tileSprite. Tile size matches the suffix (e.g. 16x16 = tileWidth:16, tileHeight:16).",
+    "16x16": {
+      "tileWidth": 16,
+      "tileHeight": 16,
+      "sheets": [
+        { "key": "tileset_16_1",  "path": "Old/Tileset_16x16_1.png",  "width": 160, "height": 160, "cols": 10, "rows": 10 },
+        { "key": "tileset_16_2",  "path": "Old/Tileset_16x16_2.png",  "width": 160, "height": 160, "cols": 10, "rows": 10 },
+        { "key": "tileset_16_3",  "path": "Old/Tileset_16x16_3.png",  "width": 160, "height": 160, "cols": 10, "rows": 10 },
+        { "key": "tileset_16_9",  "path": "Old/Tileset_16x16_9.png",  "width": 160, "height": 160, "cols": 10, "rows": 10 },
+        { "key": "tileset_16_16", "path": "Old/Tileset_16x16_16.png", "width": 192, "height": 224, "cols": 12, "rows": 14 }
+      ]
+    },
+    "32x32": {
+      "tileWidth": 32,
+      "tileHeight": 32,
+      "sheets": [
+        { "key": "tileset_32_1",  "path": "Old/Tileset_32x32_1.png",  "width": 320, "height": 320, "cols": 10, "rows": 10 },
+        { "key": "tileset_32_2",  "path": "Old/Tileset_32x32_2.png",  "width": 320, "height": 320, "cols": 10, "rows": 10 },
+        { "key": "tileset_32_3",  "path": "Old/Tileset_32x32_3.png",  "width": 320, "height": 320, "cols": 10, "rows": 10 },
+        { "key": "tileset_32_9",  "path": "Old/Tileset_32x32_9.png",  "width": 320, "height": 320, "cols": 10, "rows": 10 },
+        { "key": "tileset_32_16", "path": "Old/Tileset_32x32_16.png", "width": 384, "height": 448, "cols": 12, "rows": 14 }
+      ]
+    },
+    "48x48": {
+      "tileWidth": 48,
+      "tileHeight": 48,
+      "sheets": [
+        { "key": "tileset_48_1",  "path": "Old/Tileset_48x48_1.png",  "width": 480, "height": 480, "cols": 10, "rows": 10 },
+        { "key": "tileset_48_2",  "path": "Old/Tileset_48x48_2.png",  "width": 480, "height": 480, "cols": 10, "rows": 10 },
+        { "key": "tileset_48_3",  "path": "Old/Tileset_48x48_3.png",  "width": 480, "height": 480, "cols": 10, "rows": 10 },
+        { "key": "tileset_48_9",  "path": "Old/Tileset_48x48_9.png",  "width": 480, "height": 480, "cols": 10, "rows": 10 },
+        { "key": "tileset_48_16", "path": "Old/Tileset_48x48_16.png", "width": 576, "height": 672, "cols": 12, "rows": 14 }
+      ]
+    }
+  },
+
+  "interiors": {
+    "_comment": "Load with: this.load.image(key, basePath + path). Tall vertical sheets — scroll or slice as needed.",
+    "16x16": {
+      "tileWidth": 16,
+      "tileHeight": 16,
+      "sheets": [
+        {
+          "key": "interiors_16",
+          "path": "Interiors_free/16x16/Interiors_free_16x16.png",
+          "width": 256,
+          "height": 1424,
+          "cols": 16,
+          "rows": 89
+        },
+        {
+          "key": "room_builder_16",
+          "path": "Interiors_free/16x16/Room_Builder_free_16x16.png",
+          "width": 272,
+          "height": 368,
+          "cols": 17,
+          "rows": 23
+        }
+      ]
+    },
+    "32x32": {
+      "tileWidth": 32,
+      "tileHeight": 32,
+      "sheets": [
+        {
+          "key": "interiors_32",
+          "path": "Interiors_free/32x32/Interiors_free_32x32.png",
+          "width": 512,
+          "height": 2848,
+          "cols": 16,
+          "rows": 89
+        },
+        {
+          "key": "room_builder_32",
+          "path": "Interiors_free/32x32/Room_Builder_free_32x32.png",
+          "width": 544,
+          "height": 736,
+          "cols": 17,
+          "rows": 23
+        }
+      ]
+    },
+    "48x48": {
+      "tileWidth": 48,
+      "tileHeight": 48,
+      "sheets": [
+        {
+          "key": "interiors_48",
+          "path": "Interiors_free/48x48/Interiors_free_48x48.png",
+          "width": 768,
+          "height": 4272,
+          "cols": 16,
+          "rows": 89
+        },
+        {
+          "key": "room_builder_48",
+          "path": "Interiors_free/48x48/Room_Builder_free_48x48.png",
+          "width": 816,
+          "height": 1104,
+          "cols": 17,
+          "rows": 23
+        }
+      ]
+    }
+  },
+
+  "legacy": {
+    "_comment": "Old-folder character animations for character #2. Spritesheets are frameHeight = 2x the tile size.",
+    "16x16": {
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "sheets": [
+        {
+          "key": "legacy_idle_16",
+          "path": "Old/idle_16x16_2.png",
+          "cols": 4,
+          "rows": 1,
+          "totalFrames": 4,
+          "anims": [
+            { "key": "legacy_idle_16_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_16_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_16_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_16_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+          ]
+        },
+        {
+          "key": "legacy_run_16",
+          "path": "Old/run_horizontal_16x16_2.png",
+          "cols": 24,
+          "rows": 1,
+          "totalFrames": 24,
+          "anims": [
+            { "key": "legacy_run_16_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_16_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_16_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_16_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+          ]
+        }
+      ],
+      "rpgmaker": {
+        "key": "legacy_rpgmaker_16",
+        "path": "Old/mv/Character_2_16x16_RPGMAKER.png",
+        "width": 48,
+        "height": 128
+      }
+    },
+    "32x32": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "sheets": [
+        {
+          "key": "legacy_idle_32",
+          "path": "Old/idle_32x32_2.png",
+          "cols": 4,
+          "rows": 1,
+          "totalFrames": 4,
+          "anims": [
+            { "key": "legacy_idle_32_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_32_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_32_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_32_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+          ]
+        },
+        {
+          "key": "legacy_run_32",
+          "path": "Old/run_horizontal_32x32_2.png",
+          "cols": 24,
+          "rows": 1,
+          "totalFrames": 24,
+          "anims": [
+            { "key": "legacy_run_32_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_32_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_32_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_32_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+          ]
+        }
+      ],
+      "rpgmaker": {
+        "key": "legacy_rpgmaker_32",
+        "path": "Old/mv/Character_2_32x32_RPGMAKER.png",
+        "width": 96,
+        "height": 256
+      }
+    },
+    "48x48": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "sheets": [
+        {
+          "key": "legacy_idle_48",
+          "path": "Old/idle_48x48_2.png",
+          "cols": 4,
+          "rows": 1,
+          "totalFrames": 4,
+          "anims": [
+            { "key": "legacy_idle_48_down",  "start": 0, "end": 0, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_48_left",  "start": 1, "end": 1, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_48_right", "start": 2, "end": 2, "frameRate": 1, "repeat": -1 },
+            { "key": "legacy_idle_48_up",    "start": 3, "end": 3, "frameRate": 1, "repeat": -1 }
+          ]
+        },
+        {
+          "key": "legacy_run_48",
+          "path": "Old/run_horizontal_48x48_2.png",
+          "cols": 24,
+          "rows": 1,
+          "totalFrames": 24,
+          "anims": [
+            { "key": "legacy_run_48_down",  "start": 0,  "end": 5,  "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_48_up",    "start": 6,  "end": 11, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_48_left",  "start": 12, "end": 17, "frameRate": 8, "repeat": -1 },
+            { "key": "legacy_run_48_right", "start": 18, "end": 23, "frameRate": 8, "repeat": -1 }
+          ]
+        }
+      ],
+      "rpgmaker": {
+        "key": "legacy_rpgmaker_48",
+        "path": "Old/mv/Character_2_48x48_RPGMAKER.png",
+        "width": 144,
+        "height": 384
+      }
+    }
+  },
+
+  "phaserUsage": {
+    "_comment": "Reference snippets for loading and animating assets in Phaser 3",
+    "loadSpritesheet": "this.load.spritesheet(entry.key, 'asset/Modern tiles/' + entry.path, { frameWidth: entry.frameWidth, frameHeight: entry.frameHeight });",
+    "loadImage": "this.load.image(entry.key, 'asset/Modern tiles/' + entry.path);",
+    "createAnim": "this.anims.create({ key: anim.key, frames: this.anims.generateFrameNumbers(entry.key, { start: anim.start, end: anim.end }), frameRate: anim.frameRate, repeat: anim.repeat });",
+    "playAnim": "sprite.anims.play('adam_run_down', true);",
+    "notes": [
+      "Character frameHeight is 32 (2 tiles tall) even for 16x16 tile size packs.",
+      "Animation frame ranges (start/end) are best-guess based on image dimensions — verify against actual sprite layout.",
+      "Tileset images are loaded as images, not spritesheets; use Tiled JSON maps for full tilemap support.",
+      "Interior sheets are very tall (89+ rows); consider slicing or using Tiled map integration."
+    ]
+  }
+}

@@ -96,9 +96,23 @@ namespace HabitTracker.Services.Implementations
             return newBadgeNames;
         }
 
-        public int CalculateLevel(int xp)
+        public int CalculateLevel(int xp) =>
+            AppConstants.LevelSystem.CalculateLevel(xp);
+
+        public int XPToNextLevel(int level) =>
+            AppConstants.LevelSystem.XPToNextLevel(level);
+
+        public void GrantLevelUpStats(User user, int levelsGained)
         {
-            return (xp / AppConstants.XP_PER_LEVEL) + 1;
+            if (levelsGained <= 0) return;
+            int pts = levelsGained * AppConstants.LevelSystem.STAT_POINTS_PER_LEVEL;
+            user.STR  += pts;
+            user.WILL += pts;
+            user.INT  += pts;
+            user.AGL  += pts;
+            user.END  += pts;
+            _logger.LogInformation(
+                $"User {user.Id} gained {levelsGained} level(s), +{pts} to all base stats");
         }
 
         public async Task<List<int>> GetCompletedTodayAsync(int userId)
@@ -115,6 +129,45 @@ namespace HabitTracker.Services.Implementations
                 .AnyAsync(uq => uq.UserId == userId &&
                                uq.QuestId == questId &&
                                uq.CompletedDate == DateTime.Today);
+        }
+
+        public void UpdateRpgStats(User user, IEnumerable<Quest> completedQuests)
+        {
+            foreach (var quest in completedQuests)
+            {
+                var (str, will, intel, agl, end) = AppConstants.RpgStats.GetCategoryBonus(quest.Category ?? "");
+                int diffBonus = AppConstants.RpgStats.GetDifficultyBonus(quest.Difficulty ?? "");
+
+                // Category-based growth
+                user.STR  += str;
+                user.WILL += will;
+                user.INT  += intel;
+                user.AGL  += agl;
+                user.END  += end;
+
+                // Difficulty bonus → apply to the category's primary stat
+                if (diffBonus > 0)
+                {
+                    if (str > 0)        user.STR  += diffBonus;
+                    else if (intel > 0) user.INT  += diffBonus;
+                    else if (will > 0)  user.WILL += diffBonus;
+                    else                user.STR  += diffBonus; // default
+                }
+
+                // Hard quests always train endurance
+                if (quest.Difficulty == AppConstants.Difficulty.HARD)
+                    user.END += AppConstants.RpgStats.HARD_END_BONUS;
+
+                // Daily quests build consistency → END
+                if (quest.Frequency == AppConstants.Frequency.DAILY)
+                    user.END += AppConstants.RpgStats.DAILY_END_BONUS;
+
+                // Every completion sharpens agility
+                user.AGL += AppConstants.RpgStats.QUEST_AGL_BONUS;
+            }
+
+            _logger.LogInformation(
+                $"User {user.Id} RPG stats → STR={user.STR} WILL={user.WILL} INT={user.INT} AGL={user.AGL} END={user.END}");
         }
     }
 }

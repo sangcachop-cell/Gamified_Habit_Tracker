@@ -1,0 +1,838 @@
+﻿@model List<HabitTracker.Models.Quest>
+@using HabitTracker.Models
+@using HabitTracker.Constants
+@using HabitTracker.Controllers
+@using static HabitTracker.Constants.AppConstants
+@using static HabitTracker.Constants.FacilityCatalogue
+@{
+    ViewData["Title"] = "Hideout";
+
+    var user              = ViewBag.User as HabitTracker.Models.User;
+    var facilities        = ViewBag.Facilities as List<UserFacility> ?? new List<UserFacility>();
+    var facilityMap       = facilities.Where(uf => uf.Facility != null)
+                                      .ToDictionary(uf => uf.FacilityId, uf => uf.Facility!);
+    var completedIds      = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+
+    var hsItems    = ViewBag.HideoutStorageItems as List<PlacedItem> ?? new List<PlacedItem>();
+    string hsJson  = ViewBag.HideoutStorageItemsJson as string ?? "[]";
+    int hsCols     = (int)(ViewBag.HideoutStorageCols ?? 10);
+    int hsRows     = (int)(ViewBag.HideoutStorageRows ?? 10);
+    int woodCount  = (int)(ViewBag.Wood  ?? 100);
+    int stoneCount = (int)(ViewBag.Stone ?? 100);
+    const int C    = ItemCatalogue.CELL_PX;
+
+    var upgradeCosts = ViewBag.UpgradeCosts as Dictionary<int, FacilityCatalogue.UpgradeCost?>
+                       ?? new Dictionary<int, FacilityCatalogue.UpgradeCost?>();
+
+    int buffAtk           = (int)(ViewBag.BuffAtk    ?? 0);
+    int buffHp            = (int)(ViewBag.BuffHp     ?? 0);
+    int buffArmor         = (int)(ViewBag.BuffArmor  ?? 0);
+    double buffXpGain     = (double)(ViewBag.BuffXpGain   ?? 0.0);
+    int buffStamina       = (int)(ViewBag.BuffStamina ?? 0);
+
+    int doneToday = completedIds.Count;
+
+    // Facility accent colours per stat
+    var accentMap = new Dictionary<string, (string bg, string text, string glow)>
+    {
+        ["ATK"]     = ("#e8436a", "#fff",    "rgba(232,67,106,.35)"),
+        ["HP"]      = ("#e84343", "#fff",    "rgba(232,67,67,.30)"),
+        ["XPGain"]  = ("#f0b429", "#1a1a1a","rgba(240,180,41,.35)"),
+        ["Stamina"] = ("#00b89c", "#fff",    "rgba(0,184,156,.30)"),
+        ["Armor"]   = ("#4a9edd", "#fff",    "rgba(74,158,221,.30)"),
+    };
+}
+
+<style>
+    :root {
+        --ink:    #0a0a12;
+        --paper:  #f5f3ef;
+        --gold:   #f0b429;
+        --violet: #5c3dde;
+        --rose:   #e8436a;
+        --teal:   #00b89c;
+        --soft:   #edeaf5;
+        --stone:  #1a1a2e;
+        --stone2: #16213e;
+    }
+    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
+    h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
+
+    /* ── HERO ── */
+    .hideout-hero {
+        background: linear-gradient(135deg, var(--stone) 0%, var(--stone2) 100%);
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hideout-hero::before {
+        content: "";
+        position: absolute;
+        width: 600px; height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(92,61,222,.25) 0%, transparent 65%);
+        top: -250px; right: -200px;
+        pointer-events: none;
+    }
+    .hideout-hero::after {
+        content: "";
+        position: absolute;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(240,180,41,.12) 0%, transparent 70%);
+        bottom: -120px; left: -80px;
+        pointer-events: none;
+    }
+
+    /* ── BUFF PILL ROW ── */
+    .buff-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .buff-pill {
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 50px;
+        padding: 5px 14px;
+        font-size: .82rem; font-weight: 600;
+    }
+    .buff-pill-icon { font-size: 1rem; }
+
+    /* ── FACILITY GRID ── */
+    .facility-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+        margin-bottom: 36px;
+    }
+    .facility-card {
+        background: white;
+        border-radius: 20px;
+        padding: 22px 20px;
+        display: flex; flex-direction: column; gap: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        border: 1.5px solid transparent;
+        transition: transform .2s, box-shadow .2s, border-color .2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .facility-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 28px rgba(0,0,0,.1);
+    }
+    .facility-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 20px 20px 0 0;
+    }
+    .facility-icon-wrap {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.7rem;
+        flex-shrink: 0;
+    }
+    .facility-name  { font-weight: 800; font-size: 1rem; color: var(--ink); }
+    .facility-desc  { font-size: .78rem; color: #888; line-height: 1.5; flex: 1; }
+    .facility-buff  { font-size: .82rem; font-weight: 700; }
+    .facility-level {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 4px;
+    }
+    .lv-pips { display: flex; gap: 4px; }
+    .lv-pip {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: #e0e0e0;
+    }
+    .lv-pip.filled { background: currentColor; }
+    .upgrade-btn {
+        border: none; border-radius: 10px;
+        padding: 8px 0; width: 100%;
+        font-size: .8rem; font-weight: 700;
+        cursor: pointer;
+        margin-top: 6px;
+        opacity: .7;
+        position: relative;
+    }
+    .upgrade-btn:hover .tooltip-coming { display: block; }
+    .tooltip-coming {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 6px); left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink); color: white;
+        border-radius: 8px; padding: 5px 12px;
+        font-size: .73rem; white-space: nowrap;
+        z-index: 10;
+    }
+    .tooltip-coming::after {
+        content: "";
+        position: absolute;
+        top: 100%; left: 50%; transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: var(--ink);
+    }
+
+    /* ── QUEST SECTION ── */
+    .section-divider {
+        display: flex; align-items: center; gap: 14px;
+        margin: 8px 0 24px;
+    }
+    .section-divider hr { flex: 1; border-color: #e0ddd8; }
+    .section-divider span {
+        font-weight: 800; font-size: 1.1rem;
+        color: var(--ink); white-space: nowrap;
+    }
+
+    .filter-bar {
+        display: flex; gap: 10px; flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding: 14px 18px;
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07);
+    }
+    .filter-bar select {
+        padding: 7px 14px;
+        border: 1.5px solid rgba(0,0,0,.1);
+        border-radius: 50px;
+        font-family: "DM Sans", sans-serif;
+        font-size: .84rem;
+        background: white; outline: none;
+        cursor: pointer;
+    }
+
+    .quest-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 14px;
+    }
+    .quest-card {
+        background: white;
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex; align-items: flex-start; gap: 14px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+        position: relative;
+    }
+    .quest-card:hover { border-color: var(--violet); box-shadow: 0 4px 16px rgba(92,61,222,.12); }
+    .quest-card.selected { border-color: var(--violet); background: var(--soft); }
+    .quest-card.done { opacity: .5; cursor: not-allowed; }
+    .quest-icon { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+    .quest-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
+    .quest-meta { font-size: .76rem; color: #999; margin-top: 2px; }
+    .quest-xp   { font-size: .8rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
+    .stat-gains { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .sg-pill    { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 50px; font-size: .67rem; font-weight: 700; }
+    .quest-check {
+        position: absolute; top: 14px; right: 14px;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .8rem;
+    }
+    .quest-card.selected .quest-check { background: var(--violet); border-color: var(--violet); color: white; }
+    .quest-card.done .quest-check { background: var(--teal); border-color: var(--teal); color: white; }
+
+    /* ── STORAGE ROOM ── */
+    .storage-panel {
+        background: #12121f;
+        border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 32px;
+    }
+    .storage-label {
+        font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: rgba(255,255,255,.4); margin-bottom: 12px;
+        display: flex; justify-content: space-between;
+    }
+    .storage-label span { color: rgba(255,255,255,.2); }
+    .hs-grid {
+        position: relative;
+        background-color: #0a0a14;
+        background-image:
+            linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+        border: 1.5px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        user-select: none;
+    }
+    .hs-item {
+        position: absolute;
+        border-radius: 6px;
+        border: 2px solid rgba(255,255,255,.2);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        cursor: grab;
+        transition: border-color .15s, filter .15s;
+        box-sizing: border-box; overflow: hidden; z-index: 10;
+    }
+    .hs-item:hover  { border-color: #f0b429; filter: brightness(1.2); }
+    .hs-item.dragging { opacity: .35; cursor: grabbing; }
+    #hs-preview {
+        position: absolute; z-index: 50; pointer-events: none;
+        border-radius: 6px; box-sizing: border-box; display: none;
+    }
+    .material-bar {
+        display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .material-chip {
+        display: flex; align-items: center; gap: 8px;
+        background: white;
+        border: 1.5px solid rgba(0,0,0,.08);
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 700; font-size: .95rem;
+        color: var(--ink);
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .material-chip .mat-icon { font-size: 1.5rem; }
+    .material-chip .mat-count { font-size: 1.1rem; color: var(--violet); }
+    .material-chip .mat-label { font-size: .72rem; color: #999; font-weight: 500; }
+
+    .submit-bar {
+        position: sticky; bottom: 20px;
+        background: white;
+        border-radius: 16px;
+        padding: 16px 22px;
+        display: flex; align-items: center; justify-content: space-between; gap: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.12);
+        border: 1.5px solid rgba(0,0,0,.06);
+        margin-top: 20px;
+        z-index: 100;
+    }
+    .submit-bar-label { font-size: .9rem; color: #666; }
+    .submit-bar-count { font-weight: 800; color: var(--violet); }
+    .btn-confirm {
+        background: linear-gradient(135deg, var(--violet), #8b5cf6);
+        color: white; border: none;
+        border-radius: 12px;
+        padding: 12px 28px;
+        font-weight: 700; font-size: .95rem;
+        cursor: pointer;
+        transition: opacity .2s, transform .15s;
+    }
+    .btn-confirm:hover { opacity: .9; transform: scale(1.02); }
+</style>
+
+<!-- ── HIDEOUT HERO ── -->
+<div class="hideout-hero">
+    <div style="position:relative; z-index:1;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+            <span style="font-size:2.6rem; line-height:1;">🏰</span>
+            <div>
+                <h2 style="margin:0; font-size:2rem; letter-spacing:-1px;">Your Hideout</h2>
+                <p style="margin:0; opacity:.55; font-size:.88rem;">A sanctuary where discipline forges power</p>
+            </div>
+        </div>
+
+        <!-- Active buff summary -->
+        <div class="buff-pills">
+            <div class="buff-pill">
+                <span class="buff-pill-icon">⚔️</span>
+                <span>+@buffAtk ATK</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">❤️</span>
+                <span>+@buffHp HP</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">🛡️</span>
+                <span>+@buffArmor Armor</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">⚡</span>
+                <span>+@buffXpGain.ToString("F0")% XP Gain</span>
+            </div>
+            <div class="buff-pill">
+                <span class="buff-pill-icon">💪</span>
+                <span>+@buffStamina Stamina</span>
+            </div>
+        </div>
+
+        <div style="margin-top:14px; font-size:.8rem; opacity:.4;">
+            @doneToday quest(s) completed today &nbsp;·&nbsp; Level @(user?.Level ?? 1)
+        </div>
+    </div>
+</div>
+
+<!-- ── FACILITY GRID ── -->
+<div style="margin-bottom:12px;">
+    <h4 style="font-weight:800; margin:0 0 6px; font-size:1.15rem;">⚒️ Facilities</h4>
+    <p style="color:#999; font-size:.84rem; margin:0;">Each facility passively buffs your character stats.</p>
+</div>
+
+<div class="facility-grid">
+    @foreach (var uf in facilities)
+    {
+        var f = uf.Facility;
+        if (f == null) continue;
+
+        var hasAccent = accentMap.ContainsKey(f.StatAffected);
+        var (bg, text, glow) = hasAccent ? accentMap[f.StatAffected] : ("#5c3dde", "#fff", "rgba(92,61,222,.3)");
+        int totalBuff = f.BuffPerLevel * uf.Level;
+        bool isMax = uf.Level >= f.MaxLevel;
+
+        <div class="facility-card" style="box-shadow: 0 4px 18px @glow; border-color: @(bg)22;">
+            <!-- colour bar on top -->
+            <div style="position:absolute; top:0; left:0; right:0; height:3px; background:@bg; border-radius:20px 20px 0 0;"></div>
+
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="facility-icon-wrap" style="background:@(bg)18;">
+                    @f.Icon
+                </div>
+                <div>
+                    <div class="facility-name">@f.Name</div>
+                    <div style="font-size:.72rem; font-weight:700; color:@bg; text-transform:uppercase; letter-spacing:.06em;">
+                        @f.StatAffected
+                    </div>
+                </div>
+            </div>
+
+            <p class="facility-desc">@f.Description</p>
+
+            <div class="facility-buff" style="color:@bg;">
+                +@totalBuff @(f.StatAffected == "XPGain" ? "% XP Gain" : f.StatAffected)
+                <span style="font-weight:400; color:#aaa; font-size:.75rem;">(@f.BuffDescription)</span>
+            </div>
+
+            <!-- Level pips -->
+            <div class="facility-level">
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                    <span style="font-size:.7rem; color:#999; text-transform:uppercase; letter-spacing:.06em;">Level @uf.Level / @f.MaxLevel</span>
+                    <div class="lv-pips" style="color:@bg;">
+                        @for (int i = 1; i <= f.MaxLevel; i++)
+                        {
+                            <div class="lv-pip @(i <= uf.Level ? "filled" : "")"
+                                 style="@(i <= uf.Level ? $"background:{bg};" : "")"></div>
+                        }
+                    </div>
+                </div>
+                @if (isMax)
+                {
+                    <span style="font-size:.7rem; font-weight:700; color:var(--gold); background:rgba(240,180,41,.12); padding:3px 8px; border-radius:6px;">MAX</span>
+                }
+            </div>
+
+            @* Upgrade section *@
+            @if (isMax)
+            {
+                <div style="text-align:center; font-size:.78rem; font-weight:700; color:var(--gold); padding:8px 0; background:rgba(240,180,41,.08); border-radius:10px; margin-top:2px;">
+                    ✦ Fully Upgraded
+                </div>
+            }
+            else if (uf.UpgradeStartedAt != null)
+            {
+                @* Upgrade in progress *@
+                var cost2 = FacilityCatalogue.GetCost(f.Id, uf.Level);
+                var completesAt = uf.UpgradeStartedAt.Value.Add(cost2?.Duration ?? TimeSpan.Zero);
+                var secsLeft = Math.Max(0, (int)(completesAt - DateTime.UtcNow).TotalSeconds);
+                <div class="upgrade-timer" data-secs="@secsLeft"
+                     style="background:rgba(92,61,222,.1); border:1px solid rgba(92,61,222,.3);
+                            border-radius:10px; padding:8px 12px; margin-top:2px;
+                            text-align:center; font-size:.82rem; font-weight:700; color:var(--violet);">
+                    ⏳ <span class="timer-display">@(secsLeft > 0 ? "..." : "Ready!")</span>
+                </div>
+            }
+            else
+            {
+                @* Show cost + upgrade button *@
+                upgradeCosts.TryGetValue(f.Id, out var cost);
+                bool canAfford = cost != null && (user?.Wood ?? 0) >= cost.Wood && (user?.Stone ?? 0) >= cost.Stone;
+                <div style="margin-top:6px;">
+                    @if (cost != null)
+                    {
+                        <div style="display:flex; gap:8px; margin-bottom:6px; font-size:.78rem; font-weight:600; flex-wrap:wrap;">
+                            <span style="color:#c9a227;">🪵 @cost.Wood</span>
+                            @if (cost.Stone > 0) { <span style="color:#888;">🪨 @cost.Stone</span> }
+                            <span style="color:#aaa; margin-left:auto;">⏱ @(cost.Duration.TotalMinutes < 60 ? $"{(int)cost.Duration.TotalMinutes}m" : $"{cost.Duration.TotalHours:F0}h")</span>
+                        </div>
+                    }
+                    <form asp-action="Upgrade" asp-route-facilityId="@f.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="upgrade-btn" @(canAfford ? "" : "disabled")
+                                style="background:@(canAfford ? $"{bg}25" : "rgba(100,100,100,.1)");
+                                       color:@(canAfford ? bg : "#666");
+                                       cursor:@(canAfford ? "pointer" : "not-allowed");
+                                       opacity:@(canAfford ? "1" : ".6"); width:100%;">
+                            ⚒️ Upgrade
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- ── STORAGE ROOM ── -->
+<div class="section-divider">
+    <hr />
+    <span>🏪 Storage Room</span>
+    <hr />
+    <button type="button" onclick="toggleHsRoom()" id="hs-room-btn"
+            style="flex-shrink:0; background:var(--violet); color:white; border:none;
+                   border-radius:50px; padding:5px 16px; font-size:.8rem; font-weight:700; cursor:pointer;">
+        ▼ Open
+    </button>
+</div>
+
+<div id="hs-room-body" style="display:none;">
+
+<!-- Materials -->
+<div class="material-bar">
+    <div class="material-chip">
+        <span class="mat-icon">🪵</span>
+        <div>
+            <div class="mat-count">@woodCount</div>
+            <div class="mat-label">Wood</div>
+        </div>
+    </div>
+    <div class="material-chip">
+        <span class="mat-icon">🪨</span>
+        <div>
+            <div class="mat-count">@stoneCount</div>
+            <div class="mat-label">Stone</div>
+        </div>
+    </div>
+</div>
+
+<!-- 10×10 Storage Grid -->
+<div class="storage-panel">
+    <div class="storage-label">
+        📦 Hideout Storage
+        <span>@hsCols×@hsRows · @(hsCols * hsRows) slots</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <div class="hs-grid" id="grid-HideoutStorage"
+             data-container="Storage"
+             data-cols="@hsCols" data-rows="@hsRows"
+             style="width:@(hsCols*C)px; height:@(hsRows*C)px;
+                    background-size:@(C)px @(C)px;">
+
+            @foreach (var item in hsItems)
+            {
+                <div class="hs-item"
+                     id="hs-item-@item.Id"
+                     draggable="true"
+                     style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
+                            width:@(item.W*C)px; height:@(item.H*C)px;
+                            background:@(item.TileColor)cc;"
+                     data-id="@item.Id"
+                     data-container="HideoutStorage"
+                     data-w="@item.W" data-h="@item.H">
+                    <span style="font-size:1.6rem; line-height:1; pointer-events:none;">@item.Icon</span>
+                    <span style="font-size:.6rem; font-weight:700; color:rgba(255,255,255,.7); margin-top:2px; pointer-events:none;">@item.Name</span>
+                </div>
+            }
+
+            <div id="hs-preview"></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /hs-room-body -->
+
+<!-- ── QUEST SECTION ── -->
+<div class="section-divider">
+    <span>📋 Complete Quests</span>
+    <hr />
+    <span style="font-size:.82rem; font-weight:400; color:#999; white-space:nowrap;">@doneToday done today</span>
+</div>
+
+<!-- Filter bar -->
+<form method="get" asp-action="Index">
+    <div class="filter-bar">
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            @foreach (var cat in (string[])ViewBag.Categories)
+            {
+                <option value="@cat" selected="@(ViewBag.SelectedCategory == cat ? "selected" : null)">@cat</option>
+            }
+        </select>
+        <select name="difficulty" onchange="this.form.submit()">
+            <option value="">All Difficulties</option>
+            @foreach (var diff in (string[])ViewBag.Difficulties)
+            {
+                <option value="@diff" selected="@(ViewBag.SelectedDifficulty == diff ? "selected" : null)">@diff</option>
+            }
+        </select>
+        <select name="frequency" onchange="this.form.submit()">
+            <option value="">All Frequencies</option>
+            @foreach (var freq in (string[])ViewBag.Frequencies)
+            {
+                <option value="@freq" selected="@(ViewBag.SelectedFrequency == freq ? "selected" : null)">@freq</option>
+            }
+        </select>
+    </div>
+</form>
+
+<!-- Quest cards form -->
+<form id="quest-form" asp-action="Confirm" method="post">
+    @Html.AntiForgeryToken()
+
+    @if (!Model.Any())
+    {
+        <div style="text-align:center; padding:48px; color:#bbb;">
+            <div style="font-size:3rem;">🏜️</div>
+            <p style="margin-top:12px;">No quests match your filters.</p>
+        </div>
+    }
+    else
+    {
+        var accentCol = new Dictionary<string, string>
+        {
+            ["ATK"]    = "#e8436a",
+            ["HP"]     = "#e84343",
+            ["XPGain"] = "#f0b429",
+            ["Stamina"]= "#00b89c",
+            ["Armor"]  = "#4a9edd",
+        };
+
+        var grouped = Model
+            .GroupBy(q => q.FacilityId)
+            .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+
+        foreach (var group in grouped)
+        {
+            Facility? fac = group.Key.HasValue && facilityMap.ContainsKey(group.Key.Value)
+                ? facilityMap[group.Key.Value] : null;
+
+            string col = fac != null && accentCol.ContainsKey(fac.StatAffected)
+                ? accentCol[fac.StatAffected] : "#888";
+
+            <!-- Facility section header -->
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:14px; background:@(col)12; border-left:4px solid @col; margin-bottom:14px;">
+                <span style="font-size:1.5rem; line-height:1;">@(fac?.Icon ?? "📋")</span>
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:.95rem; color:@col;">@(fac?.Name ?? "Other Quests")</div>
+                    <div style="font-size:.75rem; opacity:.6;">@(fac?.Description ?? "Unassigned quests")</div>
+                </div>
+                @if (fac != null)
+                {
+                    <span style="font-size:.72rem; font-weight:700; background:@(col)20; color:@col; padding:3px 10px; border-radius:50px;">@fac.BuffDescription</span>
+                }
+            </div>
+
+            <div class="quest-grid" id="quest-grid-@(group.Key ?? 0)" style="margin-bottom:28px;">
+                @foreach (var quest in group)
+                {
+                    bool done = completedIds.Contains(quest.Id);
+                    <div class="quest-card @(done ? "done" : "")"
+                         onclick="@(done ? "" : $"toggleQuest({quest.Id}, this)")"
+                         id="card-@quest.Id">
+                        <div class="quest-icon">@quest.Icon</div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="quest-name">@quest.Name</div>
+                            <div class="quest-meta">@quest.Category · @quest.Difficulty · @quest.Frequency</div>
+                            <div class="quest-xp">+@quest.XPReward XP</div>
+                            @{
+                                var (gs, gw, gi, ga, ge) = RpgStats.ComputeStatGains(
+                                    quest.Category, quest.Difficulty, quest.Frequency);
+                            }
+                            <div class="stat-gains">
+                                @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️+@gs STR</span> }
+                                @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘+@gw WILL</span> }
+                                @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚+@gi INT</span> }
+                                @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹+@ga AGL</span> }
+                                @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️+@ge END</span> }
+                            </div>
+                        </div>
+                        <div class="quest-check" id="chk-@quest.Id">
+                            @if (done) { <span>✓</span> }
+                        </div>
+                        @if (!done)
+                        {
+                            <input type="checkbox" name="questIds" value="@quest.Id"
+                                   id="cb-@quest.Id" style="display:none;" />
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Sticky submit bar -->
+        <div class="submit-bar">
+            <div class="submit-bar-label">
+                <span class="submit-bar-count" id="selected-count">0</span> quest(s) selected
+            </div>
+            <button type="submit" class="btn-confirm">
+                ⚔️ Complete in Hideout
+            </button>
+        </div>
+    }
+</form>
+
+<!-- Hidden CSRF for fetch -->
+<form id="hs-csrf-form">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+<script>
+// ── Upgrade timers ───────────────────────────────────────────────────────────
+document.querySelectorAll('.upgrade-timer').forEach(function(el) {
+    var secs = parseInt(el.dataset.secs, 10);
+    var display = el.querySelector('.timer-display');
+    if (secs <= 0) { display.textContent = 'Ready! Refresh to collect.'; return; }
+    var interval = setInterval(function() {
+        secs--;
+        if (secs <= 0) {
+            clearInterval(interval);
+            display.textContent = 'Ready! Refresh to collect.';
+            el.style.borderColor = 'rgba(0,184,156,.5)';
+            el.style.color = '#00b89c';
+            return;
+        }
+        var h = Math.floor(secs / 3600);
+        var m = Math.floor((secs % 3600) / 60);
+        var s = secs % 60;
+        display.textContent = h > 0
+            ? h + 'h ' + m + 'm ' + s + 's'
+            : m > 0 ? m + 'm ' + s + 's' : s + 's';
+    }, 1000);
+    // init display immediately
+    var h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs%60;
+    display.textContent = h>0 ? h+'h '+m+'m '+s+'s' : m>0 ? m+'m '+s+'s' : s+'s';
+});
+
+// ── Storage Room collapse ─────────────────────────────────────────────────────
+let hsRoomOpen = false;
+function toggleHsRoom() {
+    hsRoomOpen = !hsRoomOpen;
+    document.getElementById('hs-room-body').style.display = hsRoomOpen ? 'block' : 'none';
+    document.getElementById('hs-room-btn').textContent    = hsRoomOpen ? '▲ Close' : '▼ Open';
+}
+
+// ── Hideout Storage DnD ───────────────────────────────────────────────────────
+(function () {
+    const CELL = @C;
+    const COLS = @hsCols, ROWS = @hsRows;
+    const grid = document.getElementById('grid-HideoutStorage');
+    const preview = document.getElementById('hs-preview');
+    const CSRF = document.getElementById('hs-csrf-form')
+        .querySelector('[name=__RequestVerificationToken]').value;
+
+    let items = @Html.Raw(hsJson);
+    let drag = null;
+
+    function wireItem(el) {
+        el.addEventListener('dragstart', function (e) {
+            const rect = el.getBoundingClientRect();
+            drag = {
+                el,
+                itemId:  parseInt(el.dataset.id),
+                w:       parseInt(el.dataset.w),
+                h:       parseInt(el.dataset.h),
+                grabCol: Math.max(0, Math.floor((e.clientX - rect.left)  / CELL)),
+                grabRow: Math.max(0, Math.floor((e.clientY - rect.top)   / CELL)),
+            };
+            const ghost = new Image();
+            ghost.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+            e.dataTransfer.setDragImage(ghost, 0, 0);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => el.classList.add('dragging'), 0);
+        });
+        el.addEventListener('dragend', function () {
+            if (drag) drag.el.classList.remove('dragging');
+            drag = null;
+            preview.style.display = 'none';
+        });
+    }
+
+    document.querySelectorAll('.hs-item').forEach(wireItem);
+
+    function targetCell(e) {
+        const rect = grid.getBoundingClientRect();
+        return {
+            col: Math.floor((e.clientX - rect.left) / CELL) - (drag ? drag.grabCol : 0),
+            row: Math.floor((e.clientY - rect.top)  / CELL) - (drag ? drag.grabRow : 0),
+        };
+    }
+
+    function isValid(col, row, w, h, excludeId) {
+        if (col < 0 || row < 0 || col + w > COLS || row + h > ROWS) return false;
+        for (const it of items) {
+            if (it.id === excludeId) continue;
+            const noOverlap = col >= it.x + it.w || col + w <= it.x ||
+                              row >= it.y + it.h || row + h <= it.y;
+            if (!noOverlap) return false;
+        }
+        return true;
+    }
+
+    grid.addEventListener('dragover', function (e) {
+        if (!drag) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const { col, row } = targetCell(e);
+        const valid = isValid(col, row, drag.w, drag.h, drag.itemId);
+        preview.style.left       = (col * CELL) + 'px';
+        preview.style.top        = (row * CELL) + 'px';
+        preview.style.width      = (drag.w * CELL) + 'px';
+        preview.style.height     = (drag.h * CELL) + 'px';
+        preview.style.background = valid ? 'rgba(0,184,156,.25)' : 'rgba(232,67,106,.25)';
+        preview.style.border     = valid ? '2px solid #00b89c'   : '2px solid #e8436a';
+        preview.style.display    = 'block';
+    });
+
+    grid.addEventListener('dragleave', function (e) {
+        if (!grid.contains(e.relatedTarget)) preview.style.display = 'none';
+    });
+
+    grid.addEventListener('drop', async function (e) {
+        e.preventDefault();
+        if (!drag) return;
+        const { col, row } = targetCell(e);
+        preview.style.display = 'none';
+
+        if (!isValid(col, row, drag.w, drag.h, drag.itemId)) return;
+
+        const el = drag.el;
+        el.style.left = (col * CELL) + 'px';
+        el.style.top  = (row * CELL) + 'px';
+        el.classList.remove('dragging');
+
+        const local = items.find(i => i.id === drag.itemId);
+        if (local) { local.x = col; local.y = row; }
+
+        const { itemId } = drag;
+        drag = null;
+
+        const body = new URLSearchParams({
+            itemId, targetContainer: 'Storage',
+            targetX: col, targetY: row,
+            __RequestVerificationToken: CSRF
+        });
+        try {
+            const res  = await fetch('/Inventory/Move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            });
+            const json = await res.json();
+            if (!json.success) location.reload();
+        } catch { location.reload(); }
+    });
+})();
+
+    function toggleQuest(id, card) {
+        var cb = document.getElementById('cb-' + id);
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        card.classList.toggle('selected', cb.checked);
+        var chk = document.getElementById('chk-' + id);
+        if (chk) chk.innerHTML = cb.checked ? '✓' : '';
+
+        var count = document.querySelectorAll('#quest-form input[type=checkbox]:checked').length;
+        document.getElementById('selected-count').textContent = count;
+    }
+</script>
+}
+

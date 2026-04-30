@@ -1,0 +1,119 @@
+@{
+    string outcome = TempData["ForestOutcome"] as string ?? "success";
+    bool isMia     = outcome == "mia";
+
+    string lootJson  = TempData["ForestLoot"] as string ?? "[]";
+    var lootList     = System.Text.Json.JsonSerializer.Deserialize<List<string>>(lootJson) ?? new();
+
+    ViewData["Title"] = isMia ? "Missing in Action" : "Extraction Successful";
+}
+
+<style>
+    .result-card {
+        max-width: 520px; margin: 60px auto;
+        background: @(isMia
+            ? "linear-gradient(135deg, #1a1208, #2a2010)"
+            : "linear-gradient(135deg, #0f1f0f, #1a3a1a)");
+        border: 1.5px solid @(isMia ? "rgba(243,156,18,.3)" : "rgba(76,175,80,.3)");
+        border-radius: 24px; padding: 48px 40px; text-align: center; color: white;
+    }
+    .result-icon  { font-size: 4rem; margin-bottom: 16px; }
+    .result-title { font-size: 2rem; font-weight: 900; margin-bottom: 8px;
+                    color: @(isMia ? "#f39c12" : "#81c784"); }
+    .result-sub   { font-size: .9rem; color: rgba(255,255,255,.5); margin-bottom: 28px; }
+    .stat-list    { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .stat-box     { background: rgba(255,255,255,.06); border-radius: 12px; padding: 14px 18px; }
+    .stat-num     { font-size: 1.6rem; font-weight: 900; color: @(isMia ? "#f39c12" : "#81c784"); }
+    .stat-lbl     { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; opacity: .45; margin-top: 2px; }
+
+    .loot-section {
+        background: rgba(255,255,255,.04); border-radius: 14px;
+        padding: 18px 20px; margin-bottom: 28px; text-align: left;
+    }
+    .loot-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+                  color: rgba(255,255,255,.3); margin-bottom: 12px; }
+    .loot-item  {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 10px; border-radius: 8px; font-size: .84rem;
+        background: rgba(255,255,255,.05); margin-bottom: 6px;
+    }
+    .loot-item.greater { color: #f9ca24; }
+    .loot-item.common  { color: #81c784; }
+    .loot-empty { font-size: .82rem; opacity: .4; text-align: center; }
+
+    .back-btn {
+        border: none; border-radius: 12px; color: white;
+        font-weight: 800; font-size: 1rem; padding: 14px 36px;
+        cursor: pointer; text-decoration: none; display: inline-block;
+        background: @(isMia
+            ? "linear-gradient(135deg, #7d6608, #b7950b)"
+            : "linear-gradient(135deg, #2e7d32, #43a047)");
+    }
+</style>
+
+<div class="result-card">
+    <div class="result-icon">@(isMia ? "🟡⚠️" : "🌲✅")</div>
+    <div class="result-title">@(isMia ? "Missing in Action" : "Extracted!")</div>
+
+    <p class="result-sub">
+        @if (isMia)
+        {
+            <span>You exhausted your movement budget and were lost in the forest.</span>
+        }
+        else
+        {
+            <span>Escaped via <strong style="color:#00b89c;">Extract @TempData["ExtractId"]</strong>.
+            Spawned at <strong>@TempData["ExtractSpawn"]</strong>.</span>
+        }
+    </p>
+
+    <div class="stat-list">
+        <div class="stat-box">
+            <div class="stat-num">@TempData["ExtractMoves"]</div>
+            <div class="stat-lbl">Moves Spent</div>
+        </div>
+        @if (!isMia)
+        {
+            <div class="stat-box">
+                @{
+                    int secs = (int)(TempData["ExtractDuration"] ?? 0);
+                    string dur = secs >= 60 ? $"{secs/60}m {secs%60}s" : $"{secs}s";
+                }
+                <div class="stat-num">@dur</div>
+                <div class="stat-lbl">Time Survived</div>
+            </div>
+        }
+        <div class="stat-box">
+            <div class="stat-num">@lootList.Count</div>
+            <div class="stat-lbl">Loot @(isMia ? "Lost" : "Recovered")</div>
+        </div>
+    </div>
+
+    <div class="loot-section">
+        <div class="loot-title">@(isMia ? "Lost Loot" : "Loot Recovered")</div>
+        @if (lootList.Count == 0)
+        {
+            <div class="loot-empty">@(isMia ? "Nothing to lose." : "No loot collected this run.")</div>
+        }
+        else
+        {
+            @foreach (var item in lootList)
+            {
+                bool isLost    = item.Contains("lost");
+                bool isGreater = item.Contains("Greater");
+                <div class="loot-item @(isLost ? "greater" : isGreater ? "greater" : "common")">
+                    @(isLost ? "⚠️" : isGreater ? "⭐" : "📦") @item
+                </div>
+            }
+        }
+    </div>
+
+    @if (isMia)
+    {
+        <p style="font-size:.78rem; color:rgba(243,156,18,.6); margin-bottom:20px;">
+            All loot lost — exceeded 5000 moves.
+        </p>
+    }
+
+    <a asp-action="Index" class="back-btn">🌲 Enter Again</a>
+</div>

@@ -16,15 +16,18 @@ namespace HabitTracker.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IStatisticsService _statisticsService;
+        private readonly IHideoutService _hideoutService;
         private readonly ILogger<DashboardController> _logger;
 
         public DashboardController(
             AppDbContext context,
             IStatisticsService statisticsService,
+            IHideoutService hideoutService,
             ILogger<DashboardController> logger)
         {
             _context = context;
             _statisticsService = statisticsService;
+            _hideoutService = hideoutService;
             _logger = logger;
         }
 
@@ -153,6 +156,34 @@ namespace HabitTracker.Controllers
                 TempData["Error"] = "Không thể tải thống kê. Vui lòng thử lại sau.";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        // ===== CHARACTER STAT SHEET =====
+        [HttpGet("Character")]
+        public async Task<IActionResult> Character()
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            await _hideoutService.EnsureUserFacilitiesAsync(userId.Value);
+            var facilities = await _hideoutService.GetUserFacilitiesAsync(userId.Value);
+            var (buffAtk, buffHp, buffArmor, buffXpGain, buffStamina) =
+                _hideoutService.GetFacilityBuffs(facilities);
+
+            ViewBag.Facilities  = facilities;
+            ViewBag.BuffAtk     = buffAtk;
+            ViewBag.BuffHp      = buffHp;
+            ViewBag.BuffArmor   = buffArmor;
+            ViewBag.BuffXpGain  = buffXpGain;
+            ViewBag.BuffStamina = buffStamina;
+
+            _logger.LogInformation($"User {userId} viewed character sheet");
+            return View(user);
         }
 
         // ===== HELPER METHODS =====

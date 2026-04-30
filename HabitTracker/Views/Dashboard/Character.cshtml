@@ -1,0 +1,424 @@
+@model HabitTracker.Models.User
+@using HabitTracker.Constants
+@using HabitTracker.Models
+@{
+    ViewData["Title"] = "Character Sheet";
+
+    int currentXP      = Model.XP;
+    int currentLevel   = Model.Level;
+    bool isMaxLevel    = currentLevel >= AppConstants.MAX_LEVEL;
+    int xpForThisLevel = AppConstants.LevelSystem.TotalXPForLevel(currentLevel);
+    int xpForNext      = isMaxLevel ? currentXP : AppConstants.LevelSystem.TotalXPForLevel(currentLevel + 1);
+    int xpProgress     = currentXP - xpForThisLevel;
+    int xpNeeded       = isMaxLevel ? 0 : xpForNext - xpForThisLevel;
+    double xpPct       = isMaxLevel ? 100 : (xpNeeded > 0 ? Math.Min(100, xpProgress * 100.0 / xpNeeded) : 0);
+
+    // Dominant stat determines "class" title
+    var stats = new[] {
+        ("STR", Model.STR), ("WILL", Model.WILL), ("INT", Model.INT),
+        ("AGL", Model.AGL), ("END", Model.END)
+    };
+    var dominant = stats.OrderByDescending(s => s.Item2).First().Item1;
+    string className = dominant switch {
+        "STR"  => "Warrior",
+        "WILL" => "Monk",
+        "INT"  => "Scholar",
+        "AGL"  => "Rogue",
+        "END"  => "Guardian",
+        _      => "Adventurer"
+    };
+    string classIcon = dominant switch {
+        "STR"  => "⚔️",
+        "WILL" => "🧘",
+        "INT"  => "📚",
+        "AGL"  => "🏹",
+        "END"  => "🛡️",
+        _      => "🌟"
+    };
+
+    int maxStatVal = stats.Max(s => s.Item2);
+    if (maxStatVal == 0) maxStatVal = 1; // avoid div-by-zero for new chars
+}
+
+<style>
+    :root {
+        --ink:    #0a0a12;
+        --paper:  #f5f3ef;
+        --gold:   #f0b429;
+        --violet: #5c3dde;
+        --rose:   #e8436a;
+        --teal:   #00b89c;
+        --soft:   #edeaf5;
+    }
+    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
+    h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
+
+    /* ── HERO CARD ── */
+    .char-hero {
+        background: var(--ink);
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 28px;
+    }
+    .char-hero::before {
+        content: "";
+        position: absolute;
+        width: 500px; height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(92,61,222,.4) 0%, transparent 70%);
+        top: -200px; right: -150px;
+        pointer-events: none;
+    }
+    .char-level-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(240,180,41,.15);
+        border: 1.5px solid var(--gold);
+        color: var(--gold);
+        border-radius: 50px;
+        padding: 4px 16px;
+        font-weight: 700; font-size: .85rem;
+        margin-bottom: 12px;
+    }
+    .char-avatar {
+        width: 96px; height: 96px;
+        border-radius: 50%;
+        border: 4px solid var(--gold);
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    /* ── XP BAR ── */
+    .xp-bar-track {
+        background: rgba(255,255,255,.12);
+        border-radius: 50px;
+        height: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .xp-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--gold), #ff9f00);
+        border-radius: 50px;
+        transition: width .6s ease;
+    }
+
+    /* ── STAT CARD ── */
+    .stat-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 24px 28px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        height: 100%;
+    }
+    .stat-panel-title {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: #999;
+        margin-bottom: 18px;
+    }
+
+    /* ── BASE STAT ROW ── */
+    .base-stat-row {
+        display: flex; align-items: center; gap: 12px;
+        margin-bottom: 16px;
+    }
+    .base-stat-icon {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    .base-stat-label { font-weight: 700; font-size: .82rem; color: #555; min-width: 36px; }
+    .base-stat-val   { font-weight: 800; font-size: 1.1rem; color: var(--ink); min-width: 32px; text-align: right; }
+    .base-stat-bar   { flex: 1; height: 8px; background: #eee; border-radius: 50px; overflow: hidden; }
+    .base-stat-fill  { height: 100%; border-radius: 50px; transition: width .5s ease; }
+
+    /* ── DERIVED STAT TILE ── */
+    .derived-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+    }
+    .derived-tile {
+        background: var(--soft);
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex; flex-direction: column; gap: 4px;
+    }
+    .derived-tile-icon { font-size: 1.6rem; line-height: 1; }
+    .derived-tile-val  { font-size: 1.5rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+    .derived-tile-name { font-size: .75rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; }
+    .derived-tile-formula { font-size: .7rem; color: #aaa; margin-top: 2px; }
+</style>
+
+<!-- ── HERO ── -->
+<div class="char-hero">
+    <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+        <img src="@(Model.Avatar != null && Model.Avatar.StartsWith("http")
+                        ? Model.Avatar
+                        : Url.Content("~/images/" + (Model.Avatar ?? "default.png")))"
+             class="char-avatar" alt="Avatar" />
+
+        <div style="flex:1; min-width:220px;">
+            <div class="char-level-badge">
+                @classIcon @className &nbsp;·&nbsp; LV @currentLevel
+                @if (isMaxLevel) { <span style="color:#ff9f00;">✦ MAX</span> }
+            </div>
+            <h2 style="margin:0 0 4px; font-size:1.8rem;">@Model.Username</h2>
+            <p style="opacity:.6; margin:0; font-size:.9rem;">@Model.Email</p>
+
+            <!-- XP bar -->
+            <div style="margin-top:18px;">
+                @if (isMaxLevel)
+                {
+                    <div style="font-size:.85rem; opacity:.7;">Max level reached — legend status unlocked</div>
+                }
+                else
+                {
+                    <div style="display:flex; justify-content:space-between; font-size:.82rem; opacity:.75; margin-bottom:4px;">
+                        <span>XP @xpProgress / @xpNeeded to LV @(currentLevel + 1)</span>
+                        <span>@xpPct.ToString("F0")%</span>
+                    </div>
+                }
+                <div class="xp-bar-track">
+                    <div class="xp-bar-fill" style="width:@xpPct.ToString("F1")%"></div>
+                </div>
+                <div style="margin-top:6px; font-size:.78rem; opacity:.5;">
+                    Total XP: @currentXP &nbsp;|&nbsp; Max Lv: @AppConstants.MAX_LEVEL
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick numbers -->
+        <div style="display:flex; flex-direction:column; gap:10px; text-align:center;">
+            <div>
+                <div style="font-size:2rem; font-weight:800; color:var(--gold);">@currentLevel</div>
+                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Level</div>
+            </div>
+            <div>
+                <div style="font-size:1.5rem; font-weight:800;">@Model.CurrentStreak</div>
+                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Streak 🔥</div>
+            </div>
+            <div>
+                <div style="font-size:1.5rem; font-weight:800;">@Model.TotalQuestsCompleted</div>
+                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Quests</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- ── BASE STATS ── -->
+    <div class="col-lg-5">
+        <div class="stat-panel">
+            <div class="stat-panel-title">Base Stats</div>
+            <p style="font-size:.8rem; color:#aaa; margin-bottom:20px; margin-top:-10px;">
+                Grows by completing quests &amp; leveling up (+1 all stats per level)
+            </p>
+
+            @{
+                var baseStatDefs = new[] {
+                    ("STR", "⚔️", Model.STR,  "#e8436a", "Strength"),
+                    ("WILL","🧘", Model.WILL, "#5c3dde", "Willpower"),
+                    ("INT", "📚", Model.INT,  "#00b89c", "Intelligence"),
+                    ("AGL", "🏹", Model.AGL,  "#f0b429", "Agility"),
+                    ("END", "🛡️", Model.END,  "#4a9edd", "Endurance"),
+                };
+            }
+
+            @foreach (var (key, icon, val, color, label) in baseStatDefs)
+            {
+                double pct = maxStatVal > 0 ? Math.Min(100, val * 100.0 / (maxStatVal * 1.2)) : 0;
+                <div class="base-stat-row">
+                    <div class="base-stat-icon" style="background:@(color)22; color:@color;">@icon</div>
+                    <span class="base-stat-label">@key</span>
+                    <div class="base-stat-bar">
+                        <div class="base-stat-fill" style="width:@pct.ToString("F1")%; background:@color;"></div>
+                    </div>
+                    <span class="base-stat-val">@val</span>
+                </div>
+            }
+
+            <hr style="border-color:#f0f0f0; margin:18px 0;">
+            <div style="font-size:.78rem; color:#bbb; line-height:1.7;">
+                <strong style="color:#999;">How stats grow:</strong><br>
+                ⚔️ STR — Sức khỏe (Health) quests<br>
+                🧘 WILL — Tinh thần (Mindfulness) quests<br>
+                📚 INT — Học tập &amp; Tài chính quests<br>
+                🏹 AGL — Every quest completion +1<br>
+                🛡️ END — Daily &amp; Hard quests
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DERIVED STATS ── -->
+    <div class="col-lg-7">
+        <div class="stat-panel">
+            <div class="stat-panel-title">Combat &amp; Character Stats</div>
+            <p style="font-size:.8rem; color:#aaa; margin-bottom:20px; margin-top:-10px;">
+                Computed from base stats + level scaling
+            </p>
+
+            <div class="derived-grid">
+
+                <div class="derived-tile">
+                    <div class="derived-tile-icon">❤️</div>
+                    <div class="derived-tile-val">@Model.HP</div>
+                    <div class="derived-tile-name">HP</div>
+                    <div class="derived-tile-formula">(80 + Lv×5) + END×10 + WILL×5</div>
+                </div>
+
+                <div class="derived-tile">
+                    <div class="derived-tile-icon">⚔️</div>
+                    <div class="derived-tile-val">@Model.AttackDamage</div>
+                    <div class="derived-tile-name">Attack</div>
+                    <div class="derived-tile-formula">(5 + Lv) + STR×2 + AGL</div>
+                </div>
+
+                <div class="derived-tile">
+                    <div class="derived-tile-icon">🛡️</div>
+                    <div class="derived-tile-val">@Model.Armor</div>
+                    <div class="derived-tile-name">Armor</div>
+                    <div class="derived-tile-formula">Lv×0.5 + END×1.5 + WILL×0.5</div>
+                </div>
+
+                <div class="derived-tile">
+                    <div class="derived-tile-icon">⚡</div>
+                    <div class="derived-tile-val">@Model.XPGainPercent.ToString("F1")%</div>
+                    <div class="derived-tile-name">XP Gain</div>
+                    <div class="derived-tile-formula">Lv×0.2% + INT×0.5%</div>
+                </div>
+
+                <div class="derived-tile">
+                    <div class="derived-tile-icon">💪</div>
+                    <div class="derived-tile-val">@Model.Stamina</div>
+                    <div class="derived-tile-name">Stamina</div>
+                    <div class="derived-tile-formula">(50 + Lv×2) + WILL×5 + END×3</div>
+                </div>
+
+                <div class="derived-tile" style="border:1.5px solid rgba(0,184,156,.25);">
+                    <div class="derived-tile-icon">⚡</div>
+                    <div class="derived-tile-val" style="color:#00b89c;">@Model.Speed</div>
+                    <div class="derived-tile-name">Speed</div>
+                    <div class="derived-tile-formula">5 + √Lv×3 + √AGL×5  (cap 100)</div>
+                </div>
+
+            </div>
+
+            <!-- Level progression table snippet -->
+            <div style="margin-top:28px;">
+                <div class="stat-panel-title">Level Progression</div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; font-size:.82rem; border-collapse:collapse;">
+                        <thead>
+                            <tr style="color:#aaa; text-transform:uppercase; font-size:.72rem; letter-spacing:.06em;">
+                                <th style="padding:6px 10px; text-align:left;">Level</th>
+                                <th style="padding:6px 10px; text-align:right;">XP needed</th>
+                                <th style="padding:6px 10px; text-align:right;">Total XP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var showLevels = new List<int>();
+                                // Show a window around current level
+                                for (int l = Math.Max(1, currentLevel - 1); l <= Math.Min(AppConstants.MAX_LEVEL, currentLevel + 3); l++)
+                                    showLevels.Add(l);
+                            }
+                            @foreach (var lv in showLevels)
+                            {
+                                bool isCurrent = lv == currentLevel;
+                                bool isMax = lv >= AppConstants.MAX_LEVEL;
+                                <tr style="background:@(isCurrent ? "var(--soft)" : "transparent"); border-radius:8px;">
+                                    <td style="padding:7px 10px; font-weight:@(isCurrent ? "700" : "400"); color:@(isCurrent ? "var(--violet)" : "var(--ink)");">
+                                        @(isCurrent ? "▶ " : "")LV @lv
+                                        @if (isCurrent) { <span style="font-size:.7rem; background:var(--violet); color:white; border-radius:4px; padding:1px 6px; margin-left:4px;">YOU</span> }
+                                    </td>
+                                    <td style="padding:7px 10px; text-align:right; color:#888;">
+                                        @(isMax ? "—" : AppConstants.LevelSystem.XPToNextLevel(lv).ToString("N0"))
+                                    </td>
+                                    <td style="padding:7px 10px; text-align:right; font-weight:600;">
+                                        @AppConstants.LevelSystem.TotalXPForLevel(lv).ToString("N0")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── HIDEOUT BUFFS ── -->
+@{
+    var facilities   = ViewBag.Facilities as List<UserFacility> ?? new List<UserFacility>();
+    int buffAtk      = (int)(ViewBag.BuffAtk     ?? 0);
+    int buffHp       = (int)(ViewBag.BuffHp      ?? 0);
+    int buffArmor    = (int)(ViewBag.BuffArmor   ?? 0);
+    double buffXpGain = (double)(ViewBag.BuffXpGain ?? 0.0);
+    int buffStamina  = (int)(ViewBag.BuffStamina ?? 0);
+}
+@if (facilities.Any())
+{
+    <div style="margin-top:24px;">
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e); border-radius:20px; padding:24px 28px; color:white;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+                <span style="font-size:1.5rem;">🏰</span>
+                <div>
+                    <div style="font-weight:800; font-size:1rem;">Hideout Buffs</div>
+                    <div style="font-size:.76rem; opacity:.5;">Passive bonuses from your facilities</div>
+                </div>
+                <a asp-controller="Hideout" asp-action="Index"
+                   style="margin-left:auto; font-size:.75rem; color:var(--gold); text-decoration:none; border:1px solid rgba(240,180,41,.4); border-radius:8px; padding:4px 12px;">
+                    Manage →
+                </a>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px;">
+                @foreach (var uf in facilities)
+                {
+                    if (uf.Facility == null) continue;
+                    int total = uf.Facility.BuffPerLevel * uf.Level;
+                    var statLabel = uf.Facility.StatAffected == "XPGain"
+                        ? $"+{total}% XP Gain"
+                        : $"+{total} {uf.Facility.StatAffected}";
+
+                    <div style="background:rgba(255,255,255,.06); border-radius:12px; padding:12px 16px; display:flex; gap:10px; align-items:center;">
+                        <span style="font-size:1.4rem; line-height:1;">@uf.Facility.Icon</span>
+                        <div>
+                            <div style="font-size:.78rem; font-weight:700; opacity:.9;">@uf.Facility.Name</div>
+                            <div style="font-size:.72rem; opacity:.5;">Lv @uf.Level</div>
+                            <div style="font-size:.82rem; font-weight:800; color:var(--gold);">@statLabel</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,.08); display:flex; gap:20px; flex-wrap:wrap; font-size:.82rem; opacity:.7;">
+                <span>❤️ +@buffHp HP</span>
+                <span>⚔️ +@buffAtk ATK</span>
+                <span>🛡️ +@buffArmor Armor</span>
+                <span>⚡ +@buffXpGain.ToString("F0")% XP</span>
+                <span>💪 +@buffStamina Stamina</span>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ── QUICK NAV ── -->
+<div style="margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
+    <a asp-controller="Dashboard" asp-action="Index"
+       class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+    <a asp-controller="Task" asp-action="Index"
+       class="btn btn-primary btn-sm">📋 Do Quests to grow stats</a>
+    <a asp-controller="Dashboard" asp-action="Badges"
+       class="btn btn-outline-warning btn-sm">🏆 My Badges</a>
+</div>

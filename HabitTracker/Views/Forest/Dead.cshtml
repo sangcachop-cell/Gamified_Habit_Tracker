@@ -1,0 +1,44 @@
+@{ ViewData["Title"] = "Extraction Failed"; }
+
+<style>
+    .dead-card {
+        max-width: 440px; margin: 60px auto;
+        background: linear-gradient(135deg, #1a0808, #2a1010);
+        border: 1.5px solid rgba(231,76,60,.3); border-radius: 24px;
+        padding: 48px 40px; text-align: center; color: white;
+    }
+    .dead-icon  { font-size: 4rem; margin-bottom: 16px; }
+    .dead-title { font-size: 2rem; font-weight: 900; color: #e74c3c; margin-bottom: 8px; }
+    .dead-sub   { font-size: .9rem; color: rgba(255,255,255,.45); margin-bottom: 28px; line-height: 1.6; }
+    .stat-box   {
+        background: rgba(255,255,255,.06); border-radius: 12px;
+        padding: 16px 20px; margin-bottom: 28px; display: inline-block;
+    }
+    .stat-num { font-size: 1.8rem; font-weight: 900; color: #e74c3c; }
+    .stat-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; opacity: .4; margin-top: 2px; }
+    .retry-btn {
+        background: linear-gradient(135deg, #922b21, #c0392b);
+        border: none; border-radius: 12px; color: white;
+        font-weight: 800; font-size: 1rem; padding: 14px 36px;
+        cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .loot-lost { font-size: .8rem; color: rgba(231,76,60,.6); margin-top: 16px; }
+</style>
+
+<div class="dead-card">
+    <div class="dead-icon">💀</div>
+    <div class="dead-title">Extraction Failed</div>
+    <p class="dead-sub">
+        You were slain in the forest.<br>
+        All accumulated loot has been lost.
+    </p>
+
+    <div class="stat-box">
+        <div class="stat-num">@(ViewBag.MovesSpent ?? 0)</div>
+        <div class="stat-lbl">Moves Spent</div>
+    </div>
+
+    <br>
+    <a asp-action="Index" class="retry-btn">🌲 Try Again</a>
+    <div class="loot-lost">All loot lost on death.</div>
+</div>

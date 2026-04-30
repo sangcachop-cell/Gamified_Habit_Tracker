@@ -9,6 +9,19 @@
          || action == "Profile"
          || action == "EditProfile"
          || action == "ChangePassword");
+
+    // Forest-active lock: while a run is active, certain nav links are disabled
+    bool forestActive = false;
+    var forestJson = Context.Session.GetString("ForestSession");
+    if (!string.IsNullOrEmpty(forestJson))
+    {
+        try
+        {
+            var fs = System.Text.Json.JsonSerializer.Deserialize<HabitTracker.Models.ForestSession>(forestJson);
+            forestActive = fs?.IsActive ?? false;
+        }
+        catch { }
+    }
 }
 
 <!DOCTYPE html>
@@ -71,6 +84,50 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Character">
+                                    ⚔️ Character
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Forest" asp-action="Index">
+                                    🌲 Forest
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                @if (forestActive)
+                                {
+                                    <span class="nav-link disabled" title="Locked while in the forest"
+                                          style="opacity:.4; cursor:not-allowed;">
+                                        🔒 Inventory
+                                    </span>
+                                }
+                                else
+                                {
+                                    <a class="nav-link" asp-controller="Inventory" asp-action="Index">
+                                        🎒 Inventory
+                                    </a>
+                                }
+                            </li>
+
+                            <li class="nav-item">
+                                @if (forestActive)
+                                {
+                                    <span class="nav-link disabled" title="Locked while in the forest"
+                                          style="opacity:.4; cursor:not-allowed;">
+                                        🔒 Hideout
+                                    </span>
+                                }
+                                else
+                                {
+                                    <a class="nav-link" asp-controller="Hideout" asp-action="Index">
+                                        🏰 Hideout
+                                    </a>
+                                }
+                            </li>
+
                             <!-- 🔍 SEARCH BUTTON -->
                             <li class="nav-item ms-3">
                                 <a class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
@@ -131,6 +188,33 @@
                                             <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
                                                 👤 My Profile
                                             </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Character">
+                                                ⚔️ Character Sheet
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Battle" asp-action="Index">
+                                                ⚔️ Battle Arena
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            @if (forestActive)
+                                            {
+                                                <span class="dropdown-item disabled" style="opacity:.4; cursor:not-allowed;">
+                                                    🔒 Hideout (locked)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <a class="dropdown-item" asp-controller="Hideout" asp-action="Index">
+                                                    🏰 Hideout
+                                                </a>
+                                            }
                                         </li>
 
                                         <li>
@@ -396,3 +480,4 @@
 
 </body>
 </html>
+

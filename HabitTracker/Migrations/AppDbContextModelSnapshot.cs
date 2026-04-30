@@ -143,6 +143,127 @@ namespace HabitTracker.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Facility", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BuffDescription")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("BuffPerLevel")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaxLevel")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("StatAffected")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Facilities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BuffDescription = "+5 ATK per level",
+                            BuffPerLevel = 5,
+                            Description = "A dedicated space for physical conditioning. Forges raw combat power through daily drills.",
+                            Icon = "🏋️",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Training Grounds",
+                            StatAffected = "ATK"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BuffDescription = "+20 HP per level",
+                            BuffPerLevel = 20,
+                            Description = "Silence the mind, fortify the spirit. Meditative practice expands your life force.",
+                            Icon = "🧘",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Meditation Hall",
+                            StatAffected = "HP"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            BuffDescription = "+2% XP Gain per level",
+                            BuffPerLevel = 2,
+                            Description = "Ancient texts and ongoing studies. Knowledge accelerates growth and sharpens the mind.",
+                            Icon = "📚",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Archive",
+                            StatAffected = "XPGain"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            BuffDescription = "+10 Stamina per level",
+                            BuffPerLevel = 10,
+                            Description = "Obstacle runs and reflex drills push your body to its limits. Speed is half the battle.",
+                            Icon = "🏃",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Agility Course",
+                            StatAffected = "Stamina"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            BuffDescription = "+5 Armor per level",
+                            BuffPerLevel = 5,
+                            Description = "Hardened defenses line the outer walls. A stalwart position from which to weather any storm.",
+                            Icon = "🛡️",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Barracks",
+                            StatAffected = "Armor"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BuffDescription = "+30 slots per level",
+                            BuffPerLevel = 30,
+                            Description = "Expand your hideout's storage capacity. Each upgrade adds 30 more grid slots (10×3).",
+                            Icon = "📦",
+                            IsActive = true,
+                            MaxLevel = 5,
+                            Name = "Storage Room",
+                            StatAffected = "Storage"
+                        });
+                });
+
             modelBuilder.Entity("HabitTracker.Models.Friendship", b =>
                 {
                     b.Property<int>("Id")
@@ -254,6 +375,9 @@ namespace HabitTracker.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("FacilityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Frequency")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -284,6 +408,8 @@ namespace HabitTracker.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("FacilityId");
+
                     b.ToTable("Quests");
 
                     b.HasData(
@@ -293,6 +419,7 @@ namespace HabitTracker.Migrations
                             Category = "Sức khỏe",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 5,
                             Frequency = "Daily",
                             Icon = "💧",
                             IsActive = true,
@@ -306,6 +433,7 @@ namespace HabitTracker.Migrations
                             Category = "Sức khỏe",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Medium",
+                            FacilityId = 1,
                             Frequency = "Daily",
                             Icon = "🏃",
                             IsActive = true,
@@ -319,6 +447,7 @@ namespace HabitTracker.Migrations
                             Category = "Sức khỏe",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 2,
                             Frequency = "Daily",
                             Icon = "😴",
                             IsActive = true,
@@ -332,6 +461,7 @@ namespace HabitTracker.Migrations
                             Category = "Sức khỏe",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Hard",
+                            FacilityId = 4,
                             Frequency = "Weekly",
                             Icon = "🏅",
                             IsActive = true,
@@ -345,6 +475,7 @@ namespace HabitTracker.Migrations
                             Category = "Học tập",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 3,
                             Frequency = "Daily",
                             Icon = "📚",
                             IsActive = true,
@@ -358,6 +489,7 @@ namespace HabitTracker.Migrations
                             Category = "Học tập",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Medium",
+                            FacilityId = 3,
                             Frequency = "Daily",
                             Icon = "🗣️",
                             IsActive = true,
@@ -371,6 +503,7 @@ namespace HabitTracker.Migrations
                             Category = "Học tập",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Hard",
+                            FacilityId = 3,
                             Frequency = "Monthly",
                             Icon = "🎓",
                             IsActive = true,
@@ -384,6 +517,7 @@ namespace HabitTracker.Migrations
                             Category = "Tinh thần",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 2,
                             Frequency = "Daily",
                             Icon = "🧘",
                             IsActive = true,
@@ -397,6 +531,7 @@ namespace HabitTracker.Migrations
                             Category = "Tinh thần",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 2,
                             Frequency = "Daily",
                             Icon = "📝",
                             IsActive = true,
@@ -410,6 +545,7 @@ namespace HabitTracker.Migrations
                             Category = "Tài chính",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Easy",
+                            FacilityId = 3,
                             Frequency = "Daily",
                             Icon = "💰",
                             IsActive = true,
@@ -423,6 +559,7 @@ namespace HabitTracker.Migrations
                             Category = "Tài chính",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Difficulty = "Medium",
+                            FacilityId = 5,
                             Frequency = "Weekly",
                             Icon = "🏦",
                             IsActive = true,
@@ -439,6 +576,9 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AGL")
+                        .HasColumnType("int");
 
                     b.Property<string>("Avatar")
                         .HasMaxLength(255)
@@ -461,10 +601,22 @@ namespace HabitTracker.Migrations
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("END")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("EquippedArmorItem")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EquippedBackpackItem")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EquippedRigItem")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FacebookLink")
                         .HasMaxLength(255)
@@ -477,6 +629,9 @@ namespace HabitTracker.Migrations
                     b.Property<string>("Gender")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("INT")
+                        .HasColumnType("int");
 
                     b.Property<string>("InstagramLink")
                         .HasMaxLength(255)
@@ -525,6 +680,12 @@ namespace HabitTracker.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("STR")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stone")
+                        .HasColumnType("int");
+
                     b.Property<int>("TotalQuestsCompleted")
                         .HasColumnType("int");
 
@@ -542,6 +703,12 @@ namespace HabitTracker.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("WILL")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Wood")
+                        .HasColumnType("int");
 
                     b.Property<int>("XP")
                         .HasColumnType("int");
@@ -575,6 +742,79 @@ namespace HabitTracker.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserBadges");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserFacility", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UnlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpgradeStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.HasIndex("UserId", "FacilityId")
+                        .IsUnique();
+
+                    b.ToTable("UserFacilities");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserInventoryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContainerType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("GridX")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GridY")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRotated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserInventoryItems");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.UserQuest", b =>
@@ -661,6 +901,13 @@ namespace HabitTracker.Migrations
                         .WithMany("Quests")
                         .HasForeignKey("CategoryId");
 
+                    b.HasOne("HabitTracker.Models.Facility", "AssignedFacility")
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("AssignedFacility");
+
                     b.Navigation("CustomCategory");
                 });
 
@@ -679,6 +926,36 @@ namespace HabitTracker.Migrations
                         .IsRequired();
 
                     b.Navigation("Badge");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserFacility", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Facility", "Facility")
+                        .WithMany("UserFacilities")
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Facility_User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facility");
+
+                    b.Navigation("Facility_User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserInventoryItem", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -710,6 +987,11 @@ namespace HabitTracker.Migrations
             modelBuilder.Entity("HabitTracker.Models.Category", b =>
                 {
                     b.Navigation("Quests");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Facility", b =>
+                {
+                    b.Navigation("UserFacilities");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.Quest", b =>
