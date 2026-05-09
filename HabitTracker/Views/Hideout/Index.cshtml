@@ -17,9 +17,15 @@
     string hsJson  = ViewBag.HideoutStorageItemsJson as string ?? "[]";
     int hsCols     = (int)(ViewBag.HideoutStorageCols ?? 10);
     int hsRows     = (int)(ViewBag.HideoutStorageRows ?? 10);
-    int woodCount  = (int)(ViewBag.Wood  ?? 100);
-    int stoneCount = (int)(ViewBag.Stone ?? 100);
+    int woodCount  = (int)(ViewBag.Wood  ?? 0);
+    int stoneCount = (int)(ViewBag.Stone ?? 0);
     const int C    = ItemCatalogue.CELL_PX;
+
+    int wbLevel   = (int)(ViewBag.WorkbenchLevel ?? 1);
+    int wbSlots   = (int)(ViewBag.WorkbenchSlots ?? 2);
+    var wbRecipes = ViewBag.WorkbenchRecipes as WorkbenchCatalogue.Recipe[] ?? Array.Empty<WorkbenchCatalogue.Recipe>();
+    int rawWood   = (int)(ViewBag.RawWoodCount  ?? 0);
+    int rawStone  = (int)(ViewBag.RawStoneCount ?? 0);
 
     var upgradeCosts = ViewBag.UpgradeCosts as Dictionary<int, FacilityCatalogue.UpgradeCost?>
                        ?? new Dictionary<int, FacilityCatalogue.UpgradeCost?>();
@@ -223,23 +229,22 @@
     }
     .quest-card:hover { border-color: var(--violet); box-shadow: 0 4px 16px rgba(92,61,222,.12); }
     .quest-card.selected { border-color: var(--violet); background: var(--soft); }
-    .quest-card.done { opacity: .5; cursor: not-allowed; }
+    .quest-card.done { opacity: .55; }
+    .quest-card { cursor: pointer; }
+    .quest-card:not(.done):hover { border-color: var(--violet); box-shadow: 0 4px 16px rgba(92,61,222,.12); }
     .quest-icon { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
     .quest-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
     .quest-meta { font-size: .76rem; color: #999; margin-top: 2px; }
     .quest-xp   { font-size: .8rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
     .stat-gains { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
     .sg-pill    { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 50px; font-size: .67rem; font-weight: 700; }
-    .quest-check {
+    .quest-badge {
         position: absolute; top: 14px; right: 14px;
-        width: 22px; height: 22px;
-        border-radius: 50%;
-        border: 2px solid #ddd;
-        display: flex; align-items: center; justify-content: center;
-        font-size: .8rem;
+        padding: 3px 10px; border-radius: 50px;
+        font-size: .72rem; font-weight: 700;
     }
-    .quest-card.selected .quest-check { background: var(--violet); border-color: var(--violet); color: white; }
-    .quest-card.done .quest-check { background: var(--teal); border-color: var(--teal); color: white; }
+    .play-badge { background: var(--violet); color: white; }
+    .done-badge { background: var(--teal);   color: white; }
 
     /* ── STORAGE ROOM ── */
     .storage-panel {
@@ -299,29 +304,6 @@
     .material-chip .mat-count { font-size: 1.1rem; color: var(--violet); }
     .material-chip .mat-label { font-size: .72rem; color: #999; font-weight: 500; }
 
-    .submit-bar {
-        position: sticky; bottom: 20px;
-        background: white;
-        border-radius: 16px;
-        padding: 16px 22px;
-        display: flex; align-items: center; justify-content: space-between; gap: 14px;
-        box-shadow: 0 8px 32px rgba(0,0,0,.12);
-        border: 1.5px solid rgba(0,0,0,.06);
-        margin-top: 20px;
-        z-index: 100;
-    }
-    .submit-bar-label { font-size: .9rem; color: #666; }
-    .submit-bar-count { font-weight: 800; color: var(--violet); }
-    .btn-confirm {
-        background: linear-gradient(135deg, var(--violet), #8b5cf6);
-        color: white; border: none;
-        border-radius: 12px;
-        padding: 12px 28px;
-        font-weight: 700; font-size: .95rem;
-        cursor: pointer;
-        transition: opacity .2s, transform .15s;
-    }
-    .btn-confirm:hover { opacity: .9; transform: scale(1.02); }
 </style>
 
 <!-- ── HIDEOUT HERO ── -->
@@ -541,6 +523,72 @@
 
 </div><!-- /hs-room-body -->
 
+<!-- ── WORKBENCH ── -->
+<div class="section-divider">
+    <hr />
+    <span>🔨 Workbench</span>
+    <hr />
+    <button type="button" onclick="toggleWb()" id="wb-btn"
+            style="flex-shrink:0; background:#c9a227; color:#1a1a1a; border:none;
+                   border-radius:50px; padding:5px 16px; font-size:.8rem; font-weight:700; cursor:pointer;">
+        ▼ Open
+    </button>
+</div>
+
+<div id="wb-body" style="display:none; margin-bottom:32px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
+        <div style="background:rgba(201,162,39,.12); border:1.5px solid rgba(201,162,39,.3); border-radius:12px; padding:10px 18px;">
+            <span style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#c9a227;">Level</span>
+            <div style="font-size:1.4rem; font-weight:800; color:white; line-height:1.2;">@wbLevel</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.1); border-radius:12px; padding:10px 18px;">
+            <span style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.4);">Craft Slots</span>
+            <div style="font-size:1.4rem; font-weight:800; color:white; line-height:1.2;">@wbSlots</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.1); border-radius:12px; padding:10px 18px;">
+            <span style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.4);">Raw Materials</span>
+            <div style="font-size:.9rem; font-weight:700; color:white; line-height:1.6; margin-top:2px;">
+                🪵 @rawWood wood &nbsp;·&nbsp; 🪨 @rawStone stone
+            </div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+        @foreach (var recipe in wbRecipes)
+        {
+            bool hasInput = recipe.InputItemId == "wood" ? rawWood > 0 : rawStone > 0;
+            string accent = recipe.InputItemId == "wood" ? "#c9a227" : "#888";
+            string inputIcon = recipe.InputItemId == "wood" ? "🪵" : "🪨";
+            string inputCount = recipe.InputItemId == "wood" ? rawWood.ToString() : rawStone.ToString();
+
+            <div style="background:#12121f; border:1.5px solid rgba(255,255,255,.07); border-radius:16px; padding:18px 20px;
+                        border-top:3px solid @accent; position:relative;">
+                <div style="font-weight:800; font-size:.95rem; color:white; margin-bottom:8px;">@recipe.Name</div>
+                <div style="font-size:.82rem; color:rgba(255,255,255,.5); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                    <span>@inputIcon @(recipe.InputItemId) ×@recipe.InputQty</span>
+                    <span style="color:rgba(255,255,255,.25);">→</span>
+                    <span style="color:@accent; font-weight:700;">@recipe.OutputLabel</span>
+                </div>
+                <div style="font-size:.72rem; color:rgba(255,255,255,.3); margin-bottom:12px;">
+                    ⏱ @(recipe.CraftTime.TotalHours)h craft time <span style="color:#4caf50;">(instant — testing)</span>
+                </div>
+                <div style="font-size:.75rem; color:rgba(255,255,255,.35); margin-bottom:12px;">
+                    In storage: @inputIcon @inputCount available
+                </div>
+                <form id="csrf-wb-@recipe.Id">@Html.AntiForgeryToken()</form>
+                <button onclick="doCraft('@recipe.Id')"
+                        @(hasInput ? "" : "disabled")
+                        style="width:100%; padding:10px; border-radius:10px; border:none; font-weight:700; font-size:.88rem; cursor:@(hasInput?"pointer":"not-allowed");
+                               background:@(hasInput ? $"{accent}22" : "rgba(100,100,100,.1)");
+                               color:@(hasInput ? accent : "#555");">
+                    @(hasInput ? "⚒️ Craft" : "No materials")
+                </button>
+                <div id="wb-msg-@recipe.Id" style="font-size:.78rem; margin-top:8px; text-align:center; min-height:18px;"></div>
+            </div>
+        }
+    </div>
+</div>
+
 <!-- ── QUEST SECTION ── -->
 <div class="section-divider">
     <span>📋 Complete Quests</span>
@@ -558,14 +606,7 @@
                 <option value="@cat" selected="@(ViewBag.SelectedCategory == cat ? "selected" : null)">@cat</option>
             }
         </select>
-        <select name="difficulty" onchange="this.form.submit()">
-            <option value="">All Difficulties</option>
-            @foreach (var diff in (string[])ViewBag.Difficulties)
-            {
-                <option value="@diff" selected="@(ViewBag.SelectedDifficulty == diff ? "selected" : null)">@diff</option>
-            }
-        </select>
-        <select name="frequency" onchange="this.form.submit()">
+<select name="frequency" onchange="this.form.submit()">
             <option value="">All Frequencies</option>
             @foreach (var freq in (string[])ViewBag.Frequencies)
             {
@@ -575,101 +616,80 @@
     </div>
 </form>
 
-<!-- Quest cards form -->
-<form id="quest-form" asp-action="Confirm" method="post">
-    @Html.AntiForgeryToken()
-
-    @if (!Model.Any())
+<!-- Quest cards -->
+@if (!Model.Any())
+{
+    <div style="text-align:center; padding:48px; color:#bbb;">
+        <div style="font-size:3rem;">🏜️</div>
+        <p style="margin-top:12px;">No quests match your filters.</p>
+    </div>
+}
+else
+{
+    var accentCol = new Dictionary<string, string>
     {
-        <div style="text-align:center; padding:48px; color:#bbb;">
-            <div style="font-size:3rem;">🏜️</div>
-            <p style="margin-top:12px;">No quests match your filters.</p>
-        </div>
-    }
-    else
+        ["ATK"]    = "#e8436a",
+        ["HP"]     = "#e84343",
+        ["XPGain"] = "#f0b429",
+        ["Stamina"]= "#00b89c",
+        ["Armor"]  = "#4a9edd",
+    };
+
+    var grouped = Model
+        .GroupBy(q => q.FacilityId)
+        .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+
+    foreach (var group in grouped)
     {
-        var accentCol = new Dictionary<string, string>
-        {
-            ["ATK"]    = "#e8436a",
-            ["HP"]     = "#e84343",
-            ["XPGain"] = "#f0b429",
-            ["Stamina"]= "#00b89c",
-            ["Armor"]  = "#4a9edd",
-        };
+        Facility? fac = group.Key.HasValue && facilityMap.ContainsKey(group.Key.Value)
+            ? facilityMap[group.Key.Value] : null;
 
-        var grouped = Model
-            .GroupBy(q => q.FacilityId)
-            .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+        string col = fac != null && accentCol.ContainsKey(fac.StatAffected)
+            ? accentCol[fac.StatAffected] : "#888";
 
-        foreach (var group in grouped)
-        {
-            Facility? fac = group.Key.HasValue && facilityMap.ContainsKey(group.Key.Value)
-                ? facilityMap[group.Key.Value] : null;
-
-            string col = fac != null && accentCol.ContainsKey(fac.StatAffected)
-                ? accentCol[fac.StatAffected] : "#888";
-
-            <!-- Facility section header -->
-            <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:14px; background:@(col)12; border-left:4px solid @col; margin-bottom:14px;">
-                <span style="font-size:1.5rem; line-height:1;">@(fac?.Icon ?? "📋")</span>
-                <div style="flex:1;">
-                    <div style="font-weight:800; font-size:.95rem; color:@col;">@(fac?.Name ?? "Other Quests")</div>
-                    <div style="font-size:.75rem; opacity:.6;">@(fac?.Description ?? "Unassigned quests")</div>
-                </div>
-                @if (fac != null)
-                {
-                    <span style="font-size:.72rem; font-weight:700; background:@(col)20; color:@col; padding:3px 10px; border-radius:50px;">@fac.BuffDescription</span>
-                }
+        <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:14px; background:@(col)12; border-left:4px solid @col; margin-bottom:14px;">
+            <span style="font-size:1.5rem; line-height:1;">@(fac?.Icon ?? "📋")</span>
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:.95rem; color:@col;">@(fac?.Name ?? "Other Quests")</div>
+                <div style="font-size:.75rem; opacity:.6;">@(fac?.Description ?? "Unassigned quests")</div>
             </div>
+            @if (fac != null)
+            {
+                <span style="font-size:.72rem; font-weight:700; background:@(col)20; color:@col; padding:3px 10px; border-radius:50px;">@fac.BuffDescription</span>
+            }
+        </div>
 
-            <div class="quest-grid" id="quest-grid-@(group.Key ?? 0)" style="margin-bottom:28px;">
-                @foreach (var quest in group)
-                {
-                    bool done = completedIds.Contains(quest.Id);
-                    <div class="quest-card @(done ? "done" : "")"
-                         onclick="@(done ? "" : $"toggleQuest({quest.Id}, this)")"
-                         id="card-@quest.Id">
-                        <div class="quest-icon">@quest.Icon</div>
-                        <div style="flex:1; min-width:0;">
-                            <div class="quest-name">@quest.Name</div>
-                            <div class="quest-meta">@quest.Category · @quest.Difficulty · @quest.Frequency</div>
-                            <div class="quest-xp">+@quest.XPReward XP</div>
-                            @{
-                                var (gs, gw, gi, ga, ge) = RpgStats.ComputeStatGains(
-                                    quest.Category, quest.Difficulty, quest.Frequency);
-                            }
-                            <div class="stat-gains">
-                                @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️+@gs STR</span> }
-                                @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘+@gw WILL</span> }
-                                @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚+@gi INT</span> }
-                                @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹+@ga AGL</span> }
-                                @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️+@ge END</span> }
-                            </div>
-                        </div>
-                        <div class="quest-check" id="chk-@quest.Id">
-                            @if (done) { <span>✓</span> }
-                        </div>
-                        @if (!done)
-                        {
-                            <input type="checkbox" name="questIds" value="@quest.Id"
-                                   id="cb-@quest.Id" style="display:none;" />
+        <div class="quest-grid" style="margin-bottom:28px;">
+            @foreach (var quest in group)
+            {
+                bool done = completedIds.Contains(quest.Id);
+                <a href="/Minigame/Play/@quest.Id"
+                   class="quest-card @(done ? "done" : "")"
+                   style="text-decoration:none; color:inherit; display:flex; align-items:flex-start; gap:14px;">
+                    <div class="quest-icon">@quest.Icon</div>
+                    <div style="flex:1; min-width:0;">
+                        <div class="quest-name">@quest.Name</div>
+                        <div class="quest-meta">@quest.Category · @quest.Frequency</div>
+                        <div class="quest-xp">10 / 25 / 50 XP</div>
+                        @{
+                            var (gs, gw, gi, ga, ge) = RpgStats.ComputeStatGains(quest.Category, "Hard", quest.Frequency);
                         }
+                        <div class="stat-gains">
+                            @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️ STR</span> }
+                            @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘 WILL</span> }
+                            @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚 INT</span> }
+                            @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹 AGL</span> }
+                            @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️ END</span> }
+                        </div>
                     </div>
-                }
-            </div>
-        }
-
-        <!-- Sticky submit bar -->
-        <div class="submit-bar">
-            <div class="submit-bar-label">
-                <span class="submit-bar-count" id="selected-count">0</span> quest(s) selected
-            </div>
-            <button type="submit" class="btn-confirm">
-                ⚔️ Complete in Hideout
-            </button>
+                    <span class="quest-badge @(done ? "done-badge" : "play-badge")">
+                        @(done ? "✓ Done" : "▶ Play")
+                    </span>
+                </a>
+            }
         </div>
     }
-</form>
+}
 
 <!-- Hidden CSRF for fetch -->
 <form id="hs-csrf-form">@Html.AntiForgeryToken()</form>
@@ -708,6 +728,40 @@ function toggleHsRoom() {
     hsRoomOpen = !hsRoomOpen;
     document.getElementById('hs-room-body').style.display = hsRoomOpen ? 'block' : 'none';
     document.getElementById('hs-room-btn').textContent    = hsRoomOpen ? '▲ Close' : '▼ Open';
+}
+
+// ── Workbench collapse ────────────────────────────────────────────────────────
+let wbOpen = false;
+function toggleWb() {
+    wbOpen = !wbOpen;
+    document.getElementById('wb-body').style.display = wbOpen ? 'block' : 'none';
+    document.getElementById('wb-btn').textContent    = wbOpen ? '▲ Close' : '▼ Open';
+}
+
+// ── Craft ─────────────────────────────────────────────────────────────────────
+async function doCraft(recipeId) {
+    const csrf = document.querySelector('#csrf-wb-' + recipeId + ' [name=__RequestVerificationToken]').value;
+    const msg  = document.getElementById('wb-msg-' + recipeId);
+    msg.textContent = '⏳ Crafting…';
+    try {
+        const res  = await fetch('/Craft/Start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ recipeId, __RequestVerificationToken: csrf })
+        });
+        const json = await res.json();
+        if (json.success) {
+            msg.style.color = '#4caf50';
+            msg.textContent = '✅ ' + json.message;
+            setTimeout(() => location.reload(), 900);
+        } else {
+            msg.style.color = '#e8436a';
+            msg.textContent = '❌ ' + json.error;
+        }
+    } catch {
+        msg.style.color = '#e8436a';
+        msg.textContent = '❌ Network error';
+    }
 }
 
 // ── Hideout Storage DnD ───────────────────────────────────────────────────────
@@ -822,17 +876,6 @@ function toggleHsRoom() {
     });
 })();
 
-    function toggleQuest(id, card) {
-        var cb = document.getElementById('cb-' + id);
-        if (!cb) return;
-        cb.checked = !cb.checked;
-        card.classList.toggle('selected', cb.checked);
-        var chk = document.getElementById('chk-' + id);
-        if (chk) chk.innerHTML = cb.checked ? '✓' : '';
-
-        var count = document.querySelectorAll('#quest-form input[type=checkbox]:checked').length;
-        document.getElementById('selected-count').textContent = count;
-    }
 </script>
 }
 

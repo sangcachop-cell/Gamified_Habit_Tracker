@@ -65,6 +65,10 @@ namespace HabitTracker.Models
         public int? FacilityId { get; set; }
         public virtual Facility? AssignedFacility { get; set; }
 
+        // Minigame type — determines which minigame view to render ("QTE" | "Dino")
+        [StringLength(50)]
+        public string MinigameType { get; set; } = "QTE";
+
         // ===== METHODS =====
         /// <summary>
         /// Tính XP reward dựa vào difficulty

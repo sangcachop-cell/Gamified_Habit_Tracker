@@ -88,6 +88,54 @@ namespace HabitTracker.Constants
             );
         }
 
+        // ── Loot tables ───────────────────────────────────────────────────────
+        public static class LootTables
+        {
+            // Forest loot pool per rarity — add item IDs here as new items are created
+            public static readonly Dictionary<string, string[]> Forest = new()
+            {
+                [ItemCatalogue.Rarity.Common]    = new[] { "wood", "stone" },
+                [ItemCatalogue.Rarity.Uncommon]  = new string[] { },
+                [ItemCatalogue.Rarity.Rare]      = new string[] { },
+                [ItemCatalogue.Rarity.Epic]      = new string[] { },
+                [ItemCatalogue.Rarity.Legendary] = new string[] { },
+                [ItemCatalogue.Rarity.Mythic]    = new string[] { },
+            };
+
+            // Returns rarity string or null (no drop). Rare monsters shift weight up.
+            public static string? RollRarity(Random rng, string monsterTier)
+            {
+                double r = rng.NextDouble() * 100;
+                if (monsterTier == "rare")
+                {
+                    if (r < 0.3)  return ItemCatalogue.Rarity.Mythic;
+                    if (r < 2.3)  return ItemCatalogue.Rarity.Legendary;
+                    if (r < 7.3)  return ItemCatalogue.Rarity.Epic;
+                    if (r < 22.3) return ItemCatalogue.Rarity.Rare;
+                    if (r < 47.3) return ItemCatalogue.Rarity.Uncommon;
+                    if (r < 82.3) return ItemCatalogue.Rarity.Common;
+                    return null; // 17.7% no drop
+                }
+                else
+                {
+                    if (r < 0.2)  return ItemCatalogue.Rarity.Mythic;
+                    if (r < 1.5)  return ItemCatalogue.Rarity.Legendary;
+                    if (r < 5.0)  return ItemCatalogue.Rarity.Epic;
+                    if (r < 15.0) return ItemCatalogue.Rarity.Rare;
+                    if (r < 35.0) return ItemCatalogue.Rarity.Uncommon;
+                    if (r < 85.0) return ItemCatalogue.Rarity.Common;
+                    return null; // 15% no drop
+                }
+            }
+
+            // Equal chance for each item in rarity pool; null if pool empty
+            public static string? RollItem(Random rng, string rarity)
+            {
+                if (!Forest.TryGetValue(rarity, out var items) || items.Length == 0) return null;
+                return items[rng.Next(items.Length)];
+            }
+        }
+
         // ── Event system ──────────────────────────────────────────────────────
         public const double BaseEventChance     = 0.05;  // 5% per open-forest cell
         public const double LocationEventChance = 0.25;  // 25% per location cell

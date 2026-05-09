@@ -2,6 +2,28 @@ namespace HabitTracker.Constants
 {
     public static class ItemCatalogue
     {
+        // ── Rarity ───────────────────────────────────────────────────────────
+        public static class Rarity
+        {
+            public const string Common    = "Common";
+            public const string Uncommon  = "Uncommon";
+            public const string Rare      = "Rare";
+            public const string Epic      = "Epic";
+            public const string Legendary = "Legendary";
+            public const string Mythic    = "Mythic";
+
+            public static string Color(string rarity) => rarity switch
+            {
+                Common    => "#ffffff",
+                Uncommon  => "#4caf50",
+                Rare      => "#00bcd4",
+                Epic      => "#9c27b0",
+                Legendary => "#ff9800",
+                Mythic    => "#f44336",
+                _         => "#ffffff"
+            };
+        }
+
         public record ItemDef(
             string Name,
             string Icon,
@@ -9,7 +31,8 @@ namespace HabitTracker.Constants
             int    Width,
             int    Height,
             string Category,
-            string TileColor
+            string TileColor,
+            string Rarity = Rarity.Common
         );
 
         // Equipment item definition — for items that occupy a slot on the character
@@ -29,32 +52,44 @@ namespace HabitTracker.Constants
             ["bread"] = new ItemDef(
                 Name: "Bread", Icon: "🍞",
                 Description: "A hearty loaf of bread. Restores 30 HP when consumed during battle.",
-                Width: 1, Height: 1, Category: "Food", TileColor: "#7c4f1e"),
+                Width: 1, Height: 1, Category: "Food", TileColor: "#7c4f1e",
+                Rarity: Rarity.Common),
 
             ["water_bottle"] = new ItemDef(
                 Name: "Water Bottle", Icon: "🧴",
                 Description: "A full bottle of water. Allows you to flee from any battle.",
-                Width: 2, Height: 1, Category: "Utility", TileColor: "#005f6b"),
+                Width: 2, Height: 1, Category: "Utility", TileColor: "#005f6b",
+                Rarity: Rarity.Common),
 
             ["simple_backpack"] = new ItemDef(
                 Name: "Simple Backpack", Icon: "🎒",
                 Description: "A sturdy pack. Equip to unlock a 4×4 storage grid.",
-                Width: 2, Height: 2, Category: "Equipment", TileColor: "#3d2b6b"),
+                Width: 2, Height: 2, Category: "Equipment", TileColor: "#3d2b6b",
+                Rarity: Rarity.Uncommon),
 
             ["simple_armor"] = new ItemDef(
                 Name: "Simple Armor", Icon: "🛡️",
                 Description: "Light plating. Equip to reduce incoming damage by 5%.",
-                Width: 1, Height: 2, Category: "Equipment", TileColor: "#2b4a6b"),
+                Width: 1, Height: 2, Category: "Equipment", TileColor: "#2b4a6b",
+                Rarity: Rarity.Uncommon),
 
             ["simple_rig"] = new ItemDef(
                 Name: "Simple Rig", Icon: "🦺",
                 Description: "A tactical rig. Equip to unlock a 4×2 quick-access grid.",
-                Width: 2, Height: 1, Category: "Equipment", TileColor: "#6b3a2b"),
+                Width: 2, Height: 1, Category: "Equipment", TileColor: "#6b3a2b",
+                Rarity: Rarity.Uncommon),
 
             ["wood"] = new ItemDef(
                 Name: "Wood", Icon: "🪵",
                 Description: "Raw wood from the forest. Process at the hideout for crafting material.",
-                Width: 2, Height: 1, Category: "Material", TileColor: "#5a3a1a"),
+                Width: 2, Height: 1, Category: "Material", TileColor: "#5a3a1a",
+                Rarity: Rarity.Common),
+
+            ["stone"] = new ItemDef(
+                Name: "Stone", Icon: "🪨",
+                Description: "A chunk of stone from the forest. Process at the hideout for crafting material.",
+                Width: 1, Height: 1, Category: "Material", TileColor: "#6b6b6b",
+                Rarity: Rarity.Common),
         };
 
         public static readonly Dictionary<string, EquipDef> Equipment = new()

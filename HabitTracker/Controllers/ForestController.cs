@@ -3,6 +3,7 @@ using HabitTracker.Data;
 using HabitTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Text.Json;
 
 namespace HabitTracker.Controllers
@@ -17,7 +18,6 @@ namespace HabitTracker.Controllers
         // Loot screen grid sizes
         private const int BODY_COLS  = 4, BODY_ROWS  = 2;
         private const int POUCH_COLS = 4, POUCH_ROWS = 2;
-        private const double WOOD_DROP_CHANCE = 0.10;
 
         private readonly AppDbContext _context;
         public ForestController(AppDbContext context) => _context = context;
@@ -402,20 +402,18 @@ namespace HabitTracker.Controllers
                 session.PendingCombat   = false;
                 session.PlayerCurrentHP = combat.PlayerCurrentHP;
 
-                // Roll loot drop into monster body (10% wood for now)
+                // Roll loot: rarity first, then pick item from that tier's pool
                 var lootRng = new Random();
-                bool dropped = lootRng.NextDouble() < WOOD_DROP_CHANCE;
-                if (dropped)
-                {
-                    session.MonsterBody.Clear();
-                    session.MonsterBody.Add(new LootItem {
-                        ItemId = "wood", GridX = 0, GridY = 0, Rotated = false
-                    });
-                }
+                session.MonsterBody.Clear();
+                string? rolledRarity = ForestMap.LootTables.RollRarity(lootRng, combat.MonsterTier);
+                string? rolledItem   = rolledRarity != null
+                    ? ForestMap.LootTables.RollItem(lootRng, rolledRarity)
+                    : null;
+                if (rolledItem != null)
+                    session.MonsterBody.Add(new LootItem { ItemId = rolledItem, GridX = 0, GridY = 0, Rotated = false });
 
-                string lootMsg = combat.MonsterTier == "rare"
-                    ? "Greater loot (placeholder)"
-                    : (dropped ? "Found wood!" : "No loot.");
+                bool dropped = session.MonsterBody.Count > 0;
+                string lootMsg = dropped ? $"Found {rolledRarity} item: {rolledItem}!" : "No loot.";
                 session.AccumulatedLoot.Add(lootMsg);
 
                 SaveSession(session);

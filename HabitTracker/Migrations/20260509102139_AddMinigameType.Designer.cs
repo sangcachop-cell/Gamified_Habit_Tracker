@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260509102139_AddMinigameType")]
+    partial class AddMinigameType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,18 +264,6 @@ namespace HabitTracker.Migrations
                             MaxLevel = 5,
                             Name = "Storage Room",
                             StatAffected = "Storage"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            BuffDescription = "+1 craft slot per level",
-                            BuffPerLevel = 1,
-                            Description = "A crafting station for processing raw materials. Higher levels unlock more slots and recipes.",
-                            Icon = "🔨",
-                            IsActive = true,
-                            MaxLevel = 5,
-                            Name = "Workbench",
-                            StatAffected = "Crafting"
                         });
                 });
 

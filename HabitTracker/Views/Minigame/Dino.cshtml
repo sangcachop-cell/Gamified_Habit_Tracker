@@ -1,0 +1,469 @@
+@model HabitTracker.Models.Quest
+@using HabitTracker.Constants
+@using static HabitTracker.Constants.AppConstants
+@{
+    ViewData["Title"] = "Minigame — " + Model.Name;
+
+    (int s, int w, int i, int a, int e) Stats(string diff) =>
+        RpgStats.ComputeStatGains(Model.Category, diff, Model.Frequency);
+
+    var se = Stats("Easy"); var sm = Stats("Medium"); var sh = Stats("Hard");
+}
+
+<style>
+    body { background:#0a0a12; color:#e8e8f0; font-family:"DM Sans",sans-serif; min-height:100vh; }
+    .mg-wrap { max-width:680px; margin:32px auto; padding:0 16px 60px; }
+
+    .mg-header { text-align:center; margin-bottom:24px; }
+    .mg-header .q-icon { font-size:3rem; line-height:1; }
+    .mg-header h2 { font-size:1.7rem; font-weight:800; margin:8px 0 3px; letter-spacing:-.5px; }
+    .mg-header .sub { color:rgba(255,255,255,.4); font-size:.82rem; }
+
+    .diff-row { display:flex; gap:10px; margin-bottom:24px; }
+    .diff-btn {
+        flex:1; padding:14px 10px; border-radius:14px;
+        border:2px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04);
+        cursor:pointer; text-align:center;
+        transition:border-color .15s,background .15s,transform .1s;
+    }
+    .diff-btn:hover { border-color:rgba(255,255,255,.25); background:rgba(255,255,255,.07); }
+    .diff-btn.active { transform:translateY(-2px); }
+    .diff-btn.easy.active   { border-color:#4caf50; background:rgba(76,175,80,.1); }
+    .diff-btn.medium.active { border-color:#f0b429; background:rgba(240,180,41,.1); }
+    .diff-btn.hard.active   { border-color:#e8436a; background:rgba(232,67,106,.1); }
+    .diff-label  { font-weight:800; font-size:.95rem; margin-bottom:4px; }
+    .diff-rounds { font-size:.72rem; opacity:.6; margin-bottom:6px; }
+    .diff-stats  { display:flex; flex-wrap:wrap; gap:3px; justify-content:center; }
+    .ds-pill { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:50px; }
+
+    /* ── Arena ── */
+    .arena { display:none; }
+
+    .progress-bar-wrap {
+        height:8px; border-radius:4px;
+        background:rgba(255,255,255,.08);
+        margin-bottom:16px; overflow:hidden;
+    }
+    .progress-bar-fill {
+        height:100%; border-radius:4px;
+        background:linear-gradient(90deg,#4caf50,#00b89c);
+        transition:width .1s linear;
+        width:0%;
+    }
+    .progress-label {
+        display:flex; justify-content:space-between;
+        font-size:.72rem; color:rgba(255,255,255,.35);
+        margin-bottom:6px;
+    }
+
+    .canvas-container {
+        border-radius:12px; overflow:hidden;
+        border:1.5px solid rgba(255,255,255,.08);
+        margin-bottom:16px; position:relative;
+    }
+    #dino-canvas { display:block; width:100%; }
+
+    .jump-btn {
+        display:block; width:100%; padding:16px;
+        border-radius:14px;
+        border:2px solid rgba(255,255,255,.15);
+        background:rgba(255,255,255,.05);
+        color:white; font-size:1.1rem; font-weight:800;
+        cursor:pointer; text-transform:uppercase; letter-spacing:.5px;
+        transition:background .1s,border-color .1s,transform .1s;
+        margin-bottom:10px;
+    }
+    .jump-btn:hover:not(:disabled) { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.35); }
+    .jump-btn:active:not(:disabled) { transform:scale(.97); }
+    .jump-btn:disabled { opacity:.25; cursor:not-allowed; }
+    .key-hint { text-align:center; font-size:.75rem; color:rgba(255,255,255,.3); }
+
+    .result-box {
+        display:none; text-align:center;
+        padding:28px 20px; border-radius:16px; margin-top:16px;
+        animation:popIn .3s ease;
+    }
+    @@keyframes popIn { from{transform:scale(.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .result-box.success { background:rgba(76,175,80,.15);  border:1.5px solid rgba(76,175,80,.4); }
+    .result-box.fail    { background:rgba(232,67,106,.12); border:1.5px solid rgba(232,67,106,.3); }
+    .res-icon  { font-size:2.8rem; line-height:1; margin-bottom:8px; }
+    .res-title { font-size:1.3rem; font-weight:800; margin-bottom:4px; }
+    .res-sub   { font-size:.82rem; color:rgba(255,255,255,.45); }
+
+    .back-link { display:block; text-align:center; margin-top:20px; color:rgba(255,255,255,.35); text-decoration:none; font-size:.82rem; }
+    .back-link:hover { color:rgba(255,255,255,.6); }
+</style>
+
+<div class="mg-wrap">
+
+    <div class="mg-header">
+        <div class="q-icon">@Model.Icon</div>
+        <h2>@Model.Name</h2>
+        <div class="sub">@Model.Category &nbsp;·&nbsp; @Model.Frequency
+            @if (Model.AssignedFacility != null) { <span>&nbsp;·&nbsp; @Model.AssignedFacility.Icon @Model.AssignedFacility.Name</span> }
+        </div>
+    </div>
+
+    <!-- Difficulty picker -->
+    <div class="diff-row">
+        <div class="diff-btn easy" onclick="selectDiff('Easy',this)">
+            <div class="diff-label" style="color:#4caf50;">Easy</div>
+            <div class="diff-rounds">15s · +10 XP</div>
+            <div class="diff-stats">
+                @if(se.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@se.s STR</span>}
+                @if(se.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@se.w WILL</span>}
+                @if(se.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@se.i INT</span>}
+                @if(se.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@se.a AGL</span>}
+                @if(se.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@se.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn medium" onclick="selectDiff('Medium',this)">
+            <div class="diff-label" style="color:#f0b429;">Medium</div>
+            <div class="diff-rounds">25s · +25 XP</div>
+            <div class="diff-stats">
+                @if(sm.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@sm.s STR</span>}
+                @if(sm.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@sm.w WILL</span>}
+                @if(sm.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@sm.i INT</span>}
+                @if(sm.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@sm.a AGL</span>}
+                @if(sm.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@sm.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn hard" onclick="selectDiff('Hard',this)">
+            <div class="diff-label" style="color:#e8436a;">Hard</div>
+            <div class="diff-rounds">40s · +100 XP · 2× stats</div>
+            <div class="diff-stats">
+                @if(sh.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@(sh.s*2) STR</span>}
+                @if(sh.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@(sh.w*2) WILL</span>}
+                @if(sh.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@(sh.i*2) INT</span>}
+                @if(sh.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@(sh.a*2) AGL</span>}
+                @if(sh.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@(sh.e*2) END</span>}
+            </div>
+        </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="arena" id="arena">
+        <div class="progress-label">
+            <span id="prog-label">Survive: 0s</span>
+            <span id="prog-target"></span>
+        </div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="prog-fill"></div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="dino-canvas" width="640" height="160"></canvas>
+        </div>
+
+        <button class="jump-btn" id="jump-btn" onclick="doJump()" disabled>🦕 Jump!</button>
+        <div class="key-hint">SPACE or click to jump</div>
+
+        <div class="result-box" id="result-box">
+            <div class="res-icon"  id="res-icon"></div>
+            <div class="res-title" id="res-title"></div>
+            <div class="res-sub"   id="res-sub"></div>
+        </div>
+    </div>
+
+    <a href="/Hideout" class="back-link">← Back to Hideout</a>
+</div>
+
+<form id="complete-form" method="post" action="/Minigame/Complete" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="questId"    value="@Model.Id" />
+    <input type="hidden" name="difficulty" id="f-diff"    value="" />
+    <input type="hidden" name="success"    id="f-success" value="" />
+</form>
+
+@section Scripts {
+<script>
+(function () {
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const CFG = {
+    Easy:   { targetMs: 15000, baseSpeed: 300, speedGain: 8  },
+    Medium: { targetMs: 25000, baseSpeed: 340, speedGain: 12 },
+    Hard:   { targetMs: 40000, baseSpeed: 380, speedGain: 18 },
+};
+
+// Canvas
+const canvas = document.getElementById('dino-canvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const GROUND = H - 30;
+
+// Colors
+const COL = {
+    bg:       '#0d0d1a',
+    ground:   '#2a2a4a',
+    dino:     '#4caf50',
+    obstacle: '#e8436a',
+    star:     'rgba(255,255,255,0.15)',
+};
+
+// State
+let diff = null, cfg = null;
+let gameRunning = false, gameOver = false;
+let startTime = null, elapsed = 0;
+let raf = null;
+
+// Dino
+const DINO_X = 80, DINO_W = 36, DINO_H = 44;
+let dinoY = GROUND - DINO_H;
+let dinoVY = 0;
+let jumping = false;
+const GRAVITY = 1800;
+const JUMP_VY = -620;
+
+// Obstacles
+let obstacles = [];
+let nextObstacle = 0;
+let speed = 0;
+
+// Stars (background)
+const stars = Array.from({length:40}, () => ({
+    x: Math.random() * W, y: Math.random() * (GROUND - 20),
+    r: Math.random() * 1.5 + 0.5
+}));
+
+// ── Select difficulty ─────────────────────────────────────────────────────────
+window.selectDiff = function(d, el) {
+    if (gameRunning) return;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    diff = d; cfg = CFG[d];
+    document.getElementById('f-diff').value = d;
+    document.getElementById('prog-target').textContent = 'Goal: ' + (cfg.targetMs/1000) + 's';
+    initGame();
+};
+
+function initGame() {
+    gameRunning = false; gameOver = false;
+    startTime = null; elapsed = 0;
+    obstacles = []; nextObstacle = 1500;
+    speed = cfg.baseSpeed;
+    dinoY = GROUND - DINO_H; dinoVY = 0; jumping = false;
+
+    document.getElementById('arena').style.display = 'block';
+    document.getElementById('result-box').style.display = 'none';
+    document.getElementById('jump-btn').disabled = false;
+    document.getElementById('prog-fill').style.width = '0%';
+    document.getElementById('prog-label').textContent = 'Survive: 0s';
+
+    drawStatic();
+}
+
+function drawStatic() {
+    ctx.fillStyle = COL.bg;
+    ctx.fillRect(0, 0, W, H);
+    drawStars();
+    drawGround();
+    drawDino();
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = 'bold 18px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Press SPACE or Jump to start!', W/2, H/2 - 10);
+}
+
+// ── Jump ──────────────────────────────────────────────────────────────────────
+window.doJump = function() {
+    if (gameOver) return;
+    if (!gameRunning) { startGame(); return; }
+    if (!jumping) {
+        dinoVY = JUMP_VY;
+        jumping = true;
+    }
+};
+
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space') { e.preventDefault(); doJump(); }
+});
+
+function startGame() {
+    gameRunning = true;
+    startTime = performance.now();
+    raf = requestAnimationFrame(tick);
+}
+
+// ── Game loop ─────────────────────────────────────────────────────────────────
+let lastTs = null;
+function tick(ts) {
+    const dt = lastTs ? Math.min((ts - lastTs) / 1000, 0.05) : 0.016;
+    lastTs = ts;
+    elapsed = ts - startTime;
+
+    // Update speed
+    speed = cfg.baseSpeed + (elapsed / 1000) * cfg.speedGain;
+
+    // Update dino physics
+    dinoVY += GRAVITY * dt;
+    dinoY  += dinoVY  * dt;
+    if (dinoY >= GROUND - DINO_H) {
+        dinoY = GROUND - DINO_H;
+        dinoVY = 0;
+        jumping = false;
+    }
+
+    // Spawn obstacles
+    nextObstacle -= speed * dt;
+    if (nextObstacle <= 0) {
+        spawnObstacle();
+        // Gap scales: starts big, shrinks as speed increases
+        const gap = Math.max(700, 1600 - elapsed / 40);
+        nextObstacle = gap;
+    }
+
+    // Move obstacles
+    for (const ob of obstacles) ob.x -= speed * dt;
+    obstacles = obstacles.filter(ob => ob.x + ob.w > -10);
+
+    // Collision
+    for (const ob of obstacles) {
+        if (collides(ob)) {
+            endGame(false);
+            return;
+        }
+    }
+
+    // Win check
+    if (elapsed >= cfg.targetMs) {
+        endGame(true);
+        return;
+    }
+
+    // Progress
+    const pct = Math.min(100, (elapsed / cfg.targetMs) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-label').textContent = 'Survive: ' + (elapsed/1000).toFixed(1) + 's';
+
+    draw();
+    raf = requestAnimationFrame(tick);
+}
+
+function spawnObstacle() {
+    // Vary height: short or tall cactus
+    const tall = Math.random() < 0.35;
+    const h = tall ? 52 : 34;
+    const w = tall ? 22 : 28;
+    obstacles.push({ x: W + 10, w, h, y: GROUND - h });
+}
+
+function collides(ob) {
+    const pad = 6; // forgiveness padding
+    return !(DINO_X + DINO_W - pad < ob.x + pad ||
+             DINO_X + pad       > ob.x + ob.w - pad ||
+             dinoY  + DINO_H - pad < ob.y + pad ||
+             dinoY  + pad          > ob.y + ob.h - pad);
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────────────
+function draw() {
+    ctx.fillStyle = COL.bg;
+    ctx.fillRect(0, 0, W, H);
+    drawStars();
+    drawGround();
+    drawObstacles();
+    drawDino();
+}
+
+function drawStars() {
+    ctx.fillStyle = COL.star;
+    for (const s of stars) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function drawGround() {
+    ctx.fillStyle = COL.ground;
+    ctx.fillRect(0, GROUND, W, H - GROUND);
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(0, GROUND, W, 2);
+}
+
+function drawDino() {
+    const x = DINO_X, y = dinoY, w = DINO_W, h = DINO_H;
+    ctx.fillStyle = COL.dino;
+
+    // Body
+    ctx.beginPath();
+    ctx.roundRect(x, y + 10, w, h - 10, 6);
+    ctx.fill();
+
+    // Head
+    ctx.beginPath();
+    ctx.roundRect(x + w - 14, y, 18, 20, 4);
+    ctx.fill();
+
+    // Eye
+    ctx.fillStyle = '#0a0a12';
+    ctx.beginPath();
+    ctx.arc(x + w + 1, y + 7, 3, 0, Math.PI*2);
+    ctx.fill();
+
+    // Legs (animate when running)
+    const legPhase = gameRunning ? Math.sin(elapsed / 80) : 0;
+    ctx.fillStyle = COL.dino;
+    ctx.fillRect(x + 6,  y + h - 4 + (legPhase >  0 ? 4 : 0), 8, 8);
+    ctx.fillRect(x + 18, y + h - 4 + (legPhase <= 0 ? 4 : 0), 8, 8);
+}
+
+function drawObstacles() {
+    for (const ob of obstacles) {
+        ctx.fillStyle = COL.obstacle;
+        ctx.save();
+        ctx.shadowColor = COL.obstacle;
+        ctx.shadowBlur  = 8;
+        ctx.beginPath();
+        ctx.roundRect(ob.x, ob.y, ob.w, ob.h, 3);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// ── End ───────────────────────────────────────────────────────────────────────
+function endGame(success) {
+    gameRunning = false; gameOver = true;
+    cancelAnimationFrame(raf);
+    document.getElementById('jump-btn').disabled = true;
+
+    const box   = document.getElementById('result-box');
+    const icon  = document.getElementById('res-icon');
+    const title = document.getElementById('res-title');
+    const sub   = document.getElementById('res-sub');
+
+    if (success) {
+        box.className = 'result-box success';
+        icon.textContent  = '✅';
+        title.textContent = 'Survived! (' + (cfg.targetMs/1000) + 's)';
+        sub.textContent   = 'Full stats and XP awarded.';
+        document.getElementById('prog-fill').style.width = '100%';
+    } else {
+        box.className = 'result-box fail';
+        icon.textContent  = '❌';
+        title.textContent = 'Crashed! (' + (elapsed/1000).toFixed(1) + 's / ' + (cfg.targetMs/1000) + 's)';
+        sub.textContent   = '1/10 consolation rewards.';
+    }
+    box.style.display = 'block';
+
+    document.getElementById('f-success').value = success ? 'true' : 'false';
+    setTimeout(function() { document.getElementById('complete-form').submit(); }, 1800);
+}
+
+// ── Polyfill roundRect for older browsers ─────────────────────────────────────
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+        this.beginPath();
+        this.moveTo(x+r,y);
+        this.arcTo(x+w,y,x+w,y+h,r);
+        this.arcTo(x+w,y+h,x,y+h,r);
+        this.arcTo(x,y+h,x,y,r);
+        this.arcTo(x,y,x+w,y,r);
+        this.closePath();
+    };
+}
+
+})();
+</script>
+}
