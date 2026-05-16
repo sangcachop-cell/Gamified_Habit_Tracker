@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260509092245_ClearAllQuests")]
+    partial class ClearAllQuests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,18 +264,6 @@ namespace HabitTracker.Migrations
                             MaxLevel = 5,
                             Name = "Storage Room",
                             StatAffected = "Storage"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            BuffDescription = "+1 craft slot per level",
-                            BuffPerLevel = 1,
-                            Description = "A crafting station for processing raw materials. Higher levels unlock more slots and recipes.",
-                            Icon = "🔨",
-                            IsActive = true,
-                            MaxLevel = 5,
-                            Name = "Workbench",
-                            StatAffected = "Crafting"
                         });
                 });
 
@@ -402,11 +393,6 @@ namespace HabitTracker.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MinigameType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -428,38 +414,6 @@ namespace HabitTracker.Migrations
                     b.HasIndex("FacilityId");
 
                     b.ToTable("Quests");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = "Sức khỏe",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Difficulty = "Easy",
-                            FacilityId = 1,
-                            Frequency = "Daily",
-                            Icon = "🏋️",
-                            IsActive = true,
-                            MinigameType = "QTE",
-                            Name = "Tập thể dục",
-                            TimesCompleted = 0,
-                            XPReward = 10
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Category = "Sức khỏe",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Difficulty = "Easy",
-                            FacilityId = 4,
-                            Frequency = "Daily",
-                            Icon = "🏃",
-                            IsActive = true,
-                            MinigameType = "Dino",
-                            Name = "Chạy bộ",
-                            TimesCompleted = 0,
-                            XPReward = 10
-                        });
                 });
 
             modelBuilder.Entity("HabitTracker.Models.User", b =>

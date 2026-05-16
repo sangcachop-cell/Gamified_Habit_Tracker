@@ -108,6 +108,15 @@ namespace HabitTracker.Controllers
             ViewBag.Wood  = user.Wood;
             ViewBag.Stone = user.Stone;
 
+            // Workbench
+            int wbLevel = facilities.FirstOrDefault(uf => uf.FacilityId == FacilityCatalogue.WORKBENCH_FACILITY_ID)?.Level ?? 1;
+            var allStorage = await _inventory.GetItemsAsync(userId.Value, ItemCatalogue.STORAGE);
+            ViewBag.WorkbenchLevel   = wbLevel;
+            ViewBag.WorkbenchSlots   = WorkbenchCatalogue.SlotsForLevel(wbLevel);
+            ViewBag.WorkbenchRecipes = WorkbenchCatalogue.RecipesForLevel(wbLevel);
+            ViewBag.RawWoodCount     = allStorage.Count(i => i.ItemId == "wood");
+            ViewBag.RawStoneCount    = allStorage.Count(i => i.ItemId == "stone");
+
             _logger.LogInformation($"User {userId} visited hideout");
 
             return View(quests);

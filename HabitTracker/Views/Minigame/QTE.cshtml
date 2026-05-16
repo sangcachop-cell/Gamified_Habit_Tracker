@@ -1,0 +1,483 @@
+@model HabitTracker.Models.Quest
+@using HabitTracker.Constants
+@using static HabitTracker.Constants.AppConstants
+@{
+    ViewData["Title"] = "Minigame — " + Model.Name;
+
+    (int s, int w, int i, int a, int e) Stats(string diff) =>
+        RpgStats.ComputeStatGains(Model.Category, diff, Model.Frequency);
+
+    var se = Stats("Easy");
+    var sm = Stats("Medium");
+    var sh = Stats("Hard");
+}
+
+<style>
+    body { background: #0a0a12; color: #e8e8f0; font-family: "DM Sans", sans-serif; min-height: 100vh; }
+
+    .mg-wrap {
+        max-width: 560px;
+        margin: 32px auto;
+        padding: 0 16px 60px;
+    }
+
+    /* ── Header ── */
+    .mg-header { text-align: center; margin-bottom: 28px; }
+    .mg-header .q-icon { font-size: 3rem; line-height: 1; }
+    .mg-header h2 { font-size: 1.7rem; font-weight: 800; margin: 8px 0 3px; letter-spacing: -.5px; }
+    .mg-header .sub { color: rgba(255,255,255,.4); font-size: .82rem; }
+
+    /* ── Difficulty picker ── */
+    .diff-row { display: flex; gap: 10px; margin-bottom: 28px; }
+    .diff-btn {
+        flex: 1; padding: 14px 10px; border-radius: 14px;
+        border: 2px solid rgba(255,255,255,.1);
+        background: rgba(255,255,255,.04);
+        cursor: pointer; text-align: center;
+        transition: border-color .15s, background .15s, transform .1s;
+    }
+    .diff-btn:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.07); }
+    .diff-btn.active { transform: translateY(-2px); }
+    .diff-btn.easy.active   { border-color: #4caf50; background: rgba(76,175,80,.1); }
+    .diff-btn.medium.active { border-color: #f0b429; background: rgba(240,180,41,.1); }
+    .diff-btn.hard.active   { border-color: #e8436a; background: rgba(232,67,106,.1); }
+    .diff-label { font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
+    .diff-rounds { font-size: .72rem; opacity: .6; margin-bottom: 6px; }
+    .diff-stats { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+    .ds-pill { font-size: .6rem; font-weight: 700; padding: 2px 5px; border-radius: 50px; }
+
+    /* ── Arena ── */
+    .arena { display: none; }
+
+    /* Round progress */
+    .round-dots {
+        display: flex; justify-content: center; gap: 10px;
+        margin-bottom: 20px;
+    }
+    .rd {
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .75rem; font-weight: 700;
+        transition: all .25s;
+    }
+    .rd.pending { background: rgba(255,255,255,.04); color: rgba(255,255,255,.3); }
+    .rd.active  { border-color: white; background: rgba(255,255,255,.1); color: white; box-shadow: 0 0 10px rgba(255,255,255,.3); }
+    .rd.hit     { border-color: #4caf50; background: rgba(76,175,80,.2); color: #4caf50; }
+    .rd.miss    { border-color: #e8436a; background: rgba(232,67,106,.2); color: #e8436a; }
+
+    /* Canvas wrapper */
+    .canvas-wrap {
+        position: relative;
+        width: 280px; height: 280px;
+        margin: 0 auto 24px;
+    }
+    #qte-canvas { display: block; }
+
+    /* Round label inside circle */
+    .round-label {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center; pointer-events: none;
+    }
+    .rl-num  { font-size: 2rem; font-weight: 900; line-height: 1; }
+    .rl-sub  { font-size: .72rem; opacity: .5; margin-top: 3px; }
+
+    /* Strike button */
+    .strike-btn {
+        display: block; width: 100%;
+        padding: 18px;
+        border-radius: 14px;
+        border: 2px solid rgba(255,255,255,.15);
+        background: rgba(255,255,255,.05);
+        color: white; font-size: 1.15rem; font-weight: 800;
+        cursor: pointer; letter-spacing: .5px; text-transform: uppercase;
+        transition: background .1s, border-color .1s, transform .1s;
+        margin-bottom: 12px;
+    }
+    .strike-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); }
+    .strike-btn:active:not(:disabled) { transform: scale(.97); }
+    .strike-btn:disabled { opacity: .25; cursor: not-allowed; }
+
+    .key-hint { text-align: center; font-size: .75rem; color: rgba(255,255,255,.3); }
+
+    /* Result */
+    .result-box {
+        display: none; text-align: center;
+        padding: 28px 20px; border-radius: 16px; margin-top: 16px;
+        animation: popIn .3s ease;
+    }
+    @@keyframes popIn { from { transform:scale(.85);opacity:0; } to { transform:scale(1);opacity:1; } }
+    .result-box.success { background: rgba(76,175,80,.15);  border: 1.5px solid rgba(76,175,80,.4); }
+    .result-box.fail    { background: rgba(232,67,106,.12); border: 1.5px solid rgba(232,67,106,.3); }
+    .res-icon  { font-size: 2.8rem; line-height:1; margin-bottom:8px; }
+    .res-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+    .res-sub   { font-size: .82rem; color: rgba(255,255,255,.45); }
+
+    .back-link { display:block; text-align:center; margin-top:20px; color:rgba(255,255,255,.35); text-decoration:none; font-size:.82rem; }
+    .back-link:hover { color:rgba(255,255,255,.6); }
+</style>
+
+<div class="mg-wrap">
+
+    <div class="mg-header">
+        <div class="q-icon">@Model.Icon</div>
+        <h2>@Model.Name</h2>
+        <div class="sub">@Model.Category &nbsp;·&nbsp; @Model.Frequency
+            @if (Model.AssignedFacility != null) { <span>&nbsp;·&nbsp; @Model.AssignedFacility.Icon @Model.AssignedFacility.Name</span> }
+        </div>
+    </div>
+
+    <!-- Difficulty picker -->
+    <div class="diff-row" id="diff-row">
+        <div class="diff-btn easy" onclick="selectDiff('Easy',this)">
+            <div class="diff-label" style="color:#4caf50;">Easy</div>
+            <div class="diff-rounds">3 rounds · +10 XP</div>
+            <div class="diff-stats">
+                @if (se.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@se.s STR</span>}
+                @if (se.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@se.w WILL</span>}
+                @if (se.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@se.i INT</span>}
+                @if (se.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@se.a AGL</span>}
+                @if (se.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@se.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn medium" onclick="selectDiff('Medium',this)">
+            <div class="diff-label" style="color:#f0b429;">Medium</div>
+            <div class="diff-rounds">5 rounds · +25 XP</div>
+            <div class="diff-stats">
+                @if (sm.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@sm.s STR</span>}
+                @if (sm.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@sm.w WILL</span>}
+                @if (sm.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@sm.i INT</span>}
+                @if (sm.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@sm.a AGL</span>}
+                @if (sm.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@sm.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn hard" onclick="selectDiff('Hard',this)">
+            <div class="diff-label" style="color:#e8436a;">Hard</div>
+            <div class="diff-rounds">6 rounds · +100 XP · 2× stats</div>
+            <div class="diff-stats">
+                @if (sh.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@(sh.s*2) STR</span>}
+                @if (sh.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@(sh.w*2) WILL</span>}
+                @if (sh.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@(sh.i*2) INT</span>}
+                @if (sh.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@(sh.a*2) AGL</span>}
+                @if (sh.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@(sh.e*2) END</span>}
+            </div>
+        </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="arena" id="arena">
+
+        <div class="round-dots" id="round-dots"></div>
+
+        <div class="canvas-wrap">
+            <canvas id="qte-canvas" width="280" height="280"></canvas>
+            <div class="round-label" id="round-label">
+                <div class="rl-num" id="rl-num">1</div>
+                <div class="rl-sub" id="rl-sub">Round</div>
+            </div>
+        </div>
+
+        <button class="strike-btn" id="strike-btn" onclick="strike()" disabled>
+            ⚡ STRIKE!
+        </button>
+        <div class="key-hint">SPACE or click</div>
+
+        <div class="result-box" id="result-box">
+            <div class="res-icon"  id="res-icon"></div>
+            <div class="res-title" id="res-title"></div>
+            <div class="res-sub"   id="res-sub"></div>
+        </div>
+    </div>
+
+    <a href="/Hideout" class="back-link">← Back to Hideout</a>
+</div>
+
+<form id="complete-form" method="post" action="/Minigame/Complete" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="questId"    value="@Model.Id" />
+    <input type="hidden" name="difficulty" id="f-diff"    value="" />
+    <input type="hidden" name="success"    id="f-success" value="" />
+</form>
+
+@section Scripts {
+<script>
+(function () {
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const CFG = {
+    Easy:   { rounds:3, period:2800, zoneDeg:80,  speedF:0.88, zoneF:0.90 },
+    Medium: { rounds:5, period:1800, zoneDeg:55,  speedF:0.88, zoneF:0.88 },
+    Hard:   { rounds:6, period:1400, zoneDeg:45,  speedF:0.87, zoneF:0.88 },
+};
+const DIFF_COLOR  = { Easy:'#4caf50', Medium:'#f0b429', Hard:'#e8436a' };
+const BETWEEN_MS  = 2000;   // gap between rounds
+const BEEP_READY  = 800;    // ms before round starts: "ready" beep
+const BEEP_GO     = 200;    // ms before round starts: "go" beep
+
+// Canvas
+const canvas = document.getElementById('qte-canvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const CX = W/2, CY = H/2, R = 100, RING = 16;
+
+// Audio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function beep(freq, dur, vol=0.25, type='sine') {
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+
+// State
+let diff      = null, cfg = null;
+let roundIdx  = 0, hits = 0;
+let period    = 0, zoneDeg = 0, zoneStart = 0, zoneEnd = 0;
+let startTime = null, raf = null;
+let fired     = false, between = false, gameOver = false;
+
+// ── Select difficulty ─────────────────────────────────────────────────────────
+window.selectDiff = function(d, el) {
+    if (raf) cancelAnimationFrame(raf);
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    diff = d; cfg = CFG[d];
+    document.getElementById('f-diff').value = d;
+    initGame();
+};
+
+function initGame() {
+    roundIdx = 0; hits = 0; gameOver = false;
+    buildDots();
+    document.getElementById('arena').style.display = 'block';
+    document.getElementById('result-box').style.display = 'none';
+    scheduleRound();
+}
+
+// ── Round dots ────────────────────────────────────────────────────────────────
+function buildDots() {
+    const c = document.getElementById('round-dots');
+    c.innerHTML = '';
+    for (let i = 0; i < cfg.rounds; i++) {
+        const d = document.createElement('div');
+        d.className = 'rd pending'; d.id = 'rd-' + i; d.textContent = i + 1;
+        c.appendChild(d);
+    }
+}
+function setDot(i, state) {
+    const d = document.getElementById('rd-' + i);
+    if (d) d.className = 'rd ' + state;
+}
+
+// ── Countdown + beeps before each round ──────────────────────────────────────
+function scheduleRound() {
+    between = true;
+    fired   = false;
+    document.getElementById('strike-btn').disabled = true;
+
+    const delay = (roundIdx === 0) ? 600 : BETWEEN_MS;
+
+    // "Ready" beep
+    setTimeout(() => beep(440, 0.12), delay - BEEP_READY < 0 ? 0 : delay - BEEP_READY);
+    // "Go" beep (higher)
+    setTimeout(() => beep(880, 0.08), delay - BEEP_GO   < 0 ? 0 : delay - BEEP_GO);
+
+    // Count-up label during wait
+    if (roundIdx > 0) {
+        document.getElementById('rl-num').textContent = '…';
+        document.getElementById('rl-sub').textContent = 'Next round';
+    }
+
+    setTimeout(startRound, delay);
+}
+
+// ── Start round ───────────────────────────────────────────────────────────────
+function startRound() {
+    fired     = false;
+    between   = false;
+    startTime = null;
+
+    const f = Math.pow(cfg.speedF, roundIdx);
+    const z = Math.pow(cfg.zoneF,  roundIdx);
+    period  = cfg.period  * f;
+    zoneDeg = cfg.zoneDeg * z;
+
+    // Zone: random center between 20%..80% of circle to give player reaction time
+    const zoneWidth = zoneDeg / 360;
+    const center    = 0.20 + Math.random() * 0.60;
+    zoneStart = (center - zoneWidth / 2 + 1) % 1;
+    zoneEnd   = Math.min(1, center + zoneWidth / 2);
+
+    setDot(roundIdx, 'active');
+    document.getElementById('rl-num').textContent = roundIdx + 1;
+    document.getElementById('rl-sub').textContent = 'Round';
+    document.getElementById('strike-btn').disabled = false;
+    document.getElementById('strike-btn').textContent = '⚡ STRIKE!';
+
+    raf = requestAnimationFrame(tick);
+}
+
+// ── Tick — linear single pass ─────────────────────────────────────────────────
+function fracNow(ts) {
+    if (!startTime) return 0;
+    return Math.min(1, (ts - startTime) / period);
+}
+
+function fracToAngle(frac) {
+    return -Math.PI / 2 + frac * 2 * Math.PI;
+}
+
+function drawZoneArc(s, e, color) {
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, fracToAngle(s), fracToAngle(e));
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = RING;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+}
+
+function tick(ts) {
+    if (!startTime) startTime = ts;
+    const frac = fracNow(ts);
+
+    // Auto-fail: indicator completed full circle without strike
+    if (frac >= 1 && !fired) {
+        fired = true;
+        cancelAnimationFrame(raf);
+        setDot(roundIdx, 'miss');
+        flashCanvas('#e8436a');
+        beep(220, 0.3, 0.2, 'sawtooth');
+        setTimeout(() => endGame(false), 500);
+        return;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Background ring
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = RING; ctx.lineCap = 'butt';
+    ctx.stroke();
+
+    // Swept trail (how far indicator has gone)
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, fracToAngle(0), fracToAngle(frac));
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = RING; ctx.lineCap = 'butt';
+    ctx.stroke();
+
+    // Zone
+    const col = DIFF_COLOR[diff];
+    drawZoneArc(zoneStart, zoneEnd, col + '44');
+    ctx.save();
+    ctx.shadowColor = col; ctx.shadowBlur = 14;
+    drawZoneArc(zoneStart, zoneEnd, col + 'bb');
+    ctx.restore();
+
+    // Indicator dot + trail
+    const angle = fracToAngle(frac);
+    const ix = CX + R * Math.cos(angle);
+    const iy = CY + R * Math.sin(angle);
+
+    for (let t = 1; t <= 6; t++) {
+        const tf = Math.max(0, frac - t * 0.015);
+        const ta = fracToAngle(tf);
+        ctx.beginPath();
+        ctx.arc(CX + R * Math.cos(ta), CY + R * Math.sin(ta), 4 - t * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.10 - t * 0.012})`;
+        ctx.fill();
+    }
+
+    ctx.save();
+    ctx.shadowColor = 'white'; ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(ix, iy, 8, 0, Math.PI * 2);
+    ctx.fillStyle = 'white'; ctx.fill();
+    ctx.restore();
+
+    if (!fired) raf = requestAnimationFrame(tick);
+}
+
+// ── Strike ────────────────────────────────────────────────────────────────────
+window.strike = function() {
+    if (fired || between || gameOver) return;
+    fired = true;
+    cancelAnimationFrame(raf);
+    document.getElementById('strike-btn').disabled = true;
+
+    const frac   = fracNow(performance.now());
+    const inZone = frac >= zoneStart && frac <= zoneEnd;
+
+    if (inZone) {
+        hits++;
+        setDot(roundIdx, 'hit');
+        flashCanvas('#4caf50');
+        beep(660, 0.15, 0.2);
+        roundIdx++;
+        if (roundIdx >= cfg.rounds) {
+            setTimeout(() => endGame(true), 400);
+        } else {
+            scheduleRound();
+        }
+    } else {
+        setDot(roundIdx, 'miss');
+        flashCanvas('#e8436a');
+        beep(220, 0.3, 0.2, 'sawtooth');
+        setTimeout(() => endGame(false), 500);
+    }
+};
+
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && !fired && !between && !gameOver) {
+        e.preventDefault(); strike();
+    }
+});
+
+function flashCanvas(color) {
+    ctx.save();
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(CX, CY, R + RING, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+// ── End game ──────────────────────────────────────────────────────────────────
+function endGame(success) {
+    gameOver = true;
+    cancelAnimationFrame(raf);
+
+    const box   = document.getElementById('result-box');
+    const icon  = document.getElementById('res-icon');
+    const title = document.getElementById('res-title');
+    const sub   = document.getElementById('res-sub');
+
+    if (success) {
+        box.className    = 'result-box success';
+        icon.textContent = '✅';
+        title.textContent = 'Complete! (' + hits + '/' + cfg.rounds + ')';
+        sub.textContent  = 'Full stats and XP awarded.';
+    } else {
+        box.className    = 'result-box fail';
+        icon.textContent = '❌';
+        title.textContent = 'Failed! (' + hits + '/' + cfg.rounds + ')';
+        sub.textContent  = '1/10 consolation rewards.';
+    }
+    box.style.display = 'block';
+
+    document.getElementById('f-success').value = success ? 'true' : 'false';
+
+    setTimeout(function() {
+        document.getElementById('complete-form').submit();
+    }, 1800);
+}
+
+})();
+</script>
+}
