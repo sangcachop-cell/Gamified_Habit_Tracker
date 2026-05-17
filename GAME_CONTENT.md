@@ -20,7 +20,7 @@
 |----|------|-------|------|--------|------|--------|
 | `simple_backpack` | Simple Backpack | 🎒 | 2×2 | Uncommon | BackpackSlot | Unlocks 4×4 storage grid |
 | `simple_armor` | Simple Armor | 🛡️ | 1×2 | Uncommon | ArmorSlot | 5% incoming damage reduction |
-| `simple_rig` | Simple Rig | 🦺 | 2×1 | Uncommon | RigSlot | Unlocks 4×2 quick-access grid |
+| `simple_rig` | Simple Rig | 🦺 | 2×1 | Uncommon | RigSlot | Unlocks 4 tall slots (W=1,H=2 each); only 1×2 items allowed; rotation blocked if violates constraint |
 
 ### Food ⚠️ defined, consume logic NOT implemented
 | ID | Name | Asset | Size | Rarity | Intended Effect |
@@ -32,11 +32,11 @@
 |----|------|-------|------|--------|-----------------|
 | `water_bottle` | Water Bottle | 🧴 | 2×1 | Common | Flee from battle (flee system disabled) |
 
-### Material ⚠️ drops + stores, craft system pending
+### Material ✅ drops + stores; instant craft implemented; timer pending
 | ID | Name | Asset | Size | Rarity | Notes |
 |----|------|-------|------|--------|-------|
-| `wood` | Wood | 🪵 | 2×1 | Common | Forest loot pool (Common tier); process at Hideout (TODO) |
-| `stone` | Stone | 🪨 | 1×1 | Common | Forest loot pool (Common tier); process at Hideout (TODO) |
+| `wood` | Wood | 🪵 | 2×1 | Common | Forest loot (Common tier); craft 1 raw → +10 User.Wood (instant) |
+| `stone` | Stone | 🪨 | 1×1 | Common | Forest loot (Common tier); craft 1 raw → +10 User.Stone (instant) |
 
 ---
 
@@ -87,23 +87,34 @@ Mult: common = 1.0, rare = 1.6
 
 ## Quests
 
-### Hideout Facilities
-| ID | Name | Asset | Buff |
-|----|------|-------|------|
-| 1 | Training Grounds | 🏋️ | +5 ATK per level |
-| 2 | Meditation Hall | 🧘 | +20 HP per level |
-| 3 | Archive | 📚 | +2% XP Gain per level |
-| 4 | Agility Course | 🏃 | +10 Stamina per level |
-| 5 | Barracks | 🛡️ | +5 Armor per level |
-| 6 | Storage Room | 📦 | +3 storage rows per level |
+### Hideout Facilities (seeded in DB — IDs 1–7)
+| ID | Name | Asset | Stat | Buff | Max Level |
+|----|------|-------|------|------|-----------|
+| 1 | Training Grounds | 🏋️ | ATK | +5 ATK/level | 5 |
+| 2 | Meditation Hall | 🧘 | HP | +20 HP/level | 5 |
+| 3 | Archive | 📚 | XPGain | +2% XP/level | 5 |
+| 4 | Agility Course | 🏃 | Stamina | +10 Stamina/level | 5 |
+| 5 | Barracks | 🛡️ | Armor | +5 Armor/level | 5 |
+| 6 | Storage Room | 📦 | Storage | +30 slots/level (10×3 rows) | 5 |
+| 7 | Workbench | 🔨 | Crafting | +1 craft slot/level | 5 |
+
+Upgrade cost: Wood + Stone (amounts TBD — upgrade endpoint is placeholder).
+
+### Workbench Recipes ✅ instant craft (timer defined in catalogue but NOT yet wired)
+| Recipe ID | Name | Input | Output | Craft Time (future) | Min Level |
+|-----------|------|-------|--------|---------------------|-----------|
+| `wood_to_material` | Process Wood | 1× raw Wood | +10 User.Wood | 2 hrs | 1 |
+| `stone_to_material` | Process Stone | 1× raw Stone | +10 User.Stone | 2 hrs | 1 |
+
+Slots available: `1 + workbench_level` (Lv1=2, Lv2=3, …)
+
+### Quest Cards (seeded — Minigame cooldown currently DISABLED for testing)
+| ID | Name | Asset | Category | Frequency | XP (E/M/H) | Facility | Minigame | Stat Gains |
+|----|------|-------|----------|-----------|------------|----------|----------|------------|
+| 1 | Tập thể dục | 🏋️ | Sức khỏe | Daily | 10/25/50 | Training Grounds | QTE circle | STR+2/3/4, AGL+2, END+1/1/2 |
+| 2 | Chạy bộ | 🏃 | Sức khỏe | Daily | 10/25/100 | Agility Course | Dino runner (15s/25s/40s) | STR+2/3/4, AGL+2/2/4, END+1/1/4 |
 
 Stat formula: category base + difficulty bonus to primary stat + Hard→+1 END + Daily→+1 END + always +1 AGL
-
-### Sức khỏe — base: STR+2, AGL+1
-| ID | Name | Asset | Frequency | XP (E/M/H) | Hideout | Minigame | STR | WILL | INT | AGL | END |
-|----|------|-------|-----------|------------|---------|----------|-----|------|-----|-----|-----|
-| 1 | Tập thể dục | 🏋️ | Daily | 10/25/50 | 🏋️ Training Grounds | QTE | +2/3/4 | — | — | +2 | +1/1/2 |
-| 2 | Chạy bộ | 🏃 | Daily | 10/25/100 | 🏃 Agility Course | Dino (survive 15s/25s/40s) | +2/3/4 | — | — | +2/2/4 | +1/1/4 |
 
 ---
 
@@ -111,8 +122,11 @@ Stat formula: category base + difficulty bonus to primary stat + Hard→+1 END +
 
 | Type | Total | Working | Placeholder |
 |------|-------|---------|-------------|
-| Items | 7 | 3 | 4 |
+| Items | 7 | 3 equip + 2 material (craft) | 2 (bread, water_bottle) |
 | Monsters | 2 | 2 | 0 |
 | Bosses | 0 | — | — |
-| Currencies | 0 | — | — |
 | Map Zones | 3 | 3 | 0 |
+| Facilities | 7 | 6 (stat buff) + 1 (workbench) | 0 |
+| Quest Cards | 2 | 2 | 0 |
+| Craft Recipes | 2 | 2 (instant) | 0 (timer pending) |
+| Loot Tiers | 2 | Common only | Uncommon–Mythic pools empty |

@@ -42,16 +42,20 @@
 
 <style>
     :root {
-        --ink:    #0a0a12;
-        --paper:  #f5f3ef;
-        --gold:   #f0b429;
-        --violet: #5c3dde;
-        --rose:   #e8436a;
-        --teal:   #00b89c;
-        --soft:   #edeaf5;
+        --ink:       #110d22;
+        --paper:     #0d0a1a;
+        --gold:      #c9a84c;
+        --gold-light:#f0c878;
+        --violet:    #7c3aed;
+        --rose:      #b91c1c;
+        --teal:      #0e7490;
+        --soft:      #1e1535;
+        --text:      #e8dfc8;
+        --text-muted:#8b7fa8;
+        --border:    #2d1f4e;
     }
-    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
-    h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
+    body { background: var(--paper); font-family: "Crimson Pro","DM Sans",serif; color: var(--text); }
+    h1,h2,h3,h4,h5 { font-family: "Cinzel","Syne",serif; }
 
     /* ── HERO CARD ── */
     .char-hero {
@@ -105,20 +109,33 @@
         transition: width .6s ease;
     }
 
+    /* ── HERO CARD updated colors ── */
+    .char-hero {
+        background: linear-gradient(135deg, #0a0818, #110d22) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(201,168,76,0.1) !important;
+    }
+    .char-hero::before {
+        background: radial-gradient(circle, rgba(124,58,237,.3) 0%, transparent 70%) !important;
+    }
+
     /* ── STAT CARD ── */
     .stat-panel {
-        background: white;
+        background: #16112a;
+        border: 1px solid var(--border);
         border-radius: 20px;
         padding: 24px 28px;
-        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        box-shadow: 0 4px 24px rgba(0,0,0,.3);
         height: 100%;
+        color: var(--text);
     }
     .stat-panel-title {
-        font-size: .7rem;
-        font-weight: 700;
-        letter-spacing: .1em;
+        font-family: "Cinzel",serif;
+        font-size: .65rem;
+        font-weight: 600;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        color: #999;
+        color: var(--text-muted);
         margin-bottom: 18px;
     }
 
@@ -134,9 +151,9 @@
         font-size: 1.2rem;
         flex-shrink: 0;
     }
-    .base-stat-label { font-weight: 700; font-size: .82rem; color: #555; min-width: 36px; }
-    .base-stat-val   { font-weight: 800; font-size: 1.1rem; color: var(--ink); min-width: 32px; text-align: right; }
-    .base-stat-bar   { flex: 1; height: 8px; background: #eee; border-radius: 50px; overflow: hidden; }
+    .base-stat-label { font-family: "Cinzel",serif; font-weight: 600; font-size: .72rem; color: var(--text-muted); min-width: 36px; letter-spacing: 1px; }
+    .base-stat-val   { font-weight: 800; font-size: 1.1rem; color: var(--gold-light); min-width: 32px; text-align: right; }
+    .base-stat-bar   { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 50px; overflow: hidden; }
     .base-stat-fill  { height: 100%; border-radius: 50px; transition: width .5s ease; }
 
     /* ── DERIVED STAT TILE ── */
@@ -146,15 +163,16 @@
         gap: 16px;
     }
     .derived-tile {
-        background: var(--soft);
+        background: #1e1535;
+        border: 1px solid var(--border);
         border-radius: 16px;
         padding: 18px 20px;
         display: flex; flex-direction: column; gap: 4px;
     }
     .derived-tile-icon { font-size: 1.6rem; line-height: 1; }
-    .derived-tile-val  { font-size: 1.5rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
-    .derived-tile-name { font-size: .75rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; }
-    .derived-tile-formula { font-size: .7rem; color: #aaa; margin-top: 2px; }
+    .derived-tile-val  { font-size: 1.5rem; font-weight: 800; color: var(--gold-light); line-height: 1.1; }
+    .derived-tile-name { font-family: "Cinzel",serif; font-size: .65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; }
+    .derived-tile-formula { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
 </style>
 
 <!-- ── HERO ── -->

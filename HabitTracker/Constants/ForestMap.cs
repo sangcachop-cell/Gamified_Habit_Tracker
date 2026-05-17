@@ -146,5 +146,94 @@ namespace HabitTracker.Constants
         // "common" in open forest, "rare" inside named locations
         public static string GetEventTier(int x, int y) =>
             GetZone(x, y) != null ? "rare" : "common";
+
+        // ── Location interior sub-maps (64×64) ───────────────────────────────
+        public record ExitZone(int X, int Y, int W, int H, string Label);
+        public record ChestPos(int X, int Y);
+
+        public record LocationInterior(
+            string     Id,
+            string     Name,
+            int        Width,           // 64
+            int        Height,          // 64
+            int        Border,          // impassable edge width (cells)
+            double     EventChancePct,  // per-step combat probability
+            string[]   TerrainColors,   // 7 hex strings; index = (x*13+y*7)%7
+            ExitZone[] Exits,
+            ChestPos[] Chests
+        );
+
+        public static readonly LocationInterior[] Interiors =
+        {
+            // Cave — dark stone, wet rock, moss patches
+            new("cave", "Cave", 64, 64, Border: 2, EventChancePct: 0.40,
+                TerrainColors: new[] {
+                    "#2a2a2a", // v=0 dark stone
+                    "#1e1e1e", // v=1 black rock
+                    "#303030", // v=2 mid grey stone
+                    "#383228", // v=3 mossy dark
+                    "#2e2e2e", // v=4 stone
+                    "#252520", // v=5 dark with hint of green
+                    "#3a3530", // v=6 warmer stone
+                },
+                // Exits at first/last passable row/col (border=2 → passable starts at 2, ends at 61)
+                Exits: new ExitZone[] {
+                    new(28,  2, 8, 2, "Cave Exit — North"),  // y=2..3
+                    new( 2, 28, 2, 8, "Cave Exit — West"),   // x=2..3
+                    new(60, 28, 2, 8, "Cave Exit — East"),   // x=60..61
+                },
+                Chests: new ChestPos[] { new(18, 20), new(42, 38), new(10, 50) }),
+
+            // Warehouse — worn wood/concrete floor
+            new("warehouse", "Warehouse", 64, 64, Border: 2, EventChancePct: 0.35,
+                TerrainColors: new[] {
+                    "#5a4a3a", // v=0 worn wood floor
+                    "#4a3a2a", // v=1 dark plank
+                    "#6b5a40", // v=2 lighter plank
+                    "#4e4238", // v=3 stained concrete
+                    "#5c5040", // v=4 concrete mid
+                    "#625040", // v=5 dusty floor
+                    "#4a3e30", // v=6 very dark plank
+                },
+                Exits: new ExitZone[] {
+                    new(28,  2, 8, 2, "Warehouse Exit — North"),  // y=2..3
+                    new(28, 60, 8, 2, "Warehouse Exit — South"),  // y=60..61
+                    new( 2, 28, 2, 8, "Warehouse Exit — West"),   // x=2..3
+                },
+                Chests: new ChestPos[] { new(10, 12), new(50, 14), new(32, 48) }),
+
+            // Lake — shallow water, reeds, dark pools
+            new("lake", "Lake", 64, 64, Border: 2, EventChancePct: 0.45,
+                TerrainColors: new[] {
+                    "#2a4a5a", // v=0 shallow water
+                    "#1e3a50", // v=1 deeper water
+                    "#3a5a6a", // v=2 pool edge
+                    "#4a6a50", // v=3 reeds/moss
+                    "#2a5060", // v=4 water mid
+                    "#1c3848", // v=5 dark deep
+                    "#3a5a48", // v=6 wet mud/reed
+                },
+                Exits: new ExitZone[] {
+                    new(28,  2, 8, 2, "Lake Exit — North"),  // y=2..3
+                    new(28, 60, 8, 2, "Lake Exit — South"),  // y=60..61
+                    new(60, 28, 2, 8, "Lake Exit — East"),   // x=60..61
+                },
+                Chests: new ChestPos[] { new(15, 30), new(48, 18), new(30, 52) }),
+        };
+
+        public static LocationInterior? GetInterior(string id) =>
+            Array.Find(Interiors, i => i.Id == id);
+
+        public static bool IsInteriorWater(LocationInterior map, int x, int y) =>
+            x < map.Border || y < map.Border ||
+            x >= map.Width  - map.Border ||
+            y >= map.Height - map.Border;
+
+        public static (int x, int y) InteriorSpawn(LocationInterior map) =>
+            (map.Width / 2, map.Height / 2);
+
+        public static ExitZone? GetExitZone(LocationInterior map, int x, int y) =>
+            Array.Find(map.Exits, ez => x >= ez.X && x < ez.X + ez.W &&
+                                        y >= ez.Y && y < ez.Y + ez.H);
     }
 }

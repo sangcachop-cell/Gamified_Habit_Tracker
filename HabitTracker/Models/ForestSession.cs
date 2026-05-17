@@ -25,13 +25,28 @@ namespace HabitTracker.Models
 
         // Remaining path cells [[x,y],...] after a mid-path combat — offered to player on return to map
         public List<int[]>? PendingPath { get; set; } = null;
+
+        // Steps walked since last combat trigger — pity system gates next encounter
+        // Initialized to the minimum so there's no forced grace period at run start
+        public int StepsSinceLastCombat { get; set; } = 10;
+
+        // ── Interior sub-map state ────────────────────────────────────────────
+        // null = player is on the main 128×128 world map
+        // "cave"|"warehouse"|"lake" = player is inside a location's 64×64 interior
+        public string? CurrentMapId  { get; set; } = null;
+        public int     WorldReturnX  { get; set; } = 0;   // world position to restore on ExitLocation
+        public int     WorldReturnY  { get; set; } = 0;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public bool IsInInterior => CurrentMapId != null;
     }
 
     public class LootItem
     {
-        public string ItemId  { get; set; } = "";
-        public int    GridX   { get; set; }
-        public int    GridY   { get; set; }
-        public bool   Rotated { get; set; }
+        public string ItemId    { get; set; } = "";
+        public int    GridX     { get; set; }
+        public int    GridY     { get; set; }
+        public bool   Rotated   { get; set; }
+        public string Container { get; set; } = ""; // set when item is in Pouch
     }
 }

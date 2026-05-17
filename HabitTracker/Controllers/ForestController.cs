@@ -14,6 +14,7 @@ namespace HabitTracker.Controllers
         private const string SESSION_KEY = "ForestSession";
         private const string COMBAT_KEY  = "ForestCombat";
         private const int    MIA_LIMIT   = 5000;
+        private const int    MIN_STEPS_BETWEEN_COMBAT = 10; // pity: guaranteed safe steps after each encounter
 
         // Loot screen grid sizes
         private const int BODY_COLS  = 4, BODY_ROWS  = 2;
@@ -78,7 +79,7 @@ namespace HabitTracker.Controllers
             if (session.PendingCombat)
                 return RedirectToAction(nameof(Combat));
 
-            // Equipped inventory for inline panel
+            // Shared: equipped inventory for inline panel (runs for both world and interior)
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
             var pocketItems = await _context.UserInventoryItems
                 .Where(i => i.UserId == userId && i.ContainerType == ItemCatalogue.BACKPACK).ToListAsync();
@@ -98,6 +99,40 @@ namespace HabitTracker.Controllers
             ViewBag.RigItems      = BuildPlacedLoot(rigItems);
             ViewBag.HasBackpack   = user?.EquippedBackpackItem != null;
             ViewBag.HasRig        = user?.EquippedRigItem != null;
+
+            // Interior sub-map branch
+            if (session.IsInInterior)
+            {
+                var interior = ForestMap.GetInterior(session.CurrentMapId!);
+                if (interior == null)
+                {
+                    // Corrupted state — silently fall back to world map
+                    session.CurrentMapId = null;
+                    SaveSession(session);
+                }
+                else
+                {
+                    ViewBag.MapMode        = "interior";
+                    ViewBag.MapW           = interior.Width;
+                    ViewBag.MapH           = interior.Height;
+                    ViewBag.WaterBorder    = interior.Border;
+                    ViewBag.InteriorId     = interior.Id;
+                    ViewBag.InteriorName   = interior.Name;
+                    ViewBag.ExitZones      = interior.Exits;
+                    ViewBag.ChestPositions = interior.Chests;
+                    ViewBag.TerrainColors  = interior.TerrainColors;
+                    return View();
+                }
+            }
+
+            // World map
+            ViewBag.MapMode        = "world";
+            ViewBag.MapW           = ForestMap.WIDTH;
+            ViewBag.MapH           = ForestMap.HEIGHT;
+            ViewBag.WaterBorder    = ForestMap.WATER_BORDER;
+            ViewBag.ExitZones      = Array.Empty<ForestMap.ExitZone>();
+            ViewBag.ChestPositions = Array.Empty<ForestMap.ChestPos>();
+            ViewBag.TerrainColors  = (string[]?)null;
             return View();
         }
 
@@ -112,6 +147,10 @@ namespace HabitTracker.Controllers
             var session = LoadSession();
             if (session == null || !session.IsActive)
                 return Json(new { ok = false, error = "No active session" });
+
+            // Route to interior move handler if player is inside a location
+            if (session.IsInInterior)
+                return MoveInterior(session, req);
 
             int tx = req.X, ty = req.Y;
 
@@ -163,9 +202,12 @@ namespace HabitTracker.Controllers
                             x = cell.X, y = cell.Y, moves = session.MovesSpent });
                     }
 
-                    // Combat event check — stop here
-                    if (rng.NextDouble() < ForestMap.GetEventChance(cell.X, cell.Y))
+                    // Combat event check — gated by pity counter
+                    session.StepsSinceLastCombat++;
+                    if (session.StepsSinceLastCombat >= MIN_STEPS_BETWEEN_COMBAT &&
+                        rng.NextDouble() < ForestMap.GetEventChance(cell.X, cell.Y))
                     {
+                        session.StepsSinceLastCombat = 0;
                         session.PlayerX           = cell.X;
                         session.PlayerY           = cell.Y;
                         session.MovesSpent        += stepsSoFar;
@@ -197,14 +239,17 @@ namespace HabitTracker.Controllers
 
                 var zone    = ForestMap.GetZone(tx, ty);
                 var extract = ForestMap.GetExtract(tx, ty);
-                bool canExtract = extract != null && extract.Id == session.RequiredExtractId;
+                bool canExtract        = extract != null && extract.Id == session.RequiredExtractId;
+                bool canEnterLocation  = zone != null;
+                string? enterLocationId = zone?.Id;
 
                 return Json(new {
                     ok = true,
                     x = session.PlayerX, y = session.PlayerY,
                     moves = session.MovesSpent, dist,
-                    zoneName = zone?.Name, zoneDesc = zone?.Description,
-                    canExtract, extractId = extract?.Id
+                    zoneName = zone?.Name, zoneDesc = zone?.Description, zoneIcon = zone?.Icon,
+                    canExtract, extractId = extract?.Id,
+                    canEnterLocation, enterLocationId
                 });
             }
             else
@@ -223,13 +268,16 @@ namespace HabitTracker.Controllers
                         x = tx, y = ty, moves = session.MovesSpent });
                 }
 
-                if (rng.NextDouble() < ForestMap.GetEventChance(tx, ty))
+                session.StepsSinceLastCombat++;
+                if (session.StepsSinceLastCombat >= MIN_STEPS_BETWEEN_COMBAT &&
+                    rng.NextDouble() < ForestMap.GetEventChance(tx, ty))
                 {
+                    session.StepsSinceLastCombat = 0;
                     session.PlayerX           = tx; session.PlayerY = ty;
                     session.MovesSpent        += 1;
                     session.PendingCombat      = true;
                     session.PendingMonsterTier = ForestMap.GetEventTier(tx, ty);
-                    session.PendingPath        = null; // no remaining path for single step
+                    session.PendingPath        = null;
                     SaveSession(session);
                     return Json(new {
                         ok = true, combatTriggered = true,
@@ -244,14 +292,17 @@ namespace HabitTracker.Controllers
 
                 var zone    = ForestMap.GetZone(tx, ty);
                 var extract = ForestMap.GetExtract(tx, ty);
-                bool canExtract = extract != null && extract.Id == session.RequiredExtractId;
+                bool canExtract        = extract != null && extract.Id == session.RequiredExtractId;
+                bool canEnterLocation  = zone != null;
+                string? enterLocationId = zone?.Id;
 
                 return Json(new {
                     ok = true,
                     x = session.PlayerX, y = session.PlayerY,
                     moves = session.MovesSpent, dist = 1,
-                    zoneName = zone?.Name, zoneDesc = zone?.Description,
-                    canExtract, extractId = extract?.Id
+                    zoneName = zone?.Name, zoneDesc = zone?.Description, zoneIcon = zone?.Icon,
+                    canExtract, extractId = extract?.Id,
+                    canEnterLocation, enterLocationId
                 });
             }
         }
@@ -592,11 +643,247 @@ namespace HabitTracker.Controllers
             return View();
         }
 
+        // ── EnterLocation ─────────────────────────────────────────────────────
+
+        [HttpPost("EnterLocation")]
+        [ValidateAntiForgeryToken]
+        public IActionResult EnterLocation([FromForm] string locationId)
+        {
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            var session = LoadSession();
+            if (session == null || !session.IsActive || session.IsInInterior)
+                return RedirectToAction(nameof(Map));
+
+            // Validate player is standing inside the named zone
+            var zone = ForestMap.GetZone(session.PlayerX, session.PlayerY);
+            if (zone == null || zone.Id != locationId)
+            {
+                TempData["ForestError"] = "You must be inside the location to enter it.";
+                return RedirectToAction(nameof(Map));
+            }
+
+            var interior = ForestMap.GetInterior(locationId);
+            if (interior == null)
+            {
+                TempData["ForestError"] = "Unknown location.";
+                return RedirectToAction(nameof(Map));
+            }
+
+            // Save world return position, transition to interior
+            session.WorldReturnX = session.PlayerX;
+            session.WorldReturnY = session.PlayerY;
+            session.CurrentMapId = locationId;
+
+            // Spawn player at interior center
+            var (sx, sy)    = ForestMap.InteriorSpawn(interior);
+            session.PlayerX = sx;
+            session.PlayerY = sy;
+
+            // World paths are meaningless inside — clear them
+            session.PendingPath = null;
+
+            // Reset pity so player gets safe steps on entry
+            session.StepsSinceLastCombat = 0;
+
+            SaveSession(session);
+            return RedirectToAction(nameof(Map));
+        }
+
+        // ── ExitLocation ──────────────────────────────────────────────────────
+
+        [HttpPost("ExitLocation")]
+        [ValidateAntiForgeryToken]
+        public IActionResult ExitLocation()
+        {
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            var session = LoadSession();
+            if (session == null || !session.IsActive || !session.IsInInterior)
+                return RedirectToAction(nameof(Map));
+
+            var interior = ForestMap.GetInterior(session.CurrentMapId!);
+            if (interior != null)
+            {
+                // Server-side guard: player must be on an exit zone
+                var exit = ForestMap.GetExitZone(interior, session.PlayerX, session.PlayerY);
+                if (exit == null)
+                {
+                    TempData["ForestError"] = "You must reach an exit zone to leave.";
+                    return RedirectToAction(nameof(Map));
+                }
+            }
+
+            // Restore world position
+            session.PlayerX      = session.WorldReturnX;
+            session.PlayerY      = session.WorldReturnY;
+            session.CurrentMapId = null;
+            session.WorldReturnX = 0;
+            session.WorldReturnY = 0;
+            session.PendingPath  = null;
+
+            SaveSession(session);
+            return RedirectToAction(nameof(Map));
+        }
+
+        // ── MoveInterior (private) ────────────────────────────────────────────
+
+        private IActionResult MoveInterior(ForestSession session, MoveRequest req)
+        {
+            var interior = ForestMap.GetInterior(session.CurrentMapId!);
+            if (interior == null)
+                return Json(new { ok = false, error = "Interior not found" });
+
+            int tx = req.X, ty = req.Y;
+
+            if (tx < 0 || ty < 0 || tx >= interior.Width || ty >= interior.Height)
+                return Json(new { ok = false, error = "Out of bounds" });
+            if (ForestMap.IsInteriorWater(interior, tx, ty))
+                return Json(new { ok = false, error = "Cannot enter here" });
+
+            var rng = new Random();
+
+            if (req.Path is { Count: > 1 })
+            {
+                // Validate path against interior bounds
+                for (int i = 1; i < req.Path.Count; i++)
+                {
+                    var prev = req.Path[i - 1];
+                    var curr = req.Path[i];
+                    if (Math.Abs(curr.X - prev.X) > 1 || Math.Abs(curr.Y - prev.Y) > 1)
+                        return Json(new { ok = false, error = "Invalid path: non-adjacent step" });
+                    if (ForestMap.IsInteriorWater(interior, curr.X, curr.Y))
+                        return Json(new { ok = false, error = "Invalid path: enters impassable area" });
+                }
+                var last = req.Path[^1];
+                if (last.X != tx || last.Y != ty)
+                    return Json(new { ok = false, error = "Path end mismatch" });
+
+                var pathArr = req.Path.ToArray();
+
+                int stepsSoFar = 0;
+                for (int si = 1; si < pathArr.Length; si++)
+                {
+                    var cell = pathArr[si];
+                    stepsSoFar++;
+
+                    // MIA check (shared counter)
+                    if (session.MovesSpent + stepsSoFar > MIA_LIMIT)
+                    {
+                        session.PlayerX    = cell.X;
+                        session.PlayerY    = cell.Y;
+                        session.MovesSpent += stepsSoFar;
+                        session.IsActive   = false;
+                        session.AccumulatedLoot.Clear();
+                        session.MonsterBody.Clear();
+                        session.Pouch.Clear();
+                        session.PendingPath  = null;
+                        session.CurrentMapId = null;
+                        SaveSession(session);
+                        return Json(new { ok = true, mia = true,
+                            x = cell.X, y = cell.Y, moves = session.MovesSpent });
+                    }
+
+                    // Combat event — always "rare" tier inside locations, gated by pity
+                    session.StepsSinceLastCombat++;
+                    if (session.StepsSinceLastCombat >= MIN_STEPS_BETWEEN_COMBAT &&
+                        rng.NextDouble() < interior.EventChancePct)
+                    {
+                        session.StepsSinceLastCombat = 0;
+                        session.PlayerX           = cell.X;
+                        session.PlayerY           = cell.Y;
+                        session.MovesSpent        += stepsSoFar;
+                        session.PendingCombat      = true;
+                        session.PendingMonsterTier = "rare";
+                        session.PendingPath        = pathArr[si..]
+                            .Select(c => new[] { c.X, c.Y }).ToList();
+                        SaveSession(session);
+                        return Json(new {
+                            ok = true, combatTriggered = true,
+                            monsterTier = "rare",
+                            x = cell.X, y = cell.Y,
+                            moves = session.MovesSpent, dist = stepsSoFar
+                        });
+                    }
+                }
+
+                // Reached destination
+                int dist = req.Path.Count - 1;
+                session.PlayerX    = tx;
+                session.PlayerY    = ty;
+                session.MovesSpent += dist;
+                SaveSession(session);
+
+                var exitZone = ForestMap.GetExitZone(interior, tx, ty);
+                bool canExit = exitZone != null;
+
+                return Json(new {
+                    ok = true,
+                    x = session.PlayerX, y = session.PlayerY,
+                    moves = session.MovesSpent, dist,
+                    canExit, exitLabel = exitZone?.Label,
+                    canExtract = false
+                });
+            }
+            else
+            {
+                // Single-step (WASD)
+                if (session.MovesSpent + 1 > MIA_LIMIT)
+                {
+                    session.PlayerX    = tx; session.PlayerY = ty;
+                    session.MovesSpent += 1;
+                    session.IsActive   = false;
+                    session.AccumulatedLoot.Clear();
+                    session.MonsterBody.Clear();
+                    session.Pouch.Clear();
+                    session.CurrentMapId = null;
+                    SaveSession(session);
+                    return Json(new { ok = true, mia = true,
+                        x = tx, y = ty, moves = session.MovesSpent });
+                }
+
+                session.StepsSinceLastCombat++;
+                if (session.StepsSinceLastCombat >= MIN_STEPS_BETWEEN_COMBAT &&
+                    rng.NextDouble() < interior.EventChancePct)
+                {
+                    session.StepsSinceLastCombat = 0;
+                    session.PlayerX           = tx; session.PlayerY = ty;
+                    session.MovesSpent        += 1;
+                    session.PendingCombat      = true;
+                    session.PendingMonsterTier = "rare";
+                    session.PendingPath        = null;
+                    SaveSession(session);
+                    return Json(new {
+                        ok = true, combatTriggered = true,
+                        monsterTier = "rare",
+                        x = tx, y = ty, moves = session.MovesSpent, dist = 1
+                    });
+                }
+
+                session.PlayerX = tx; session.PlayerY = ty;
+                session.MovesSpent += 1;
+                SaveSession(session);
+
+                var exitZone = ForestMap.GetExitZone(interior, tx, ty);
+                bool canExit = exitZone != null;
+
+                return Json(new {
+                    ok = true,
+                    x = session.PlayerX, y = session.PlayerY,
+                    moves = session.MovesSpent, dist = 1,
+                    canExit, exitLabel = exitZone?.Label,
+                    canExtract = false
+                });
+            }
+        }
+
         // ── Extract ───────────────────────────────────────────────────────────
 
         [HttpPost("Extract")]
         [ValidateAntiForgeryToken]
-        public IActionResult Extract()
+        public async Task<IActionResult> Extract()
         {
             var userId = GetUserId();
             if (userId == null) return RedirectToAction("Login", "Account");
@@ -611,6 +898,24 @@ namespace HabitTracker.Controllers
                 return RedirectToAction(nameof(Map));
             }
 
+            // Commit staged Pouch items → permanent DB storage
+            foreach (var item in session.Pouch)
+            {
+                _context.UserInventoryItems.Add(new UserInventoryItem
+                {
+                    UserId        = userId.Value,
+                    ItemId        = item.ItemId,
+                    ContainerType = item.Container,
+                    GridX         = item.GridX,
+                    GridY         = item.GridY,
+                    IsRotated     = item.Rotated,
+                    AcquiredAt    = DateTime.Now
+                });
+            }
+            if (session.Pouch.Count > 0)
+                await _context.SaveChangesAsync();
+
+            session.Pouch.Clear();
             session.IsActive = false;
             session.MonsterBody.Clear();
             SaveSession(session);
@@ -663,12 +968,25 @@ namespace HabitTracker.Controllers
                     .ToListAsync()
                 : new List<UserInventoryItem>();
 
+            // Merge DB items + Pouch items for each container so the grid shows pending pickups
+            var placedPocket   = BuildPlacedLoot(pocketItems);
+            var placedBackpack = BuildPlacedLoot(bpItems);
+            var placedRig      = BuildPlacedLoot(rigItems);
+            foreach (var p in session.Pouch)
+            {
+                var placed = BuildPlacedPouchItem(p);
+                if (placed == null) continue;
+                if (p.Container == ItemCatalogue.BACKPACK)         placedPocket.Add(placed);
+                else if (p.Container == ItemCatalogue.EQUIPPED_BACKPACK) placedBackpack.Add(placed);
+                else if (p.Container == ItemCatalogue.EQUIPPED_RIG)      placedRig.Add(placed);
+            }
+
             ViewBag.Session       = session;
             ViewBag.BodyCols      = BODY_COLS;
             ViewBag.BodyRows      = BODY_ROWS;
-            ViewBag.PocketItems   = BuildPlacedLoot(pocketItems);
-            ViewBag.BackpackItems = BuildPlacedLoot(bpItems);
-            ViewBag.RigItems      = BuildPlacedLoot(rigItems);
+            ViewBag.PocketItems   = placedPocket;
+            ViewBag.BackpackItems = placedBackpack;
+            ViewBag.RigItems      = placedRig;
             ViewBag.HasBackpack   = user?.EquippedBackpackItem != null;
             ViewBag.HasRig        = user?.EquippedRigItem != null;
             return View();
@@ -724,6 +1042,7 @@ namespace HabitTracker.Controllers
                 req.GridX + w > cols || req.GridY + h > rows)
                 return Json(new { ok = false, error = "Out of bounds" });
 
+            // AABB check against real DB items
             var existing = await _context.UserInventoryItems
                 .Where(i => i.UserId == userId && i.ContainerType == container)
                 .ToListAsync();
@@ -737,20 +1056,29 @@ namespace HabitTracker.Controllers
                 if (!noOv) return Json(new { ok = false, error = "Overlap" });
             }
 
-            _context.UserInventoryItems.Add(new UserInventoryItem
+            // AABB check against already-pocketed (Pouch) items in same container
+            foreach (var p in session.Pouch.Where(p => p.Container == container))
             {
-                UserId        = userId.Value,
-                ItemId        = loot.ItemId,
-                ContainerType = container,
-                GridX         = req.GridX,
-                GridY         = req.GridY,
-                IsRotated     = req.Rotated,
-                AcquiredAt    = DateTime.Now
+                if (!ItemCatalogue.Items.TryGetValue(p.ItemId, out var pd)) continue;
+                int pw = p.Rotated ? pd.Height : pd.Width;
+                int ph = p.Rotated ? pd.Width  : pd.Height;
+                bool noOv = req.GridX >= p.GridX + pw || req.GridX + w <= p.GridX ||
+                            req.GridY >= p.GridY + ph || req.GridY + h <= p.GridY;
+                if (!noOv) return Json(new { ok = false, error = "Overlap" });
+            }
+
+            // Stage in Pouch — only committed to DB on successful Extract
+            session.Pouch.Add(new LootItem
+            {
+                ItemId    = loot.ItemId,
+                Container = container,
+                GridX     = req.GridX,
+                GridY     = req.GridY,
+                Rotated   = req.Rotated,
             });
 
             session.MonsterBody.RemoveAt(req.Index);
             SaveSession(session);
-            await _context.SaveChangesAsync();
 
             return Json(new { ok = true });
         }
@@ -777,6 +1105,18 @@ namespace HabitTracker.Controllers
 
             SaveSession(session);
             return RedirectToAction(nameof(Map));
+        }
+
+        private static PlacedItem? BuildPlacedPouchItem(LootItem p)
+        {
+            if (!ItemCatalogue.Items.TryGetValue(p.ItemId, out var def)) return null;
+            int w = p.Rotated ? def.Height : def.Width;
+            int h = p.Rotated ? def.Width  : def.Height;
+            // Id = 0 marks this as a pending (pouch) item — not in DB yet
+            return new PlacedItem(0, p.ItemId, def.Name, def.Icon,
+                def.Description, def.Category, def.TileColor,
+                p.GridX, p.GridY, w, h, p.Rotated,
+                ItemCatalogue.CanRotate(p.ItemId), p.Container);
         }
 
         private static List<PlacedItem> BuildPlacedLoot(IEnumerable<UserInventoryItem> items)

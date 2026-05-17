@@ -82,10 +82,11 @@
     /* Slot cell — inset border showing individual slot boundaries */
     .slot-cell {
         position: absolute;
-        border: 1.5px solid rgba(255,255,255,.14);
-        border-radius: 5px;
+        border: 1.5px solid rgba(255,255,255,.22);
+        border-radius: 8px;
         pointer-events: none;
         z-index: 1;
+        background: rgba(255,255,255,.02);
     }
 
     /* Drop preview */
@@ -99,7 +100,7 @@
         transition: none;
     }
 
-    /* Item tile */
+    /* Item tile — rendered 1px inset from grid cell so border never touches grid boundary */
     .inv-item {
         position: absolute;
         border-radius: 6px;
@@ -277,9 +278,9 @@
                     <div class="inv-item"
                          id="item-@item.Id"
                          draggable="true"
-                         style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
-                                width:@(item.W*C)px; height:@(item.H*C)px;
-                                background:@(item.TileColor)cc;"
+                         style="left:@(item.GridX*C+1)px; top:@(item.GridY*C+1)px;
+                                width:@(item.W*C-2)px; height:@(item.H*C-2)px;
+                                background:@(item.TileColor);"
                          data-id="@item.Id" data-itemid="@item.ItemId"
                          data-container="Storage"
                          data-w="@item.W" data-h="@item.H"
@@ -292,12 +293,8 @@
                         <span class="item-name">@item.Name</span>
                         @if (item.CanRotate)
                         {
-                            <form class="rotate-form"
-                                  asp-action="Rotate" asp-route-id="@item.Id" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="rotate-btn"
-                                        onclick="event.stopPropagation()" title="Rotate">↺</button>
-                            </form>
+                            <button class="rotate-btn" type="button"
+                                    onclick="rotateItemAjax(event,@item.Id,this)" title="Rotate">↺</button>
                         }
                     </div>
                 }
@@ -319,19 +316,14 @@
                  style="width:@(bCols*C)px; height:@(bRows*C)px;
                         background-size:@(C)px @(C)px;">
 
-                @* Slot outlines — 4 × 1×1 *@
-                @for (int si = 0; si < bCols; si++) {
-                    <div class="slot-cell" style="left:@(si*C+4)px; top:4px; width:@(C-8)px; height:@(C-8)px;"></div>
-                }
-
                 @foreach (var item in backpackItems)
                 {
                     <div class="inv-item"
                          id="item-@item.Id"
                          draggable="true"
-                         style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
-                                width:@(item.W*C)px; height:@(item.H*C)px;
-                                background:@(item.TileColor)cc;"
+                         style="left:@(item.GridX*C+1)px; top:@(item.GridY*C+1)px;
+                                width:@(item.W*C-2)px; height:@(item.H*C-2)px;
+                                background:@(item.TileColor);"
                          data-id="@item.Id" data-itemid="@item.ItemId"
                          data-container="Backpack"
                          data-w="@item.W" data-h="@item.H"
@@ -344,12 +336,8 @@
                         <span class="item-name">@item.Name</span>
                         @if (item.CanRotate)
                         {
-                            <form class="rotate-form"
-                                  asp-action="Rotate" asp-route-id="@item.Id" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="rotate-btn"
-                                        onclick="event.stopPropagation()" title="Rotate">↺</button>
-                            </form>
+                            <button class="rotate-btn" type="button"
+                                    onclick="rotateItemAjax(event,@item.Id,this)" title="Rotate">↺</button>
                         }
                     </div>
                 }
@@ -369,7 +357,7 @@
                      style="width:@(ebCols*C)px; height:@(ebRows*C)px; background-size:@(C)px @(C)px;">
                     @foreach (var item in eqBpItems) {
                         <div class="inv-item" id="item-@item.Id" draggable="true"
-                             style="left:@(item.GridX*C)px; top:@(item.GridY*C)px; width:@(item.W*C)px; height:@(item.H*C)px; background:@(item.TileColor)cc;"
+                             style="left:@(item.GridX*C+1)px; top:@(item.GridY*C+1)px; width:@(item.W*C-2)px; height:@(item.H*C-2)px; background:@(item.TileColor);"
                              data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedBackpack" data-w="@item.W" data-h="@item.H"
                              data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
                              data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
@@ -401,16 +389,16 @@
                 </div>
                 <div class="inv-grid" id="grid-EquippedRig"
                      data-container="EquippedRig" data-cols="@erCols" data-rows="@erRows"
-                     style="width:@(erCols*C)px; height:@(erRows*C)px; background-size:@(C)px @(C)px;">
+                     style="width:@(erCols*C)px; height:@(erRows*C)px; background-image:none;">
 
-                    @* Slot outlines — 4 × 2×1 slots *@
+                    @* Tall slot outlines — 4 × (1col × 2row) slots *@
                     @for (int sc = 0; sc < erCols; sc++) {
-                            <div class="slot-cell" style="left:@(sc*C+4)px; top:4px; width:@(C-8)px; height:@(erRows*C-8)px;"></div>
-                        }
+                        <div class="slot-cell" style="left:@(sc*C+4)px; top:4px; width:@(C-8)px; height:@(erRows*C-8)px;"></div>
+                    }
 
                     @foreach (var item in eqRigItems) {
                         <div class="inv-item" id="item-@item.Id" draggable="true"
-                             style="left:@(item.GridX*C)px; top:@(item.GridY*C)px; width:@(item.W*C)px; height:@(item.H*C)px; background:@(item.TileColor)cc;"
+                             style="left:@(item.GridX*C+1)px; top:@(item.GridY*C+1)px; width:@(item.W*C-2)px; height:@(item.H*C-2)px; background:@(item.TileColor);"
                              data-id="@item.Id" data-itemid="@item.ItemId" data-container="EquippedRig" data-w="@item.W" data-h="@item.H"
                              data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
                              data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
@@ -461,6 +449,25 @@
 
 @section Scripts {
 <script>
+function rotateItemAjax(e, itemId, btn) {
+    e.stopPropagation();
+    fetch('/Inventory/RotateAjax/' + itemId, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+            if (!d.success) { alert(d.error || 'Cannot rotate'); return; }
+            const el = btn.closest('.inv-item');
+            const CELLPX = @C;
+            const w = parseInt(el.dataset.w);
+            const h = parseInt(el.dataset.h);
+            el.dataset.w = h;
+            el.dataset.h = w;
+            el.dataset.rotated = el.dataset.rotated === 'true' ? 'false' : 'true';
+            el.style.width  = (h * CELLPX - 2) + 'px';
+            el.style.height = (w * CELLPX - 2) + 'px';
+        })
+        .catch(() => alert('Network error'));
+}
+
 const CELL = @C;
 const GRID_META = {
     Storage:          { cols: @sCols,  rows: @sRows  },
@@ -583,8 +590,8 @@ async function onGridDrop(e, grid) {
     }
 
     const el = drag.el;
-    el.style.left = (col * CELL) + 'px';
-    el.style.top  = (row * CELL) + 'px';
+    el.style.left = (col * CELL + 1) + 'px';
+    el.style.top  = (row * CELL + 1) + 'px';
     if (el.parentNode !== grid) grid.appendChild(el);
     el.dataset.container = container;
     el.classList.remove('dragging');
@@ -612,10 +619,10 @@ async function onGridDrop(e, grid) {
 }
 
 function showPreview(grid, col, row, w, h, valid) {
-    preview.style.left       = (col * CELL) + 'px';
-    preview.style.top        = (row * CELL) + 'px';
-    preview.style.width      = (w * CELL) + 'px';
-    preview.style.height     = (h * CELL) + 'px';
+    preview.style.left       = (col * CELL + 1) + 'px';
+    preview.style.top        = (row * CELL + 1) + 'px';
+    preview.style.width      = (w * CELL - 2) + 'px';
+    preview.style.height     = (h * CELL - 2) + 'px';
     preview.style.background = valid ? 'rgba(0,184,156,.25)' : 'rgba(232,67,106,.25)';
     preview.style.border     = valid ? '2px solid #00b89c'   : '2px solid #e8436a';
     preview.style.display    = 'block';

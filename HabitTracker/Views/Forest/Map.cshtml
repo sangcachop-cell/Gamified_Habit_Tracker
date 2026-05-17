@@ -12,8 +12,6 @@
     var reqExtract = ForestMap.Extracts.FirstOrDefault(e => e.Id == s?.RequiredExtractId);
     var spawnInfo  = ForestMap.Spawns.FirstOrDefault(sp => sp.Id == s?.SpawnId);
 
-    const int W = ForestMap.WIDTH;
-    const int H = ForestMap.HEIGHT;
 }
 
 <style>
@@ -125,16 +123,34 @@
 </style>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
-    <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:#81c784;">🌲 The Forest</h2>
+    @if (ViewBag.MapMode == "interior")
+    {
+        <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:#cd853f;">
+            🏚️ @(ViewBag.InteriorName ?? "Location Interior")
+        </h2>
+    }
+    else
+    {
+        <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:#81c784;">🌲 The Forest</h2>
+    }
     <div style="display:flex; gap:10px; align-items:center;">
-        <span style="font-size:.8rem; color:rgba(255,255,255,.4);">
-            Required exit: <strong style="color:#00b89c;">@reqExtract?.Label (Extract @s?.RequiredExtractId)</strong>
-        </span>
-        <button onclick="openFullMap()" style="background:rgba(76,175,80,.12);
-            border:1px solid rgba(76,175,80,.3); border-radius:8px; color:#81c784;
-            padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
-            🗺️ Full Map
-        </button>
+        @if (ViewBag.MapMode != "interior")
+        {
+            <span style="font-size:.8rem; color:rgba(255,255,255,.4);">
+                Required exit: <strong style="color:#00b89c;">@reqExtract?.Label (Extract @s?.RequiredExtractId)</strong>
+            </span>
+            <button onclick="openFullMap()" style="background:rgba(76,175,80,.12);
+                border:1px solid rgba(76,175,80,.3); border-radius:8px; color:#81c784;
+                padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
+                🗺️ Full Map
+            </button>
+        }
+        else
+        {
+            <span style="font-size:.8rem; color:rgba(205,133,63,.6);">
+                ⚠️ Loot is staged — extract on the world map to keep it
+            </span>
+        }
         <button type="button" onclick="toggleInventory()" id="btn-inventory-toggle"
             style="background:rgba(249,202,36,.12);
             border:1px solid rgba(249,202,36,.3); border-radius:8px; color:#f9ca24;
@@ -190,9 +206,31 @@
             <span id="location-desc" style="font-size:.75rem; opacity:.7;"></span>
         </div>
 
-        <form asp-action="Extract" method="post">
+        @* Extract — hidden when inside a location *@
+        @{ bool isInterior = ViewBag.MapMode == "interior"; }
+        <form asp-action="Extract" method="post"
+              style="@(isInterior ? "display:none" : "")">
             @Html.AntiForgeryToken()
             <button type="submit" class="extract-btn" id="extract-btn">⬆️ Extract Here</button>
+        </form>
+
+        @* Enter Location — shown on world map when player steps into a zone *@
+        <form asp-action="EnterLocation" method="post" id="enter-location-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="locationId" id="enter-location-id" value="" />
+            <button type="submit" class="extract-btn" id="enter-location-btn"
+                    style="background:linear-gradient(135deg,#7a5c3a,#5a4030);">
+                🚪 Enter Location
+            </button>
+        </form>
+
+        @* Exit Location — shown on interior map when player reaches an exit zone *@
+        <form asp-action="ExitLocation" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="extract-btn" id="exit-location-btn"
+                    style="background:linear-gradient(135deg,#5a3a8a,#3a2060);">
+                🚪 Exit to Forest
+            </button>
         </form>
 
         <!-- Post-combat path continuation panel -->
@@ -214,19 +252,30 @@
             </div>
         </div>
 
-        <div class="hint-bar">💡 Click map or minimap to move &nbsp;|&nbsp; WASD / ↑↓←→ to step</div>
+        <div class="hint-bar">💡 WASD / ↑↓←→ to move &nbsp;|&nbsp; Drag map to pan &nbsp;|&nbsp; Scroll to zoom</div>
 
         <div class="panel-title" style="margin-top:18px;">Legend</div>
         <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#2d5a2d;"></div> Forest</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c;"></div> Water (blocked)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#5a4a3a;"></div> 🦇 Cave</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#7a5c3a;"></div> 🏚️ Warehouse</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#2a7abf;"></div> 🌊 Lake</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#4a90d9;"></div> Spawn A (NW)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#d94a4a;"></div> Spawn B (SE)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#00b89c;"></div> ⬆️ Extract (target)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+            @if (ViewBag.MapMode == "interior")
+            {
+                <div class="legend-item"><div class="legend-dot" style="background:#303030;"></div> Interior Floor</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e;"></div> Impassable Edge</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8B4513; border-radius:2px;"></div> 🚪 Exit Zone</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#b8860b; border-radius:2px;"></div> ◈ Chest (coming soon)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+            }
+            else
+            {
+                <div class="legend-item"><div class="legend-dot" style="background:#2d5a2d;"></div> Forest</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c;"></div> Water (blocked)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#5a4a3a;"></div> 🦇 Cave</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#7a5c3a;"></div> 🏚️ Warehouse</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#2a7abf;"></div> 🌊 Lake</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#4a90d9;"></div> Spawn A (NW)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#d94a4a;"></div> Spawn B (SE)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#00b89c;"></div> ⬆️ Extract (target)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+            }
         </div>
 
         <div class="panel-title" style="margin-top:18px;">Log</div>
@@ -458,15 +507,37 @@ function toggleInventory() {
 
 @section Scripts {
 <script>
-const MAP_W = @W, MAP_H = @H;
-const WATER_BORDER = @ForestMap.WATER_BORDER;
+const MAP_W        = @(ViewBag.MapW       ?? ForestMap.WIDTH);
+const MAP_H        = @(ViewBag.MapH       ?? ForestMap.HEIGHT);
+const WATER_BORDER = @(ViewBag.WaterBorder ?? ForestMap.WATER_BORDER);
+const MAP_MODE     = '@(ViewBag.MapMode   ?? "world")';
 
-const LOCATIONS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-    ForestMap.Locations.Select(z => new { z.Id, z.Name, z.Icon, z.Color, z.X, z.Y, z.W, z.H })));
-const SPAWNS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-    ForestMap.Spawns.Select(s => new { s.Id, s.X, s.Y, s.W, s.H, s.Label, s.Color })));
-const EXTRACTS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-    ForestMap.Extracts.Select(e => new { e.Id, e.X, e.Y, e.W, e.H, e.Label, e.Color })));
+// Interior terrain palette (7 colours; index = (x*13+y*7)%7). Null = use world greens.
+const TERRAIN_COLORS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    ViewBag.TerrainColors as string[] ?? Array.Empty<string>()));
+
+// Exit zones — only populated in interior mode
+const EXIT_ZONES = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    (ViewBag.ExitZones as HabitTracker.Constants.ForestMap.ExitZone[] ?? Array.Empty<HabitTracker.Constants.ForestMap.ExitZone>())
+    .Select(ez => new { ez.X, ez.Y, ez.W, ez.H, ez.Label })));
+
+// Treasure chests — visual only (interior mode)
+const CHESTS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    (ViewBag.ChestPositions as HabitTracker.Constants.ForestMap.ChestPos[] ?? Array.Empty<HabitTracker.Constants.ForestMap.ChestPos>())
+    .Select(cp => new { cp.X, cp.Y })));
+
+@{
+    bool _isInterior = ViewBag.MapMode == "interior";
+    string _locsJson     = _isInterior ? "[]" : System.Text.Json.JsonSerializer.Serialize(
+        ForestMap.Locations.Select(z => new { z.Id, z.Name, z.Icon, z.Color, z.X, z.Y, z.W, z.H }));
+    string _spawnsJson   = _isInterior ? "[]" : System.Text.Json.JsonSerializer.Serialize(
+        ForestMap.Spawns.Select(s => new { s.Id, s.X, s.Y, s.W, s.H, s.Label, s.Color }));
+    string _extractsJson = _isInterior ? "[]" : System.Text.Json.JsonSerializer.Serialize(
+        ForestMap.Extracts.Select(e => new { e.Id, e.X, e.Y, e.W, e.H, e.Label, e.Color }));
+}
+const LOCATIONS = @Html.Raw(_locsJson);
+const SPAWNS    = @Html.Raw(_spawnsJson);
+const EXTRACTS  = @Html.Raw(_extractsJson);
 
 let session = @Html.Raw(sessionJson);
 
@@ -641,7 +712,9 @@ function buildFullMap() {
                 fmbg.fillStyle = v === 0 ? '#1a3a5c' : v === 1 ? '#1c3f63' : '#1e4268';
             } else {
                 const v = (x * 13 + y * 7) % 7;
-                fmbg.fillStyle = v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633';
+                fmbg.fillStyle = (TERRAIN_COLORS && TERRAIN_COLORS.length === 7)
+                    ? TERRAIN_COLORS[v]
+                    : (v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633');
             }
             fmbg.fillRect(x * FM_CELL, y * FM_CELL, FM_CELL, FM_CELL);
         }
@@ -721,7 +794,10 @@ function buildMinimap() {
             if (isWater(x, y)) {
                 mctx.fillStyle = '#1a3a5c';
             } else {
-                mctx.fillStyle = ((x * 13 + y * 7) % 5 < 2) ? '#254a25' : '#2d5a2d';
+                const v = (x * 13 + y * 7) % 7;
+                mctx.fillStyle = (TERRAIN_COLORS && TERRAIN_COLORS.length === 7)
+                    ? TERRAIN_COLORS[v]
+                    : (v < 2 ? '#254a25' : '#2d5a2d');
             }
             mctx.fillRect(x * MC_BASE, y * MC_BASE, MC_BASE, MC_BASE);
         }
@@ -737,6 +813,16 @@ function buildMinimap() {
     EXTRACTS.forEach(function(ex) {
         mctx.fillStyle = ex.Id === session.RequiredExtractId ? '#00e5c0' : '#007060';
         mctx.fillRect(ex.X * MC_BASE, ex.Y * MC_BASE, ex.W * MC_BASE, ex.H * MC_BASE);
+    });
+    // Exit zones on minimap (interior)
+    EXIT_ZONES.forEach(function(ez) {
+        mctx.fillStyle = '#cd853f';
+        mctx.fillRect(ez.X * MC_BASE, ez.Y * MC_BASE, ez.W * MC_BASE, ez.H * MC_BASE);
+    });
+    // Chests on minimap (interior)
+    CHESTS.forEach(function(ch) {
+        mctx.fillStyle = '#ffd700';
+        mctx.fillRect(ch.X * MC_BASE, ch.Y * MC_BASE, MC_BASE, MC_BASE);
     });
 }
 buildMinimap();
@@ -790,7 +876,9 @@ function drawMap() {
                 ctx.fillStyle = v === 0 ? '#1a3a5c' : v === 1 ? '#1c3f63' : '#1e4268';
             } else {
                 const v = (wx * 13 + wy * 7) % 7;
-                ctx.fillStyle = v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633';
+                ctx.fillStyle = (TERRAIN_COLORS && TERRAIN_COLORS.length === 7)
+                    ? TERRAIN_COLORS[v]
+                    : (v < 2 ? '#254a25' : v < 5 ? '#2d5a2d' : '#336633');
             }
             ctx.fillRect(px, py, VC, VC);
 
@@ -875,19 +963,43 @@ function drawMap() {
         }
     });
 
-    // 5. Path overlays
-    // Hover path: dotted yellow, full path
-    if (!isMoving && hoverPath && hoverPath.length > 1) {
-        drawPathLine(hoverPath, 0, 'rgba(240,220,80,.35)', 1, 3, 4);
-        // Destination marker
-        const dest = hoverPath[hoverPath.length - 1];
-        const dvx = (dest.x - camX + 0.5) * VC, dvy = (dest.y - camY + 0.5) * VC;
-        if (dvx >= 0 && dvx <= canvas.width && dvy >= 0 && dvy <= canvas.height) {
-            ctx.strokeStyle = 'rgba(240,220,80,.7)'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.arc(dvx, dvy, VC * 0.42, 0, Math.PI * 2); ctx.stroke();
+    // 4b. Exit zones (interior only — empty array on world map)
+    EXIT_ZONES.forEach(function(ez) {
+        const vx1 = Math.max(ez.X, camX), vy1 = Math.max(ez.Y, camY);
+        const vx2 = Math.min(ez.X + ez.W, camX + VP), vy2 = Math.min(ez.Y + ez.H, camY + VP);
+        if (vx2 <= vx1 || vy2 <= vy1) return;
+        const px = (vx1 - camX) * VC, py = (vy1 - camY) * VC;
+        const pw = (vx2 - vx1) * VC, ph = (vy2 - vy1) * VC;
+        ctx.fillStyle = '#8B4513'; ctx.globalAlpha = 0.75;
+        rr(ctx, px, py, pw, ph, 3); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#cd853f'; ctx.lineWidth = 2;
+        rr(ctx, px, py, pw, ph, 3); ctx.stroke();
+        const cVX = (ez.X + ez.W / 2 - camX) * VC, cVY = (ez.Y + ez.H / 2 - camY) * VC;
+        if (cVX >= 0 && cVX <= canvas.width && cVY >= 0 && cVY <= canvas.height) {
+            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#ffe4b5';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('EXIT', cVX, cVY);
         }
-    }
-    // Active path: solid bright, remaining segment only
+    });
+
+    // 4c. Chest markers (visual only — golden squares with ◈)
+    CHESTS.forEach(function(ch) {
+        const vx = ch.X - camX, vy = ch.Y - camY;
+        if (vx < 0 || vx >= VP || vy < 0 || vy >= VP) return;
+        const px = vx * VC + VC * 0.15, py = vy * VC + VC * 0.15;
+        const sz = VC * 0.7;
+        ctx.fillStyle = '#b8860b'; ctx.globalAlpha = 0.9;
+        rr(ctx, px, py, sz, sz, 3); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 1.5;
+        rr(ctx, px, py, sz, sz, 3); ctx.stroke();
+        ctx.font = Math.floor(sz * 0.6) + 'px serif';
+        ctx.fillStyle = '#ffd700'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('◈', px + sz / 2, py + sz / 2);
+    });
+
+    // 5. Active path overlay (shown during animation after combat trigger)
     if (isMoving && activePath) {
         drawPathLine(activePath, activePathIdx, 'rgba(240,200,50,.7)', 1, 0, 0);
     }
@@ -1005,7 +1117,7 @@ canvas.addEventListener('mousedown', function(e) {
     didPan = false;
 });
 
-// ── Mouse hover + pan ──────────────────────────────────────────────────────────
+// ── Mouse hover + pan (no click-to-move — WASD only) ─────────────────────────
 canvas.addEventListener('mousemove', function(e) {
     if (isMoving) return;
     const rect = canvas.getBoundingClientRect();
@@ -1019,7 +1131,6 @@ canvas.addEventListener('mousemove', function(e) {
         if (didPan) {
             camX = clamp(panStartCamX - Math.round(dx / VC), 0, MAP_W - VP);
             camY = clamp(panStartCamY - Math.round(dy / VC), 0, MAP_H - VP);
-            hoverWX = hoverWY = -1; hoverPath = null;
             canvas.style.cursor = 'grabbing';
             drawMap(); return;
         }
@@ -1027,65 +1138,26 @@ canvas.addEventListener('mousemove', function(e) {
 
     // Minimap hover → show world coords
     if (minimapHit(cx, cy)) {
-        hoverWX = hoverWY = -1; hoverPath = null;
         canvas.style.cursor = 'crosshair';
         const mmx = canvas.width - MINI - 8, mmy = canvas.height - MINI - 8;
         const { ox, oy, scale } = miniOrigin();
         const wx = ox + Math.floor((cx - mmx) / scale);
         const wy = oy + Math.floor((cy - mmy) / scale);
         document.getElementById('hover-display').textContent = '(' + wx + ', ' + wy + ') [map]';
-        drawMap(); return;
+        return;
     }
 
     hoverWX = camX + Math.floor(cx / VC);
     hoverWY = camY + Math.floor(cy / VC);
-    const water = isWater(hoverWX, hoverWY);
-    canvas.style.cursor = water ? 'not-allowed' : 'crosshair';
-
-    if (hoverWX !== lastHoverWX || hoverWY !== lastHoverWY) {
-        lastHoverWX = hoverWX; lastHoverWY = hoverWY;
-        hoverPath = water ? null : aStar(session.PlayerX, session.PlayerY, hoverWX, hoverWY);
-    }
-    const pathLen = hoverPath ? hoverPath.length - 1 : 0;
-    document.getElementById('hover-display').textContent =
-        '(' + hoverWX + ', ' + hoverWY + ')' + (pathLen > 0 ? '  –  ' + pathLen + ' moves' : '');
-    drawMap();
+    canvas.style.cursor = 'crosshair';
+    document.getElementById('hover-display').textContent = '(' + hoverWX + ', ' + hoverWY + ')';
 });
 
 canvas.addEventListener('mouseleave', function() {
     if (isMoving) return;
-    hoverWX = hoverWY = -1; hoverPath = null; canvas.style.cursor = 'crosshair'; drawMap();
-});
-
-// ── Click to move (canvas + minimap) — skipped if pan occurred ────────────────
-canvas.addEventListener('click', async function(e) {
-    if (isMoving || didPan) { didPan = false; return; }
-    const rect = canvas.getBoundingClientRect();
-    const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
-    const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
-
-    // Minimap click → navigate to world position
-    const mmx = canvas.width - MINI - 8, mmy = canvas.height - MINI - 8;
-    if (cx >= mmx && cx <= mmx + MINI && cy >= mmy && cy <= mmy + MINI) {
-        const { ox, oy, scale } = miniOrigin();
-        const wx = ox + Math.floor((cx - mmx) / scale);
-        const wy = oy + Math.floor((cy - mmy) / scale);
-        const tx = Math.max(WATER_BORDER, Math.min(MAP_W - WATER_BORDER - 1, wx));
-        const ty = Math.max(WATER_BORDER, Math.min(MAP_H - WATER_BORDER - 1, wy));
-        if (isWater(tx, ty) || (tx === session.PlayerX && ty === session.PlayerY)) return;
-        const path = aStar(session.PlayerX, session.PlayerY, tx, ty);
-        if (!path || path.length <= 1) { addLog('No path found.'); return; }
-        await doMove(tx, ty, path);
-        return;
-    }
-
-    // Regular canvas click
-    const tx = camX + Math.floor(cx / VC), ty = camY + Math.floor(cy / VC);
-    if (isWater(tx, ty)) { addLog('Cannot enter water.'); return; }
-    if (tx === session.PlayerX && ty === session.PlayerY) return;
-    const path = hoverPath || aStar(session.PlayerX, session.PlayerY, tx, ty);
-    if (!path || path.length <= 1) { addLog('No path found.'); return; }
-    await doMove(tx, ty, path);
+    hoverWX = hoverWY = -1;
+    canvas.style.cursor = 'crosshair';
+    drawMap();
 });
 
 // ── WASD / arrow keys ──────────────────────────────────────────────────────────
@@ -1129,14 +1201,33 @@ async function doMove(tx, ty, path) {
         return;
     }
 
-    // ── Combat triggered ───────────────────────────────────────────────────
+    // ── Combat triggered — animate partial path first, then redirect ─────────
     if (data.combatTriggered) {
-        session.PlayerX = data.x; session.PlayerY = data.y;
+        const stepsToAnimate = Math.min(data.dist || 1, path ? path.length - 1 : 0);
+        if (path && stepsToAnimate > 0) {
+            activePath    = path.slice(0, stepsToAnimate + 1);
+            activePathIdx = 0;
+            for (let i = 1; i <= stepsToAnimate; i++) {
+                session.PlayerX = path[i].x;
+                session.PlayerY = path[i].y;
+                activePathIdx   = i;
+                updateCamera();
+                drawMap();
+                await sleep(160);
+            }
+            activePath = null;
+        } else {
+            session.PlayerX = data.x;
+            session.PlayerY = data.y;
+            updateCamera();
+            drawMap();
+        }
         session.MovesSpent = data.moves;
-        updateCamera(); drawMap();
+        document.getElementById('moves-display').textContent = data.moves;
+        document.getElementById('pos-display').textContent   = '(' + data.x + ', ' + data.y + ')';
         const tier = data.monsterTier === 'rare' ? '⭐ Rare' : '⚡ Normal';
         addLog(tier + ' encounter! Entering combat...', data.monsterTier === 'rare' ? 'ev-rare' : 'ev-common');
-        setTimeout(function() { window.location.href = '/Forest/Combat'; }, 700);
+        setTimeout(function() { window.location.href = '/Forest/Combat'; }, 400);
         return;
     }
 
@@ -1181,6 +1272,29 @@ async function doMove(tx, ty, path) {
         addLog('Reached ' + data.extractId + ' — ready to extract!');
     } else {
         btn.classList.remove('show');
+    }
+
+    // Enter Location button (world map — player standing in a named zone)
+    const enterBtn = document.getElementById('enter-location-btn');
+    if (enterBtn) {
+        if (data.canEnterLocation && MAP_MODE === 'world') {
+            document.getElementById('enter-location-id').value = data.enterLocationId || '';
+            enterBtn.textContent = '🚪 Enter ' + (data.zoneName || 'Location');
+            enterBtn.classList.add('show');
+        } else {
+            enterBtn.classList.remove('show');
+        }
+    }
+
+    // Exit Location button (interior — player on an exit zone)
+    const exitBtn = document.getElementById('exit-location-btn');
+    if (exitBtn) {
+        if (data.canExit && MAP_MODE === 'interior') {
+            exitBtn.classList.add('show');
+            if (data.exitLabel) addLog('🚪 ' + data.exitLabel + ' — ready to exit!');
+        } else {
+            exitBtn.classList.remove('show');
+        }
     }
 
     if (path && path.length > 1) {

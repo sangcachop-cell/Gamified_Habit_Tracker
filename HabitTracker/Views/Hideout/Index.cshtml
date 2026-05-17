@@ -474,14 +474,14 @@
     <div class="material-chip">
         <span class="mat-icon">🪵</span>
         <div>
-            <div class="mat-count">@woodCount</div>
+            <div class="mat-count" id="mat-count-wood">@woodCount</div>
             <div class="mat-label">Wood</div>
         </div>
     </div>
     <div class="material-chip">
         <span class="mat-icon">🪨</span>
         <div>
-            <div class="mat-count">@stoneCount</div>
+            <div class="mat-count" id="mat-count-stone">@stoneCount</div>
             <div class="mat-label">Stone</div>
         </div>
     </div>
@@ -507,7 +507,7 @@
                      draggable="true"
                      style="left:@(item.GridX*C)px; top:@(item.GridY*C)px;
                             width:@(item.W*C)px; height:@(item.H*C)px;
-                            background:@(item.TileColor)cc;"
+                            background:@(item.TileColor);"
                      data-id="@item.Id"
                      data-container="HideoutStorage"
                      data-w="@item.W" data-h="@item.H">
@@ -572,12 +572,15 @@
                 <div style="font-size:.72rem; color:rgba(255,255,255,.3); margin-bottom:12px;">
                     ⏱ @(recipe.CraftTime.TotalHours)h craft time <span style="color:#4caf50;">(instant — testing)</span>
                 </div>
-                <div style="font-size:.75rem; color:rgba(255,255,255,.35); margin-bottom:12px;">
-                    In storage: @inputIcon @inputCount available
+                <div id="wb-avail-@recipe.Id" style="font-size:.75rem; color:rgba(255,255,255,.35); margin-bottom:12px;"
+                     data-input="@recipe.InputItemId" data-accent="@accent" data-icon="@inputIcon">
+                    In storage: @inputIcon <span id="wb-raw-@recipe.Id">@inputCount</span> available
                 </div>
                 <form id="csrf-wb-@recipe.Id">@Html.AntiForgeryToken()</form>
-                <button onclick="doCraft('@recipe.Id')"
+                <button id="wb-btn-@recipe.Id"
+                        onclick="doCraft('@recipe.Id')"
                         @(hasInput ? "" : "disabled")
+                        data-input="@recipe.InputItemId"
                         style="width:100%; padding:10px; border-radius:10px; border:none; font-weight:700; font-size:.88rem; cursor:@(hasInput?"pointer":"not-allowed");
                                background:@(hasInput ? $"{accent}22" : "rgba(100,100,100,.1)");
                                color:@(hasInput ? accent : "#555");">
@@ -739,10 +742,34 @@ function toggleWb() {
 }
 
 // ── Craft ─────────────────────────────────────────────────────────────────────
+let _rawWood  = @rawWood;
+let _rawStone = @rawStone;
+
+function _updateRecipeButtons() {
+    document.querySelectorAll('[id^="wb-btn-"]').forEach(btn => {
+        const inp    = btn.dataset.input;
+        const rid    = btn.id.replace('wb-btn-', '');
+        const avail  = inp === 'wood' ? _rawWood : _rawStone;
+        const row    = document.getElementById('wb-avail-' + rid);
+        const accent = row ? row.dataset.accent : '#888';
+        const icon   = row ? row.dataset.icon   : '';
+        const rawEl  = document.getElementById('wb-raw-' + rid);
+        if (rawEl) rawEl.textContent = avail;
+        btn.disabled = avail <= 0;
+        btn.textContent = avail > 0 ? '⚒️ Craft' : 'No materials';
+        btn.style.cursor     = avail > 0 ? 'pointer' : 'not-allowed';
+        btn.style.background = avail > 0 ? accent + '22' : 'rgba(100,100,100,.1)';
+        btn.style.color      = avail > 0 ? accent : '#555';
+    });
+}
+
 async function doCraft(recipeId) {
     const csrf = document.querySelector('#csrf-wb-' + recipeId + ' [name=__RequestVerificationToken]').value;
     const msg  = document.getElementById('wb-msg-' + recipeId);
+    const btn  = document.getElementById('wb-btn-' + recipeId);
+    if (btn) btn.disabled = true;
     msg.textContent = '⏳ Crafting…';
+    msg.style.color = '';
     try {
         const res  = await fetch('/Craft/Start', {
             method: 'POST',
@@ -753,14 +780,41 @@ async function doCraft(recipeId) {
         if (json.success) {
             msg.style.color = '#4caf50';
             msg.textContent = '✅ ' + json.message;
-            setTimeout(() => location.reload(), 900);
+
+            // Update processed material chip counts
+            const woodEl  = document.getElementById('mat-count-wood');
+            const stoneEl = document.getElementById('mat-count-stone');
+            if (woodEl)  woodEl.textContent  = json.newWood;
+            if (stoneEl) stoneEl.textContent = json.newStone;
+
+            // Decrement raw count for the consumed input
+            if (json.inputItemId === 'wood') _rawWood--;
+            else                             _rawStone--;
+
+            // Remove consumed item div from storage grid
+            if (json.removedItemId) {
+                const el = document.getElementById('hs-item-' + json.removedItemId);
+                if (el) {
+                    el.style.transition = 'opacity .25s';
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.remove();
+                        if (window.hs_removeItem) window.hs_removeItem(json.removedItemId);
+                    }, 250);
+                }
+            }
+
+            // Refresh all recipe button states
+            _updateRecipeButtons();
         } else {
             msg.style.color = '#e8436a';
             msg.textContent = '❌ ' + json.error;
+            if (btn) btn.disabled = _rawWood <= 0 && _rawStone <= 0;
         }
     } catch {
         msg.style.color = '#e8436a';
         msg.textContent = '❌ Network error';
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -874,6 +928,11 @@ async function doCraft(recipeId) {
             if (!json.success) location.reload();
         } catch { location.reload(); }
     });
+
+    // Expose removal hook so doCraft() can purge items without reload
+    window.hs_removeItem = function(dbId) {
+        items = items.filter(i => i.id !== dbId);
+    };
 })();
 
 </script>
