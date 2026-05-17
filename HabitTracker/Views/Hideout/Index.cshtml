@@ -52,7 +52,7 @@
 <style>
     :root {
         --ink:    #0a0a12;
-        --paper:  #f5f3ef;
+        --paper:  #0d0d1a;
         --gold:   #f0b429;
         --violet: #5c3dde;
         --rose:   #e8436a;
@@ -61,7 +61,7 @@
         --stone:  #1a1a2e;
         --stone2: #16213e;
     }
-    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
+    body { background: var(--paper); font-family: "DM Sans", sans-serif; color: #e8e8f0; }
     h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
 
     /* ── HERO ── */
@@ -113,19 +113,20 @@
         margin-bottom: 36px;
     }
     .facility-card {
-        background: white;
+        background: rgba(255,255,255,.06);
         border-radius: 20px;
         padding: 22px 20px;
         display: flex; flex-direction: column; gap: 10px;
-        box-shadow: 0 2px 12px rgba(0,0,0,.06);
-        border: 1.5px solid transparent;
+        box-shadow: 0 2px 12px rgba(0,0,0,.3);
+        border: 1.5px solid rgba(255,255,255,.1);
         transition: transform .2s, box-shadow .2s, border-color .2s;
         position: relative;
         overflow: hidden;
     }
     .facility-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 28px rgba(0,0,0,.1);
+        box-shadow: 0 8px 28px rgba(0,0,0,.4);
+        border-color: rgba(255,255,255,.2);
     }
     .facility-card::before {
         content: "";
@@ -141,7 +142,7 @@
         font-size: 1.7rem;
         flex-shrink: 0;
     }
-    .facility-name  { font-weight: 800; font-size: 1rem; color: var(--ink); }
+    .facility-name  { font-weight: 800; font-size: 1rem; color: #e8e8f0; }
     .facility-desc  { font-size: .78rem; color: #888; line-height: 1.5; flex: 1; }
     .facility-buff  { font-size: .82rem; font-weight: 700; }
     .facility-level {
@@ -152,7 +153,7 @@
     .lv-pip {
         width: 10px; height: 10px;
         border-radius: 50%;
-        background: #e0e0e0;
+        background: rgba(255,255,255,.15);
     }
     .lv-pip.filled { background: currentColor; }
     .upgrade-btn {
@@ -180,7 +181,7 @@
         position: absolute;
         top: 100%; left: 50%; transform: translateX(-50%);
         border: 5px solid transparent;
-        border-top-color: var(--ink);
+        border-top-color: #e8e8f0;
     }
 
     /* ── QUEST SECTION ── */
@@ -188,10 +189,10 @@
         display: flex; align-items: center; gap: 14px;
         margin: 8px 0 24px;
     }
-    .section-divider hr { flex: 1; border-color: #e0ddd8; }
+    .section-divider hr { flex: 1; border-color: rgba(255,255,255,.1); }
     .section-divider span {
         font-weight: 800; font-size: 1.1rem;
-        color: var(--ink); white-space: nowrap;
+        color: #e8e8f0; white-space: nowrap;
     }
 
     .filter-bar {
@@ -233,7 +234,7 @@
     .quest-card { cursor: pointer; }
     .quest-card:not(.done):hover { border-color: var(--violet); box-shadow: 0 4px 16px rgba(92,61,222,.12); }
     .quest-icon { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
-    .quest-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
+    .quest-name { font-weight: 700; font-size: .95rem; color: #e8e8f0; }
     .quest-meta { font-size: .76rem; color: #999; margin-top: 2px; }
     .quest-xp   { font-size: .8rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
     .stat-gains { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
@@ -292,12 +293,12 @@
     }
     .material-chip {
         display: flex; align-items: center; gap: 8px;
-        background: white;
-        border: 1.5px solid rgba(0,0,0,.08);
+        background: rgba(255,255,255,.06);
+        border: 1.5px solid rgba(255,255,255,.1);
         border-radius: 12px;
         padding: 10px 18px;
         font-weight: 700; font-size: .95rem;
-        color: var(--ink);
+        color: #e8e8f0;
         box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
     .material-chip .mat-icon { font-size: 1.5rem; }
@@ -312,8 +313,8 @@
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
             <span style="font-size:2.6rem; line-height:1;">🏰</span>
             <div>
-                <h2 style="margin:0; font-size:2rem; letter-spacing:-1px;">Your Hideout</h2>
-                <p style="margin:0; opacity:.55; font-size:.88rem;">A sanctuary where discipline forges power</p>
+                <h2 style="margin:0; font-size:2rem; letter-spacing:-1px;">Căn Cứ Của Bạn</h2>
+                <p style="margin:0; opacity:.55; font-size:.88rem;">Nơi kỷ luật rèn giũa sức mạnh</p>
             </div>
         </div>
 
@@ -329,28 +330,28 @@
             </div>
             <div class="buff-pill">
                 <span class="buff-pill-icon">🛡️</span>
-                <span>+@buffArmor Armor</span>
+                <span>+@buffArmor Giáp</span>
             </div>
             <div class="buff-pill">
                 <span class="buff-pill-icon">⚡</span>
-                <span>+@buffXpGain.ToString("F0")% XP Gain</span>
+                <span>+@buffXpGain.ToString("F0")% Nhận XP</span>
             </div>
             <div class="buff-pill">
                 <span class="buff-pill-icon">💪</span>
-                <span>+@buffStamina Stamina</span>
+                <span>+@buffStamina Sức bền</span>
             </div>
         </div>
 
         <div style="margin-top:14px; font-size:.8rem; opacity:.4;">
-            @doneToday quest(s) completed today &nbsp;·&nbsp; Level @(user?.Level ?? 1)
+            @doneToday nhiệm vụ hoàn thành hôm nay &nbsp;·&nbsp; Cấp @(user?.Level ?? 1)
         </div>
     </div>
 </div>
 
 <!-- ── FACILITY GRID ── -->
 <div style="margin-bottom:12px;">
-    <h4 style="font-weight:800; margin:0 0 6px; font-size:1.15rem;">⚒️ Facilities</h4>
-    <p style="color:#999; font-size:.84rem; margin:0;">Each facility passively buffs your character stats.</p>
+    <h4 style="font-weight:800; margin:0 0 6px; font-size:1.15rem;">⚒️ Cơ Sở</h4>
+    <p style="color:#999; font-size:.84rem; margin:0;">Mỗi cơ sở mang lại buff thụ động cho nhân vật của bạn.</p>
 </div>
 
 <div class="facility-grid">
@@ -375,7 +376,7 @@
                 <div>
                     <div class="facility-name">@f.Name</div>
                     <div style="font-size:.72rem; font-weight:700; color:@bg; text-transform:uppercase; letter-spacing:.06em;">
-                        @f.StatAffected
+                        @(f.StatAffected switch { "ATK"=>"Tấn Công","HP"=>"Sinh Lực","XPGain"=>"Nhận XP","Stamina"=>"Sức Bền","Armor"=>"Giáp","Storage"=>"Kho Chứa","Crafting"=>"Chế Tác",_=>f.StatAffected })
                     </div>
                 </div>
             </div>
@@ -383,14 +384,13 @@
             <p class="facility-desc">@f.Description</p>
 
             <div class="facility-buff" style="color:@bg;">
-                +@totalBuff @(f.StatAffected == "XPGain" ? "% XP Gain" : f.StatAffected)
-                <span style="font-weight:400; color:#aaa; font-size:.75rem;">(@f.BuffDescription)</span>
+                +@totalBuff @(f.StatAffected == "XPGain" ? "% Nhận XP" : f.StatAffected switch { "ATK"=>"Tấn Công","HP"=>"Sinh Lực","Stamina"=>"Sức Bền","Armor"=>"Giáp","Storage"=>"Kho Chứa","Crafting"=>"Chế Tác",_=>f.StatAffected })
             </div>
 
             <!-- Level pips -->
             <div class="facility-level">
                 <div style="display:flex; flex-direction:column; gap:3px;">
-                    <span style="font-size:.7rem; color:#999; text-transform:uppercase; letter-spacing:.06em;">Level @uf.Level / @f.MaxLevel</span>
+                    <span style="font-size:.7rem; color:#999; text-transform:uppercase; letter-spacing:.06em;">Cấp @uf.Level / @f.MaxLevel</span>
                     <div class="lv-pips" style="color:@bg;">
                         @for (int i = 1; i <= f.MaxLevel; i++)
                         {
@@ -409,7 +409,7 @@
             @if (isMax)
             {
                 <div style="text-align:center; font-size:.78rem; font-weight:700; color:var(--gold); padding:8px 0; background:rgba(240,180,41,.08); border-radius:10px; margin-top:2px;">
-                    ✦ Fully Upgraded
+                    ✦ Nâng Cấp Tối Đa
                 </div>
             }
             else if (uf.UpgradeStartedAt != null)
@@ -446,7 +446,7 @@
                                        color:@(canAfford ? bg : "#666");
                                        cursor:@(canAfford ? "pointer" : "not-allowed");
                                        opacity:@(canAfford ? "1" : ".6"); width:100%;">
-                            ⚒️ Upgrade
+                            ⚒️ Nâng Cấp
                         </button>
                     </form>
                 </div>
@@ -458,12 +458,12 @@
 <!-- ── STORAGE ROOM ── -->
 <div class="section-divider">
     <hr />
-    <span>🏪 Storage Room</span>
+    <span>🏪 Phòng Kho</span>
     <hr />
     <button type="button" onclick="toggleHsRoom()" id="hs-room-btn"
             style="flex-shrink:0; background:var(--violet); color:white; border:none;
                    border-radius:50px; padding:5px 16px; font-size:.8rem; font-weight:700; cursor:pointer;">
-        ▼ Open
+        ▼ Mở
     </button>
 </div>
 
@@ -475,14 +475,14 @@
         <span class="mat-icon">🪵</span>
         <div>
             <div class="mat-count" id="mat-count-wood">@woodCount</div>
-            <div class="mat-label">Wood</div>
+            <div class="mat-label">Gỗ</div>
         </div>
     </div>
     <div class="material-chip">
         <span class="mat-icon">🪨</span>
         <div>
             <div class="mat-count" id="mat-count-stone">@stoneCount</div>
-            <div class="mat-label">Stone</div>
+            <div class="mat-label">Đá</div>
         </div>
     </div>
 </div>
@@ -490,7 +490,7 @@
 <!-- 10×10 Storage Grid -->
 <div class="storage-panel">
     <div class="storage-label">
-        📦 Hideout Storage
+        📦 Kho Căn Cứ
         <span>@hsCols×@hsRows · @(hsCols * hsRows) slots</span>
     </div>
     <div style="overflow-x:auto;">
@@ -531,7 +531,7 @@
     <button type="button" onclick="toggleWb()" id="wb-btn"
             style="flex-shrink:0; background:#c9a227; color:#1a1a1a; border:none;
                    border-radius:50px; padding:5px 16px; font-size:.8rem; font-weight:700; cursor:pointer;">
-        ▼ Open
+        ▼ Mở
     </button>
 </div>
 
@@ -730,7 +730,7 @@ let hsRoomOpen = false;
 function toggleHsRoom() {
     hsRoomOpen = !hsRoomOpen;
     document.getElementById('hs-room-body').style.display = hsRoomOpen ? 'block' : 'none';
-    document.getElementById('hs-room-btn').textContent    = hsRoomOpen ? '▲ Close' : '▼ Open';
+    document.getElementById('hs-room-btn').textContent    = hsRoomOpen ? '▲ Đóng' : '▼ Mở';
 }
 
 // ── Workbench collapse ────────────────────────────────────────────────────────
@@ -738,7 +738,7 @@ let wbOpen = false;
 function toggleWb() {
     wbOpen = !wbOpen;
     document.getElementById('wb-body').style.display = wbOpen ? 'block' : 'none';
-    document.getElementById('wb-btn').textContent    = wbOpen ? '▲ Close' : '▼ Open';
+    document.getElementById('wb-btn').textContent    = wbOpen ? '▲ Đóng' : '▼ Mở';
 }
 
 // ── Craft ─────────────────────────────────────────────────────────────────────

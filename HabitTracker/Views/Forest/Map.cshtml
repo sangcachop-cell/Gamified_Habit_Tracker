@@ -296,8 +296,10 @@
         var (rCols, rRows)   = HabitTracker.Constants.ItemCatalogue.ContainerSize(HabitTracker.Constants.ItemCatalogue.EQUIPPED_RIG);
         const int IC = 64;
     }
+    <div id="map-rot-indicator" style="position:fixed;top:20px;right:20px;background:rgba(0,0,0,.88);color:#f9ca24;border:1.5px solid rgba(249,202,36,.4);border-radius:10px;padding:10px 18px;font-weight:800;font-size:.95rem;display:none;z-index:9999;pointer-events:none;letter-spacing:.04em;">↻ ?×?</div>
+
     <div id="inventory-panel" class="map-panel" style="display:none; min-width:300px;">
-        <div class="panel-title">Kho Đồ Trang Bị</div>
+        <div class="panel-title">Kho Đồ Trang Bị &nbsp;<span style="font-size:.65rem;opacity:.45;font-weight:400;">R = xoay khi kéo</span></div>
 
         <div class="inv-section">
             <div class="inv-label">🪙 TÚI <span class="inv-meta">@pCols×@pRows</span></div>
@@ -404,6 +406,7 @@
     const data = document.getElementById('inv-data');
     if (!data) return;
     const CELL = parseInt(data.dataset.cell, 10);
+    const BW   = 2; // .inv-grid border-width (box-sizing:content-box)
     let invDrag = null;
     let invBusy = false;
 
@@ -413,76 +416,115 @@
         const g = document.getElementById(gridId);
         if (!g) return;
         g.innerHTML = '';
+        const containerId = g.dataset.container;
         items.forEach(p => {
-            const el = document.createElement('div');
+            const id  = getProp(p,'Id');
+            const x   = getProp(p,'GridX'), y = getProp(p,'GridY');
+            const w   = getProp(p,'W'),     h = getProp(p,'H');
+            const isPouch = (id === 0 || id === '0');
+            const el  = document.createElement('div');
             el.className = 'inv-item';
-            const x = getProp(p,'GridX'), y = getProp(p,'GridY');
-            const w = getProp(p,'W'),     h = getProp(p,'H');
             el.style.left   = (x * CELL) + 'px';
             el.style.top    = (y * CELL) + 'px';
             el.style.width  = (w * CELL - 4) + 'px';
             el.style.height = (h * CELL - 4) + 'px';
             const tile = getProp(p,'TileColor') ?? '#444';
             el.style.background = `linear-gradient(135deg, ${tile}cc, ${tile}66)`;
-            const id   = getProp(p,'Id');
-            const name = getProp(p,'Name') ?? '?';
-            const icon = getProp(p,'Icon') ?? '❓';
+            if (isPouch) el.style.outline = '1.5px dashed rgba(249,202,36,.55)';
             el.draggable = true;
             el.dataset.id = id;
-            el.innerHTML = `<span title="${name}">${icon}</span>`;
+            // pointer-events:none on span so drag fires on parent div, not child
+            el.innerHTML = `<span style="pointer-events:none;" title="${getProp(p,'Name')??"?"}">${getProp(p,'Icon')??"❓"}</span>`;
+
+            // pw/ph = pixel dims (CELL*cols - 4), used for hover rotate resize
+            const pw = w * CELL, ph = h * CELL;
             el.addEventListener('dragstart', e => {
-                invDrag = { id, w, h };
+                invDrag = { id, w, h, isPouch, srcContainer: containerId, srcX: x, srcY: y };
                 el.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
             });
             el.addEventListener('dragend', () => { el.classList.remove('dragging'); invDrag = null; });
+            el.addEventListener('mouseover', ev => {
+                hovMapItem = { id, isPouch, srcContainer: containerId, srcX: x, srcY: y, pw, ph, el };
+                ev.stopPropagation();
+            });
+            el.addEventListener('mouseout', () => { hovMapItem = null; });
+
+            // Right-click rotate
             el.addEventListener('contextmenu', async e => {
                 e.preventDefault();
-                if (invBusy) return;
-                invBusy = true;
-                const res = await fetch(`/Inventory/RotateAjax/${id}`, { method: 'POST' });
-                const r = await res.json();
-                if (r.success) location.reload();
-                else { alert(r.error || 'Cannot rotate'); invBusy = false; }
+                if (invBusy) return; invBusy = true;
+                if (isPouch) {
+                    const res = await fetch('/Forest/Loot/RotatePouch', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ Container: containerId, GridX: x, GridY: y })
+                    });
+                    const r = await res.json();
+                    if (r.ok) location.reload();
+                    else { alert(r.error || 'Không thể xoay'); invBusy = false; }
+                } else {
+                    const res = await fetch(`/Inventory/RotateAjax/${id}`, { method: 'POST' });
+                    const r = await res.json();
+                    if (r.success) location.reload();
+                    else { alert(r.error || 'Cannot rotate'); invBusy = false; }
+                }
             });
             g.appendChild(el);
         });
     }
 
     document.querySelectorAll('.inv-grid').forEach(g => {
-        g.addEventListener('dragover', e => { e.preventDefault(); if (invDrag) g.classList.add('drop-active'); });
+        g.addEventListener('dragover',  e => { e.preventDefault(); if (invDrag) g.classList.add('drop-active'); });
         g.addEventListener('dragleave', () => g.classList.remove('drop-active'));
         g.addEventListener('drop', async e => {
             e.preventDefault(); e.stopPropagation();
             g.classList.remove('drop-active');
             if (!invDrag || invBusy) return;
             const captured = invDrag; invDrag = null; invBusy = true;
-            const rect = g.getBoundingClientRect();
-            const cx = Math.floor((e.clientX - rect.left) / CELL);
-            const cy = Math.floor((e.clientY - rect.top)  / CELL);
+            const rect   = g.getBoundingClientRect();
+            const cx     = Math.max(0, Math.floor((e.clientX - rect.left - BW) / CELL));
+            const cy     = Math.max(0, Math.floor((e.clientY - rect.top  - BW) / CELL));
             const target = g.dataset.container;
-            const fd = new FormData();
-            fd.append('itemId', captured.id);
-            fd.append('targetContainer', target);
-            fd.append('targetX', cx);
-            fd.append('targetY', cy);
-            const res = await fetch('/Inventory/Move', { method: 'POST', body: fd });
-            const r = await res.json();
-            if (r.success) location.reload();
-            else { alert(r.error || 'Cannot place'); invBusy = false; }
+
+            if (captured.isPouch) {
+                const res = await fetch('/Forest/Loot/MovePouch', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        SrcContainer: captured.srcContainer, SrcX: captured.srcX, SrcY: captured.srcY,
+                        TargetContainer: target, TargetX: cx, TargetY: cy
+                    })
+                });
+                const r = await res.json();
+                if (r.ok) location.reload();
+                else { alert(r.error || 'Không thể đặt'); invBusy = false; }
+            } else {
+                const fd = new FormData();
+                fd.append('itemId', captured.id);
+                fd.append('targetContainer', target);
+                fd.append('targetX', cx);
+                fd.append('targetY', cy);
+                const res = await fetch('/Inventory/Move', { method: 'POST', body: fd });
+                const r = await res.json();
+                if (r.success) location.reload();
+                else { alert(r.error || 'Cannot place'); invBusy = false; }
+            }
         });
     });
 
     const trash = document.getElementById('inv-trash');
     if (trash) {
-        trash.addEventListener('dragover', e => { e.preventDefault(); if (invDrag) trash.classList.add('drop-active'); });
+        trash.addEventListener('dragover',  e => { e.preventDefault(); if (invDrag) trash.classList.add('drop-active'); });
         trash.addEventListener('dragleave', () => trash.classList.remove('drop-active'));
         trash.addEventListener('drop', async e => {
             e.preventDefault(); e.stopPropagation();
             trash.classList.remove('drop-active');
             if (!invDrag || invBusy) return;
             const captured = invDrag; invDrag = null;
-            if (!confirm('Discard this item permanently?')) return;
+            if (captured.isPouch) {
+                alert('Không thể bỏ vật phẩm đang chờ. Đến điểm Rút Lui để lưu hoặc bỏ qua.');
+                return;
+            }
+            if (!confirm('Bỏ vật phẩm này vĩnh viễn?')) return;
             invBusy = true;
             const res = await fetch(`/Inventory/Discard/${captured.id}`, { method: 'POST' });
             const r = await res.json();
@@ -491,11 +533,52 @@
         });
     }
 
+    // ── R key: hover over item → press R → rotate ────────────────────────
+    const rotEl = document.getElementById('map-rot-indicator');
+    let rotTimer = null, hovMapItem = null;
+    function showRot(dims) {
+        if (!rotEl) return;
+        rotEl.textContent = '↻ ' + dims;
+        rotEl.style.display = 'block';
+        clearTimeout(rotTimer);
+        rotTimer = setTimeout(() => { rotEl.style.display = 'none'; }, 1200);
+    }
+
+    document.addEventListener('keydown', async function(e) {
+        if (e.code !== 'KeyR' || !hovMapItem) return;
+        if (invBusy) return; invBusy = true;
+        const hov = hovMapItem;
+        if (hov.isPouch) {
+            const res = await fetch('/Forest/Loot/RotatePouch', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Container: hov.srcContainer, GridX: hov.srcX, GridY: hov.srcY })
+            });
+            const r = await res.json();
+            invBusy = false;
+            if (r.ok) {
+                const tmp = hov.pw; hov.pw = hov.ph; hov.ph = tmp;
+                hov.el.style.width  = (hov.pw - 4) + 'px';
+                hov.el.style.height = (hov.ph - 4) + 'px';
+                showRot(Math.round(hov.pw/CELL) + '×' + Math.round(hov.ph/CELL));
+            } else { alert(r.error || 'Không thể xoay'); }
+        } else {
+            const res = await fetch(`/Inventory/RotateAjax/${hov.id}`, { method: 'POST' });
+            const r = await res.json();
+            invBusy = false;
+            if (r.success) {
+                const tmp = hov.pw; hov.pw = hov.ph; hov.ph = tmp;
+                hov.el.style.width  = (hov.pw - 4) + 'px';
+                hov.el.style.height = (hov.ph - 4) + 'px';
+                showRot(Math.round(hov.pw/CELL) + '×' + Math.round(hov.ph/CELL));
+            }
+        }
+    });
+
     try {
         renderInv('inv-pocket',   JSON.parse(data.dataset.pocket   || '[]'));
         renderInv('inv-backpack', JSON.parse(data.dataset.backpack || '[]'));
         renderInv('inv-rig',      JSON.parse(data.dataset.rig      || '[]'));
-    } catch (e) { console.warn('Inventory render failed', e); }
+    } catch (err) { console.warn('Inventory render failed', err); }
 })();
 
 function toggleInventory() {

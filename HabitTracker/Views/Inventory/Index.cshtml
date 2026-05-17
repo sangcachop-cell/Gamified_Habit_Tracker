@@ -124,13 +124,14 @@
         color: rgba(255,255,255,.7); margin-top: 2px; padding: 0 4px;
         pointer-events: none; }
 
-    .rotate-form { position: absolute; top: 3px; right: 3px; }
-    .rotate-btn {
-        background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.2);
-        border-radius: 4px; color: white; font-size: .7rem; padding: 1px 5px;
-        cursor: pointer; line-height: 1.4; transition: background .15s;
+    .rot-toast {
+        position: fixed; top: 20px; right: 20px;
+        background: rgba(0,0,0,.88); color: #f0b429;
+        border: 1.5px solid rgba(240,180,41,.4);
+        border-radius: 10px; padding: 10px 18px;
+        font-weight: 800; font-size: .95rem;
+        display: none; z-index: 9999; pointer-events: none;
     }
-    .rotate-btn:hover { background: rgba(240,180,41,.45); border-color: #f0b429; }
 
     /* Info panel */
     .info-panel {
@@ -289,13 +290,8 @@
                          data-rotated="@item.IsRotated.ToString().ToLower()"
                          data-can-rotate="@item.CanRotate.ToString().ToLower()"
                          onclick="selectItem(this)">
-                        <span class="item-icon">@item.Icon</span>
-                        <span class="item-name">@item.Name</span>
-                        @if (item.CanRotate)
-                        {
-                            <button class="rotate-btn" type="button"
-                                    onclick="rotateItemAjax(event,@item.Id,this)" title="Rotate">↺</button>
-                        }
+                        <span class="item-icon" style="pointer-events:none;">@item.Icon</span>
+                        <span class="item-name" style="pointer-events:none;">@item.Name</span>
                     </div>
                 }
             </div>
@@ -332,13 +328,8 @@
                          data-rotated="@item.IsRotated.ToString().ToLower()"
                          data-can-rotate="@item.CanRotate.ToString().ToLower()"
                          onclick="selectItem(this)">
-                        <span class="item-icon">@item.Icon</span>
-                        <span class="item-name">@item.Name</span>
-                        @if (item.CanRotate)
-                        {
-                            <button class="rotate-btn" type="button"
-                                    onclick="rotateItemAjax(event,@item.Id,this)" title="Rotate">↺</button>
-                        }
+                        <span class="item-icon" style="pointer-events:none;">@item.Icon</span>
+                        <span class="item-name" style="pointer-events:none;">@item.Name</span>
                     </div>
                 }
             </div>
@@ -362,17 +353,8 @@
                              data-name="@item.Name" data-icon="@item.Icon" data-desc="@item.Description" data-cat="@item.Category"
                              data-rotated="@item.IsRotated.ToString().ToLower()" data-can-rotate="@item.CanRotate.ToString().ToLower()"
                              onclick="selectItem(this)">
-                            <span class="item-icon">@item.Icon</span>
-                            <span class="item-name">@item.Name</span>
-                            @if (item.CanRotate)
-                            {
-                                <form class="rotate-form"
-                                      asp-action="Rotate" asp-route-id="@item.Id" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="rotate-btn"
-                                            onclick="event.stopPropagation()" title="Rotate">↺</button>
-                                </form>
-                            }
+                            <span class="item-icon" style="pointer-events:none;">@item.Icon</span>
+                            <span class="item-name" style="pointer-events:none;">@item.Name</span>
                         </div>
                     }
                 </div>
@@ -424,7 +406,7 @@
             <div class="info-meta">
                 <div class="info-meta-row"><span>Kích Thước</span><span id="info-size"></span></div>
                 <div class="info-meta-row"><span>Đã Xoay</span><span id="info-rotated"></span></div>
-                <div class="info-meta-row" id="rotate-row"><span>Có thể xoay</span><span>↺ được</span></div>
+                <div class="info-meta-row" id="rotate-row"><span>Xoay</span><span>Kéo + nhấn R</span></div>
             </div>
             <div id="equip-action" style="display:none; margin-top:14px;">
                 <form id="equip-form" method="post">
@@ -449,23 +431,30 @@
 
 @section Scripts {
 <script>
-function rotateItemAjax(e, itemId, btn) {
-    e.stopPropagation();
-    fetch('/Inventory/RotateAjax/' + itemId, { method: 'POST' })
-        .then(r => r.json())
-        .then(d => {
-            if (!d.success) { alert(d.error || 'Cannot rotate'); return; }
-            const el = btn.closest('.inv-item');
-            const CELLPX = @C;
-            const w = parseInt(el.dataset.w);
-            const h = parseInt(el.dataset.h);
-            el.dataset.w = h;
-            el.dataset.h = w;
-            el.dataset.rotated = el.dataset.rotated === 'true' ? 'false' : 'true';
-            el.style.width  = (h * CELLPX - 2) + 'px';
-            el.style.height = (w * CELLPX - 2) + 'px';
-        })
-        .catch(() => alert('Network error'));
+// ── Rotate toast ─────────────────────────────────────────────────────────────
+const rotToast = document.createElement('div');
+rotToast.className = 'rot-toast';
+document.body.appendChild(rotToast);
+let rotTimer = null;
+function showRot(dims) {
+    rotToast.textContent = '↻ ' + dims;
+    rotToast.style.display = 'block';
+    clearTimeout(rotTimer);
+    rotTimer = setTimeout(() => { rotToast.style.display = 'none'; }, 1200);
+}
+
+async function rotateItem(itemId, el) {
+    const res = await fetch('/Inventory/RotateAjax/' + itemId, { method: 'POST' });
+    const d = await res.json();
+    if (!d.success) { alert(d.error || 'Không thể xoay'); return false; }
+    const w = parseInt(el.dataset.w), h = parseInt(el.dataset.h);
+    el.dataset.w = h; el.dataset.h = w;
+    el.dataset.rotated = el.dataset.rotated === 'true' ? 'false' : 'true';
+    el.style.width  = (h * @C - 2) + 'px';
+    el.style.height = (w * @C - 2) + 'px';
+    const local = items.find(i => i.id === itemId);
+    if (local) { const tmp = local.w; local.w = local.h; local.h = tmp; }
+    return true;
 }
 
 const CELL = @C;
@@ -523,6 +512,24 @@ function onDragEnd() {
     hidePreview();
     document.querySelectorAll('.container-panel').forEach(p => p.classList.remove('drag-over'));
 }
+
+// R key: hover over item → press R → rotate (works without drag since HTML5 DnD blocks keydown)
+let hovInv = null;
+document.querySelectorAll('.inv-item').forEach(el => {
+    el.addEventListener('mouseover', e => {
+        if (el.dataset.canRotate === 'true') hovInv = el;
+        e.stopPropagation();
+    });
+    el.addEventListener('mouseout', () => { hovInv = null; });
+});
+
+document.addEventListener('keydown', async e => {
+    if (e.code !== 'KeyR' || !hovInv) return;
+    e.preventDefault();
+    const id = parseInt(hovInv.dataset.id);
+    const ok = await rotateItem(id, hovInv);
+    if (ok) showRot(hovInv.dataset.w + '×' + hovInv.dataset.h);
+});
 
 document.querySelectorAll('.inv-grid').forEach(grid => {
     grid.addEventListener('dragover',  e => onGridDragOver(e, grid));

@@ -94,11 +94,24 @@ namespace HabitTracker.Controllers
 
             ViewBag.Session       = session;
             ViewBag.SessionJson   = JsonSerializer.Serialize(session);
-            ViewBag.PocketItems   = BuildPlacedLoot(pocketItems);
-            ViewBag.BackpackItems = BuildPlacedLoot(bpItems);
-            ViewBag.RigItems      = BuildPlacedLoot(rigItems);
             ViewBag.HasBackpack   = user?.EquippedBackpackItem != null;
             ViewBag.HasRig        = user?.EquippedRigItem != null;
+
+            // Build inventory panel lists — DB items + session Pouch items
+            var mapPocket   = BuildPlacedLoot(pocketItems);
+            var mapBackpack = BuildPlacedLoot(bpItems);
+            var mapRig      = BuildPlacedLoot(rigItems);
+            foreach (var lp in session.Pouch)
+            {
+                var pl = BuildPlacedPouchItem(lp);
+                if (pl == null) continue;
+                if (lp.Container == ItemCatalogue.BACKPACK)               mapPocket.Add(pl);
+                else if (lp.Container == ItemCatalogue.EQUIPPED_BACKPACK) mapBackpack.Add(pl);
+                else if (lp.Container == ItemCatalogue.EQUIPPED_RIG)      mapRig.Add(pl);
+            }
+            ViewBag.PocketItems   = mapPocket;
+            ViewBag.BackpackItems = mapBackpack;
+            ViewBag.RigItems      = mapRig;
 
             // Interior sub-map branch
             if (session.IsInInterior)
@@ -212,7 +225,9 @@ namespace HabitTracker.Controllers
                         session.PlayerY           = cell.Y;
                         session.MovesSpent        += stepsSoFar;
                         session.PendingCombat      = true;
-                        session.PendingMonsterTier = ForestMap.GetEventTier(cell.X, cell.Y);
+                        var zone215 = ForestMap.GetZone(cell.X, cell.Y);
+                        session.PendingMonsterId   = ForestMap.GetMonsterId(rng, zone215?.Id);
+                        session.PendingMonsterTier = ForestMap.MakeMonster(session.PendingMonsterId, 1).Tier;
                         // Store remaining path (from combat cell to original destination)
                         session.PendingPath = pathArr[si..]
                             .Select(c => new[] { c.X, c.Y }).ToList();
@@ -222,6 +237,7 @@ namespace HabitTracker.Controllers
                             ok              = true,
                             combatTriggered = true,
                             monsterTier     = session.PendingMonsterTier,
+                            monsterId       = session.PendingMonsterId,
                             x               = cell.X,
                             y               = cell.Y,
                             moves           = session.MovesSpent,
@@ -276,12 +292,15 @@ namespace HabitTracker.Controllers
                     session.PlayerX           = tx; session.PlayerY = ty;
                     session.MovesSpent        += 1;
                     session.PendingCombat      = true;
-                    session.PendingMonsterTier = ForestMap.GetEventTier(tx, ty);
+                    var zone279 = ForestMap.GetZone(tx, ty);
+                    session.PendingMonsterId   = ForestMap.GetMonsterId(rng, zone279?.Id);
+                    session.PendingMonsterTier = ForestMap.MakeMonster(session.PendingMonsterId, 1).Tier;
                     session.PendingPath        = null;
                     SaveSession(session);
                     return Json(new {
                         ok = true, combatTriggered = true,
                         monsterTier = session.PendingMonsterTier,
+                        monsterId   = session.PendingMonsterId,
                         x = tx, y = ty, moves = session.MovesSpent, dist = 1
                     });
                 }
@@ -325,14 +344,16 @@ namespace HabitTracker.Controllers
                 var user = await _context.Users.FindAsync(userId.Value);
                 if (user == null) return RedirectToAction("Login", "Account");
 
-                var monster = ForestMap.MakeMonster(session.PendingMonsterTier, user.Level);
+                var monster = ForestMap.MakeMonster(session.PendingMonsterId, user.Level);
                 int playerHP = session.PlayerCurrentHP > 0 ? session.PlayerCurrentHP : user.HP;
 
                 combat = new ForestCombatState
                 {
+                    MonsterId                = monster.Id,
                     MonsterTier              = monster.Tier,
                     MonsterName              = monster.Name,
                     MonsterIcon              = monster.Icon,
+                    MonsterDescription       = monster.Description,
                     MonsterMaxHP             = monster.HP,
                     MonsterCurrentHP         = monster.HP,
                     MonsterAttack            = monster.Attack,
@@ -344,7 +365,7 @@ namespace HabitTracker.Controllers
                     PlayerArmor              = user.Armor,
                     PlayerSpeed              = user.Speed,
                     PlayerDamageReductionPct = user.ArmorDamageReductionPct,
-                    Log = new List<string> { $"A {monster.Name} blocks your path!" }
+                    Log = new List<string> { $"Một {monster.Name} chặn đường bạn!" }
                 };
                 SaveCombat(combat);
 
@@ -382,11 +403,11 @@ namespace HabitTracker.Controllers
             // Speed summary line
             string speedLine = playerFirst
                 ? (playerBonus
-                    ? $"Speed advantage! You strike twice. (SPD {combat.PlayerSpeed} > {combat.MonsterSpeed})"
-                    : $"You act first. (SPD {combat.PlayerSpeed} vs {combat.MonsterSpeed})")
+                    ? $"Ưu thế tốc độ! Bạn đánh hai lần. (TĐ {combat.PlayerSpeed} > {combat.MonsterSpeed})"
+                    : $"Bạn hành động trước. (TĐ {combat.PlayerSpeed} so với {combat.MonsterSpeed})")
                 : (monsterBonus
-                    ? $"{combat.MonsterName} is faster and strikes twice! (SPD {combat.MonsterSpeed} > {combat.PlayerSpeed})"
-                    : $"{combat.MonsterName} acts first. (SPD {combat.MonsterSpeed} vs {combat.PlayerSpeed})");
+                    ? $"{combat.MonsterName} nhanh hơn và đánh hai lần! (TĐ {combat.MonsterSpeed} > {combat.PlayerSpeed})"
+                    : $"{combat.MonsterName} hành động trước. (TĐ {combat.MonsterSpeed} so với {combat.PlayerSpeed})");
             combat.Log.Insert(0, speedLine);
 
             // Damage helpers (local functions)
@@ -402,12 +423,12 @@ namespace HabitTracker.Controllers
                 if (monsterDead) return;
                 int d = PlayerDmg();
                 combat.MonsterCurrentHP -= d;
-                combat.Log.Insert(0, $"{prefix}You strike {combat.MonsterName} for {d} damage.");
+                combat.Log.Insert(0, $"{prefix}Bạn tấn công {combat.MonsterName} gây {d} sát thương.");
                 if (combat.MonsterCurrentHP <= 0)
                 {
                     combat.MonsterCurrentHP = 0;
                     monsterDead = true;
-                    combat.Log.Insert(0, $"{combat.MonsterName} is defeated!");
+                    combat.Log.Insert(0, $"{combat.MonsterName} đã bị tiêu diệt!");
                 }
             }
 
@@ -416,12 +437,12 @@ namespace HabitTracker.Controllers
                 if (playerDead) return;
                 int d = MonsterDmg();
                 combat.PlayerCurrentHP -= d;
-                combat.Log.Insert(0, $"{prefix}{combat.MonsterName} hits you for {d} damage.");
+                combat.Log.Insert(0, $"{prefix}{combat.MonsterName} tấn công bạn gây {d} sát thương.");
                 if (combat.PlayerCurrentHP <= 0)
                 {
                     combat.PlayerCurrentHP = 0;
                     playerDead = true;
-                    combat.Log.Insert(0, "You have been slain!");
+                    combat.Log.Insert(0, "Bạn đã bị tiêu diệt!");
                 }
             }
 
@@ -429,21 +450,21 @@ namespace HabitTracker.Controllers
             if (playerFirst)
             {
                 DoPlayerHit();
-                if (playerBonus && !monsterDead) DoPlayerHit("Bonus strike — ");
+                if (playerBonus && !monsterDead) DoPlayerHit("Đòn Bổ Sung — ");
                 if (!monsterDead)
                 {
                     DoMonsterHit();
-                    if (monsterBonus && !playerDead) DoMonsterHit("Counter-strike — ");
+                    if (monsterBonus && !playerDead) DoMonsterHit("Phản Công — ");
                 }
             }
             else
             {
                 DoMonsterHit();
-                if (monsterBonus && !playerDead) DoMonsterHit("Bonus strike — ");
+                if (monsterBonus && !playerDead) DoMonsterHit("Đòn Bổ Sung — ");
                 if (!playerDead)
                 {
                     DoPlayerHit();
-                    if (playerBonus && !monsterDead) DoPlayerHit("Counter-strike — ");
+                    if (playerBonus && !monsterDead) DoPlayerHit("Phản Công — ");
                 }
             }
 
@@ -453,18 +474,18 @@ namespace HabitTracker.Controllers
                 session.PendingCombat   = false;
                 session.PlayerCurrentHP = combat.PlayerCurrentHP;
 
-                // Roll loot: rarity first, then pick item from that tier's pool
+                // Roll loot: rarity first, then pick item from per-monster pool
                 var lootRng = new Random();
                 session.MonsterBody.Clear();
-                string? rolledRarity = ForestMap.LootTables.RollRarity(lootRng, combat.MonsterTier);
+                string? rolledRarity = ForestMap.LootTables.RollRarity(lootRng, combat.MonsterId);
                 string? rolledItem   = rolledRarity != null
-                    ? ForestMap.LootTables.RollItem(lootRng, rolledRarity)
+                    ? ForestMap.LootTables.RollItem(lootRng, combat.MonsterId, rolledRarity)
                     : null;
                 if (rolledItem != null)
                     session.MonsterBody.Add(new LootItem { ItemId = rolledItem, GridX = 0, GridY = 0, Rotated = false });
 
                 bool dropped = session.MonsterBody.Count > 0;
-                string lootMsg = dropped ? $"Found {rolledRarity} item: {rolledItem}!" : "No loot.";
+                string lootMsg = dropped ? $"Nhặt được vật phẩm {rolledRarity}: {rolledItem}!" : "Không có chiến lợi phẩm.";
                 session.AccumulatedLoot.Add(lootMsg);
 
                 SaveSession(session);
@@ -525,8 +546,8 @@ namespace HabitTracker.Controllers
             var rng = new Random();
             bool defendFails = rng.Next(100) < failPct;
 
-            string risk = idx == 0 ? "always blocks" : $"{failPct}% fail risk";
-            combat.Log.Insert(0, $"You raise your guard. ({risk})");
+            string risk = idx == 0 ? "luôn chặn" : $"{failPct}% rủi ro thất bại";
+            combat.Log.Insert(0, $"Bạn nâng phòng thủ. ({risk})");
             combat.ConsecutiveDefends++;
 
             bool monsterBonus = combat.MonsterSpeed >= (int)(combat.PlayerSpeed * 1.5);
@@ -538,34 +559,34 @@ namespace HabitTracker.Controllers
 
             if (defendFails)
             {
-                combat.Log.Insert(0, "💥 Your guard breaks!");
+                combat.Log.Insert(0, "💥 Phòng thủ của bạn bị phá vỡ!");
 
                 int d = MonsterDmg();
                 combat.PlayerCurrentHP -= d;
-                combat.Log.Insert(0, $"{combat.MonsterName} hits you for {d} damage.");
+                combat.Log.Insert(0, $"{combat.MonsterName} tấn công bạn gây {d} sát thương.");
                 if (combat.PlayerCurrentHP <= 0)
                 {
                     combat.PlayerCurrentHP = 0;
                     playerDead = true;
-                    combat.Log.Insert(0, "You have been slain!");
+                    combat.Log.Insert(0, "Bạn đã bị tiêu diệt!");
                 }
 
                 if (monsterBonus && !playerDead)
                 {
                     d = MonsterDmg();
                     combat.PlayerCurrentHP -= d;
-                    combat.Log.Insert(0, $"Bonus strike — hits for {d}.");
+                    combat.Log.Insert(0, $"Đòn Bổ Sung — gây {d} sát thương.");
                     if (combat.PlayerCurrentHP <= 0)
                     {
                         combat.PlayerCurrentHP = 0;
                         playerDead = true;
-                        combat.Log.Insert(0, "You have been slain!");
+                        combat.Log.Insert(0, "Bạn đã bị tiêu diệt!");
                     }
                 }
             }
             else
             {
-                combat.Log.Insert(0, $"🛡️ All damage from {combat.MonsterName} blocked!");
+                combat.Log.Insert(0, $"🛡️ Toàn bộ sát thương từ {combat.MonsterName} bị chặn hoàn toàn!");
             }
 
             if (playerDead)
@@ -604,7 +625,7 @@ namespace HabitTracker.Controllers
 
             if (scroll == null)
             {
-                combat.Log.Insert(0, "❌ You need an Escape Scroll to flee!");
+                combat.Log.Insert(0, "❌ Bạn cần Cuộn Tẩu Thoát để bỏ chạy!");
                 SaveCombat(combat);
                 return RedirectToAction(nameof(Combat));
             }
@@ -796,13 +817,15 @@ namespace HabitTracker.Controllers
                         session.PlayerY           = cell.Y;
                         session.MovesSpent        += stepsSoFar;
                         session.PendingCombat      = true;
-                        session.PendingMonsterTier = "rare";
+                        session.PendingMonsterId   = ForestMap.GetMonsterId(rng, session.CurrentMapId);
+                        session.PendingMonsterTier = ForestMap.MakeMonster(session.PendingMonsterId, 1).Tier;
                         session.PendingPath        = pathArr[si..]
                             .Select(c => new[] { c.X, c.Y }).ToList();
                         SaveSession(session);
                         return Json(new {
                             ok = true, combatTriggered = true,
-                            monsterTier = "rare",
+                            monsterTier = session.PendingMonsterTier,
+                            monsterId   = session.PendingMonsterId,
                             x = cell.X, y = cell.Y,
                             moves = session.MovesSpent, dist = stepsSoFar
                         });
@@ -852,12 +875,14 @@ namespace HabitTracker.Controllers
                     session.PlayerX           = tx; session.PlayerY = ty;
                     session.MovesSpent        += 1;
                     session.PendingCombat      = true;
-                    session.PendingMonsterTier = "rare";
+                    session.PendingMonsterId   = ForestMap.GetMonsterId(rng, session.CurrentMapId);
+                    session.PendingMonsterTier = ForestMap.MakeMonster(session.PendingMonsterId, 1).Tier;
                     session.PendingPath        = null;
                     SaveSession(session);
                     return Json(new {
                         ok = true, combatTriggered = true,
-                        monsterTier = "rare",
+                        monsterTier = session.PendingMonsterTier,
+                        monsterId   = session.PendingMonsterId,
                         x = tx, y = ty, moves = session.MovesSpent, dist = 1
                     });
                 }
@@ -1134,6 +1159,132 @@ namespace HabitTracker.Controllers
                     ItemCatalogue.CanRotate(item.ItemId), item.ContainerType));
             }
             return result;
+        }
+
+        // ── Loot/MovePouch POST ───────────────────────────────────────────────
+        public class MovePouchRequest
+        {
+            public string SrcContainer    { get; set; } = "";
+            public int    SrcX            { get; set; }
+            public int    SrcY            { get; set; }
+            public string TargetContainer { get; set; } = "";
+            public int    TargetX         { get; set; }
+            public int    TargetY         { get; set; }
+        }
+
+        [HttpPost("Loot/MovePouch")]
+        public IActionResult LootMovePouch([FromBody] MovePouchRequest req)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { ok = false, error = "Not logged in" });
+
+            var session = LoadSession();
+            if (session == null || !session.IsActive)
+                return Json(new { ok = false, error = "Không có phiên hoạt động" });
+
+            var item = session.Pouch.FirstOrDefault(p =>
+                p.Container == req.SrcContainer && p.GridX == req.SrcX && p.GridY == req.SrcY);
+            if (item == null) return Json(new { ok = false, error = "Không tìm thấy vật phẩm" });
+
+            if (!ItemCatalogue.Items.TryGetValue(item.ItemId, out var def))
+                return Json(new { ok = false, error = "Vật phẩm không tồn tại" });
+
+            int w = item.Rotated ? def.Height : def.Width;
+            int h = item.Rotated ? def.Width  : def.Height;
+
+            var allowed = new[] { ItemCatalogue.BACKPACK, ItemCatalogue.EQUIPPED_BACKPACK, ItemCatalogue.EQUIPPED_RIG };
+            if (!allowed.Contains(req.TargetContainer))
+                return Json(new { ok = false, error = "Container không hợp lệ" });
+
+            var constraint = ItemCatalogue.SlotConstraint(req.TargetContainer);
+            if (constraint.HasValue && (w != constraint.Value.W || h != constraint.Value.H))
+                return Json(new { ok = false, error = $"Ô chỉ nhận vật phẩm {constraint.Value.W}×{constraint.Value.H}" });
+
+            var (cols, rows) = ItemCatalogue.ContainerSize(req.TargetContainer);
+            if (req.TargetX < 0 || req.TargetY < 0 || req.TargetX + w > cols || req.TargetY + h > rows)
+                return Json(new { ok = false, error = "Vượt quá giới hạn ô" });
+
+            foreach (var other in session.Pouch)
+            {
+                if (other == item || other.Container != req.TargetContainer) continue;
+                if (!ItemCatalogue.Items.TryGetValue(other.ItemId, out var od)) continue;
+                int ow = other.Rotated ? od.Height : od.Width;
+                int oh = other.Rotated ? od.Width  : od.Height;
+                bool overlap = !(req.TargetX + w <= other.GridX || other.GridX + ow <= req.TargetX ||
+                                 req.TargetY + h <= other.GridY || other.GridY + oh <= req.TargetY);
+                if (overlap) return Json(new { ok = false, error = "Ô đã có vật phẩm khác" });
+            }
+
+            item.Container = req.TargetContainer;
+            item.GridX = req.TargetX;
+            item.GridY = req.TargetY;
+            SaveSession(session);
+            return Json(new { ok = true });
+        }
+
+        // ── Loot/RotateBody POST ──────────────────────────────────────────────
+        [HttpPost("Loot/RotateBody")]
+        public IActionResult LootRotateBody(int index)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { ok = false });
+
+            var session = LoadSession();
+            if (session == null || !session.IsActive || index < 0 || index >= session.MonsterBody.Count)
+                return Json(new { ok = false, error = "Chỉ số không hợp lệ" });
+
+            var item = session.MonsterBody[index];
+            if (!ItemCatalogue.Items.TryGetValue(item.ItemId, out var def) || def.Width == def.Height)
+                return Json(new { ok = false, error = "Không thể xoay" });
+
+            item.Rotated = !item.Rotated;
+            SaveSession(session);
+            return Json(new { ok = true });
+        }
+
+        // ── Loot/RotatePouch POST ─────────────────────────────────────────────
+        public class RotatePouchRequest
+        {
+            public string Container { get; set; } = "";
+            public int    GridX     { get; set; }
+            public int    GridY     { get; set; }
+        }
+
+        [HttpPost("Loot/RotatePouch")]
+        public IActionResult LootRotatePouch([FromBody] RotatePouchRequest req)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { ok = false });
+
+            var session = LoadSession();
+            if (session == null || !session.IsActive)
+                return Json(new { ok = false, error = "Không có phiên hoạt động" });
+
+            var item = session.Pouch.FirstOrDefault(p =>
+                p.Container == req.Container && p.GridX == req.GridX && p.GridY == req.GridY);
+            if (item == null) return Json(new { ok = false, error = "Không tìm thấy" });
+
+            if (!ItemCatalogue.Items.TryGetValue(item.ItemId, out var def) || def.Width == def.Height)
+                return Json(new { ok = false, error = "Không thể xoay" });
+
+            var constraint = ItemCatalogue.SlotConstraint(item.Container);
+            if (constraint.HasValue)
+            {
+                int newW = item.Rotated ? def.Width : def.Height;
+                int newH = item.Rotated ? def.Height : def.Width;
+                if (newW != constraint.Value.W || newH != constraint.Value.H)
+                    return Json(new { ok = false, error = "Ô không cho phép xoay" });
+            }
+
+            int rw = item.Rotated ? def.Width  : def.Height;
+            int rh = item.Rotated ? def.Height : def.Width;
+            var (cols, rows) = ItemCatalogue.ContainerSize(item.Container);
+            if (item.GridX + rw > cols || item.GridY + rh > rows)
+                return Json(new { ok = false, error = "Vượt giới hạn sau xoay" });
+
+            item.Rotated = !item.Rotated;
+            SaveSession(session);
+            return Json(new { ok = true });
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

@@ -4,26 +4,30 @@
 
 Build a gamified habit tracker RPG where real-life habits (quests) are completed via interactive minigames. Players earn XP, stats, and loot. Core loop: complete quests → get stronger → survive harder forest raids → craft better gear → repeat.
 
-Pillars not yet finished: more quests/minigames, craft timer, stamina cost, boss encounters, chest loot in location interiors, market/economy.
+Pillars not yet finished: craft timer, stamina cost, chest loot in interiors, boss encounters, market/economy, more minigames/quests.
 
 ---
 
 ## Current Code State (branch: `fix-branch`)
 
-Last commit on repo: `c872322`. Current session work (Việt hóa UI) is **uncommitted local changes**.
+Last commits this session:
+- `37d1279` — feat: localize all core UI to Vietnamese
+- Several uncommitted changes from this session (Tetris minigame, monster overhaul, item expansion, dark theme fixes, inventory/loot bug fixes)
 
 ### What works end-to-end
 
-- **Fantasy UI + Full Vietnamese** — dark theme (Cinzel font, gold/purple), toàn bộ text đã dịch sang tiếng Việt: navbar, forest views (Rừng Sâu, Chiến Đấu, Chiến Lợi Phẩm, Rút Lui, Tử Vong), inventory, login, dashboard
-- **Forest raid** — 128×128 map, WASD-only movement (click-to-move removed), A* used internally for post-combat path continuation
-- **Location interiors** — Cave/Warehouse/Lake → 64×64 sub-map with unique terrain, rare encounters (always Forest Brute), exit zones, chest markers (visual only)
-- **Pity system** — `StepsSinceLastCombat`: minimum 10 steps between encounters; resets on combat and on interior entry
-- **Combat** — turn-based, path animates to combat cell before redirecting (no teleport)
-- **Loot staging (Pouch)** — items go to `session.Pouch` on pickup, NOT DB; committed only on successful Extract; death/server restart = loot lost
-- **Inventory** — grid drag-drop, equipment slots (Ba Lô/Giáp/Rig Chiến Thuật), rotate (AJAX), items render +1px inset so borders never clip
-- **Rig slot constraint** — rotate blocked server-side if violates W=1,H=2
-- **Hideout** — 7 facilities, instant craft (AJAX, no reload), storage DnD
-- **Minigames** — QTE circle + Dino runner; daily cooldown disabled for testing
+- **Full Vietnamese UI** — all major pages dark-themed and translated: navbar, forest, inventory, hideout, leaderboard, friend, battle, character, badges, statistics, register, login, dashboard
+- **Tetris minigame** — `Views/Minigame/Tetris.cshtml`; 10×20 board, 7 tetrominoes, CW rotation with wall kicks, ghost piece, hard drop (SPACE), R-key rotate mid-drag (via hover), difficulty 3/8/15 lines
+- **Quest "Đọc sách"** — Id=3, Category="Học tập", FacilityId=3 (Thư Viện), MinigameType="Tetris"; migrated
+- **11 monsters** with scaled stats — see GAME_CONTENT.md. Each has per-monster loot table + exclusive Mythic drop
+- **53 new fantasy items** in `ItemCatalogue.cs` — Common through Mythic, Vietnamese names + descriptions, placeholder ❓ icon
+- **Facility names/descriptions** in DB → Vietnamese (migration `VietnameseFacilities` applied)
+- **Forest inventory panel** — shows both DB items AND session Pouch items (merged in Map GET action)
+- **Loot screen** — pouch items moveable via `POST /Forest/Loot/MovePouch`; rotatable via `POST /Forest/Loot/RotatePouch`; body items rotate via `POST /Forest/Loot/RotateBody`
+- **R-key rotate** — hover over item → press R → rotates. Works in all 3 inventory surfaces (Inventory/Index, Forest Map panel, Loot screen). Uses `mouseover` tracking because HTML5 DnD suppresses `keydown` mid-drag
+- **Dark theme** — all pages fixed: Leaderboard, Friend, Statistics, Badges, Register, Hideout, Battle, Character all use dark backgrounds, no white cards
+- **Forest combat log** — fully Vietnamese (attack/defend/flee/speed messages)
+- **Monster descriptions** — all 11 monsters have Vietnamese names + flavour text in `ForestMap.MakeMonster()`
 
 ### Intentionally disabled
 
@@ -36,122 +40,93 @@ Last commit on repo: `c872322`. Current session work (Việt hóa UI) is **uncom
 
 ### DB state
 
-- 2 quests seeded: Id=1 Tập thể dục (QTE), Id=2 Chạy bộ (Dino)
-- 7 facilities seeded: 1=Training Grounds … 7=Workbench
+- 3 quests seeded: Id=1 Tập thể dục (QTE), Id=2 Chạy bộ (Dino), Id=3 Đọc sách (Tetris)
+- 7 facilities seeded with Vietnamese names: Sân Tập Luyện / Thiền Đường / Thư Viện / Đường Chướng Ngại / Doanh Trại / Phòng Kho / Bàn Thợ
+- Migrations applied: `AddDocSachQuest`, `VietnameseFacilities`
 - `User.Wood` / `User.Stone` = integer material counts (NOT inventory items)
-- Raw wood/stone = `UserInventoryItem` entries
 
 ---
 
-## Key Files
+## Key Files (actively edited this session)
 
-| File | Purpose |
-|------|---------|
-| `Models/ForestSession.cs` | Session state; `CurrentMapId`, `WorldReturnX/Y`, `StepsSinceLastCombat`, `Pouch` |
-| `Constants/ForestMap.cs` | Zones, spawns, extracts, `Interiors[]` (3 location interior defs with exits/chests) |
-| `Controllers/ForestController.cs` | Map, Move, MoveInterior, EnterLocation, ExitLocation, Combat, Loot, Extract, Dead |
-| `Views/Forest/Map.cshtml` | Canvas map; dynamic `MAP_W/H/WATER_BORDER/MAP_MODE`; full Vietnamese UI |
-| `Views/Forest/Combat.cshtml` | Tấn Công / Phòng Thủ / Bỏ Chạy |
-| `Views/Forest/Loot.cshtml` | Chiến Lợi Phẩm screen |
-| `Views/Forest/Dead.cshtml` | Tử Vong screen |
-| `Views/Forest/Result.cshtml` | Rút Lui / Mất Tích result |
-| `Views/Forest/Index.cshtml` | Rừng Sâu entry page |
-| `Controllers/InventoryController.cs` | `RotateItemAsync` checks `SlotConstraint` |
-| `Services/Implementations/InventoryService.cs` | Slot constraint check on rotate |
-| `Views/Inventory/Index.cshtml` | Kho Đồ; +1px inset items; Pocket bg-image; Rig tall slot-cells |
-| `Views/Shared/_Layout.cshtml` | Navbar toàn tiếng Việt |
-| `Views/Account/Login.cshtml` | Bước Vào Vương Quốc |
-| `Views/Hideout/Index.cshtml` | Craft AJAX, DnD storage |
-| `Controllers/CraftController.cs` | Returns `removedItemId`, `inputItemId`, `newWood`, `newStone` |
-| `Constants/WorkbenchCatalogue.cs` | Craft recipes, slots per level |
-| `Constants/ItemCatalogue.cs` | Item defs + Rarity |
-| `GAME_CONTENT.md` | Design doc. Edit here → say "sync" → Claude updates seed + migration |
-| `TODO.md` | Priority queue + disabled flags |
+| File | What changed |
+|------|-------------|
+| `Constants/ItemCatalogue.cs` | Added 53 new items (35 fantasy + 18 monster-unique); all Vietnamese |
+| `Constants/ForestMap.cs` | 11 monsters with `MakeMonster(id, lvl)`; `GetMonsterId(rng, locationId)`; per-monster `LootTables.ByMonster`; location names/exits in Vietnamese |
+| `Models/ForestSession.cs` | Added `PendingMonsterId` field |
+| `Models/ForestCombatState.cs` | Added `MonsterId`, `MonsterDescription` fields |
+| `Controllers/ForestController.cs` | 7 call sites updated for `PendingMonsterId`; added `LootMovePouch`, `LootRotateBody`, `LootRotatePouch` actions; Map GET merges Pouch items into panel data; combat log → Vietnamese |
+| `Data/AppDbContext.cs` | Facility names + descriptions → Vietnamese; quest Id=3 added |
+| `Views/Minigame/Tetris.cshtml` | New file — full canvas Tetris |
+| `Views/Forest/Map.cshtml` | Inventory panel: pouch-aware move/rotate/drag; R-key via hover; `pointer-events:none` on item spans |
+| `Views/Forest/Loot.cshtml` | `MovePouch` / `RotatePouch` / `RotateBody` wired; R-key via `MutationObserver` + hover; body rotate button removed; border-offset fix on drop |
+| `Views/Inventory/Index.cshtml` | Rotate buttons removed; R-key via hover; `pointer-events:none` on spans |
+| `Views/Account/Leaderboard.cshtml` | Dark theme, "Level" → "Cấp" |
+| `Views/Friend/Index.cshtml` | Dark theme, "Level" → "Cấp" |
+| `Views/Dashboard/Statistics.cshtml` | Dark theme, English labels → Vietnamese |
+| `Views/Dashboard/Badges.cshtml` | Dark theme, rarity labels → Vietnamese, "NEW" → "MỚI" |
+| `Views/Account/Register.cshtml` | Right panel dark, labels → Vietnamese |
+| `Views/Battle/Index.cshtml` | "Battle Arena" → "Đấu Trường", wave labels, all English → Vietnamese |
+| `Views/Dashboard/Character.cshtml` | Class names → Vietnamese, table headers, stat names, dark `var(--ink)` color bug fixed |
+| `Views/Hideout/Index.cshtml` | Dark body bg, facility names, English strings → Vietnamese |
+| `Views/Shared/_Layout.cshtml` | `lang="en"` → `lang="vi"` |
 
 ---
 
 ## What Failed / Watch Out For
 
-### Razor / C# gotchas
+### Monster system
+- Old system: `MakeMonster(tier, lvl)` with only 2 monsters. Replaced with `MakeMonster(monsterId, lvl)` with 11 monsters and `GetMonsterId(rng, locationId?)`.
+- `ForestMonster` record now has `Id` field — any old session JSON in browser cookies will have stale `PendingMonsterId = ""` (defaults to `"forest_scout"` from model default, safe).
+
+### Inventory drag
+- **Root cause of drag not working**: child `<span>` inside `.inv-item` was intercepting mousedown before the parent `draggable=true` div. Fix: `style="pointer-events:none;"` on all item inner spans in all three surfaces.
+- **Border offset bug**: `.grid-box` / `.inv-grid` has `border: 2px solid` with `box-sizing: content-box`. Drop target `getBoundingClientRect().left` includes border. Drop position calc must subtract `bw=2` before dividing by `CELL`. Fixed in Loot.cshtml; NOT yet fixed in Map.cshtml panel or Inventory/Index.cshtml (Map uses absolute-positioned items so visual matches; Inventory uses `+1px` inset convention which partially compensates).
+
+### R-key rotate
+- **Failed approach**: `keydown` inside HTML5 DnD drag. Browser enters drag-capture mode; `keydown` events are suppressed in most browsers (Chrome, Firefox) while drag is active. `drag !== null` / `dragData !== null` check never passes.
+- **Working approach**: `mouseover` tracking. User hovers over any item → `hovItem` / `hovInv` / `hovMapItem` is set → pressing R fires the rotate call. No drag dependency.
+- In Loot.cshtml: `MutationObserver` watches grid childList changes to attach hover listeners after `renderBody()` / `renderPlayer()` create items dynamically.
+
+### Razor / C# gotchas (carry-forward)
 - **`@` in JS** → RZ1003 parser error. Use `//` without `@`; write "at" in strings.
 - **`@@keyframes`** in Razor `<style>` → must be `@@keyframes` not `@keyframes`.
 - **C# in tag helper attribute** → `<form asp-action="X" @(condition ? ...)>` is RZ1031. Use `@{ bool flag = ...; }` then `style="@(flag ? "display:none" : "")"`.
 - **Hex opacity in Razor** → `@(color)22` not `@color22` (Razor reads `color22` as variable name).
+- **`data-pocket='...'` single-quote HTML attr** — `System.Text.Json` does NOT escape `'`. Any item Name/Description with apostrophe breaks the attribute. Current Vietnamese translations have no apostrophes. Watch if adding English names back.
 
-### Inventory / Grid
-- **Item border clipping** — tried `box-shadow: inset` first (didn't fix all edges). Final fix: render items at `GridX*C+1, GridY*C+1` size `W*C-2, H*C-2`; update drag JS and rotate JS too.
-- **Double grid on Pocket/Rig** — CSS `background-image` + slot-cell `<div>` both showed. Fix: Pocket = bg-image only; Rig = tall slot-cells + `background-image:none`.
-- **Slot constraint rotate bypass** — `RotateItemAsync` only checked bounds, not `SlotConstraint`. Fixed: check `SlotConstraint` before bounds.
+### Loot / Pouch system
+- Pouch items have `Id = 0` from `BuildPlacedPouchItem`. Never pass id=0 to `/Inventory/Move` — always route through `/Forest/Loot/MovePouch` instead.
+- `MovePouch` finds item by `Container + GridX + GridY` tuple. Unique within a pouch because no overlapping items are allowed.
+- Discard of pouch items from Map panel is intentionally blocked — user must abandon at extract or lose on death.
 
-### Forest / Interior
-- **Combat teleport** — JS was immediately jumping player position and redirecting without animating. Fixed: run partial path animation loop before the 400ms redirect.
-- **World zones in interior** — `LOCATIONS` JS constant always serialized all world zones. Fixed: serialize `[]` when `MapMode == "interior"`.
-- **Exit zones unreachable** — exits at y=1/x=1 are inside `WATER_BORDER=2` → impassable. Fixed: north exits y=2, west x=2, east x=60, south y=60.
-- **Loot double-fire** — fixed in earlier session with `busy` flag + `e.stopPropagation()`.
-
-### Việt hóa
-- **Login page** — was already edited to English (fantasy copy) in UI overhaul session. Had to re-translate back to Vietnamese this session.
-- **Dashboard** — was mostly already Vietnamese from previous dev; just fixed "Welcome back" → "Chào mừng trở lại" and "Level" → "Cấp".
-- **Task/Index** — also mostly Vietnamese already; only needed "Other Quests" → "Nhiệm Vụ Khác".
-
----
-
-## Interior System Reference
-
-```
-ForestSession.CurrentMapId = null       → bản đồ thế giới 128×128
-ForestSession.CurrentMapId = "cave"     → Hang Động 64×64
-                           = "warehouse" → Kho Hàng 64×64
-                           = "lake"     → Hồ 64×64
-
-StepsSinceLastCombat → pity counter (tối thiểu 10 bước giữa 2 trận)
-WorldReturnX/Y       → vị trí thế giới để khôi phục khi ExitLocation
-```
-
-Interior specs (ForestMap.cs `Interiors[]`):
-- All 64×64, border=2 (passable area x/y=[2..61])
-- Cave: 40% encounter, exits N(y=2) W(x=2) E(x=60), chests: (18,20)(42,38)(10,50)
-- Warehouse: 35% encounter, exits N(y=2) S(y=60) W(x=2), chests: (10,12)(50,14)(32,48)
-- Lake: 45% encounter, exits N(y=2) S(y=60) E(x=60), chests: (15,30)(48,18)(30,52)
-- Always spawns Forest Brute (rare tier) inside
-
----
-
-## Vietnamese Translation Coverage
-
-Đã dịch xong:
-- ✅ Navbar + dropdown + footer
-- ✅ Forest: Index, Map (panel + log + buttons + JS strings), Combat, Loot, Dead, Result
-- ✅ Inventory: header, equipment panel (Ba Lô/Giáp/Rig), container labels, info panel
-- ✅ Dashboard: greeting, level label
-- ✅ Task: "Other Quests" fallback
-- ✅ Login: hero copy + button
-
-Chưa dịch (ít ảnh hưởng hoặc chưa quan trọng):
-- ⚠️ `Views/Account/Register.cshtml` — còn một số label tiếng Anh
-- ⚠️ `Views/Account/Leaderboard.cshtml` — "Top XP", "Top Streak", column headers
-- ⚠️ `Views/Friend/Index.cshtml` — search, accept/reject buttons
-- ⚠️ `Views/Battle/Index.cshtml` — wave labels, stats
-- ⚠️ `Views/Dashboard/Character.cshtml` — stat formulas, class names (Warrior/Monk/Scholar...)
-- ⚠️ `Views/Dashboard/Badges.cshtml`, `Statistics.cshtml`
-- ⚠️ Error messages từ controllers (TempData["Error"], validation strings)
-- ⚠️ Item descriptions trong `ItemCatalogue.cs` (tiếng Anh)
-- ⚠️ Facility descriptions trong `AppDbContext.cs` seed
+### Interior system (unchanged from before)
+- `ForestSession.CurrentMapId = null` → world 128×128
+- `= "cave" | "warehouse" | "lake"` → interior 64×64
+- Exit zones at border=2 (passable x/y = [2..61])
+- Cave exits: N(y=2) W(x=2) E(x=60) — exits must be at ≥2 or they're inside water border
 
 ---
 
 ## Next Steps (priority order)
 
-1. **Commit Việt hóa** — `git add` các view files đã dịch → commit.
+1. **Commit all session work** — large diff across many files; commit with meaningful message grouping (monsters + items, UI fixes, inventory bugfixes, Tetris).
 
-2. **Chest loot trong interior** — định nghĩa loot table per location trong `ForestMap.cs`. Click vào chest cell → POST `/Forest/OpenChest` → validate position, award loot to `session.Pouch`.
+2. **Chest loot in interiors** — `ForestMap.cs` already has `ChestPos[]` per interior (visual only). Need:
+   - POST `/Forest/OpenChest` — validate player is adjacent to chest cell; award loot to `session.Pouch`
+   - Per-location loot tables in `LootTables` (different from monster drops)
+   - JS in `Map.cshtml`: detect chest cells on click → show popup → POST
 
-3. **Re-enable daily cooldown** — bỏ comment 2 block trong `MinigameController.cs` khi xong test.
+3. **Re-enable daily cooldown** — uncomment 2 blocks in `MinigameController.cs` L42-46, L63-67.
 
-4. **Loot tiers** — thêm items vào `ForestMap.LootTables.Forest[Rarity.Uncommon]` và cao hơn.
+4. **Stamina cost** — add `PlayerStamina` to `ForestSession`; deduct per step in `Move()` and `MoveInterior()`; force exit or death when empty.
 
-5. **Stamina cost** — thêm `PlayerStamina` vào `ForestSession`; trừ mỗi bước trong `MoveInterior()` và `Move()`; hết stamina → buộc rút lui hoặc chết.
+5. **Craft timer** — `UserCraftSlot` model (UserId, SlotIndex, RecipeId, StartedAt, CompletesAt); migration; `CraftService` collects on Hideout load.
 
-6. **Craft timer** — `UserCraftSlot` model (UserId, SlotIndex, RecipeId, StartedAt, CompletesAt), migration, `CraftService` collect on Hideout load.
+6. **Item icons** — all new items use ❓ placeholder. Design emoji or custom icons per category.
 
-7. **Dịch nốt các trang còn lại** — Register, Leaderboard, Friend, Battle, Character, Badges, Statistics.
+7. **Loot tier population** — `ForestMap.LootTables.ByMonster` has pools defined per monster per rarity. All non-Common tiers are populated. Common tiers also have monster-specific drops. `heart_of_the_forest` is **Ancient Warden only** — do not add it to any other pool.
+
+8. **Boss trigger system** — `ancient_warden` currently has 0.2% chance in open world. Consider adding a dedicated spawn trigger (rare map event, boss room mechanic, etc.) so it's findable but not just random luck.
+
+9. **Inventory border-offset fix** — Map.cshtml panel and Inventory/Index.cshtml `targetCell()` both skip the 2px border subtraction. Low priority since placement works close enough, but causes 1-cell off-by-one near grid edges.

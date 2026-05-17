@@ -17,17 +17,18 @@
 <style>
     :root {
         --ink: #0a0a12;
-        --paper: #f5f3ef;
+        --paper: #0d0d1a;
         --violet: #5c3dde;
         --gold: #f0b429;
         --rose: #e8436a;
         --teal: #00b89c;
-        --soft: #edeaf5
+        --soft: #1e1535
     }
 
     body {
         background: var(--paper);
-        font-family: "DM Sans",sans-serif
+        font-family: "DM Sans",sans-serif;
+        color: #e8e8f0
     }
 
     h1, h2, h3, h4 {
@@ -76,9 +77,9 @@
     }
 
     .kpi {
-        background: white;
+        background: rgba(255,255,255,.05);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 22px;
         position: relative;
         overflow: hidden
@@ -129,9 +130,9 @@
     }
 
     .summary-card {
-        background: white;
+        background: rgba(255,255,255,.05);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 22px;
         margin-bottom: 24px
     }
@@ -144,7 +145,7 @@
 
     .sum-item {
         padding: 10px 16px;
-        border-right: 1px solid #f0f0f0;
+        border-right: 1px solid rgba(255,255,255,.08);
         text-align: center
     }
 
@@ -166,9 +167,9 @@
     }
 
     .compare-card {
-        background: white;
+        background: rgba(255,255,255,.05);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 22px;
         margin-bottom: 24px
     }
@@ -186,7 +187,7 @@
     }
 
     .cbar-wrap {
-        background: #f8f8f8;
+        background: rgba(255,255,255,.05);
         border-radius: 12px;
         padding: 16px
     }
@@ -194,7 +195,7 @@
     .cbar-label {
         font-size: .78rem;
         font-weight: 600;
-        color: #888;
+        color: rgba(255,255,255,.5);
         margin-bottom: 8px
     }
 
@@ -207,7 +208,7 @@
 
     .cbar {
         height: 8px;
-        background: #e8e8e8;
+        background: rgba(255,255,255,.1);
         border-radius: 50px;
         overflow: hidden
     }
@@ -219,8 +220,9 @@
     }
 
     .alert-above {
-        background: #d4f5ef;
-        color: #006651;
+        background: rgba(0,184,156,.12);
+        color: #00b89c;
+        border: 1px solid rgba(0,184,156,.3);
         padding: 12px 16px;
         border-radius: 10px;
         font-size: .88rem;
@@ -229,8 +231,9 @@
     }
 
     .alert-below {
-        background: #fff5d6;
-        color: #7a5200;
+        background: rgba(240,180,41,.1);
+        color: #f0b429;
+        border: 1px solid rgba(240,180,41,.25);
         padding: 12px 16px;
         border-radius: 10px;
         font-size: .88rem;
@@ -246,9 +249,9 @@
     }
 
     .chart-card {
-        background: white;
+        background: rgba(255,255,255,.05);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 24px
     }
 
@@ -272,9 +275,9 @@
     }
 
     .ach-item {
-        background: white;
+        background: rgba(255,255,255,.04);
         border-radius: 14px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.08);
         padding: 18px;
         text-align: center;
         transition: all .25s
@@ -350,7 +353,7 @@
         </div>
         <div class="kpi kpi-teal">
             <div class="kpi-icon">📈</div>
-            <div class="kpi-label">Completion Rate</div>
+            <div class="kpi-label">Tỉ lệ hoàn thành</div>
             <div class="kpi-val">@Model.PerformanceMetrics.CompletionRate.ToString("F0")%</div>
             <div class="kpi-sub">@Model.GetPerformanceRating()</div>
         </div>
@@ -362,7 +365,7 @@
         </div>
         <div class="kpi kpi-rose">
             <div class="kpi-icon">🎯</div>
-            <div class="kpi-label">Consistency</div>
+            <div class="kpi-label">Tính nhất quán</div>
             <div class="kpi-val">@Model.PerformanceMetrics.ConsistencyScore%</div>
             <div class="kpi-sub">@Model.GetConsistencyStatus()</div>
         </div>
@@ -371,10 +374,10 @@
     <!-- Summary -->
     <div class="summary-card">
         <div class="sum-grid">
-            <div class="sum-item"><div class="sum-num">@Model.GetTotalCompletions()</div><div class="sum-lbl">Tổng completions</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.GetTotalCompletions()</div><div class="sum-lbl">Tổng hoàn thành</div></div>
             <div class="sum-item"><div class="sum-num">@Model.GetTotalXP()</div><div class="sum-lbl">Tổng XP (30 ngày)</div></div>
-            <div class="sum-item"><div class="sum-num">@Model.GetTopCategory()</div><div class="sum-lbl">Category hàng đầu</div></div>
-            <div class="sum-item"><div class="sum-num">@Model.Comparison.UserCompletion</div><div class="sum-lbl">Quests (7 ngày)</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.GetTopCategory()</div><div class="sum-lbl">Thể loại hàng đầu</div></div>
+            <div class="sum-item"><div class="sum-num">@Model.Comparison.UserCompletion</div><div class="sum-lbl">Nhiệm vụ (7 ngày)</div></div>
         </div>
     </div>
 
@@ -426,7 +429,7 @@
             </div>
         </div>
         <div class="chart-card">
-            <h4>🏆 Breakdown theo Category</h4>
+            <h4>🏆 Thống kê theo Thể loại</h4>
             <div class="chart-wrap">
                 @if (Model.CategoryBreakdown?.Count > 0)
                 {
@@ -454,7 +457,7 @@
             </div>
         </div>
         <div class="chart-card">
-            <h4>⚔️ Breakdown theo Difficulty</h4>
+            <h4>⚔️ Thống kê theo Độ khó</h4>
             <div class="chart-wrap">
                 @if (Model.DifficultyBreakdown?.Count > 0)
                 {
@@ -473,7 +476,7 @@
     @if (Model.RecentAchievements?.Any() == true)
     {
         <div class="chart-card" style="margin-bottom:0">
-            <h4>🎖️ Achievements gần đây</h4>
+            <h4>🎖️ Thành tích gần đây</h4>
             <div class="ach-grid">
                 @foreach (var a in Model.RecentAchievements)
                 {
@@ -492,7 +495,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         Chart.defaults.font.family = "'DM Sans', sans-serif";
-        Chart.defaults.color = '#888';
+        Chart.defaults.color = 'rgba(255,255,255,.5)';
         const palette = ['#5c3dde','#f0b429','#e8436a','#00b89c','#9966ff','#ff9f40','#36a2eb','#ff6384'];
 
         // ── XP Trend ──
@@ -519,7 +522,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' }, ticks: { stepSize: 10 } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { stepSize: 10 } },
                         x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }
                     }
                 }
@@ -561,7 +564,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' } },
                         x: { grid: { display: false } }
                     }
                 }
@@ -588,7 +591,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' } },
                         x: { grid: { display: false } }
                     }
                 }

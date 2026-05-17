@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Battle";
+    ViewData["Title"] = "Đấu Trường";
     var entries = ViewBag.LobbyEntries as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
 }
 
@@ -91,8 +91,8 @@
 </style>
 
 <div class="lobby-hero">
-    <h1 class="lobby-title">⚔️ Battle Arena</h1>
-    <p class="lobby-sub">Prove your worth — stats shown are scaled to your current level</p>
+    <h1 class="lobby-title">⚔️ Đấu Trường</h1>
+    <p class="lobby-sub">Thể hiện sức mạnh — chỉ số hiển thị đã điều chỉnh theo cấp độ của bạn</p>
 </div>
 
 <div class="monster-grid">
@@ -103,12 +103,12 @@
             <h3 class="monster-name">@e.Name</h3>
             <p class="monster-desc">@e.Description</p>
 
-            <div class="level-note">Scaled to your Level @e.PlayerLevel</div>
+            <div class="level-note">Điều chỉnh theo Cấp @e.PlayerLevel của bạn</div>
 
             <!-- Wave 1 vs Wave 5 stat preview -->
             <div class="wave-compare">
                 <div class="wave-box">
-                    <div class="wave-box-title" style="color:#00b89c;">Wave 1</div>
+                    <div class="wave-box-title" style="color:#00b89c;">Đợt 1</div>
                     <div class="wave-stat"><span>❤️ HP</span>  <span class="wave-stat-val">@e.W1HP</span></div>
                     <div class="wave-stat"><span>⚔️ ATK</span> <span class="wave-stat-val">@e.W1ATK</span></div>
                     <div class="wave-stat"><span>🛡️ ARM</span> <span class="wave-stat-val">@e.W1ARM</span></div>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="wave-arrow">→</div>
                 <div class="wave-box">
-                    <div class="wave-box-title" style="color:#e8436a;">Wave @e.TotalWaves</div>
+                    <div class="wave-box-title" style="color:#e8436a;">Đợt @e.TotalWaves</div>
                     <div class="wave-stat"><span>❤️ HP</span>  <span class="wave-stat-val" style="color:#e8436a;">@e.WLastHP</span></div>
                     <div class="wave-stat"><span>⚔️ ATK</span> <span class="wave-stat-val" style="color:#e8436a;">@e.WLastATK</span></div>
                     <div class="wave-stat"><span>🛡️ ARM</span> <span class="wave-stat-val" style="color:#e8436a;">@e.WLastARM</span></div>
@@ -124,13 +124,13 @@
                 </div>
             </div>
 
-            <span class="waves-badge">@e.TotalWaves waves · HP carries over · no healing</span>
-            <span class="xp-badge">Up to +@e.TotalXP XP for full clear</span>
+            <span class="waves-badge">@e.TotalWaves đợt · HP dồn tiếp · không hồi máu</span>
+            <span class="xp-badge">Tối đa +@e.TotalXP XP nếu thắng toàn bộ</span>
 
             <form asp-action="Start" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="monsterId" value="test_unit" />
-                <button type="submit" class="btn-challenge">⚔️ Enter Gauntlet</button>
+                <button type="submit" class="btn-challenge">⚔️ Vào Đấu Trường</button>
             </form>
         </div>
     }

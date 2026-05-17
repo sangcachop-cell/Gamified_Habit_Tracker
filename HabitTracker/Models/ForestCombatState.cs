@@ -3,9 +3,11 @@ namespace HabitTracker.Models
     // Single-fight combat state for Forest encounters — stored in session as JSON
     public class ForestCombatState
     {
-        public string MonsterTier   { get; set; } = "normal"; // "normal" | "rare"
-        public string MonsterName   { get; set; } = "";
-        public string MonsterIcon   { get; set; } = "🐺";
+        public string MonsterId          { get; set; } = "forest_scout";
+        public string MonsterTier        { get; set; } = "common";
+        public string MonsterName        { get; set; } = "";
+        public string MonsterIcon        { get; set; } = "🐺";
+        public string MonsterDescription { get; set; } = "";
         public int MonsterMaxHP     { get; set; }
         public int MonsterCurrentHP { get; set; }
         public int MonsterAttack    { get; set; }

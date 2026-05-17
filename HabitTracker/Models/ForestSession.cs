@@ -12,9 +12,10 @@ namespace HabitTracker.Models
         public DateTime StartedAt       { get; set; } = DateTime.UtcNow;
 
         // Combat state
-        public int  PlayerCurrentHP     { get; set; } = -1;      // -1 = use full HP on first combat
-        public bool PendingCombat       { get; set; } = false;
-        public string PendingMonsterTier { get; set; } = "normal"; // "normal" | "rare"
+        public int  PlayerCurrentHP      { get; set; } = -1;      // -1 = use full HP on first combat
+        public bool PendingCombat        { get; set; } = false;
+        public string PendingMonsterTier { get; set; } = "common"; // legacy compat
+        public string PendingMonsterId   { get; set; } = "forest_scout"; // authoritative monster id
 
         // Loot accumulates until extract or death — placeholder log messages
         public List<string> AccumulatedLoot { get; set; } = new();
