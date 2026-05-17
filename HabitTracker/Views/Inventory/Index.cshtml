@@ -191,15 +191,15 @@
 </style>
 
 <div class="inv-header">
-    <h2 class="inv-title">🎒 Inventory</h2>
+    <h2 class="inv-title">🎒 Kho Đồ</h2>
     <div style="font-size:.8rem; color:rgba(255,255,255,.35);">
-        Drag items between grids to move them
+        Kéo đồ giữa các ô để di chuyển
     </div>
 </div>
 
 <!-- ── EQUIPMENT PANEL ── -->
 <div class="equip-panel">
-    <div class="equip-panel-title">⚔️ Equipped</div>
+    <div class="equip-panel-title">⚔️ Đang Trang Bị</div>
     <div class="equip-slots">
 
         @{ // Backpack slot
@@ -207,15 +207,15 @@
         <div class="equip-slot @(eqBpItemId != null ? "occupied" : "")">
             <div class="equip-slot-icon">🎒</div>
             <div>
-                <div class="equip-slot-label">Backpack</div>
+                <div class="equip-slot-label">Ba Lô</div>
                 @if (bpDef != null) { <div class="equip-slot-name">@bpDef.Name</div> }
-                else { <div class="equip-slot-empty">Empty</div> }
+                else { <div class="equip-slot-empty">Trống</div> }
             </div>
             @if (eqBpItemId != null)
             {
                 <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_BACKPACK" method="post" style="margin-left:auto;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                    <button type="submit" class="unequip-btn">✕ Tháo Ra</button>
                 </form>
             }
         </div>
@@ -225,15 +225,15 @@
         <div class="equip-slot @(eqArmorId != null ? "occupied" : "")">
             <div class="equip-slot-icon">🛡️</div>
             <div>
-                <div class="equip-slot-label">Armor</div>
+                <div class="equip-slot-label">Giáp</div>
                 @if (armDef != null) { <div class="equip-slot-name">@armDef.Name <span style="font-size:.75rem; color:rgba(255,255,255,.4);">(-@armDef.DamageReduction% dmg)</span></div> }
-                else { <div class="equip-slot-empty">Empty</div> }
+                else { <div class="equip-slot-empty">Trống</div> }
             </div>
             @if (eqArmorId != null)
             {
                 <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_ARMOR" method="post" style="margin-left:auto;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                    <button type="submit" class="unequip-btn">✕ Tháo Ra</button>
                 </form>
             }
         </div>
@@ -243,15 +243,15 @@
         <div class="equip-slot @(eqRigItemId != null ? "occupied" : "")">
             <div class="equip-slot-icon">🦺</div>
             <div>
-                <div class="equip-slot-label">Rig</div>
+                <div class="equip-slot-label">Rig Chiến Thuật</div>
                 @if (rigDef != null) { <div class="equip-slot-name">@rigDef.Name</div> }
-                else { <div class="equip-slot-empty">Empty</div> }
+                else { <div class="equip-slot-empty">Trống</div> }
             </div>
             @if (eqRigItemId != null)
             {
                 <form asp-action="Unequip" asp-route-slot="@ItemCatalogue.SLOT_RIG" method="post" style="margin-left:auto;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="unequip-btn">✕ Unequip</button>
+                    <button type="submit" class="unequip-btn">✕ Tháo Ra</button>
                 </form>
             }
         </div>
@@ -265,8 +265,8 @@
     <div class="inv-col">
         <div class="container-panel" id="panel-Storage">
             <div class="container-label">
-                📦 Storage
-                <span>@sCols×@sRows · @(sCols * sRows) slots</span>
+                📦 Kho Chứa
+                <span>@sCols×@sRows · @(sCols * sRows) ô</span>
             </div>
             <div class="inv-grid" id="grid-Storage"
                  data-container="Storage" data-cols="@sCols" data-rows="@sRows"
@@ -308,8 +308,8 @@
         <!-- Pocket 4×1 -->
         <div class="container-panel" id="panel-Backpack">
             <div class="container-label">
-                👜 Pocket
-                <span>@bCols×@bRows · @(bCols * bRows) slots</span>
+                👜 Túi
+                <span>@bCols×@bRows · @(bCols * bRows) ô</span>
             </div>
             <div class="inv-grid" id="grid-Backpack"
                  data-container="Backpack" data-cols="@bCols" data-rows="@bRows"
@@ -349,8 +349,8 @@
         {
             <div class="container-panel" id="panel-EquippedBackpack">
                 <div class="container-label">
-                    🎒 Equipped Backpack
-                    <span>@ebCols×@ebRows · @(ebCols * ebRows) slots</span>
+                    🎒 Ba Lô Trang Bị
+                    <span>@ebCols×@ebRows · @(ebCols * ebRows) ô</span>
                 </div>
                 <div class="inv-grid" id="grid-EquippedBackpack"
                      data-container="EquippedBackpack" data-cols="@ebCols" data-rows="@ebRows"
@@ -384,8 +384,8 @@
         {
             <div class="container-panel" id="panel-EquippedRig">
                 <div class="container-label">
-                    🦺 Equipped Rig
-                    <span>@erCols×@erRows · 4×(2×1) slots</span>
+                    🦺 Rig Chiến Thuật
+                    <span>@erCols×@erRows · 4 ô (1×2)</span>
                 </div>
                 <div class="inv-grid" id="grid-EquippedRig"
                      data-container="EquippedRig" data-cols="@erCols" data-rows="@erRows"
@@ -415,16 +415,16 @@
 
     <!-- ── INFO PANEL ── -->
     <div class="info-panel">
-        <div class="info-empty" id="info-empty">← Drag items between grids<br>or click to view details</div>
+        <div class="info-empty" id="info-empty">← Kéo đồ giữa các ô<br>hoặc click để xem chi tiết</div>
         <div id="info-content" style="display:none;">
             <div class="info-icon" id="info-icon"></div>
             <div class="info-name" id="info-name"></div>
             <div class="info-cat"  id="info-cat"></div>
             <div class="info-desc" id="info-desc"></div>
             <div class="info-meta">
-                <div class="info-meta-row"><span>Size</span><span id="info-size"></span></div>
-                <div class="info-meta-row"><span>Rotated</span><span id="info-rotated"></span></div>
-                <div class="info-meta-row" id="rotate-row"><span>Can rotate</span><span>↺ yes</span></div>
+                <div class="info-meta-row"><span>Kích Thước</span><span id="info-size"></span></div>
+                <div class="info-meta-row"><span>Đã Xoay</span><span id="info-rotated"></span></div>
+                <div class="info-meta-row" id="rotate-row"><span>Có thể xoay</span><span>↺ được</span></div>
             </div>
             <div id="equip-action" style="display:none; margin-top:14px;">
                 <form id="equip-form" method="post">
@@ -432,7 +432,7 @@
                     <button type="submit" style="width:100%; background:linear-gradient(135deg,#f0b429,#e8436a);
                         border:none; border-radius:10px; color:white; font-weight:700;
                         padding:10px; cursor:pointer; font-size:.88rem;">
-                        ⚔️ Equip
+                        ⚔️ Trang Bị
                     </button>
                 </form>
             </div>

@@ -1,4 +1,4 @@
-@{ ViewData["Title"] = "Extraction Failed"; }
+@{ ViewData["Title"] = "Tử Vong"; }
 
 <style>
     .dead-card {
@@ -27,18 +27,18 @@
 
 <div class="dead-card">
     <div class="dead-icon">💀</div>
-    <div class="dead-title">Extraction Failed</div>
+    <div class="dead-title">Bạn Đã Tử Vong</div>
     <p class="dead-sub">
-        You were slain in the forest.<br>
-        All accumulated loot has been lost.
+        Bạn đã bị tiêu diệt trong rừng sâu.<br>
+        Toàn bộ vật phẩm tích lũy đã bị mất.
     </p>
 
     <div class="stat-box">
         <div class="stat-num">@(ViewBag.MovesSpent ?? 0)</div>
-        <div class="stat-lbl">Moves Spent</div>
+        <div class="stat-lbl">Số Bước Đã Đi</div>
     </div>
 
     <br>
-    <a asp-action="Index" class="retry-btn">🌲 Try Again</a>
-    <div class="loot-lost">All loot lost on death.</div>
+    <a asp-action="Index" class="retry-btn">🌲 Thử Lại</a>
+    <div class="loot-lost">Chết là mất sạch đồ.</div>
 </div>

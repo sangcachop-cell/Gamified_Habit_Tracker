@@ -142,25 +142,25 @@
             <button onclick="openFullMap()" style="background:rgba(76,175,80,.12);
                 border:1px solid rgba(76,175,80,.3); border-radius:8px; color:#81c784;
                 padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
-                🗺️ Full Map
+                🗺️ Bản Đồ
             </button>
         }
         else
         {
             <span style="font-size:.8rem; color:rgba(205,133,63,.6);">
-                ⚠️ Loot is staged — extract on the world map to keep it
+                ⚠️ Đồ đang tạm giữ — rút lui trên bản đồ chính để giữ lại
             </span>
         }
         <button type="button" onclick="toggleInventory()" id="btn-inventory-toggle"
             style="background:rgba(249,202,36,.12);
             border:1px solid rgba(249,202,36,.3); border-radius:8px; color:#f9ca24;
             padding:6px 14px; font-size:.8rem; cursor:pointer; font-weight:600;">
-            🎒 Inventory
+            🎒 Kho Đồ
         </button>
         <form asp-action="Index" method="get">
             <button type="submit" style="background:rgba(232,67,106,.15); border:1px solid rgba(232,67,106,.3);
                 border-radius:8px; color:#e8436a; padding:6px 14px; font-size:.8rem; cursor:pointer;">
-                ✕ Abandon
+                ✕ Từ Bỏ
             </button>
         </form>
     </div>
@@ -195,11 +195,11 @@
             <button data-zoom="mini" data-dir="-" class="zoom-btn">−</button>
             <button data-zoom="mini" data-dir="+" class="zoom-btn">+</button>
         </div>
-        <div class="panel-title" style="margin-top:8px;">Player Status</div>
-        <div class="stat-row"><span>Spawn</span><span class="stat-val">@spawnInfo?.Label</span></div>
-        <div class="stat-row"><span>Position</span><span class="stat-val" id="pos-display">(@s?.PlayerX, @s?.PlayerY)</span></div>
-        <div class="stat-row"><span>Moves</span><span class="stat-val" id="moves-display">@s?.MovesSpent</span></div>
-        <div class="stat-row"><span>Cursor</span><span class="stat-val" id="hover-display" style="color:rgba(255,255,255,.4);">—</span></div>
+        <div class="panel-title" style="margin-top:8px;">Trạng Thái</div>
+        <div class="stat-row"><span>Xuất Phát</span><span class="stat-val">@spawnInfo?.Label</span></div>
+        <div class="stat-row"><span>Vị Trí</span><span class="stat-val" id="pos-display">(@s?.PlayerX, @s?.PlayerY)</span></div>
+        <div class="stat-row"><span>Số Bước</span><span class="stat-val" id="moves-display">@s?.MovesSpent</span></div>
+        <div class="stat-row"><span>Con Trỏ</span><span class="stat-val" id="hover-display" style="color:rgba(255,255,255,.4);">—</span></div>
 
         <div class="location-chip" id="location-chip">
             <span id="location-icon"></span> <strong id="location-name"></strong><br>
@@ -211,7 +211,7 @@
         <form asp-action="Extract" method="post"
               style="@(isInterior ? "display:none" : "")">
             @Html.AntiForgeryToken()
-            <button type="submit" class="extract-btn" id="extract-btn">⬆️ Extract Here</button>
+            <button type="submit" class="extract-btn" id="extract-btn">⬆️ Rút Lui Tại Đây</button>
         </form>
 
         @* Enter Location — shown on world map when player steps into a zone *@
@@ -220,7 +220,7 @@
             <input type="hidden" name="locationId" id="enter-location-id" value="" />
             <button type="submit" class="extract-btn" id="enter-location-btn"
                     style="background:linear-gradient(135deg,#7a5c3a,#5a4030);">
-                🚪 Enter Location
+                🚪 Vào Địa Điểm
             </button>
         </form>
 
@@ -229,58 +229,58 @@
             @Html.AntiForgeryToken()
             <button type="submit" class="extract-btn" id="exit-location-btn"
                     style="background:linear-gradient(135deg,#5a3a8a,#3a2060);">
-                🚪 Exit to Forest
+                🚪 Thoát Ra Rừng
             </button>
         </form>
 
         <!-- Post-combat path continuation panel -->
         <div id="continue-panel" style="display:none; background:rgba(0,184,156,.1);
             border:1px solid rgba(0,184,156,.3); border-radius:10px; padding:12px; margin-top:12px;">
-            <div style="font-size:.8rem; font-weight:700; color:#00b89c; margin-bottom:6px;">✅ Victory!</div>
+            <div style="font-size:.8rem; font-weight:700; color:#00b89c; margin-bottom:6px;">✅ Chiến Thắng!</div>
             <div id="continue-dest" style="font-size:.75rem; opacity:.6; margin-bottom:10px;"></div>
             <div style="display:flex; gap:8px;">
                 <button id="btn-continue" style="flex:1; background:rgba(0,184,156,.3);
                     border:1px solid rgba(0,184,156,.5); border-radius:8px; color:#00e5c0;
                     font-size:.8rem; font-weight:700; padding:7px; cursor:pointer;">
-                    ➤ Continue
+                    ➤ Tiếp Tục
                 </button>
                 <button id="btn-stop" style="flex:1; background:rgba(255,255,255,.06);
                     border:1px solid rgba(255,255,255,.15); border-radius:8px; color:rgba(255,255,255,.5);
                     font-size:.8rem; font-weight:700; padding:7px; cursor:pointer;">
-                    ✋ Stop
+                    ✋ Dừng Lại
                 </button>
             </div>
         </div>
 
-        <div class="hint-bar">💡 WASD / ↑↓←→ to move &nbsp;|&nbsp; Drag map to pan &nbsp;|&nbsp; Scroll to zoom</div>
+        <div class="hint-bar">💡 WASD / ↑↓←→ để di chuyển &nbsp;|&nbsp; Kéo để xem bản đồ &nbsp;|&nbsp; Cuộn để zoom</div>
 
-        <div class="panel-title" style="margin-top:18px;">Legend</div>
+        <div class="panel-title" style="margin-top:18px;">Chú Giải</div>
         <div class="legend">
             @if (ViewBag.MapMode == "interior")
             {
-                <div class="legend-item"><div class="legend-dot" style="background:#303030;"></div> Interior Floor</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e;"></div> Impassable Edge</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#8B4513; border-radius:2px;"></div> 🚪 Exit Zone</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#b8860b; border-radius:2px;"></div> ◈ Chest (coming soon)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#303030;"></div> Sàn Bên Trong</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e;"></div> Viền Chặn</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8B4513; border-radius:2px;"></div> 🚪 Lối Thoát</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#b8860b; border-radius:2px;"></div> ◈ Rương (sắp ra)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 Bạn</div>
             }
             else
             {
-                <div class="legend-item"><div class="legend-dot" style="background:#2d5a2d;"></div> Forest</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c;"></div> Water (blocked)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#5a4a3a;"></div> 🦇 Cave</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#7a5c3a;"></div> 🏚️ Warehouse</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#2a7abf;"></div> 🌊 Lake</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#4a90d9;"></div> Spawn A (NW)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#d94a4a;"></div> Spawn B (SE)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#00b89c;"></div> ⬆️ Extract (target)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 You</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#2d5a2d;"></div> Rừng</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c;"></div> Nước (chặn)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#5a4a3a;"></div> 🦇 Hang Động</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#7a5c3a;"></div> 🏚️ Kho Hàng</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#2a7abf;"></div> 🌊 Hồ</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#4a90d9;"></div> Xuất Phát A (TN)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#d94a4a;"></div> Xuất Phát B (ĐN)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#00b89c;"></div> ⬆️ Rút Lui (mục tiêu)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f0b429; border-radius:50%;"></div> 👤 Bạn</div>
             }
         </div>
 
-        <div class="panel-title" style="margin-top:18px;">Log</div>
+        <div class="panel-title" style="margin-top:18px;">Nhật Ký</div>
         <div class="move-log" id="move-log">
-            <div>Spawned at @spawnInfo?.Label (@s?.SpawnId)</div>
+            <div>Xuất hiện tại @spawnInfo?.Label (@s?.SpawnId)</div>
         </div>
     </div>
 
@@ -297,10 +297,10 @@
         const int IC = 64;
     }
     <div id="inventory-panel" class="map-panel" style="display:none; min-width:300px;">
-        <div class="panel-title">Equipped Inventory</div>
+        <div class="panel-title">Kho Đồ Trang Bị</div>
 
         <div class="inv-section">
-            <div class="inv-label">🪙 POCKET <span class="inv-meta">@pCols×@pRows</span></div>
+            <div class="inv-label">🪙 TÚI <span class="inv-meta">@pCols×@pRows</span></div>
             <div id="inv-pocket" class="inv-grid"
                  data-container="@HabitTracker.Constants.ItemCatalogue.BACKPACK"
                  data-cols="@pCols" data-rows="@pRows"
@@ -310,7 +310,7 @@
         @if (hasBackpack)
         {
             <div class="inv-section">
-                <div class="inv-label">🎒 EQUIPPED BACKPACK <span class="inv-meta">@bpCols×@bpRows</span></div>
+                <div class="inv-label">🎒 BA LÔ TRANG BỊ <span class="inv-meta">@bpCols×@bpRows</span></div>
                 <div id="inv-backpack" class="inv-grid"
                      data-container="@HabitTracker.Constants.ItemCatalogue.EQUIPPED_BACKPACK"
                      data-cols="@bpCols" data-rows="@bpRows"
@@ -319,13 +319,13 @@
         }
         else
         {
-            <div class="inv-section"><div class="inv-empty">🎒 No backpack equipped</div></div>
+            <div class="inv-section"><div class="inv-empty">🎒 Chưa trang bị ba lô</div></div>
         }
 
         @if (hasRig)
         {
             <div class="inv-section">
-                <div class="inv-label">🦺 EQUIPPED RIG <span class="inv-meta">@rCols×@rRows</span></div>
+                <div class="inv-label">🦺 RIG TRANG BỊ <span class="inv-meta">@rCols×@rRows</span></div>
                 <div id="inv-rig" class="inv-grid"
                      data-container="@HabitTracker.Constants.ItemCatalogue.EQUIPPED_RIG"
                      data-cols="@rCols" data-rows="@rRows"
@@ -334,16 +334,16 @@
         }
         else
         {
-            <div class="inv-section"><div class="inv-empty">🦺 No rig equipped</div></div>
+            <div class="inv-section"><div class="inv-empty">🦺 Chưa trang bị rig</div></div>
         }
 
         <div class="inv-section">
-            <div class="inv-label">🗑️ DISCARD <span class="inv-meta">drag here to delete</span></div>
-            <div id="inv-trash" class="inv-trash">drop item to discard</div>
+            <div class="inv-label">🗑️ BỎ ĐỒ <span class="inv-meta">kéo vào đây để xóa</span></div>
+            <div id="inv-trash" class="inv-trash">thả đồ vào đây để bỏ</div>
         </div>
 
         <div class="hint-bar" style="margin-top:14px;">
-            Drag to move · Right-click to rotate · Drop on trash to discard
+            Kéo để di chuyển · Chuột phải để xoay · Thả vào thùng rác để bỏ
         </div>
     </div>
 
@@ -1196,7 +1196,7 @@ async function doMove(tx, ty, path) {
         session.PlayerX = data.x; session.PlayerY = data.y;
         session.MovesSpent = data.moves;
         updateCamera(); drawMap();
-        addLog('⚠️ Move limit reached — Missing in Action!', 'ev-rare');
+        addLog('⚠️ Đã đạt giới hạn bước — Mất Tích!', 'ev-rare');
         setTimeout(function() { window.location.href = '/Forest/Result'; }, 1200);
         return;
     }
@@ -1225,8 +1225,8 @@ async function doMove(tx, ty, path) {
         session.MovesSpent = data.moves;
         document.getElementById('moves-display').textContent = data.moves;
         document.getElementById('pos-display').textContent   = '(' + data.x + ', ' + data.y + ')';
-        const tier = data.monsterTier === 'rare' ? '⭐ Rare' : '⚡ Normal';
-        addLog(tier + ' encounter! Entering combat...', data.monsterTier === 'rare' ? 'ev-rare' : 'ev-common');
+        const tier = data.monsterTier === 'rare' ? '⭐ Quái Hiếm' : '⚡ Thường';
+        addLog(tier + ' — Bước vào chiến đấu!', data.monsterTier === 'rare' ? 'ev-rare' : 'ev-common');
         setTimeout(function() { window.location.href = '/Forest/Combat'; }, 400);
         return;
     }
@@ -1269,7 +1269,7 @@ async function doMove(tx, ty, path) {
     const btn = document.getElementById('extract-btn');
     if (data.canExtract) {
         btn.classList.add('show');
-        addLog('Reached ' + data.extractId + ' — ready to extract!');
+        addLog('Đến ' + data.extractId + ' — sẵn sàng rút lui!');
     } else {
         btn.classList.remove('show');
     }
@@ -1279,7 +1279,7 @@ async function doMove(tx, ty, path) {
     if (enterBtn) {
         if (data.canEnterLocation && MAP_MODE === 'world') {
             document.getElementById('enter-location-id').value = data.enterLocationId || '';
-            enterBtn.textContent = '🚪 Enter ' + (data.zoneName || 'Location');
+            enterBtn.textContent = '🚪 Vào ' + (data.zoneName || 'Địa Điểm');
             enterBtn.classList.add('show');
         } else {
             enterBtn.classList.remove('show');
@@ -1311,7 +1311,7 @@ async function doMove(tx, ty, path) {
 (function() {
     // Combat win log entry
     const winEl = document.getElementById('combat-win-data');
-    if (winEl) addLog('✅ Monster defeated! ' + (winEl.dataset.loot || ''), 'ev-common');
+    if (winEl) addLog('✅ Tiêu diệt quái! ' + (winEl.dataset.loot || ''), 'ev-common');
 
     // Pending path continuation
     const pathEl = document.getElementById('pending-path-data');

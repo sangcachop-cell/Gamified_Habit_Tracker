@@ -4,42 +4,42 @@
 
 Build a gamified habit tracker RPG where real-life habits (quests) are completed via interactive minigames. Players earn XP, stats, and loot. Core loop: complete quests → get stronger → survive harder forest raids → craft better gear → repeat.
 
-Pillars not yet finished: more quests/minigames, craft timer, stamina cost, boss encounters, market/economy, chest loot in location interiors.
+Pillars not yet finished: more quests/minigames, craft timer, stamina cost, boss encounters, chest loot in location interiors, market/economy.
 
 ---
 
 ## Current Code State (branch: `fix-branch`)
 
-Last commit still on repo: `ea3ceb1` — all session work is uncommitted local changes.
+Last commit on repo: `c872322`. Current session work (Việt hóa UI) is **uncommitted local changes**.
 
 ### What works end-to-end
 
-- **Fantasy UI** — full dark theme (Cinzel font, gold/purple palette) across all views
-- **Forest raid** — 128×128 map, WASD-only movement (click-to-move disabled), A* still used internally for post-combat path continuation
-- **Location interiors** — stepping into Cave/Warehouse/Lake zone on world map shows "Enter" button → transitions to 64×64 sub-map with unique terrain, stronger monsters (always "rare"), exit zones, and treasure chest markers (visual only)
-- **Pity system** — `StepsSinceLastCombat` in session; minimum 10 steps guaranteed between any two encounters; resets to 0 on combat trigger and on interior entry
-- **Combat** — turn-based fight, path animates to combat cell before redirecting (was teleporting before fix)
-- **Loot staging (Pouch)** — items picked up during loot screen go to `session.Pouch`, NOT DB; only committed on successful Extract; death/server restart = loot lost
-- **Inventory** — grid drag-drop, equipment slots (Backpack/Armor/Rig), rotate (AJAX, no reload), discard; item tiles render +1px inset / -2px size so border never clips at grid edge
-- **Rig slot constraint** — rotate blocked server-side if rotated size violates `SlotConstraint` (Rig requires W=1,H=2)
-- **Hideout** — 7 facilities (stat buffs + Storage Room + Workbench), instant craft (Wood/Stone raw → material), craft/rotate no longer reload page
-- **Minigames** — QTE circle + Dino runner, both functional; daily cooldown currently disabled for testing
+- **Fantasy UI + Full Vietnamese** — dark theme (Cinzel font, gold/purple), toàn bộ text đã dịch sang tiếng Việt: navbar, forest views (Rừng Sâu, Chiến Đấu, Chiến Lợi Phẩm, Rút Lui, Tử Vong), inventory, login, dashboard
+- **Forest raid** — 128×128 map, WASD-only movement (click-to-move removed), A* used internally for post-combat path continuation
+- **Location interiors** — Cave/Warehouse/Lake → 64×64 sub-map with unique terrain, rare encounters (always Forest Brute), exit zones, chest markers (visual only)
+- **Pity system** — `StepsSinceLastCombat`: minimum 10 steps between encounters; resets on combat and on interior entry
+- **Combat** — turn-based, path animates to combat cell before redirecting (no teleport)
+- **Loot staging (Pouch)** — items go to `session.Pouch` on pickup, NOT DB; committed only on successful Extract; death/server restart = loot lost
+- **Inventory** — grid drag-drop, equipment slots (Ba Lô/Giáp/Rig Chiến Thuật), rotate (AJAX), items render +1px inset so borders never clip
+- **Rig slot constraint** — rotate blocked server-side if violates W=1,H=2
+- **Hideout** — 7 facilities, instant craft (AJAX, no reload), storage DnD
+- **Minigames** — QTE circle + Dino runner; daily cooldown disabled for testing
 
-### What is intentionally disabled for testing
+### Intentionally disabled
 
 | Flag | Location | Notes |
 |------|----------|-------|
-| Daily cooldown | `MinigameController.cs` ~L42-46 (GET) ~L63-67 (POST) | Commented out |
-| Craft timer | `CraftController.cs` | Instant; no `UserCraftSlot` table yet |
-| Workbench upgrade | `HideoutController.cs` | Endpoint is placeholder |
-| Chest loot | `ForestController.cs` / `ForestMap.cs` | Chests visible on canvas but no interaction |
+| Daily cooldown | `MinigameController.cs` ~L42-46, ~L63-67 | Commented out |
+| Craft timer | `CraftController.cs` | Instant; no `UserCraftSlot` table |
+| Workbench upgrade | `HideoutController.cs` | Placeholder endpoint |
+| Chest loot | `ForestMap.cs` / `ForestController.cs` | Visual only |
 
 ### DB state
 
 - 2 quests seeded: Id=1 Tập thể dục (QTE), Id=2 Chạy bộ (Dino)
-- 7 facilities seeded: 1=Training Grounds, 2=Meditation Hall, 3=Archive, 4=Agility Course, 5=Barracks, 6=Storage Room, 7=Workbench
-- `User.Wood` and `User.Stone` = integer material counts (NOT inventory items)
-- Raw wood/stone from forest = `UserInventoryItem` entries
+- 7 facilities seeded: 1=Training Grounds … 7=Workbench
+- `User.Wood` / `User.Stone` = integer material counts (NOT inventory items)
+- Raw wood/stone = `UserInventoryItem` entries
 
 ---
 
@@ -47,80 +47,111 @@ Last commit still on repo: `ea3ceb1` — all session work is uncommitted local c
 
 | File | Purpose |
 |------|---------|
-| `Models/ForestSession.cs` | Session state; holds `CurrentMapId`, `WorldReturnX/Y`, `StepsSinceLastCombat`, `Pouch` |
-| `Constants/ForestMap.cs` | Zones, spawns, extracts, monster factory, loot tables, **`Interiors[]`** (3 location interior defs) |
-| `Controllers/ForestController.cs` | All forest actions: Map, Move, MoveInterior, EnterLocation, ExitLocation, Combat, Loot, Extract, Dead |
-| `Views/Forest/Map.cshtml` | Canvas map; dynamic `MAP_W/H/WATER_BORDER/MAP_MODE`; interior terrain/EXIT_ZONES/CHESTS rendering; WASD only |
-| `Controllers/InventoryController.cs` | Inventory CRUD; `RotateItemAsync` checks `SlotConstraint` before bounds |
-| `Services/Implementations/InventoryService.cs` | `RotateItemAsync` — slot constraint check added this session |
-| `Views/Inventory/Index.cshtml` | Grid drag-drop; items at `+1px` inset; Pocket uses bg-image grid; Rig uses tall slot-cells |
-| `Views/Hideout/Index.cshtml` | Craft (AJAX, no reload), storage DnD, workbench |
-| `Controllers/CraftController.cs` | POST /Craft/Start → returns `removedItemId`, `inputItemId`, `newWood`, `newStone` |
+| `Models/ForestSession.cs` | Session state; `CurrentMapId`, `WorldReturnX/Y`, `StepsSinceLastCombat`, `Pouch` |
+| `Constants/ForestMap.cs` | Zones, spawns, extracts, `Interiors[]` (3 location interior defs with exits/chests) |
+| `Controllers/ForestController.cs` | Map, Move, MoveInterior, EnterLocation, ExitLocation, Combat, Loot, Extract, Dead |
+| `Views/Forest/Map.cshtml` | Canvas map; dynamic `MAP_W/H/WATER_BORDER/MAP_MODE`; full Vietnamese UI |
+| `Views/Forest/Combat.cshtml` | Tấn Công / Phòng Thủ / Bỏ Chạy |
+| `Views/Forest/Loot.cshtml` | Chiến Lợi Phẩm screen |
+| `Views/Forest/Dead.cshtml` | Tử Vong screen |
+| `Views/Forest/Result.cshtml` | Rút Lui / Mất Tích result |
+| `Views/Forest/Index.cshtml` | Rừng Sâu entry page |
+| `Controllers/InventoryController.cs` | `RotateItemAsync` checks `SlotConstraint` |
+| `Services/Implementations/InventoryService.cs` | Slot constraint check on rotate |
+| `Views/Inventory/Index.cshtml` | Kho Đồ; +1px inset items; Pocket bg-image; Rig tall slot-cells |
+| `Views/Shared/_Layout.cshtml` | Navbar toàn tiếng Việt |
+| `Views/Account/Login.cshtml` | Bước Vào Vương Quốc |
+| `Views/Hideout/Index.cshtml` | Craft AJAX, DnD storage |
+| `Controllers/CraftController.cs` | Returns `removedItemId`, `inputItemId`, `newWood`, `newStone` |
 | `Constants/WorkbenchCatalogue.cs` | Craft recipes, slots per level |
 | `Constants/ItemCatalogue.cs` | Item defs + Rarity |
-| `GAME_CONTENT.md` | Design doc: items, monsters, quests, loot tables, facilities. Edit here → say "sync" → Claude updates seed + migration |
-| `TODO.md` | Priority queue + disabled flags table |
+| `GAME_CONTENT.md` | Design doc. Edit here → say "sync" → Claude updates seed + migration |
+| `TODO.md` | Priority queue + disabled flags |
 
 ---
 
 ## What Failed / Watch Out For
 
 ### Razor / C# gotchas
-- **`@` in JS** → Razor parser error RZ1003. Use `//` comments without `@`, write "at" literally in strings.
+- **`@` in JS** → RZ1003 parser error. Use `//` without `@`; write "at" in strings.
 - **`@@keyframes`** in Razor `<style>` → must be `@@keyframes` not `@keyframes`.
-- **Tag helper attribute with C#** → `<form asp-action="X" @(condition ? ...)>` is RZ1031. Use `@{ bool flag = ...; }` then `style="@(flag ? "display:none" : "")"` instead.
+- **C# in tag helper attribute** → `<form asp-action="X" @(condition ? ...)>` is RZ1031. Use `@{ bool flag = ...; }` then `style="@(flag ? "display:none" : "")"`.
+- **Hex opacity in Razor** → `@(color)22` not `@color22` (Razor reads `color22` as variable name).
 
 ### Inventory / Grid
-- **Item border clipping at grid edges** — tried `box-shadow: inset 0 0 0 2px` first (didn't fix all edges). Final fix: render items at `GridX*C+1, GridY*C+1` with `W*C-2, H*C-2`; also update drag-drop JS and rotate JS to match.
-- **Double grid on Pocket/Rig** — CSS `background-image` + slot-cell `<div>` both rendered at once. Fix: Pocket uses bg-image only; Rig uses tall slot-cells only (`background-image: none`).
-- **Slot constraint rotate bypass** — `RotateItemAsync` only checked bounds, not `SlotConstraint`. Player could rotate wood (1×2) back to (2×1) inside the Rig if bounds happened to pass. Fixed by checking `SlotConstraint` first.
+- **Item border clipping** — tried `box-shadow: inset` first (didn't fix all edges). Final fix: render items at `GridX*C+1, GridY*C+1` size `W*C-2, H*C-2`; update drag JS and rotate JS too.
+- **Double grid on Pocket/Rig** — CSS `background-image` + slot-cell `<div>` both showed. Fix: Pocket = bg-image only; Rig = tall slot-cells + `background-image:none`.
+- **Slot constraint rotate bypass** — `RotateItemAsync` only checked bounds, not `SlotConstraint`. Fixed: check `SlotConstraint` before bounds.
 
 ### Forest / Interior
-- **Combat teleport** — when combat triggered mid-path, JS was immediately updating `session.PlayerX/Y` and redirecting without animating. Fixed by running the partial path animation loop before the 400ms redirect.
-- **World zones bleeding into interior** — `LOCATIONS` JS constant always serialized all world zones (Cave/Warehouse/Lake) even when inside an interior, causing "Cave" label to appear inside the Warehouse. Fixed: make `LOCATIONS`/`SPAWNS`/`EXTRACTS` serialize to `[]` when `MapMode == "interior"`.
-- **Exit zones in impassable border** — original exit zone coords had y=1 / x=1 which are inside `WATER_BORDER=2` → player could never reach them. Fixed: north exits moved to y=2, west to x=2, east to x=60, south to y=60.
-- **Loot double-fire** — fixed in previous session with `busy` flag + `e.stopPropagation()`.
-- **Continue path teleport** — fixed in previous session by recomputing A* from current player position.
+- **Combat teleport** — JS was immediately jumping player position and redirecting without animating. Fixed: run partial path animation loop before the 400ms redirect.
+- **World zones in interior** — `LOCATIONS` JS constant always serialized all world zones. Fixed: serialize `[]` when `MapMode == "interior"`.
+- **Exit zones unreachable** — exits at y=1/x=1 are inside `WATER_BORDER=2` → impassable. Fixed: north exits y=2, west x=2, east x=60, south y=60.
+- **Loot double-fire** — fixed in earlier session with `busy` flag + `e.stopPropagation()`.
 
-### Theme
-- **Hex opacity in Razor** — `@(color)22` not `@color22` (Razor parses the second form as variable `color22`).
-- **Item tile opacity** — items had `background: @(TileColor)cc` (80% transparent) letting CSS grid lines bleed through. Fixed by removing the `cc` alpha: `background: @(TileColor)`.
+### Việt hóa
+- **Login page** — was already edited to English (fantasy copy) in UI overhaul session. Had to re-translate back to Vietnamese this session.
+- **Dashboard** — was mostly already Vietnamese from previous dev; just fixed "Welcome back" → "Chào mừng trở lại" and "Level" → "Cấp".
+- **Task/Index** — also mostly Vietnamese already; only needed "Other Quests" → "Nhiệm Vụ Khác".
 
 ---
 
 ## Interior System Reference
 
 ```
-ForestSession.CurrentMapId  = null       → on 128×128 world map
-ForestSession.CurrentMapId  = "cave"     → inside Cave 64×64 interior
-                            = "warehouse"
-                            = "lake"
+ForestSession.CurrentMapId = null       → bản đồ thế giới 128×128
+ForestSession.CurrentMapId = "cave"     → Hang Động 64×64
+                           = "warehouse" → Kho Hàng 64×64
+                           = "lake"     → Hồ 64×64
 
-ForestSession.WorldReturnX/Y = world coords to restore on ExitLocation
-ForestSession.StepsSinceLastCombat = pity counter (min 10 steps between encounters)
+StepsSinceLastCombat → pity counter (tối thiểu 10 bước giữa 2 trận)
+WorldReturnX/Y       → vị trí thế giới để khôi phục khi ExitLocation
 ```
 
-Interior map constants (ForestMap.cs `Interiors[]`):
+Interior specs (ForestMap.cs `Interiors[]`):
 - All 64×64, border=2 (passable area x/y=[2..61])
-- Cave: 40% encounter, 3 exits (N y=2, W x=2, E x=60), 3 chests
-- Warehouse: 35% encounter, 3 exits (N y=2, S y=60, W x=2), 3 chests
-- Lake: 45% encounter, 3 exits (N y=2, S y=60, E x=60), 3 chests
-- Always spawns "Forest Brute" (rare tier) inside
+- Cave: 40% encounter, exits N(y=2) W(x=2) E(x=60), chests: (18,20)(42,38)(10,50)
+- Warehouse: 35% encounter, exits N(y=2) S(y=60) W(x=2), chests: (10,12)(50,14)(32,48)
+- Lake: 45% encounter, exits N(y=2) S(y=60) E(x=60), chests: (15,30)(48,18)(30,52)
+- Always spawns Forest Brute (rare tier) inside
+
+---
+
+## Vietnamese Translation Coverage
+
+Đã dịch xong:
+- ✅ Navbar + dropdown + footer
+- ✅ Forest: Index, Map (panel + log + buttons + JS strings), Combat, Loot, Dead, Result
+- ✅ Inventory: header, equipment panel (Ba Lô/Giáp/Rig), container labels, info panel
+- ✅ Dashboard: greeting, level label
+- ✅ Task: "Other Quests" fallback
+- ✅ Login: hero copy + button
+
+Chưa dịch (ít ảnh hưởng hoặc chưa quan trọng):
+- ⚠️ `Views/Account/Register.cshtml` — còn một số label tiếng Anh
+- ⚠️ `Views/Account/Leaderboard.cshtml` — "Top XP", "Top Streak", column headers
+- ⚠️ `Views/Friend/Index.cshtml` — search, accept/reject buttons
+- ⚠️ `Views/Battle/Index.cshtml` — wave labels, stats
+- ⚠️ `Views/Dashboard/Character.cshtml` — stat formulas, class names (Warrior/Monk/Scholar...)
+- ⚠️ `Views/Dashboard/Badges.cshtml`, `Statistics.cshtml`
+- ⚠️ Error messages từ controllers (TempData["Error"], validation strings)
+- ⚠️ Item descriptions trong `ItemCatalogue.cs` (tiếng Anh)
+- ⚠️ Facility descriptions trong `AppDbContext.cs` seed
 
 ---
 
 ## Next Steps (priority order)
 
-1. **Chest loot in interiors** — define chest loot tables in `ForestMap.cs` per location. Add click interaction on chest cells in `Map.cshtml` (separate from WASD movement). POST to new `/Forest/OpenChest` action → validate chest position, award loot to `session.Pouch`.
+1. **Commit Việt hóa** — `git add` các view files đã dịch → commit.
 
-2. **Re-enable daily cooldown** — uncomment 2 blocks in `MinigameController.cs` when testing is done.
+2. **Chest loot trong interior** — định nghĩa loot table per location trong `ForestMap.cs`. Click vào chest cell → POST `/Forest/OpenChest` → validate position, award loot to `session.Pouch`.
 
-3. **Loot tiers** — add items to `ForestMap.LootTables.Forest[Rarity.Uncommon]` (and higher tiers) in `ForestMap.cs`. Rare/Elite monsters in interiors use the same pool.
+3. **Re-enable daily cooldown** — bỏ comment 2 block trong `MinigameController.cs` khi xong test.
 
-4. **Stamina cost in forest** — add `PlayerStamina` to `ForestSession`; deduct on each Move step in `MoveInterior()` and world `Move()`; if stamina hits 0, force extract or death.
+4. **Loot tiers** — thêm items vào `ForestMap.LootTables.Forest[Rarity.Uncommon]` và cao hơn.
 
-5. **Craft timer** — create `UserCraftSlot` model (UserId, SlotIndex, RecipeId, StartedAt, CompletesAt), migration, update `CraftController` to queue jobs; add `CraftService` to collect finished slots on Hideout load.
+5. **Stamina cost** — thêm `PlayerStamina` vào `ForestSession`; trừ mỗi bước trong `MoveInterior()` và `Move()`; hết stamina → buộc rút lui hoặc chết.
 
-6. **More quests** — add rows to `GAME_CONTENT.md`, say "sync" → update `AppDbContext.cs` seed + migration. Each quest needs a `MinigameType` string.
+6. **Craft timer** — `UserCraftSlot` model (UserId, SlotIndex, RecipeId, StartedAt, CompletesAt), migration, `CraftService` collect on Hideout load.
 
-7. **Workbench upgrade costs** — define Wood+Stone cost per facility level in `HideoutController` / new `UpgradeCatalogue.cs`. Currently endpoint returns placeholder.
+7. **Dịch nốt các trang còn lại** — Register, Leaderboard, Friend, Battle, Character, Badges, Statistics.
