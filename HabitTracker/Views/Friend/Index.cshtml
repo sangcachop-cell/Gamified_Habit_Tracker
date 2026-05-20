@@ -11,17 +11,18 @@
 <style>
     :root {
         --ink: #0a0a12;
-        --paper: #f5f3ef;
+        --paper: #0d0d1a;
         --violet: #5c3dde;
         --gold: #f0b429;
         --rose: #e8436a;
         --teal: #00b89c;
-        --soft: #edeaf5
+        --soft: #1e1535
     }
 
     body {
         background: var(--paper);
-        font-family: "DM Sans",sans-serif
+        font-family: "DM Sans",sans-serif;
+        color: #e8e8f0
     }
 
     h1, h2, h3, h4 {
@@ -123,9 +124,9 @@
     }
 
     .glass-card {
-        background: white;
+        background: rgba(255,255,255,.04);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 22px;
         margin-bottom: 20px
     }
@@ -154,7 +155,7 @@
         align-items: center;
         gap: 12px;
         padding: 10px 0;
-        border-bottom: 1px solid #f5f5f5
+        border-bottom: 1px solid rgba(255,255,255,.06)
     }
 
         .user-row:last-child {
@@ -212,8 +213,8 @@
 
     .btn-reject {
         padding: 6px 14px;
-        background: #f0f0f0;
-        color: #666;
+        background: rgba(255,255,255,.08);
+        color: rgba(255,255,255,.6);
         border: none;
         border-radius: 50px;
         font-size: .78rem;
@@ -223,7 +224,7 @@
     }
 
         .btn-reject:hover {
-            background: #e0e0e0
+            background: rgba(255,255,255,.14)
         }
 
     .btn-unfriend {
@@ -260,8 +261,8 @@
 
     .btn-pending {
         padding: 6px 14px;
-        background: #f0f0f0;
-        color: #888;
+        background: rgba(255,255,255,.06);
+        color: rgba(255,255,255,.4);
         border: none;
         border-radius: 50px;
         font-size: .78rem;
@@ -299,9 +300,9 @@
     }
     /* search results */
     .search-card {
-        background: white;
+        background: rgba(255,255,255,.04);
         border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1.5px solid rgba(255,255,255,.1);
         padding: 22px;
         margin-bottom: 24px
     }
@@ -316,8 +317,9 @@
     }
 
     .alert-s {
-        background: #d4f5ef;
-        color: #006651;
+        background: rgba(0,184,156,.12);
+        color: #00b89c;
+        border: 1px solid rgba(0,184,156,.3);
         padding: 11px 16px;
         border-radius: 10px;
         font-size: .88rem;
@@ -375,7 +377,7 @@
                         </a>
                         <div>
                             <div class="u-name">@u.Username</div>
-                            <div class="u-sub">Level @u.Level · @u.XP XP</div>
+                            <div class="u-sub">Cấp @u.Level · @u.XP XP</div>
                         </div>
                         <div class="u-actions">
                             <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem profile</a>
@@ -423,7 +425,7 @@
                             <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
                             <div>
                                 <div class="u-name">@u.Username</div>
-                                <div class="u-sub">Level @u.Level · @u.XP XP</div>
+                                <div class="u-sub">Cấp @u.Level · @u.XP XP</div>
                             </div>
                             <div class="u-actions">
                                 <form method="post" action="/Friend/Accept" style="display:inline">
@@ -451,7 +453,7 @@
                         var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
                         <div class="user-row">
                             <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
-                            <div><div class="u-name">@u.Username</div><div class="u-sub">Level @u.Level</div></div>
+                            <div><div class="u-name">@u.Username</div><div class="u-sub">Cấp @u.Level</div></div>
                             <div class="u-actions">
                                 <form method="post" action="/Friend/Reject" style="display:inline">
                                     <input type="hidden" name="friendshipId" value="@f.Id" />
@@ -481,7 +483,7 @@
                             <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
                             <div>
                                 <div class="u-name">@u.Username</div>
-                                <div class="u-sub">Level @u.Level · @u.XP XP · 🔥@u.CurrentStreak</div>
+                                <div class="u-sub">Cấp @u.Level · @u.XP XP · 🔥@u.CurrentStreak</div>
                             </div>
                             <div class="u-actions">
                                 <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem</a>

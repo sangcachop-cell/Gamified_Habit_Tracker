@@ -1,0 +1,561 @@
+@model HabitTracker.Models.Quest
+@using HabitTracker.Constants
+@using static HabitTracker.Constants.AppConstants
+@{
+    ViewData["Title"] = "Minigame — " + Model.Name;
+
+    (int s, int w, int i, int a, int e) Stats(string diff) =>
+        RpgStats.ComputeStatGains(Model.Category, diff, Model.Frequency);
+
+    var se = Stats("Easy"); var sm = Stats("Medium"); var sh = Stats("Hard");
+}
+
+<style>
+    body { background:#0a0a12; color:#e8e8f0; font-family:"DM Sans",sans-serif; min-height:100vh; }
+    .mg-wrap { max-width:500px; margin:32px auto; padding:0 16px 60px; }
+
+    .mg-header { text-align:center; margin-bottom:24px; }
+    .mg-header .q-icon { font-size:3rem; line-height:1; }
+    .mg-header h2 { font-size:1.7rem; font-weight:800; margin:8px 0 3px; letter-spacing:-.5px; }
+    .mg-header .sub { color:rgba(255,255,255,.4); font-size:.82rem; }
+
+    .diff-row { display:flex; gap:10px; margin-bottom:24px; }
+    .diff-btn {
+        flex:1; padding:14px 10px; border-radius:14px;
+        border:2px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04);
+        cursor:pointer; text-align:center;
+        transition:border-color .15s,background .15s,transform .1s;
+    }
+    .diff-btn:hover { border-color:rgba(255,255,255,.25); background:rgba(255,255,255,.07); }
+    .diff-btn.active { transform:translateY(-2px); }
+    .diff-btn.easy.active   { border-color:#4caf50; background:rgba(76,175,80,.1); }
+    .diff-btn.medium.active { border-color:#f0b429; background:rgba(240,180,41,.1); }
+    .diff-btn.hard.active   { border-color:#e8436a; background:rgba(232,67,106,.1); }
+    .diff-label  { font-weight:800; font-size:.95rem; margin-bottom:4px; }
+    .diff-rounds { font-size:.72rem; opacity:.6; margin-bottom:6px; }
+    .diff-stats  { display:flex; flex-wrap:wrap; gap:3px; justify-content:center; }
+    .ds-pill { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:50px; }
+
+    .arena { display:none; }
+
+    .progress-label { display:flex; justify-content:space-between; font-size:.72rem; color:rgba(255,255,255,.35); margin-bottom:6px; }
+    .progress-bar-wrap { height:8px; border-radius:4px; background:rgba(255,255,255,.08); margin-bottom:14px; overflow:hidden; }
+    .progress-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#9c7cf4,#4a9edd); transition:width .2s; width:0%; }
+
+    .tetris-area { display:flex; gap:12px; justify-content:center; align-items:flex-start; margin-bottom:12px; }
+    #tetris-canvas { display:block; flex-shrink:0; border:1.5px solid rgba(255,255,255,.1); border-radius:4px; }
+    .tetris-sidebar { display:flex; flex-direction:column; gap:10px; width:90px; }
+    .sidebar-box { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px 8px; text-align:center; }
+    .sb-label { font-size:.6rem; opacity:.45; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+    .sb-val { font-size:1.6rem; font-weight:800; line-height:1; }
+    #next-canvas { display:block; margin:0 auto; }
+
+    .mobile-controls { display:flex; gap:8px; justify-content:center; margin-bottom:10px; }
+    .mc-btn {
+        width:54px; height:48px; border-radius:10px;
+        border:1.5px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05);
+        color:white; font-size:1.3rem; cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        user-select:none; -webkit-user-select:none;
+        transition:background .08s, transform .08s;
+    }
+    .mc-btn:active { background:rgba(255,255,255,.18); transform:scale(.94); }
+    .mc-drop { background:rgba(92,61,222,.1); border-color:rgba(92,61,222,.3); }
+    .key-hint { text-align:center; font-size:.72rem; color:rgba(255,255,255,.27); margin-bottom:12px; }
+
+    .result-box { display:none; text-align:center; padding:28px 20px; border-radius:16px; margin-top:4px; animation:popIn .3s ease; }
+    @@keyframes popIn { from{transform:scale(.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .result-box.success { background:rgba(76,175,80,.15);  border:1.5px solid rgba(76,175,80,.4); }
+    .result-box.fail    { background:rgba(232,67,106,.12); border:1.5px solid rgba(232,67,106,.3); }
+    .res-icon  { font-size:2.8rem; line-height:1; margin-bottom:8px; }
+    .res-title { font-size:1.3rem; font-weight:800; margin-bottom:4px; }
+    .res-sub   { font-size:.82rem; color:rgba(255,255,255,.45); }
+
+    .back-link { display:block; text-align:center; margin-top:20px; color:rgba(255,255,255,.35); text-decoration:none; font-size:.82rem; }
+    .back-link:hover { color:rgba(255,255,255,.6); }
+</style>
+
+<div class="mg-wrap">
+
+    <div class="mg-header">
+        <div class="q-icon">@Model.Icon</div>
+        <h2>@Model.Name</h2>
+        <div class="sub">@Model.Category &nbsp;·&nbsp; @Model.Frequency
+            @if (Model.AssignedFacility != null) { <span>&nbsp;·&nbsp; @Model.AssignedFacility.Icon @Model.AssignedFacility.Name</span> }
+        </div>
+    </div>
+
+    <!-- Difficulty picker -->
+    <div class="diff-row">
+        <div class="diff-btn easy" onclick="selectDiff('Easy',this)">
+            <div class="diff-label" style="color:#4caf50;">Easy</div>
+            <div class="diff-rounds">3 dòng · +10 XP</div>
+            <div class="diff-stats">
+                @if(se.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@se.s STR</span>}
+                @if(se.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@se.w WILL</span>}
+                @if(se.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@se.i INT</span>}
+                @if(se.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@se.a AGL</span>}
+                @if(se.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@se.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn medium" onclick="selectDiff('Medium',this)">
+            <div class="diff-label" style="color:#f0b429;">Medium</div>
+            <div class="diff-rounds">8 dòng · +25 XP</div>
+            <div class="diff-stats">
+                @if(sm.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@sm.s STR</span>}
+                @if(sm.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@sm.w WILL</span>}
+                @if(sm.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@sm.i INT</span>}
+                @if(sm.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@sm.a AGL</span>}
+                @if(sm.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@sm.e END</span>}
+            </div>
+        </div>
+        <div class="diff-btn hard" onclick="selectDiff('Hard',this)">
+            <div class="diff-label" style="color:#e8436a;">Hard</div>
+            <div class="diff-rounds">15 dòng · +100 XP · 2× stats</div>
+            <div class="diff-stats">
+                @if(sh.s>0){<span class="ds-pill" style="background:rgba(232,67,106,.2);color:#e8436a;">⚔️+@(sh.s*2) STR</span>}
+                @if(sh.w>0){<span class="ds-pill" style="background:rgba(92,61,222,.2);color:#9c7cf4;">🧘+@(sh.w*2) WILL</span>}
+                @if(sh.i>0){<span class="ds-pill" style="background:rgba(0,184,156,.2);color:#00b89c;">📚+@(sh.i*2) INT</span>}
+                @if(sh.a>0){<span class="ds-pill" style="background:rgba(240,180,41,.2);color:#f0b429;">🏹+@(sh.a*2) AGL</span>}
+                @if(sh.e>0){<span class="ds-pill" style="background:rgba(74,158,221,.2);color:#4a9edd;">🛡️+@(sh.e*2) END</span>}
+            </div>
+        </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="arena" id="arena">
+        <div class="progress-label">
+            <span id="prog-label">Dòng: 0</span>
+            <span id="prog-target"></span>
+        </div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="prog-fill"></div>
+        </div>
+
+        <div class="tetris-area">
+            <canvas id="tetris-canvas" width="240" height="480"></canvas>
+            <div class="tetris-sidebar">
+                <div class="sidebar-box">
+                    <span class="sb-label">Tiếp theo</span>
+                    <canvas id="next-canvas" width="80" height="80"></canvas>
+                </div>
+                <div class="sidebar-box">
+                    <span class="sb-label">Dòng</span>
+                    <div class="sb-val" id="lines-val">0</div>
+                </div>
+                <div class="sidebar-box">
+                    <span class="sb-label">Mục tiêu</span>
+                    <div class="sb-val" id="target-val">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-controls">
+            <button class="mc-btn" onclick="mcLeft()">◀</button>
+            <button class="mc-btn mc-drop" onclick="mcHardDrop()">⬇</button>
+            <button class="mc-btn" onclick="mcRotate()">↻</button>
+            <button class="mc-btn" onclick="mcRight()">▶</button>
+        </div>
+        <div class="key-hint">← → di chuyển &nbsp;·&nbsp; ↑/Z xoay &nbsp;·&nbsp; ↓ rơi nhanh &nbsp;·&nbsp; SPACE hạ ngay</div>
+
+        <div class="result-box" id="result-box">
+            <div class="res-icon"  id="res-icon"></div>
+            <div class="res-title" id="res-title"></div>
+            <div class="res-sub"   id="res-sub"></div>
+        </div>
+    </div>
+
+    <a href="/Hideout" class="back-link">← Trở về Căn Cứ</a>
+</div>
+
+<form id="complete-form" method="post" action="/Minigame/Complete" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="questId"    value="@Model.Id" />
+    <input type="hidden" name="difficulty" id="f-diff"    value="" />
+    <input type="hidden" name="success"    id="f-success" value="" />
+</form>
+
+@section Scripts {
+<script>
+(function () {
+'use strict';
+
+// ── Config ────────────────────────────────────────────────────────────────────
+var CFG = {
+    Easy:   { targetLines: 3,  dropMs: 700, label: '3 dòng'  },
+    Medium: { targetLines: 8,  dropMs: 450, label: '8 dòng'  },
+    Hard:   { targetLines: 15, dropMs: 220, label: '15 dòng' },
+};
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+var COLS = 10, ROWS = 20, CELL = 24, NEXT_CELL = 18;
+
+// ── Canvas ────────────────────────────────────────────────────────────────────
+var canvas  = document.getElementById('tetris-canvas');
+var ctx     = canvas.getContext('2d');
+var ncanvas = document.getElementById('next-canvas');
+var nctx    = ncanvas.getContext('2d');
+
+// ── Tetrominoes [row, col] offsets ────────────────────────────────────────────
+var PIECES = [
+    { cells: [[0,0],[0,1],[0,2],[0,3]], color: '#00b8d4' }, // I
+    { cells: [[0,0],[0,1],[1,0],[1,1]], color: '#f0b429' }, // O
+    { cells: [[0,1],[1,0],[1,1],[1,2]], color: '#9c7cf4' }, // T
+    { cells: [[0,1],[0,2],[1,0],[1,1]], color: '#4caf50' }, // S
+    { cells: [[0,0],[0,1],[1,1],[1,2]], color: '#e8436a' }, // Z
+    { cells: [[0,0],[1,0],[1,1],[1,2]], color: '#4a9edd' }, // J
+    { cells: [[0,2],[1,0],[1,1],[1,2]], color: '#ff8800' }, // L
+];
+
+function randomPiece() {
+    var p = PIECES[Math.floor(Math.random() * PIECES.length)];
+    return { cells: p.cells.map(function(c) { return [c[0], c[1]]; }), color: p.color };
+}
+
+function rotateCW(cells) {
+    var rot = cells.map(function(rc) { return [rc[1], -rc[0]]; });
+    var minR = Math.min.apply(null, rot.map(function(rc) { return rc[0]; }));
+    var minC = Math.min.apply(null, rot.map(function(rc) { return rc[1]; }));
+    return rot.map(function(rc) { return [rc[0] - minR, rc[1] - minC]; });
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var board = [], current = null, next = null;
+var linesCleared = 0;
+var diff = null, cfg = null;
+var gameOver = false, gameRunning = false;
+var dropAcc = 0, lastTs = 0, raf = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function canPlace(cells, rowOff, colOff) {
+    return cells.every(function(rc) {
+        var gr = rc[0] + rowOff, gc = rc[1] + colOff;
+        return gr >= 0 && gr < ROWS && gc >= 0 && gc < COLS && !board[gr][gc];
+    });
+}
+
+function spawnColOff(cells) {
+    var maxC = Math.max.apply(null, cells.map(function(rc) { return rc[1]; }));
+    return Math.floor((COLS - maxC - 1) / 2);
+}
+
+function spawnPiece() {
+    current = {
+        cells: next.cells.map(function(c) { return [c[0], c[1]]; }),
+        color: next.color,
+        rowOff: 0,
+        colOff: spawnColOff(next.cells)
+    };
+    next = randomPiece();
+    drawNext();
+    if (!canPlace(current.cells, current.rowOff, current.colOff)) {
+        endGame(false);
+    }
+}
+
+function lockPiece() {
+    if (gameOver) return;
+    current.cells.forEach(function(rc) {
+        var gr = rc[0] + current.rowOff;
+        var gc = rc[1] + current.colOff;
+        if (gr >= 0) board[gr][gc] = current.color;
+    });
+    clearLines();
+    if (!gameOver) spawnPiece();
+}
+
+function clearLines() {
+    var count = 0;
+    for (var r = ROWS - 1; r >= 0; r--) {
+        if (board[r].every(function(c) { return c !== null; })) {
+            board.splice(r, 1);
+            board.unshift(new Array(COLS).fill(null));
+            count++;
+            r++;
+        }
+    }
+    if (count > 0) {
+        linesCleared += count;
+        updateUI();
+        if (linesCleared >= cfg.targetLines) endGame(true);
+    }
+}
+
+function ghostRow() {
+    var row = current.rowOff;
+    while (canPlace(current.cells, row + 1, current.colOff)) row++;
+    return row;
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function moveLeft()  { if (canPlace(current.cells, current.rowOff, current.colOff - 1)) current.colOff--; }
+function moveRight() { if (canPlace(current.cells, current.rowOff, current.colOff + 1)) current.colOff++; }
+
+function rotate() {
+    var rot = rotateCW(current.cells);
+    var kicks = [0, -1, 1, -2, 2];
+    for (var i = 0; i < kicks.length; i++) {
+        if (canPlace(rot, current.rowOff, current.colOff + kicks[i])) {
+            current.cells = rot;
+            current.colOff += kicks[i];
+            return;
+        }
+    }
+}
+
+function hardDrop() {
+    current.rowOff = ghostRow();
+    lockPiece();
+    dropAcc = 0;
+}
+
+function softDrop() {
+    if (canPlace(current.cells, current.rowOff + 1, current.colOff)) {
+        current.rowOff++;
+    } else {
+        lockPiece();
+        dropAcc = 0;
+    }
+}
+
+// mobile buttons
+window.mcLeft = function() {
+    if (gameOver) return;
+    if (!gameRunning) { startGame(); return; }
+    moveLeft(); drawBoard();
+};
+window.mcRight = function() {
+    if (gameOver) return;
+    if (!gameRunning) { startGame(); return; }
+    moveRight(); drawBoard();
+};
+window.mcRotate = function() {
+    if (gameOver) return;
+    if (!gameRunning) { startGame(); return; }
+    rotate(); drawBoard();
+};
+window.mcHardDrop = function() {
+    if (gameOver) return;
+    if (!gameRunning) { startGame(); return; }
+    hardDrop();
+};
+
+document.addEventListener('keydown', function(e) {
+    if (gameOver) return;
+    if (!gameRunning) {
+        var starters = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyZ'];
+        if (starters.indexOf(e.code) !== -1) { e.preventDefault(); startGame(); }
+        return;
+    }
+    if      (e.code === 'ArrowLeft')                  { e.preventDefault(); moveLeft();  drawBoard(); }
+    else if (e.code === 'ArrowRight')                 { e.preventDefault(); moveRight(); drawBoard(); }
+    else if (e.code === 'ArrowUp' || e.code === 'KeyZ') { e.preventDefault(); rotate();   drawBoard(); }
+    else if (e.code === 'Space')                      { e.preventDefault(); hardDrop(); }
+    else if (e.code === 'ArrowDown')                  { e.preventDefault(); softDrop(); dropAcc = 0; }
+});
+
+// ── Game loop ─────────────────────────────────────────────────────────────────
+function tick(ts) {
+    var dt = lastTs ? Math.min(ts - lastTs, 100) : 16;
+    lastTs = ts;
+    dropAcc += dt;
+    if (dropAcc >= cfg.dropMs) {
+        dropAcc -= cfg.dropMs;
+        softDrop();
+    }
+    if (!gameOver) {
+        drawBoard();
+        raf = requestAnimationFrame(tick);
+    }
+}
+
+// ── Drawing ───────────────────────────────────────────────────────────────────
+function drawCell(c2d, col, row, color, cell) {
+    var x = col * cell + 1, y = row * cell + 1, s = cell - 2;
+    c2d.fillStyle = color;
+    c2d.fillRect(x, y, s, s);
+    // highlight top+left edge
+    c2d.fillStyle = 'rgba(255,255,255,0.22)';
+    c2d.fillRect(x, y, s, 3);
+    c2d.fillRect(x, y, 3, s);
+    // shadow bottom+right edge
+    c2d.fillStyle = 'rgba(0,0,0,0.22)';
+    c2d.fillRect(x, y + s - 2, s, 2);
+    c2d.fillRect(x + s - 2, y, 2, s);
+}
+
+function drawBoard() {
+    // background
+    ctx.fillStyle = '#0d0d1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    for (var c = 1; c < COLS; c++) {
+        ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, ROWS * CELL); ctx.stroke();
+    }
+    for (var r = 1; r < ROWS; r++) {
+        ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(COLS * CELL, r * CELL); ctx.stroke();
+    }
+
+    // locked board cells
+    for (var br = 0; br < ROWS; br++) {
+        for (var bc = 0; bc < COLS; bc++) {
+            if (board[br][bc]) drawCell(ctx, bc, br, board[br][bc], CELL);
+        }
+    }
+
+    if (current && !gameOver) {
+        // ghost piece
+        var gRow = ghostRow();
+        if (gRow !== current.rowOff) {
+            current.cells.forEach(function(rc) {
+                var gx = (rc[1] + current.colOff) * CELL;
+                var gy = (rc[0] + gRow) * CELL;
+                ctx.fillStyle = current.color + '22';
+                ctx.fillRect(gx + 1, gy + 1, CELL - 2, CELL - 2);
+                ctx.strokeStyle = current.color + '55';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(gx + 1.5, gy + 1.5, CELL - 3, CELL - 3);
+            });
+        }
+
+        // active piece
+        current.cells.forEach(function(rc) {
+            drawCell(ctx, rc[1] + current.colOff, rc[0] + current.rowOff, current.color, CELL);
+        });
+    }
+
+    // start prompt
+    if (!gameRunning && !gameOver) {
+        ctx.fillStyle = 'rgba(10,10,18,0.7)';
+        ctx.fillRect(0, ROWS * CELL / 2 - 28, COLS * CELL, 56);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = 'bold 14px DM Sans,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Nhấn phím bất kỳ để bắt đầu', COLS * CELL / 2, ROWS * CELL / 2);
+        ctx.textBaseline = 'alphabetic';
+    }
+}
+
+function drawNext() {
+    nctx.fillStyle = '#0d0d1a';
+    nctx.fillRect(0, 0, ncanvas.width, ncanvas.height);
+    if (!next) return;
+    var maxR = Math.max.apply(null, next.cells.map(function(rc) { return rc[0]; }));
+    var maxC = Math.max.apply(null, next.cells.map(function(rc) { return rc[1]; }));
+    var offX = Math.floor((4 - maxC - 1) / 2) * NEXT_CELL + 4;
+    var offY = Math.floor((4 - maxR - 1) / 2) * NEXT_CELL + 4;
+    next.cells.forEach(function(rc) {
+        var x = rc[1] * NEXT_CELL + offX + 1;
+        var y = rc[0] * NEXT_CELL + offY + 1;
+        var s = NEXT_CELL - 2;
+        nctx.fillStyle = next.color;
+        nctx.fillRect(x, y, s, s);
+        nctx.fillStyle = 'rgba(255,255,255,0.22)';
+        nctx.fillRect(x, y, s, 3);
+        nctx.fillRect(x, y, 3, s);
+        nctx.fillStyle = 'rgba(0,0,0,0.22)';
+        nctx.fillRect(x, y + s - 2, s, 2);
+        nctx.fillRect(x + s - 2, y, 2, s);
+    });
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function updateUI() {
+    document.getElementById('lines-val').textContent = linesCleared;
+    var pct = Math.min(100, (linesCleared / cfg.targetLines) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-label').textContent = 'Dòng: ' + linesCleared;
+}
+
+// ── Init / Start / End ────────────────────────────────────────────────────────
+window.selectDiff = function(d, el) {
+    if (raf) cancelAnimationFrame(raf);
+    document.querySelectorAll('.diff-btn').forEach(function(b) { b.classList.remove('active'); });
+    el.classList.add('active');
+    diff = d; cfg = CFG[d];
+    document.getElementById('f-diff').value = d;
+    initGame();
+};
+
+function initGame() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    board = [];
+    for (var r = 0; r < ROWS; r++) board.push(new Array(COLS).fill(null));
+    linesCleared = 0;
+    gameOver = false; gameRunning = false;
+    dropAcc = 0; lastTs = 0;
+
+    next = randomPiece();
+    spawnPiece(); // current = copy of next; next = new random
+
+    document.getElementById('arena').style.display = 'block';
+    document.getElementById('result-box').style.display = 'none';
+    document.getElementById('target-val').textContent = cfg.targetLines;
+    document.getElementById('lines-val').textContent = '0';
+    document.getElementById('prog-fill').style.width = '0%';
+    document.getElementById('prog-label').textContent = 'Dòng: 0';
+    document.getElementById('prog-target').textContent = 'Mục tiêu: ' + cfg.label;
+
+    drawBoard();
+    drawNext();
+}
+
+function startGame() {
+    if (gameRunning || gameOver) return;
+    gameRunning = true;
+    dropAcc = 0;
+    lastTs = performance.now();
+    raf = requestAnimationFrame(tick);
+}
+
+function endGame(success) {
+    gameOver = true;
+    gameRunning = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    drawBoard();
+
+    var box   = document.getElementById('result-box');
+    var icon  = document.getElementById('res-icon');
+    var title = document.getElementById('res-title');
+    var sub   = document.getElementById('res-sub');
+
+    if (success) {
+        box.className = 'result-box success';
+        icon.textContent  = '✅';
+        title.textContent = 'Hoàn thành! (' + linesCleared + ' dòng)';
+        sub.textContent   = 'Toàn bộ chỉ số và XP được trao.';
+        document.getElementById('prog-fill').style.width = '100%';
+    } else {
+        box.className = 'result-box fail';
+        icon.textContent  = '❌';
+        title.textContent = 'Thất bại! (' + linesCleared + '/' + cfg.targetLines + ' dòng)';
+        sub.textContent   = '1/10 phần thưởng an ủi.';
+    }
+    box.style.display = 'block';
+
+    document.getElementById('f-success').value = success ? 'true' : 'false';
+    setTimeout(function() {
+        document.getElementById('complete-form').submit();
+    }, 1800);
+}
+
+// ── roundRect polyfill ────────────────────────────────────────────────────────
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+        this.beginPath();
+        this.moveTo(x+r,y);
+        this.arcTo(x+w,y,x+w,y+h,r);
+        this.arcTo(x+w,y+h,x,y+h,r);
+        this.arcTo(x,y+h,x,y,r);
+        this.arcTo(x,y,x+w,y,r);
+        this.closePath();
+    };
+}
+
+})();
+</script>
+}

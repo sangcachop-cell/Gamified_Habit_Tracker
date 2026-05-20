@@ -64,10 +64,12 @@ namespace HabitTracker.Controllers
                 $"User {userId} crafted {recipeId}: consumed {recipe.InputItemId}, gained {recipe.OutputQty} {recipe.OutputField}");
 
             return Json(new {
-                success = true,
-                message = $"{recipe.OutputLabel} added!",
-                newWood  = user.Wood,
-                newStone = user.Stone
+                success       = true,
+                message       = $"{recipe.OutputLabel} added!",
+                newWood       = user.Wood,
+                newStone      = user.Stone,
+                removedItemId = inputItem.Id,
+                inputItemId   = recipe.InputItemId
             });
         }
 

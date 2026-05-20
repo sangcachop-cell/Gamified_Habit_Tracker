@@ -20,12 +20,12 @@
     };
     var dominant = stats.OrderByDescending(s => s.Item2).First().Item1;
     string className = dominant switch {
-        "STR"  => "Warrior",
-        "WILL" => "Monk",
-        "INT"  => "Scholar",
-        "AGL"  => "Rogue",
-        "END"  => "Guardian",
-        _      => "Adventurer"
+        "STR"  => "Chiến Binh",
+        "WILL" => "Hòa Thượng",
+        "INT"  => "Học Giả",
+        "AGL"  => "Thích Khách",
+        "END"  => "Hộ Vệ",
+        _      => "Phiêu Lưu Giả"
     };
     string classIcon = dominant switch {
         "STR"  => "⚔️",
@@ -42,16 +42,20 @@
 
 <style>
     :root {
-        --ink:    #0a0a12;
-        --paper:  #f5f3ef;
-        --gold:   #f0b429;
-        --violet: #5c3dde;
-        --rose:   #e8436a;
-        --teal:   #00b89c;
-        --soft:   #edeaf5;
+        --ink:       #110d22;
+        --paper:     #0d0a1a;
+        --gold:      #c9a84c;
+        --gold-light:#f0c878;
+        --violet:    #7c3aed;
+        --rose:      #b91c1c;
+        --teal:      #0e7490;
+        --soft:      #1e1535;
+        --text:      #e8dfc8;
+        --text-muted:#8b7fa8;
+        --border:    #2d1f4e;
     }
-    body { background: var(--paper); font-family: "DM Sans", sans-serif; }
-    h1,h2,h3,h4,h5 { font-family: "Syne", sans-serif; }
+    body { background: var(--paper); font-family: "Crimson Pro","DM Sans",serif; color: var(--text); }
+    h1,h2,h3,h4,h5 { font-family: "Cinzel","Syne",serif; }
 
     /* ── HERO CARD ── */
     .char-hero {
@@ -105,20 +109,33 @@
         transition: width .6s ease;
     }
 
+    /* ── HERO CARD updated colors ── */
+    .char-hero {
+        background: linear-gradient(135deg, #0a0818, #110d22) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(201,168,76,0.1) !important;
+    }
+    .char-hero::before {
+        background: radial-gradient(circle, rgba(124,58,237,.3) 0%, transparent 70%) !important;
+    }
+
     /* ── STAT CARD ── */
     .stat-panel {
-        background: white;
+        background: #16112a;
+        border: 1px solid var(--border);
         border-radius: 20px;
         padding: 24px 28px;
-        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        box-shadow: 0 4px 24px rgba(0,0,0,.3);
         height: 100%;
+        color: var(--text);
     }
     .stat-panel-title {
-        font-size: .7rem;
-        font-weight: 700;
-        letter-spacing: .1em;
+        font-family: "Cinzel",serif;
+        font-size: .65rem;
+        font-weight: 600;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        color: #999;
+        color: var(--text-muted);
         margin-bottom: 18px;
     }
 
@@ -134,9 +151,9 @@
         font-size: 1.2rem;
         flex-shrink: 0;
     }
-    .base-stat-label { font-weight: 700; font-size: .82rem; color: #555; min-width: 36px; }
-    .base-stat-val   { font-weight: 800; font-size: 1.1rem; color: var(--ink); min-width: 32px; text-align: right; }
-    .base-stat-bar   { flex: 1; height: 8px; background: #eee; border-radius: 50px; overflow: hidden; }
+    .base-stat-label { font-family: "Cinzel",serif; font-weight: 600; font-size: .72rem; color: var(--text-muted); min-width: 36px; letter-spacing: 1px; }
+    .base-stat-val   { font-weight: 800; font-size: 1.1rem; color: var(--gold-light); min-width: 32px; text-align: right; }
+    .base-stat-bar   { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 50px; overflow: hidden; }
     .base-stat-fill  { height: 100%; border-radius: 50px; transition: width .5s ease; }
 
     /* ── DERIVED STAT TILE ── */
@@ -146,15 +163,16 @@
         gap: 16px;
     }
     .derived-tile {
-        background: var(--soft);
+        background: #1e1535;
+        border: 1px solid var(--border);
         border-radius: 16px;
         padding: 18px 20px;
         display: flex; flex-direction: column; gap: 4px;
     }
     .derived-tile-icon { font-size: 1.6rem; line-height: 1; }
-    .derived-tile-val  { font-size: 1.5rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
-    .derived-tile-name { font-size: .75rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; }
-    .derived-tile-formula { font-size: .7rem; color: #aaa; margin-top: 2px; }
+    .derived-tile-val  { font-size: 1.5rem; font-weight: 800; color: var(--gold-light); line-height: 1.1; }
+    .derived-tile-name { font-family: "Cinzel",serif; font-size: .65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; }
+    .derived-tile-formula { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
 </style>
 
 <!-- ── HERO ── -->
@@ -177,12 +195,12 @@
             <div style="margin-top:18px;">
                 @if (isMaxLevel)
                 {
-                    <div style="font-size:.85rem; opacity:.7;">Max level reached — legend status unlocked</div>
+                    <div style="font-size:.85rem; opacity:.7;">Đã đạt cấp tối đa — trạng thái huyền thoại</div>
                 }
                 else
                 {
                     <div style="display:flex; justify-content:space-between; font-size:.82rem; opacity:.75; margin-bottom:4px;">
-                        <span>XP @xpProgress / @xpNeeded to LV @(currentLevel + 1)</span>
+                        <span>XP @xpProgress / @xpNeeded đến Cấp @(currentLevel + 1)</span>
                         <span>@xpPct.ToString("F0")%</span>
                     </div>
                 }
@@ -190,7 +208,7 @@
                     <div class="xp-bar-fill" style="width:@xpPct.ToString("F1")%"></div>
                 </div>
                 <div style="margin-top:6px; font-size:.78rem; opacity:.5;">
-                    Total XP: @currentXP &nbsp;|&nbsp; Max Lv: @AppConstants.MAX_LEVEL
+                    Tổng XP: @currentXP &nbsp;|&nbsp; Cấp tối đa: @AppConstants.MAX_LEVEL
                 </div>
             </div>
         </div>
@@ -199,7 +217,7 @@
         <div style="display:flex; flex-direction:column; gap:10px; text-align:center;">
             <div>
                 <div style="font-size:2rem; font-weight:800; color:var(--gold);">@currentLevel</div>
-                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Level</div>
+                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Cấp độ</div>
             </div>
             <div>
                 <div style="font-size:1.5rem; font-weight:800;">@Model.CurrentStreak</div>
@@ -207,7 +225,7 @@
             </div>
             <div>
                 <div style="font-size:1.5rem; font-weight:800;">@Model.TotalQuestsCompleted</div>
-                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Quests</div>
+                <div style="font-size:.72rem; opacity:.6; text-transform:uppercase; letter-spacing:.07em;">Nhiệm vụ</div>
             </div>
         </div>
     </div>
@@ -218,9 +236,9 @@
     <!-- ── BASE STATS ── -->
     <div class="col-lg-5">
         <div class="stat-panel">
-            <div class="stat-panel-title">Base Stats</div>
+            <div class="stat-panel-title">Chỉ Số Cơ Bản</div>
             <p style="font-size:.8rem; color:#aaa; margin-bottom:20px; margin-top:-10px;">
-                Grows by completing quests &amp; leveling up (+1 all stats per level)
+                Tăng khi hoàn thành nhiệm vụ &amp; lên cấp (+1 tất cả chỉ số mỗi cấp)
             </p>
 
             @{
@@ -246,14 +264,14 @@
                 </div>
             }
 
-            <hr style="border-color:#f0f0f0; margin:18px 0;">
+            <hr style="border-color:rgba(255,255,255,.08); margin:18px 0;">
             <div style="font-size:.78rem; color:#bbb; line-height:1.7;">
-                <strong style="color:#999;">How stats grow:</strong><br>
-                ⚔️ STR — Sức khỏe (Health) quests<br>
-                🧘 WILL — Tinh thần (Mindfulness) quests<br>
-                📚 INT — Học tập &amp; Tài chính quests<br>
-                🏹 AGL — Every quest completion +1<br>
-                🛡️ END — Daily &amp; Hard quests
+                <strong style="color:#999;">Cách tăng chỉ số:</strong><br>
+                ⚔️ STR — Nhiệm vụ Sức Khỏe<br>
+                🧘 WILL — Nhiệm vụ Tinh Thần<br>
+                📚 INT — Nhiệm vụ Học Tập &amp; Tài Chính<br>
+                🏹 AGL — Mỗi lần hoàn thành nhiệm vụ +1<br>
+                🛡️ END — Nhiệm vụ hàng ngày &amp; khó
             </div>
         </div>
     </div>
@@ -261,9 +279,9 @@
     <!-- ── DERIVED STATS ── -->
     <div class="col-lg-7">
         <div class="stat-panel">
-            <div class="stat-panel-title">Combat &amp; Character Stats</div>
+            <div class="stat-panel-title">Chỉ Số Chiến Đấu</div>
             <p style="font-size:.8rem; color:#aaa; margin-bottom:20px; margin-top:-10px;">
-                Computed from base stats + level scaling
+                Tính từ chỉ số cơ bản + hệ số cấp độ
             </p>
 
             <div class="derived-grid">
@@ -278,35 +296,35 @@
                 <div class="derived-tile">
                     <div class="derived-tile-icon">⚔️</div>
                     <div class="derived-tile-val">@Model.AttackDamage</div>
-                    <div class="derived-tile-name">Attack</div>
+                    <div class="derived-tile-name">Tấn Công</div>
                     <div class="derived-tile-formula">(5 + Lv) + STR×2 + AGL</div>
                 </div>
 
                 <div class="derived-tile">
                     <div class="derived-tile-icon">🛡️</div>
                     <div class="derived-tile-val">@Model.Armor</div>
-                    <div class="derived-tile-name">Armor</div>
+                    <div class="derived-tile-name">Giáp</div>
                     <div class="derived-tile-formula">Lv×0.5 + END×1.5 + WILL×0.5</div>
                 </div>
 
                 <div class="derived-tile">
                     <div class="derived-tile-icon">⚡</div>
                     <div class="derived-tile-val">@Model.XPGainPercent.ToString("F1")%</div>
-                    <div class="derived-tile-name">XP Gain</div>
+                    <div class="derived-tile-name">Nhận XP</div>
                     <div class="derived-tile-formula">Lv×0.2% + INT×0.5%</div>
                 </div>
 
                 <div class="derived-tile">
                     <div class="derived-tile-icon">💪</div>
                     <div class="derived-tile-val">@Model.Stamina</div>
-                    <div class="derived-tile-name">Stamina</div>
+                    <div class="derived-tile-name">Sức Bền</div>
                     <div class="derived-tile-formula">(50 + Lv×2) + WILL×5 + END×3</div>
                 </div>
 
                 <div class="derived-tile" style="border:1.5px solid rgba(0,184,156,.25);">
                     <div class="derived-tile-icon">⚡</div>
                     <div class="derived-tile-val" style="color:#00b89c;">@Model.Speed</div>
-                    <div class="derived-tile-name">Speed</div>
+                    <div class="derived-tile-name">Tốc Độ</div>
                     <div class="derived-tile-formula">5 + √Lv×3 + √AGL×5  (cap 100)</div>
                 </div>
 
@@ -314,14 +332,14 @@
 
             <!-- Level progression table snippet -->
             <div style="margin-top:28px;">
-                <div class="stat-panel-title">Level Progression</div>
+                <div class="stat-panel-title">Tiến Trình Cấp Độ</div>
                 <div style="overflow-x:auto;">
                     <table style="width:100%; font-size:.82rem; border-collapse:collapse;">
                         <thead>
                             <tr style="color:#aaa; text-transform:uppercase; font-size:.72rem; letter-spacing:.06em;">
-                                <th style="padding:6px 10px; text-align:left;">Level</th>
-                                <th style="padding:6px 10px; text-align:right;">XP needed</th>
-                                <th style="padding:6px 10px; text-align:right;">Total XP</th>
+                                <th style="padding:6px 10px; text-align:left;">Cấp</th>
+                                <th style="padding:6px 10px; text-align:right;">XP cần</th>
+                                <th style="padding:6px 10px; text-align:right;">Tổng XP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -336,9 +354,9 @@
                                 bool isCurrent = lv == currentLevel;
                                 bool isMax = lv >= AppConstants.MAX_LEVEL;
                                 <tr style="background:@(isCurrent ? "var(--soft)" : "transparent"); border-radius:8px;">
-                                    <td style="padding:7px 10px; font-weight:@(isCurrent ? "700" : "400"); color:@(isCurrent ? "var(--violet)" : "var(--ink)");">
-                                        @(isCurrent ? "▶ " : "")LV @lv
-                                        @if (isCurrent) { <span style="font-size:.7rem; background:var(--violet); color:white; border-radius:4px; padding:1px 6px; margin-left:4px;">YOU</span> }
+                                    <td style="padding:7px 10px; font-weight:@(isCurrent ? "700" : "400"); color:@(isCurrent ? "var(--violet)" : "var(--text)");">
+                                        @(isCurrent ? "▶ " : "")Cấp @lv
+                                        @if (isCurrent) { <span style="font-size:.7rem; background:var(--violet); color:white; border-radius:4px; padding:1px 6px; margin-left:4px;">BẠN</span> }
                                     </td>
                                     <td style="padding:7px 10px; text-align:right; color:#888;">
                                         @(isMax ? "—" : AppConstants.LevelSystem.XPToNextLevel(lv).ToString("N0"))

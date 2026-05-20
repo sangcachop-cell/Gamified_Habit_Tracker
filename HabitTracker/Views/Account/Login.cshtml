@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập — HabitTracker</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -18,26 +18,43 @@
             padding: 0
         }
 
+        :root {
+            --bg-deep: #0d0a1a;
+            --bg-card: #16112a;
+            --bg-panel: #1e1535;
+            --gold: #c9a84c;
+            --gold-light: #f0c878;
+            --purple: #7c3aed;
+            --text: #e8dfc8;
+            --text-muted: #8b7fa8;
+            --border: #2d1f4e;
+            --glow-gold: rgba(201,168,76,0.2);
+            --glow-purple: rgba(124,58,237,0.2);
+        }
+
         body {
-            font-family: "DM Sans",sans-serif;
+            font-family: "Crimson Pro","DM Sans",serif;
+            background: var(--bg-deep);
+            color: var(--text);
             min-height: 100vh;
             display: grid;
             grid-template-columns: 1fr 1fr
         }
 
         h1, h2, h3 {
-            font-family: "Syne",sans-serif
+            font-family: "Cinzel","Syne",serif
         }
 
         .left-panel {
-            background: #0a0a12;
-            color: white;
+            background: #0a0818;
+            color: var(--text);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 52px 56px;
             position: relative;
-            overflow: hidden
+            overflow: hidden;
+            border-right: 1px solid var(--border)
         }
 
             .left-panel::before {
@@ -46,7 +63,7 @@
                 width: 600px;
                 height: 600px;
                 border-radius: 50%;
-                background: radial-gradient(circle,rgba(92,61,222,.3) 0%,transparent 70%);
+                background: radial-gradient(circle,rgba(124,58,237,.25) 0%,transparent 70%);
                 top: -200px;
                 right: -200px
             }
@@ -57,25 +74,28 @@
                 width: 400px;
                 height: 400px;
                 border-radius: 50%;
-                background: radial-gradient(circle,rgba(240,180,41,.2) 0%,transparent 70%);
+                background: radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 70%);
                 bottom: -100px;
                 left: -100px
             }
 
         .brand {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: white;
+            font-family: "Cinzel",serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gold);
             text-decoration: none;
             position: relative;
             z-index: 2;
             display: flex;
             align-items: center;
-            gap: 8px
+            gap: 8px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(201,168,76,0.3)
         }
 
             .brand span {
-                color: #f0b429
+                color: var(--gold-light)
             }
 
         .hero-text {
@@ -84,16 +104,18 @@
         }
 
             .hero-text h2 {
-                font-size: clamp(2.2rem,4vw,3.2rem);
-                font-weight: 800;
-                line-height: 1.05;
-                letter-spacing: -2px;
-                margin-bottom: 16px
+                font-family: "Cinzel",serif;
+                font-size: clamp(1.8rem,3.5vw,2.8rem);
+                font-weight: 700;
+                line-height: 1.2;
+                letter-spacing: 1px;
+                margin-bottom: 16px;
+                color: var(--text)
             }
 
             .hero-text p {
-                color: rgba(255,255,255,.55);
-                font-size: .95rem;
+                color: var(--text-muted);
+                font-size: 1rem;
                 line-height: 1.7;
                 max-width: 380px
             }
@@ -110,15 +132,16 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            color: rgba(255,255,255,.7);
-            font-size: .88rem
+            color: var(--text-muted);
+            font-size: .9rem
         }
 
         .feat-dot {
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: rgba(255,255,255,.1);
+            background: rgba(201,168,76,.12);
+            border: 1px solid rgba(201,168,76,.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -127,7 +150,7 @@
         }
         /* RIGHT */
         .right-panel {
-            background: #f5f3ef;
+            background: var(--bg-card);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -140,14 +163,16 @@
         }
 
             .auth-box h3 {
-                font-size: 1.9rem;
-                font-weight: 800;
-                letter-spacing: -1.5px;
-                margin-bottom: 5px
+                font-family: "Cinzel",serif;
+                font-size: 1.7rem;
+                font-weight: 700;
+                letter-spacing: 1px;
+                margin-bottom: 5px;
+                color: var(--gold)
             }
 
             .auth-box .subtitle {
-                color: #888;
+                color: var(--text-muted);
                 font-size: .9rem;
                 margin-bottom: 34px
             }
@@ -159,53 +184,61 @@
             .form-field label {
                 font-weight: 600;
                 font-size: .83rem;
-                color: #444;
+                color: var(--text-muted);
                 display: block;
-                margin-bottom: 7px
+                margin-bottom: 7px;
+                font-family: "Cinzel",serif;
+                letter-spacing: 0.5px
             }
 
             .form-field input {
                 width: 100%;
                 padding: 12px 16px;
-                border: 1.5px solid rgba(0,0,0,.1);
+                border: 1.5px solid var(--border);
                 border-radius: 10px;
-                font-family: "DM Sans",sans-serif;
-                font-size: .95rem;
-                background: white;
+                font-family: "Crimson Pro",serif;
+                font-size: 1rem;
+                background: var(--bg-panel);
+                color: var(--text);
                 transition: border-color .2s,box-shadow .2s;
                 outline: none
             }
 
                 .form-field input:focus {
-                    border-color: #5c3dde;
-                    box-shadow: 0 0 0 3px rgba(92,61,222,.1)
+                    border-color: var(--gold);
+                    box-shadow: 0 0 0 3px var(--glow-gold)
+                }
+
+                .form-field input::placeholder {
+                    color: var(--text-muted)
                 }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background: #0a0a12;
+            background: linear-gradient(135deg, var(--purple), #9f45f5);
             color: white;
             border: none;
             border-radius: 50px;
-            font-family: "Syne",sans-serif;
+            font-family: "Cinzel",serif;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: .9rem;
+            letter-spacing: 1.5px;
             cursor: pointer;
-            transition: background .2s,transform .2s;
+            transition: all .2s;
             margin-bottom: 18px
         }
 
             .btn-submit:hover {
-                background: #5c3dde;
-                transform: translateY(-1px)
+                transform: translateY(-1px);
+                box-shadow: 0 6px 24px var(--glow-purple)
             }
 
         .divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            color: #ccc;
+            color: var(--text-muted);
             font-size: .8rem;
             margin: 20px 0
         }
@@ -214,15 +247,15 @@
                 content: "";
                 flex: 1;
                 height: 1px;
-                background: #e0e0e0
+                background: var(--border)
             }
 
         .btn-google {
             width: 100%;
             padding: 12px 16px;
-            background: white;
-            color: #333;
-            border: 1.5px solid rgba(0,0,0,.1);
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1.5px solid var(--border);
             border-radius: 50px;
             font-weight: 600;
             font-size: .9rem;
@@ -237,29 +270,31 @@
         }
 
             .btn-google:hover {
-                border-color: #5c3dde;
-                color: #333
+                border-color: var(--gold);
+                color: var(--gold)
             }
 
         .auth-footer {
             text-align: center;
             font-size: .88rem;
-            color: #888
+            color: var(--text-muted)
         }
 
             .auth-footer a {
-                color: #5c3dde;
+                color: var(--gold);
                 font-weight: 600;
                 text-decoration: none
             }
 
                 .auth-footer a:hover {
+                    color: var(--gold-light);
                     text-decoration: underline
                 }
 
         .error-msg {
-            background: #fde8ed;
-            color: #c0392b;
+            background: rgba(185,28,28,0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(185,28,28,0.4);
             padding: 11px 15px;
             border-radius: 8px;
             font-size: .86rem;
@@ -283,27 +318,27 @@
 <body>
     <!-- LEFT -->
     <div class="left-panel">
-        <a href="/" class="brand">🚀 Habit<span>Tracker</span></a>
+        <a href="/" class="brand">⚔️ Vương<span>Quốc</span></a>
 
         <div class="hero-text">
-            <h2>Gamify your<br>daily habits.</h2>
-            <p>Hoàn thành quest, nhận XP, lên level — xây dựng thói quen tốt như chơi game.</p>
+            <h2>Huyền Thoại<br>Của Bạn Bắt Đầu.</h2>
+            <p>Hoàn thành nhiệm vụ. Nhận XP. Nâng cấp cuộc sống thực — từng thói quen một.</p>
         </div>
 
         <div class="feature-list">
-            <div class="feat-item"><div class="feat-dot">🎯</div><span>Hệ thống Quest & XP gamification</span></div>
-            <div class="feat-item"><div class="feat-dot">🔥</div><span>Streak tracking — duy trì động lực</span></div>
-            <div class="feat-item"><div class="feat-dot">🏆</div><span>Badges & Leaderboard cộng đồng</span></div>
-            <div class="feat-item"><div class="feat-dot">📊</div><span>Dashboard thống kê chi tiết</span></div>
+            <div class="feat-item"><div class="feat-dot">⚔️</div><span>Nhiệm vụ dựa trên thói quen, nhận XP thực</span></div>
+            <div class="feat-item"><div class="feat-dot">🔥</div><span>Theo dõi streak — giữ ngọn lửa cháy mãi</span></div>
+            <div class="feat-item"><div class="feat-dot">🏰</div><span>Căn cứ, đột kích rừng & chế tạo đồ</span></div>
+            <div class="feat-item"><div class="feat-dot">🏆</div><span>Huy hiệu, bảng xếp hạng & đối thủ</span></div>
         </div>
     </div>
 
     <!-- RIGHT -->
     <div class="right-panel">
         <div class="auth-box">
-            <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:#888;text-decoration:none;font-size:.85rem;margin-bottom:24px;transition:color .2s" onmouseover="this.style.color='#5c3dde'" onmouseout="this.style.color='#888'">← Về trang chủ</a>
-            <h3>Chào mừng trở lại 👋</h3>
-            <p class="subtitle">Đăng nhập để tiếp tục hành trình của bạn</p>
+            <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:#8b7fa8;text-decoration:none;font-size:.85rem;margin-bottom:24px;transition:color .2s" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8b7fa8'">← Về trang chủ</a>
+            <h3>Chào Mừng Trở Lại ⚔️</h3>
+            <p class="subtitle">Tiếp tục hành trình của bạn</p>
 
             @if (ViewBag.Error != null)
             {
@@ -319,7 +354,7 @@
                     <label>Mật khẩu</label>
                     <input asp-for="Password" type="password" placeholder="••••••••" />
                 </div>
-                <button type="submit" class="btn-submit">Đăng nhập →</button>
+                <button type="submit" class="btn-submit">Bước Vào Vương Quốc →</button>
             </form>
 
             <div class="divider">hoặc</div>

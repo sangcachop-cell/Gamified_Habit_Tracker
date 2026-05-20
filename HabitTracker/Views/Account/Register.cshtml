@@ -129,7 +129,7 @@
         }
         /* RIGHT */
         .right-panel {
-            background: #f5f3ef;
+            background: #0d0d1a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -151,7 +151,7 @@
             }
 
             .auth-box .subtitle {
-                color: #777;
+                color: rgba(255,255,255,.45);
                 font-size: .9rem;
                 margin-bottom: 32px
             }
@@ -169,7 +169,7 @@
             .form-field label {
                 font-weight: 600;
                 font-size: .83rem;
-                color: #333;
+                color: rgba(255,255,255,.7);
                 display: block;
                 margin-bottom: 6px
             }
@@ -177,11 +177,12 @@
             .form-field input {
                 width: 100%;
                 padding: 11px 14px;
-                border: 1.5px solid rgba(0,0,0,.12);
+                border: 1.5px solid rgba(255,255,255,.15);
                 border-radius: 10px;
                 font-family: "DM Sans",sans-serif;
                 font-size: .93rem;
-                background: white;
+                background: rgba(255,255,255,.06);
+                color: #e8e8f0;
                 transition: border-color .2s,box-shadow .2s;
                 outline: none
             }
@@ -192,7 +193,7 @@
                 }
 
         .avatar-area {
-            border: 2px dashed rgba(0,0,0,.15);
+            border: 2px dashed rgba(255,255,255,.2);
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -253,7 +254,7 @@
         .auth-footer {
             text-align: center;
             font-size: .88rem;
-            color: #777
+            color: rgba(255,255,255,.45)
         }
 
             .auth-footer a {
@@ -298,20 +299,20 @@
     </div>
     <div class="right-panel">
         <div class="auth-box">
-            <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:#888;text-decoration:none;font-size:.85rem;margin-bottom:24px;transition:color .2s" onmouseover="this.style.color='#5c3dde'" onmouseout="this.style.color='#888'">← Về trang chủ</a>
-            <h3>Tạo tài khoản mới 🎮</h3>
+            <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.4);text-decoration:none;font-size:.85rem;margin-bottom:24px;transition:color .2s" onmouseover="this.style.color='#9c7cf4'" onmouseout="this.style.color='rgba(255,255,255,.4)'">← Về trang chủ</a>
+            <h3 style="color:#e8e8f0;">Tạo tài khoản mới 🎮</h3>
             <p class="subtitle">Miễn phí mãi mãi — không cần thẻ tín dụng</p>
 
             <form method="post" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-field">
-                        <label>Username</label>
-                        <input asp-for="Username" placeholder="coolname123" />
+                        <label>Tên đăng nhập</label>
+                        <input asp-for="Username" placeholder="tenhanhdong123" />
                         <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
                     <div class="form-field">
                         <label>Email</label>
-                        <input asp-for="Email" placeholder="you@example.com" />
+                        <input asp-for="Email" placeholder="ban@email.com" />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                 </div>

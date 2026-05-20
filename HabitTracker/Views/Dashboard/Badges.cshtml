@@ -4,11 +4,13 @@
 }
 
 <style>
+    body { background: #0d0d1a; color: #e8e8f0; font-family: "DM Sans", sans-serif; }
+
     .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #5c3dde 0%, #7c3aed 100%);
         color: white;
         padding: 35px 30px;
-        border-radius: 12px;
+        border-radius: 16px;
         margin-bottom: 30px;
         display: flex;
         align-items: center;
@@ -17,21 +19,13 @@
         gap: 15px;
     }
 
-        .page-header h2 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-
-        .page-header p {
-            margin: 6px 0 0;
-            opacity: 0.9;
-            font-size: 0.95em;
-        }
+        .page-header h2 { margin: 0; font-size: 1.8em; }
+        .page-header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95em; }
 
     .back-btn {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
         color: white;
-        border: 2px solid rgba(255,255,255,0.5);
+        border: 1.5px solid rgba(255,255,255,0.4);
         padding: 10px 22px;
         border-radius: 8px;
         text-decoration: none;
@@ -39,12 +33,7 @@
         transition: all 0.2s;
         white-space: nowrap;
     }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.35);
-            color: white;
-            border-color: white;
-        }
+        .back-btn:hover { background: rgba(255,255,255,0.25); color: white; border-color: white; }
 
     .badges-grid {
         display: grid;
@@ -53,151 +42,64 @@
     }
 
     .badge-card {
-        background: white;
-        border-radius: 12px;
+        background: rgba(255,255,255,.05);
+        border-radius: 14px;
         padding: 24px 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: 1.5px solid rgba(255,255,255,.1);
         text-align: center;
         transition: all 0.25s;
-        border: 2px solid transparent;
         position: relative;
         overflow: hidden;
     }
-
-        .badge-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
-        }
-
-        .badge-card.new-badge {
-            border-color: #ffc107;
-        }
+        .badge-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.2); }
+        .badge-card.new-badge { border-color: #ffc107; }
 
     .new-badge-ribbon {
-        position: absolute;
-        top: 12px;
-        right: -20px;
-        background: #ffc107;
-        color: #333;
-        font-size: 0.7em;
-        font-weight: bold;
-        padding: 3px 28px;
-        transform: rotate(35deg);
-        letter-spacing: 0.5px;
+        position: absolute; top: 12px; right: -20px;
+        background: #ffc107; color: #111;
+        font-size: 0.7em; font-weight: bold;
+        padding: 3px 28px; transform: rotate(35deg); letter-spacing: 0.5px;
     }
 
-    .badge-icon {
-        font-size: 3em;
-        margin-bottom: 12px;
-        display: block;
-    }
+    .badge-icon { font-size: 3em; margin-bottom: 12px; display: block; }
+    .badge-name { font-size: 1.15em; font-weight: 700; color: #e8e8f0; margin-bottom: 8px; }
+    .badge-description { font-size: 0.88em; color: rgba(255,255,255,.5); line-height: 1.5; margin-bottom: 12px; }
 
-    .badge-name {
-        font-size: 1.15em;
-        font-weight: 700;
-        color: #222;
-        margin-bottom: 8px;
-    }
+    .badge-meta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
-    .badge-description {
-        font-size: 0.88em;
-        color: #666;
-        line-height: 1.5;
-        margin-bottom: 12px;
-    }
+    .rarity-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; color: white; }
+    .rarity-Common   { background: #6b6b6b; }
+    .rarity-Rare     { background: #0070DD; }
+    .rarity-Epic     { background: #A335EE; }
+    .rarity-Legendary{ background: #FF8000; }
 
-    .badge-meta {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 12px;
-    }
-
-    .rarity-tag {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 700;
-        color: white;
-    }
-
-    .rarity-Common {
-        background: #808080;
-    }
-
-    .rarity-Rare {
-        background: #0070DD;
-    }
-
-    .rarity-Epic {
-        background: #A335EE;
-    }
-
-    .rarity-Legendary {
-        background: #FF8000;
-    }
-
-    .earned-date {
-        font-size: 0.8em;
-        color: #999;
-        margin-top: 8px;
-    }
+    .earned-date { font-size: 0.8em; color: rgba(255,255,255,.35); margin-top: 8px; }
 
     .xp-tag {
         display: inline-block;
-        background: #e8f5e9;
-        color: #388e3c;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 600;
+        background: rgba(0,184,156,.15); color: #00b89c;
+        border: 1px solid rgba(0,184,156,.3);
+        padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600;
     }
 
     .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        text-align: center; padding: 60px 20px; color: rgba(255,255,255,.4);
+        background: rgba(255,255,255,.04);
+        border: 1.5px solid rgba(255,255,255,.08);
+        border-radius: 14px;
     }
-
-        .empty-state .emoji {
-            font-size: 4em;
-            display: block;
-            margin-bottom: 16px;
-        }
+        .empty-state .emoji { font-size: 4em; display: block; margin-bottom: 16px; }
 
     .stats-bar {
-        background: white;
-        border-radius: 10px;
-        padding: 18px 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        display: flex;
-        gap: 30px;
-        flex-wrap: wrap;
-        align-items: center;
+        background: rgba(255,255,255,.05);
+        border-radius: 12px; padding: 18px 24px; margin-bottom: 24px;
+        border: 1.5px solid rgba(255,255,255,.1);
+        display: flex; gap: 30px; flex-wrap: wrap; align-items: center;
     }
 
-    .stat-chip {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-        .stat-chip .num {
-            font-size: 1.5em;
-            font-weight: 800;
-            color: #667eea;
-        }
-
-        .stat-chip .lbl {
-            font-size: 0.8em;
-            color: #888;
-        }
+    .stat-chip { display: flex; flex-direction: column; align-items: center; }
+        .stat-chip .num { font-size: 1.5em; font-weight: 800; color: #9c7cf4; }
+        .stat-chip .lbl { font-size: 0.8em; color: rgba(255,255,255,.4); }
 </style>
 
 <div class="container mt-4 mb-5">
@@ -226,28 +128,28 @@
             {
                 <div class="stat-chip">
                     <span class="num" style="color:#FF8000">@leg</span>
-                    <span class="lbl">Legendary</span>
+                    <span class="lbl">Huyền Thoại</span>
                 </div>
             }
             @if (countByRarity.TryGetValue("Epic", out int epic) && epic > 0)
             {
                 <div class="stat-chip">
                     <span class="num" style="color:#A335EE">@epic</span>
-                    <span class="lbl">Epic</span>
+                    <span class="lbl">Sử Thi</span>
                 </div>
             }
             @if (countByRarity.TryGetValue("Rare", out int rare) && rare > 0)
             {
                 <div class="stat-chip">
                     <span class="num" style="color:#0070DD">@rare</span>
-                    <span class="lbl">Rare</span>
+                    <span class="lbl">Hiếm</span>
                 </div>
             }
             @if (countByRarity.TryGetValue("Common", out int common) && common > 0)
             {
                 <div class="stat-chip">
                     <span class="num" style="color:#808080">@common</span>
-                    <span class="lbl">Common</span>
+                    <span class="lbl">Thường</span>
                 </div>
             }
         </div>
@@ -261,7 +163,7 @@
                 <div class="badge-card @(isNew ? "new-badge" : "")">
                     @if (isNew)
                     {
-                        <div class="new-badge-ribbon">NEW</div>
+                        <div class="new-badge-ribbon">MỚI</div>
                     }
 
                     <span class="badge-icon">@(ub.Badge?.Icon ?? "🏅")</span>
@@ -273,7 +175,7 @@
                     }
 
                     <div class="badge-meta">
-                        <span class="rarity-tag rarity-@rarity">@rarity</span>
+                        <span class="rarity-tag rarity-@rarity">@(rarity switch { "Common" => "Thường", "Rare" => "Hiếm", "Epic" => "Sử Thi", "Legendary" => "Huyền Thoại", _ => rarity })</span>
                         @if (ub.Badge != null && ub.Badge.RequiredXP > 0)
                         {
                             <span class="xp-tag">@ub.Badge.RequiredXP XP</span>

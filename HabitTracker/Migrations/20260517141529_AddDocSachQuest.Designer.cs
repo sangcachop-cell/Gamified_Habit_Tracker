@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517141529_AddDocSachQuest")]
+    partial class AddDocSachQuest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,85 +196,85 @@ namespace HabitTracker.Migrations
                         new
                         {
                             Id = 1,
-                            BuffDescription = "+5 Tấn Công mỗi cấp",
+                            BuffDescription = "+5 ATK per level",
                             BuffPerLevel = 5,
-                            Description = "Không gian tập luyện thể chất. Rèn giũa sức mạnh chiến đấu qua các buổi luyện tập hàng ngày.",
+                            Description = "A dedicated space for physical conditioning. Forges raw combat power through daily drills.",
                             Icon = "🏋️",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Sân Tập Luyện",
+                            Name = "Training Grounds",
                             StatAffected = "ATK"
                         },
                         new
                         {
                             Id = 2,
-                            BuffDescription = "+20 Sinh Lực mỗi cấp",
+                            BuffDescription = "+20 HP per level",
                             BuffPerLevel = 20,
-                            Description = "Thanh lọc tâm trí, tăng cường tinh thần. Thiền định giúp mở rộng sinh lực.",
+                            Description = "Silence the mind, fortify the spirit. Meditative practice expands your life force.",
                             Icon = "🧘",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Thiền Đường",
+                            Name = "Meditation Hall",
                             StatAffected = "HP"
                         },
                         new
                         {
                             Id = 3,
-                            BuffDescription = "+2% Nhận XP mỗi cấp",
+                            BuffDescription = "+2% XP Gain per level",
                             BuffPerLevel = 2,
-                            Description = "Kho sách cổ và tri thức. Kiến thức thúc đẩy sự phát triển và mài sắc trí tuệ.",
+                            Description = "Ancient texts and ongoing studies. Knowledge accelerates growth and sharpens the mind.",
                             Icon = "📚",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Thư Viện",
+                            Name = "Archive",
                             StatAffected = "XPGain"
                         },
                         new
                         {
                             Id = 4,
-                            BuffDescription = "+10 Sức Bền mỗi cấp",
+                            BuffDescription = "+10 Stamina per level",
                             BuffPerLevel = 10,
-                            Description = "Bài tập vượt chướng ngại và phản xạ đẩy cơ thể đến giới hạn. Tốc độ là nửa chiến thắng.",
+                            Description = "Obstacle runs and reflex drills push your body to its limits. Speed is half the battle.",
                             Icon = "🏃",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Đường Chướng Ngại",
+                            Name = "Agility Course",
                             StatAffected = "Stamina"
                         },
                         new
                         {
                             Id = 5,
-                            BuffDescription = "+5 Giáp mỗi cấp",
+                            BuffDescription = "+5 Armor per level",
                             BuffPerLevel = 5,
-                            Description = "Phòng thủ vững chắc bao bọc căn cứ. Vị trí kiên cố để chịu đựng mọi cuộc tấn công.",
+                            Description = "Hardened defenses line the outer walls. A stalwart position from which to weather any storm.",
                             Icon = "🛡️",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Doanh Trại",
+                            Name = "Barracks",
                             StatAffected = "Armor"
                         },
                         new
                         {
                             Id = 6,
-                            BuffDescription = "+30 ô mỗi cấp",
+                            BuffDescription = "+30 slots per level",
                             BuffPerLevel = 30,
-                            Description = "Mở rộng kho chứa của căn cứ. Mỗi lần nâng cấp thêm 30 ô lưới (10×3).",
+                            Description = "Expand your hideout's storage capacity. Each upgrade adds 30 more grid slots (10×3).",
                             Icon = "📦",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Phòng Kho",
+                            Name = "Storage Room",
                             StatAffected = "Storage"
                         },
                         new
                         {
                             Id = 7,
-                            BuffDescription = "+1 ô chế tác mỗi cấp",
+                            BuffDescription = "+1 craft slot per level",
                             BuffPerLevel = 1,
-                            Description = "Trạm chế tác để xử lý nguyên liệu thô. Cấp cao hơn mở khóa thêm ô và công thức.",
+                            Description = "A crafting station for processing raw materials. Higher levels unlock more slots and recipes.",
                             Icon = "🔨",
                             IsActive = true,
                             MaxLevel = 5,
-                            Name = "Bàn Thợ",
+                            Name = "Workbench",
                             StatAffected = "Crafting"
                         });
                 });

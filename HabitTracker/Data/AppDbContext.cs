@@ -30,7 +30,10 @@ namespace HabitTracker.Data
                     Icon = "🏋️", FacilityId = 1, MinigameType = "QTE" },
                 new Quest { Id = 2, Name = "Chạy bộ", Category = "Sức khỏe",
                     Difficulty = "Easy", Frequency = "Daily", XPReward = 10,
-                    Icon = "🏃", FacilityId = 4, MinigameType = "Dino" }
+                    Icon = "🏃", FacilityId = 4, MinigameType = "Dino" },
+                new Quest { Id = 3, Name = "Đọc sách", Category = "Học tập",
+                    Difficulty = "Medium", Frequency = "Daily", XPReward = 25,
+                    Icon = "📖", FacilityId = 3, MinigameType = "Tetris" }
             );
 
             // Seed Badge
@@ -51,45 +54,45 @@ namespace HabitTracker.Data
             modelBuilder.Entity<Facility>().HasData(
                 new Facility
                 {
-                    Id = 1, Name = "Training Grounds", Icon = "🏋️",
-                    Description = "A dedicated space for physical conditioning. Forges raw combat power through daily drills.",
-                    StatAffected = "ATK", BuffDescription = "+5 ATK per level", BuffPerLevel = 5, MaxLevel = 5
+                    Id = 1, Name = "Sân Tập Luyện", Icon = "🏋️",
+                    Description = "Không gian tập luyện thể chất. Rèn giũa sức mạnh chiến đấu qua các buổi luyện tập hàng ngày.",
+                    StatAffected = "ATK", BuffDescription = "+5 Tấn Công mỗi cấp", BuffPerLevel = 5, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 2, Name = "Meditation Hall", Icon = "🧘",
-                    Description = "Silence the mind, fortify the spirit. Meditative practice expands your life force.",
-                    StatAffected = "HP", BuffDescription = "+20 HP per level", BuffPerLevel = 20, MaxLevel = 5
+                    Id = 2, Name = "Thiền Đường", Icon = "🧘",
+                    Description = "Thanh lọc tâm trí, tăng cường tinh thần. Thiền định giúp mở rộng sinh lực.",
+                    StatAffected = "HP", BuffDescription = "+20 Sinh Lực mỗi cấp", BuffPerLevel = 20, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 3, Name = "Archive", Icon = "📚",
-                    Description = "Ancient texts and ongoing studies. Knowledge accelerates growth and sharpens the mind.",
-                    StatAffected = "XPGain", BuffDescription = "+2% XP Gain per level", BuffPerLevel = 2, MaxLevel = 5
+                    Id = 3, Name = "Thư Viện", Icon = "📚",
+                    Description = "Kho sách cổ và tri thức. Kiến thức thúc đẩy sự phát triển và mài sắc trí tuệ.",
+                    StatAffected = "XPGain", BuffDescription = "+2% Nhận XP mỗi cấp", BuffPerLevel = 2, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 4, Name = "Agility Course", Icon = "🏃",
-                    Description = "Obstacle runs and reflex drills push your body to its limits. Speed is half the battle.",
-                    StatAffected = "Stamina", BuffDescription = "+10 Stamina per level", BuffPerLevel = 10, MaxLevel = 5
+                    Id = 4, Name = "Đường Chướng Ngại", Icon = "🏃",
+                    Description = "Bài tập vượt chướng ngại và phản xạ đẩy cơ thể đến giới hạn. Tốc độ là nửa chiến thắng.",
+                    StatAffected = "Stamina", BuffDescription = "+10 Sức Bền mỗi cấp", BuffPerLevel = 10, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 5, Name = "Barracks", Icon = "🛡️",
-                    Description = "Hardened defenses line the outer walls. A stalwart position from which to weather any storm.",
-                    StatAffected = "Armor", BuffDescription = "+5 Armor per level", BuffPerLevel = 5, MaxLevel = 5
+                    Id = 5, Name = "Doanh Trại", Icon = "🛡️",
+                    Description = "Phòng thủ vững chắc bao bọc căn cứ. Vị trí kiên cố để chịu đựng mọi cuộc tấn công.",
+                    StatAffected = "Armor", BuffDescription = "+5 Giáp mỗi cấp", BuffPerLevel = 5, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 6, Name = "Storage Room", Icon = "📦",
-                    Description = "Expand your hideout's storage capacity. Each upgrade adds 30 more grid slots (10×3).",
-                    StatAffected = "Storage", BuffDescription = "+30 slots per level", BuffPerLevel = 30, MaxLevel = 5
+                    Id = 6, Name = "Phòng Kho", Icon = "📦",
+                    Description = "Mở rộng kho chứa của căn cứ. Mỗi lần nâng cấp thêm 30 ô lưới (10×3).",
+                    StatAffected = "Storage", BuffDescription = "+30 ô mỗi cấp", BuffPerLevel = 30, MaxLevel = 5
                 },
                 new Facility
                 {
-                    Id = 7, Name = "Workbench", Icon = "🔨",
-                    Description = "A crafting station for processing raw materials. Higher levels unlock more slots and recipes.",
-                    StatAffected = "Crafting", BuffDescription = "+1 craft slot per level", BuffPerLevel = 1, MaxLevel = 5
+                    Id = 7, Name = "Bàn Thợ", Icon = "🔨",
+                    Description = "Trạm chế tác để xử lý nguyên liệu thô. Cấp cao hơn mở khóa thêm ô và công thức.",
+                    StatAffected = "Crafting", BuffDescription = "+1 ô chế tác mỗi cấp", BuffPerLevel = 1, MaxLevel = 5
                 }
             );
 

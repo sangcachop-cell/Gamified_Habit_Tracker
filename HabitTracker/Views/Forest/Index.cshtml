@@ -1,5 +1,5 @@
 @using HabitTracker.Constants
-@{ ViewData["Title"] = "The Forest"; }
+@{ ViewData["Title"] = "Rừng Sâu"; }
 
 <style>
     .forest-hero {
@@ -49,22 +49,22 @@
 
 <div class="forest-hero">
     <div style="position:relative; z-index:1;">
-        <h1 class="forest-title">🌲 The Forest</h1>
-        <p class="forest-subtitle">An untamed wilderness. Enter, explore, and extract — or be lost forever.</p>
+        <h1 class="forest-title">🌲 Rừng Sâu</h1>
+        <p class="forest-subtitle">Vùng hoang dã hiểm nguy. Vào, khám phá và rút lui — hoặc mãi mãi mất tích.</p>
         <div>
             <form asp-action="Enter" method="post" style="display:inline;">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="enter-btn">🌲 Enter the Forest</button>
+                <button type="submit" class="enter-btn">🌲 Vào Rừng</button>
             </form>
             @if ((bool)(ViewBag.HasActiveSession ?? false))
             {
                 <a asp-action="Map" class="resume-btn" style="display:inline-block; text-decoration:none; line-height:1; padding:14px 36px;">
-                    ↩ Resume Session
+                    ↩ Tiếp Tục Hành Trình
                 </a>
             }
         </div>
         <div style="margin-top:20px; font-size:.8rem; opacity:.4;">
-            Each run is random. Spawn location determines your required extract point.
+            Mỗi lần vào đều ngẫu nhiên. Điểm xuất phát quyết định điểm rút lui bắt buộc.
         </div>
     </div>
 </div>
@@ -80,17 +80,17 @@
     }
     <div class="info-card">
         <div class="info-card-icon">🔵🔴</div>
-        <div class="info-card-title">Spawn Points</div>
-        <div class="info-card-desc">Two opposing spawn locations. Randomly assigned each run.</div>
+        <div class="info-card-title">Điểm Xuất Phát</div>
+        <div class="info-card-desc">Hai vị trí xuất phát đối lập. Được chọn ngẫu nhiên mỗi lần vào.</div>
     </div>
     <div class="info-card">
         <div class="info-card-icon">⬆️</div>
-        <div class="info-card-title">Extract Points</div>
-        <div class="info-card-desc">Two extraction zones. You must reach the one opposite your spawn.</div>
+        <div class="info-card-title">Điểm Rút Lui</div>
+        <div class="info-card-desc">Hai khu vực rút lui. Bạn phải đến điểm đối diện với nơi xuất phát.</div>
     </div>
     <div class="info-card">
         <div class="info-card-icon">👣</div>
-        <div class="info-card-title">Movement</div>
-        <div class="info-card-desc">Click any cell to move. Distance = moves spent. Water is impassable.</div>
+        <div class="info-card-title">Di Chuyển</div>
+        <div class="info-card-desc">Dùng WASD / phím mũi tên để di chuyển. Nước không thể đi qua.</div>
     </div>
 </div>

@@ -105,6 +105,14 @@ namespace HabitTracker.Services.Implementations
             int newW = item.IsRotated ? def.Width  : def.Height;
             int newH = item.IsRotated ? def.Height : def.Width;
 
+            // Check slot constraint (e.g. Rig requires exactly W=1,H=2)
+            var sc = ItemCatalogue.SlotConstraint(item.ContainerType);
+            if (sc != null && (newW != sc.Value.W || newH != sc.Value.H))
+            {
+                _logger.LogInformation($"Rotate rejected: {newW}x{newH} violates slot constraint {sc.Value.W}x{sc.Value.H}");
+                return false;
+            }
+
             // Check container bounds (dynamic for Storage)
             var (cols, rows) = await GetEffectiveContainerSizeAsync(userId, item.ContainerType);
             if (item.GridX + newW > cols || item.GridY + newH > rows)

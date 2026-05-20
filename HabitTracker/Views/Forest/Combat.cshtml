@@ -1,6 +1,6 @@
 @using HabitTracker.Models
 @{
-    ViewData["Title"] = "Forest — Encounter";
+    ViewData["Title"] = "Rừng — Chạm Trán";
     var combat  = ViewBag.Combat  as ForestCombatState;
     var session = ViewBag.Session as ForestSession;
     bool isRare = combat?.MonsterTier == "rare";
@@ -99,7 +99,7 @@
 
 <div class="encounter-wrap">
     <div class="encounter-header">
-        <div class="encounter-tag">@(isRare ? "⭐ Rare Encounter" : "⚡ Encounter")</div>
+        <div class="encounter-tag">@(isRare ? "⭐ Quái Hiếm" : "⚡ Chạm Trán")</div>
         <div class="encounter-title">@combat?.MonsterName</div>
     </div>
 
@@ -107,8 +107,8 @@
         <!-- Player -->
         <div class="combatant">
             <div class="combatant-icon">🧍</div>
-            <div class="combatant-name">You</div>
-            <div class="hp-label">HP</div>
+            <div class="combatant-name">Bạn</div>
+            <div class="hp-label">Máu</div>
             <div class="hp-bar-bg">
                 <div class="hp-bar-fill" style="width:@playerHpPct%;
                     background: @(playerHpPct > 50 ? "#27ae60" : playerHpPct > 25 ? "#f39c12" : "#c0392b");"></div>
@@ -129,7 +129,7 @@
         <div class="combatant">
             <div class="combatant-icon">@combat?.MonsterIcon</div>
             <div class="combatant-name">@combat?.MonsterName</div>
-            <div class="hp-label">HP</div>
+            <div class="hp-label">Máu</div>
             <div class="hp-bar-bg">
                 <div class="hp-bar-fill" style="width:@monsterHpPct%;
                     background: @(monsterHpPct > 50 ? "#e74c3c" : monsterHpPct > 25 ? "#e67e22" : "#c0392b");"></div>
@@ -152,13 +152,13 @@
         @if (playerGoesFirst)
         {
             <span style="color:rgba(129,199,132,.6);">
-                ⚡ You act first@(playerDbl ? " — bonus strike!" : "")
+                ⚡ Bạn ra đòn trước@(playerDbl ? " — đòn kép!" : "")
             </span>
         }
         else
         {
             <span style="color:rgba(231,76,60,.6);">
-                ⚠️ @combat?.MonsterName acts first@(monsterDbl ? " — double strike!" : "")
+                ⚠️ @combat?.MonsterName ra đòn trước@(monsterDbl ? " — đòn kép!" : "")
             </span>
         }
     </div>
@@ -185,22 +185,22 @@
         int[] failChances = { 0, 35, 65, 85 };
         int defIdx = Math.Min(combat?.ConsecutiveDefends ?? 0, 3);
         int defFail = failChances[defIdx];
-        string defRisk = defIdx == 0 ? "Always blocks" : $"{defFail}% fail";
+        string defRisk = defIdx == 0 ? "Luôn chặn" : $"{defFail}% thất bại";
     }
     <div class="action-row">
         <form asp-action="CombatAttack" asp-controller="Forest" method="post">
             @Html.AntiForgeryToken()
             <button type="submit" class="btn-action btn-attack">
                 <span class="ico">⚔️</span>
-                <span>Attack</span>
-                <small>Resets guard</small>
+                <span>Tấn Công</span>
+                <small>Xóa thế thủ</small>
             </button>
         </form>
         <form asp-action="CombatDefend" asp-controller="Forest" method="post">
             @Html.AntiForgeryToken()
             <button type="submit" class="btn-action btn-defend">
                 <span class="ico">🛡️</span>
-                <span>Defend</span>
+                <span>Phòng Thủ</span>
                 <small>@defRisk</small>
             </button>
         </form>
@@ -208,13 +208,13 @@
             @Html.AntiForgeryToken()
             <button type="submit" class="btn-action btn-flee">
                 <span class="ico">🏃</span>
-                <span>Flee</span>
-                <small>Needs Escape Scroll</small>
+                <span>Bỏ Chạy</span>
+                <small>Cần Cuộn Thoát</small>
             </button>
         </form>
     </div>
 
     <div class="moves-badge">
-        @session?.MovesSpent moves spent &nbsp;|&nbsp; @(session?.Pouch?.Count ?? 0) loot in pouch
+        @session?.MovesSpent bước đã đi &nbsp;|&nbsp; @(session?.Pouch?.Count ?? 0) đồ trong túi
     </div>
 </div>
