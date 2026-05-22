@@ -60,7 +60,7 @@
             color: var(--text);
             background:
                 linear-gradient(rgba(2,8,3,.86), rgba(2,8,3,.92)),
-                url('/fe/forest-hero.png');
+                url('/fe/loot/forest-hero.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -381,6 +381,126 @@
                 width: 100%;
             }
         }
+    
+
+        /* ===== FULLSCREEN 1-SCREEN PATCH ===== */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        body {
+            min-height: 100vh !important;
+            background-attachment: fixed;
+        }
+
+        .loot-wrap {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 14px 44px !important;
+            border-radius: 0 !important;
+            overflow: hidden !important;
+            display: grid !important;
+            grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+            gap: 10px !important;
+        }
+
+        .loot-header {
+            margin-bottom: 0 !important;
+        }
+
+        .loot-title {
+            font-size: clamp(1.9rem, 3vw, 3rem) !important;
+            line-height: 1.05 !important;
+        }
+
+        .loot-sub {
+            margin-top: 4px !important;
+            font-size: .84rem !important;
+        }
+
+        .layout {
+            min-height: 0 !important;
+            height: 100% !important;
+            grid-template-columns: 360px minmax(0, 1fr) !important;
+            gap: 20px !important;
+            overflow: hidden !important;
+        }
+
+        .panel {
+            padding: 14px 16px !important;
+            border-radius: 20px !important;
+        }
+
+        .panel-title {
+            margin-bottom: 10px !important;
+            font-size: .76rem !important;
+        }
+
+        .stack {
+            min-height: 0 !important;
+            max-height: 100% !important;
+            overflow-y: auto !important;
+            padding-right: 8px !important;
+            gap: 12px !important;
+        }
+
+        .actions-row {
+            margin-top: 0 !important;
+        }
+
+        .btn-loot {
+            padding: 11px 22px !important;
+            border-radius: 14px !important;
+            font-size: .9rem !important;
+        }
+
+        .hint {
+            margin-top: 0 !important;
+            font-size: .72rem !important;
+            line-height: 1.45 !important;
+        }
+
+        .trash-zone {
+            padding: 12px !important;
+            margin-top: 4px !important;
+        }
+
+        @@media(max-height: 820px) {
+            .loot-wrap { padding: 10px 32px !important; }
+            .loot-title { font-size: 2rem !important; }
+            .loot-sub { display: none !important; }
+            .panel { padding: 12px 14px !important; }
+            .stack { gap: 10px !important; }
+            .actions-row { gap: 10px !important; }
+            .hint { display: none !important; }
+        }
+
+        @@media(max-width: 1100px) {
+            html, body { overflow: auto !important; }
+            .loot-wrap {
+                height: auto !important;
+                min-height: 100vh !important;
+                overflow: visible !important;
+                padding: 20px !important;
+                display: block !important;
+            }
+            .layout {
+                height: auto !important;
+                grid-template-columns: 1fr !important;
+                overflow: visible !important;
+            }
+            .stack {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -565,20 +685,20 @@
         function monsterBodyImage(w, h) {
             const size = w * h;
 
-            if (size === 1) return "/fe/1o.png";
-            if (size === 6) return "/fe/6o.png";
-            if (size === 4) return "/fe/8o.png";
-            if (size === 8) return "/fe/8o.png";
+            if (size === 1) return "/fe/loot/1o.png";
+            if (size === 6) return "/fe/loot/6o.png";
+            if (size === 4) return "/fe/loot/8o.png";
+            if (size === 8) return "/fe/loot/8o.png";
 
             if (w === 1 && h >= 2 && h <= 5) {
-                return `/fe/${h}doc.png`;
+                return `/fe/loot/${h}doc.png`;
             }
 
             if (h === 1 && w >= 2 && w <= 5) {
-                return `/fe/${w}ngang.png`;
+                return `/fe/loot/${w}ngang.png`;
             }
 
-            return "/fe/1o.png";
+            return "/fe/loot/1o.png";
         }
 
         function renderMonsterImage(w, h, name) {

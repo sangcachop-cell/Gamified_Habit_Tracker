@@ -1,201 +1,909 @@
 ﻿@model List<HabitTracker.Models.UserBadge>
+
 @{
     ViewData["Title"] = "Tất cả Badges";
+    Layout = null;
+
+    int totalBadges = Model?.Count ?? 0;
+    int totalReward = Model?.Count(b => b.Badge != null && b.Badge.RequiredXP > 0) ?? 0;
 }
 
-<style>
-    body { background: #0d0d1a; color: #e8e8f0; font-family: "DM Sans", sans-serif; }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    .page-header {
-        background: linear-gradient(135deg, #5c3dde 0%, #7c3aed 100%);
-        color: white;
-        padding: 35px 30px;
-        border-radius: 16px;
-        margin-bottom: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
+    <title>Tất cả Badges — Vương Quốc</title>
 
-        .page-header h2 { margin: 0; font-size: 1.8em; }
-        .page-header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95em; }
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    .back-btn {
-        background: rgba(255,255,255,0.15);
-        color: white;
-        border: 1.5px solid rgba(255,255,255,0.4);
-        padding: 10px 22px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.2s;
-        white-space: nowrap;
-    }
-        .back-btn:hover { background: rgba(255,255,255,0.25); color: white; border-color: white; }
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap"
+          rel="stylesheet">
 
-    .badges-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 20px;
-    }
+    <style>
 
-    .badge-card {
-        background: rgba(255,255,255,.05);
-        border-radius: 14px;
-        padding: 24px 20px;
-        border: 1.5px solid rgba(255,255,255,.1);
-        text-align: center;
-        transition: all 0.25s;
-        position: relative;
-        overflow: hidden;
-    }
-        .badge-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.2); }
-        .badge-card.new-badge { border-color: #ffc107; }
+        :root {
+            --bg: #070711;
+            --panel: #121020;
+            --violet: #7c4dff;
+            --violet2: #9b7cff;
+            --gold: #ffd166;
+            --green: #48d597;
+            --cyan: #2de2c5;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,.58);
+            --border: rgba(255,255,255,.1);
+        }
 
-    .new-badge-ribbon {
-        position: absolute; top: 12px; right: -20px;
-        background: #ffc107; color: #111;
-        font-size: 0.7em; font-weight: bold;
-        padding: 3px 28px; transform: rotate(35deg); letter-spacing: 0.5px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .badge-icon { font-size: 3em; margin-bottom: 12px; display: block; }
-    .badge-name { font-size: 1.15em; font-weight: 700; color: #e8e8f0; margin-bottom: 8px; }
-    .badge-description { font-size: 0.88em; color: rgba(255,255,255,.5); line-height: 1.5; margin-bottom: 12px; }
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top right, rgba(124,77,255,.18), transparent 35%), #070711;
+            color: white;
+            font-family: "Be Vietnam Pro", sans-serif;
+        }
 
-    .badge-meta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        /* TOPBAR */
 
-    .rarity-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; color: white; }
-    .rarity-Common   { background: #6b6b6b; }
-    .rarity-Rare     { background: #0070DD; }
-    .rarity-Epic     { background: #A335EE; }
-    .rarity-Legendary{ background: #FF8000; }
+        .topbar {
+            height: 78px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 0 28px;
+            background: rgba(7,7,17,.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
 
-    .earned-date { font-size: 0.8em; color: rgba(255,255,255,.35); margin-top: 8px; }
+        /* LOGO */
 
-    .xp-tag {
-        display: inline-block;
-        background: rgba(0,184,156,.15); color: #00b89c;
-        border: 1px solid rgba(0,184,156,.3);
-        padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 220px;
+            height: 64px;
+            padding: 8px 16px;
+            border-radius: 18px;
+            color: white;
+            text-decoration: none;
+            background: linear-gradient( 135deg, rgba(124,77,255,.22), rgba(8,8,18,.78) );
+            border: 1px solid rgba(168,85,247,.45);
+            box-shadow: 0 0 22px rgba(124,77,255,.28), inset 0 0 18px rgba(255,255,255,.04);
+            transition: .25s;
+        }
 
-    .empty-state {
-        text-align: center; padding: 60px 20px; color: rgba(255,255,255,.4);
-        background: rgba(255,255,255,.04);
-        border: 1.5px solid rgba(255,255,255,.08);
-        border-radius: 14px;
-    }
-        .empty-state .emoji { font-size: 4em; display: block; margin-bottom: 16px; }
+            .brand:hover {
+                transform: translateY(-2px);
+                border-color: rgba(168,85,247,.75);
+                box-shadow: 0 0 30px rgba(124,77,255,.38), inset 0 0 20px rgba(255,255,255,.05);
+                color: white;
+            }
 
-    .stats-bar {
-        background: rgba(255,255,255,.05);
-        border-radius: 12px; padding: 18px 24px; margin-bottom: 24px;
-        border: 1.5px solid rgba(255,255,255,.1);
-        display: flex; gap: 30px; flex-wrap: wrap; align-items: center;
-    }
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(168,85,247,.7)) drop-shadow(0 0 22px rgba(124,77,255,.45));
+        }
 
-    .stat-chip { display: flex; flex-direction: column; align-items: center; }
-        .stat-chip .num { font-size: 1.5em; font-weight: 800; color: #9c7cf4; }
-        .stat-chip .lbl { font-size: 0.8em; color: rgba(255,255,255,.4); }
-</style>
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
 
-<div class="container mt-4 mb-5">
+            .brand-text span {
+                font-family: "Cinzel", serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #f8fafc;
+                letter-spacing: .6px;
+            }
 
-    <!-- Header -->
-    <div class="page-header">
-        <div>
-            <h2>🏆 Tất cả Badges</h2>
-            <p>Bộ sưu tập huy hiệu của bạn</p>
-        </div>
-        <a href="javascript:history.back()" class="back-btn">← Quay lại</a>
-    </div>
+            .brand-text strong {
+                margin-top: 2px;
+                font-family: "Cinzel", serif;
+                font-size: 1.65rem;
+                font-weight: 800;
+                color: #facc15;
+                letter-spacing: .8px;
+                text-shadow: 0 0 10px rgba(250,204,21,.5), 0 0 24px rgba(168,85,247,.35);
+            }
 
-    @if (Model != null && Model.Count > 0)
-    {
-        <!-- Stats summary -->
-        var countByRarity = Model
-        .GroupBy(b => b.Badge?.Rarity ?? "Common")
-        .ToDictionary(g => g.Key, g => g.Count());
-        <div class="stats-bar">
-            <div class="stat-chip">
-                <span class="num">@Model.Count</span>
-                <span class="lbl">Tổng badges</span>
+        /* NAV */
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+            .top-nav a {
+                color: rgba(255,255,255,.7);
+                text-decoration: none;
+                padding: 10px 14px;
+                border-radius: 14px;
+                font-size: .85rem;
+                font-weight: 700;
+                white-space: nowrap;
+                transition: .2s;
+            }
+
+                .top-nav a:hover,
+                .top-nav a.active {
+                    color: white;
+                    background: rgba(124,77,255,.18);
+                }
+
+        /* USER */
+
+        .top-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .level-chip {
+            color: var(--gold);
+            font-size: .85rem;
+            font-weight: 800;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,.25);
+            background: white;
+        }
+
+        /* LAYOUT */
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+            padding-top: 78px;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 78px;
+            bottom: 0;
+            width: 260px;
+            padding: 22px 16px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top left, rgba(124,77,255,.18), transparent 32%), #080814;
+            border-right: 1px solid rgba(255,255,255,.08);
+        }
+
+        .side-title {
+            margin: 18px 12px 10px;
+            color: rgba(255,255,255,.34);
+            font-size: .72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+        }
+
+        .side-menu {
+            display: grid;
+            gap: 8px;
+        }
+
+            .side-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 14px;
+                border-radius: 15px;
+                color: rgba(255,255,255,.7);
+                text-decoration: none;
+                font-size: .9rem;
+                font-weight: 700;
+                transition: .2s;
+            }
+
+                .side-menu a:hover,
+                .side-menu a.active {
+                    color: white;
+                    background: rgba(124,77,255,.18);
+                    box-shadow: inset 0 0 0 1px rgba(124,77,255,.25);
+                }
+
+        /* SIDEBAR CARD */
+
+        .side-card {
+            margin-top: 26px;
+            padding: 18px;
+            border-radius: 22px;
+            background: linear-gradient( 135deg, rgba(124,77,255,.2), rgba(255,209,102,.08) );
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+            .side-card h4 {
+                color: var(--gold);
+                font-size: .95rem;
+                font-weight: 800;
+                margin-bottom: 8px;
+            }
+
+            .side-card p {
+                color: rgba(255,255,255,.58);
+                font-size: .8rem;
+                line-height: 1.6;
+                margin-bottom: 14px;
+            }
+
+            .side-card a {
+                display: block;
+                padding: 11px 14px;
+                border-radius: 14px;
+                text-align: center;
+                background: linear-gradient( 135deg, var(--violet), #6d28d9 );
+                color: white;
+                text-decoration: none;
+                font-size: .82rem;
+                font-weight: 800;
+            }
+
+        /* MAIN */
+
+        .main {
+            grid-column: 2;
+            padding: 28px;
+            background: radial-gradient(circle at top right, rgba(124,77,255,.14), transparent 34%), radial-gradient(circle at bottom left, rgba(45,226,197,.06), transparent 30%);
+        }
+
+        /* HERO */
+
+        .badges-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 26px;
+            padding: 30px 34px;
+            min-height: 220px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,.08);
+            background: linear-gradient( 90deg, rgba(6,6,18,.94) 0%, rgba(6,6,18,.58) 35%, rgba(6,6,18,.35) 100% ), url('/fe/badges/badges-banner.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+
+        .hero-trophy {
+            width: 95px;
+            height: 95px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(255,209,102,.65)) drop-shadow(0 0 24px rgba(168,85,247,.45));
+        }
+
+        .badges-hero h1 {
+            font-family: "Cinzel", serif;
+            font-size: clamp(2.2rem, 3vw, 4rem);
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,.45), 0 0 24px rgba(168,85,247,.55);
+        }
+
+        .badges-hero p {
+            max-width: 760px;
+            color: rgba(255,255,255,.78);
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        /* STATS */
+
+        .stats-panel {
+            width: fit-content;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(8,8,18,.48);
+            border: 1px solid rgba(255,255,255,.1);
+            backdrop-filter: blur(12px);
+        }
+
+        .stat-box {
+            min-width: 170px;
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+            .stat-box .num {
+                color: var(--gold);
+                font-size: 2rem;
+                font-weight: 900;
+            }
+
+            .stat-box .lbl {
+                margin-top: 8px;
+                color: rgba(255,255,255,.62);
+                font-size: .88rem;
+                font-weight: 700;
+            }
+
+        /* FILTER */
+
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            border-radius: 22px;
+            background: linear-gradient( 135deg, rgba(255,255,255,.045), rgba(124,77,255,.07) );
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        .filter-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.05rem;
+            font-weight: 900;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-chip {
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: rgba(8,8,18,.55);
+            border: 1px solid rgba(255,255,255,.1);
+            color: rgba(255,255,255,.72);
+            font-size: .82rem;
+            font-weight: 800;
+        }
+
+            .filter-chip.active {
+                color: white;
+                background: linear-gradient( 135deg, var(--violet), #6d28d9 );
+                box-shadow: 0 12px 28px rgba(124,77,255,.25);
+            }
+
+        /* GRID */
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 18px;
+        }
+
+        /* CARD */
+
+        .badge-card {
+            position: relative;
+            overflow: hidden;
+            padding: 28px;
+            min-height: 310px;
+            border-radius: 24px;
+            background: linear-gradient( 135deg, rgba(255,255,255,.055), rgba(124,77,255,.08) );
+            border: 1px solid rgba(255,255,255,.08);
+            transition: .25s;
+        }
+
+            .badge-card:hover {
+                transform: translateY(-4px);
+                border-color: rgba(124,77,255,.45);
+                box-shadow: 0 18px 42px rgba(0,0,0,.26);
+            }
+
+            .badge-card.new-badge {
+                border-color: rgba(72,213,151,.45);
+                background: linear-gradient( 135deg, rgba(72,213,151,.12), rgba(124,77,255,.06) );
+            }
+
+        .new-badge-ribbon {
+            position: absolute;
+            top: 16px;
+            left: -32px;
+            width: 125px;
+            transform: rotate(-38deg);
+            padding: 5px 0;
+            text-align: center;
+            background: linear-gradient( 135deg, var(--gold), #ff9f1c );
+            color: #160f00;
+            font-size: .68rem;
+            font-weight: 900;
+        }
+
+        .badge-icon {
+            width: 105px;
+            height: 105px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 20px;
+            border-radius: 24px;
+            background: rgba(124,77,255,.16);
+            border: 1px solid rgba(124,77,255,.28);
+            font-size: 3.6rem;
+            filter: drop-shadow(0 0 16px rgba(124,77,255,.55));
+        }
+
+        .badge-name {
+            font-family: "Cinzel", serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .badge-description {
+            color: rgba(255,255,255,.58);
+            font-size: .92rem;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .badge-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rarity-tag,
+        .xp-tag {
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: .76rem;
+            font-weight: 900;
+        }
+
+        .rarity-Common {
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.13);
+        }
+
+        .rarity-Rare {
+            background: rgba(74,158,221,.15);
+            color: #93c5fd;
+            border: 1px solid rgba(74,158,221,.3);
+        }
+
+        .rarity-Epic {
+            background: rgba(124,77,255,.16);
+            color: #c4b5fd;
+            border: 1px solid rgba(124,77,255,.3);
+        }
+
+        .rarity-Legendary {
+            background: rgba(255,209,102,.15);
+            color: var(--gold);
+            border: 1px solid rgba(255,209,102,.3);
+        }
+
+        .xp-tag {
+            background: rgba(45,226,197,.15);
+            color: var(--cyan);
+            border: 1px solid rgba(45,226,197,.3);
+        }
+
+        .earned-date {
+            margin-top: 18px;
+            color: rgba(255,255,255,.45);
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        /* MOBILE */
+
+        @@media (max-width: 1180px) {
+
+            .layout {
+                grid-template-columns: 1fr;
+                padding-top: 118px;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                grid-column: 1;
+            }
+
+            .topbar {
+                height: auto;
+                min-height: 78px;
+                flex-wrap: wrap;
+                padding: 14px 18px;
+            }
+
+            .top-nav {
+                order: 3;
+                width: 100%;
+            }
+        }
+
+        @@media (max-width: 700px) {
+
+            .main {
+                padding: 18px;
+            }
+
+            .badges-hero {
+                padding: 24px;
+            }
+
+            .hero-title-wrap {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-trophy {
+                width: 82px;
+                height: 82px;
+            }
+
+            .badges-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-panel {
+                width: 100%;
+            }
+
+            .stat-box {
+                min-width: calc(50% - 8px);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <!-- LOGO -->
+
+        <a href="/Dashboard" class="brand">
+
+            <img src="/fe/logo/logo.png"
+                 class="brand-logo"
+                 alt="Logo" />
+
+            <div class="brand-text">
+                <span>Vương</span>
+                <strong>Quốc</strong>
             </div>
-            @if (countByRarity.TryGetValue("Legendary", out int leg) && leg > 0)
-            {
-                <div class="stat-chip">
-                    <span class="num" style="color:#FF8000">@leg</span>
-                    <span class="lbl">Huyền Thoại</span>
-                </div>
-            }
-            @if (countByRarity.TryGetValue("Epic", out int epic) && epic > 0)
-            {
-                <div class="stat-chip">
-                    <span class="num" style="color:#A335EE">@epic</span>
-                    <span class="lbl">Sử Thi</span>
-                </div>
-            }
-            @if (countByRarity.TryGetValue("Rare", out int rare) && rare > 0)
-            {
-                <div class="stat-chip">
-                    <span class="num" style="color:#0070DD">@rare</span>
-                    <span class="lbl">Hiếm</span>
-                </div>
-            }
-            @if (countByRarity.TryGetValue("Common", out int common) && common > 0)
-            {
-                <div class="stat-chip">
-                    <span class="num" style="color:#808080">@common</span>
-                    <span class="lbl">Thường</span>
-                </div>
-            }
+
+        </a>
+
+        <!-- NAV -->
+
+        <nav class="top-nav">
+
+            <a href="/Dashboard">
+                📊 Trang chủ
+            </a>
+
+            <a href="/Task">
+                📋 Nhiệm vụ
+            </a>
+
+            <a href="/Account/Leaderboard">
+                🏆 Bảng xếp hạng
+            </a>
+
+            <a href="/Friend">
+                👥 Bạn bè
+            </a>
+
+            <a href="/Dashboard/Badges"
+               class="active">
+                🏅 Thành tựu
+            </a>
+
+            <a href="/Inventory">
+                🎒 Kho đồ
+            </a>
+
+            <a href="/Hideout/Index">
+                🏰 Căn cứ
+            </a>
+
+            <a href="/Task/search">
+                🔍 Tìm nhiệm vụ
+            </a>
+
+        </nav>
+
+        <!-- USER -->
+
+        <div class="top-user">
+
+            <span class="level-chip">
+                LV. 5
+            </span>
+
+            <img src="/images/default.png"
+                 class="avatar"
+                 alt="Avatar" />
+
         </div>
 
-        <!-- Badges Grid -->
-        <div class="badges-grid">
-            @foreach (var ub in Model.OrderByDescending(b => b.EarnedDate))
-            {
-                var isNew = ub.IsNewlyEarned();
-                var rarity = ub.Badge?.Rarity ?? "Common";
-                <div class="badge-card @(isNew ? "new-badge" : "")">
-                    @if (isNew)
-                    {
-                        <div class="new-badge-ribbon">MỚI</div>
-                    }
+    </header>
 
-                    <span class="badge-icon">@(ub.Badge?.Icon ?? "🏅")</span>
-                    <div class="badge-name">@(ub.Badge?.Name ?? "Badge")</div>
+    <!-- LAYOUT -->
 
-                    @if (!string.IsNullOrEmpty(ub.Badge?.Description))
-                    {
-                        <div class="badge-description">@ub.Badge.Description</div>
-                    }
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="side-title">
+                Chính
+            </div>
+
+            <nav class="side-menu">
+
+                <a href="/Dashboard">
+                    🏠 Dashboard
+                </a>
+
+                <a href="/Task">
+                    📋 Danh sách Quest
+                </a>
+
+                <a href="/Task/search">
+                    🔍 Tìm kiếm Quest
+                </a>
+
+                <a href="/Dashboard/Statistics">
+                    📊 Thống kê
+                </a>
+
+                <a href="/Forest/Index">
+                    🌲 Rừng Sâu
+                </a>
+
+            </nav>
+
+            <div class="side-title">
+                Cộng đồng
+            </div>
+
+            <nav class="side-menu">
+
+                <a href="/Account/Leaderboard">
+                    🏆 Bảng xếp hạng
+                </a>
+
+                <a href="/Friend">
+                    👥 Bạn bè
+                </a>
+
+                <a href="/Dashboard/Badges"
+                   class="active">
+                    🏅 Thành tựu
+                </a>
+
+            </nav>
+
+            <div class="side-title">
+                Tài khoản
+            </div>
+
+            <nav class="side-menu">
+
+                <a href="/Account/Profile">
+                    🧙 Hồ sơ cá nhân
+                </a>
+
+                <a href="/Dashboard/Character">
+                    🧝 Nhân vật
+                </a>
+
+                <a href="/Inventory">
+                    🎒 Kho đồ
+                </a>
+
+                <a href="/Hideout/Index">
+                    🏰 Căn cứ
+                </a>
+
+                <a href="/Account/Logout">
+                    🚪 Đăng xuất
+                </a>
+
+            </nav>
+
+            <div class="side-card">
+
+                <h4>
+                    Huy hiệu
+                </h4>
+
+                <p>
+                    Hoàn thành nhiệm vụ để mở khóa thêm nhiều huy hiệu hiếm và phần thưởng hấp dẫn!
+                </p>
+
+                <a href="/Task/search">
+                    Tìm quest ngay
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN -->
+
+        <main class="main">
+
+            <!-- HERO -->
+
+            <section class="badges-hero">
+
+                <div class="hero-title-wrap">
+
+                    <img src="/fe/badges/badge-trophy.png"
+                         class="hero-trophy" />
+
+                    <h1>Tất cả Badges</h1>
+
+                </div>
+
+                <p>
+                    Bộ sưu tập huy hiệu và thành tựu của bạn trong Vương Quốc.
+                </p>
+
+                <div class="stats-panel">
+
+                    <div class="stat-box">
+                        <div class="num">@totalBadges</div>
+                        <div class="lbl">Tổng badges</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="num">@totalReward</div>
+                        <div class="lbl">Thưởng</div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- FILTER -->
+
+            <div class="filter-bar">
+
+                <div class="filter-title">
+                    ✨ Badges của bạn
+                </div>
+
+                <div class="filter-actions">
+
+                    <span class="filter-chip active">
+                        Tất cả (@totalBadges)
+                    </span>
+
+                    <span class="filter-chip">
+                        Đã đạt (@totalBadges)
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- GRID -->
+
+            <div class="badges-grid">
+
+                @foreach (var ub in Model.OrderByDescending(b => b.EarnedDate))
+                {
+                    var isNew = ub.IsNewlyEarned();
+                    var rarity = ub.Badge?.Rarity ?? "Common";
+
+                    <div class="badge-card @(isNew ? "new-badge" : "")">
+
+                        @if (isNew)
+                        {
+                            <div class="new-badge-ribbon">
+                                MỚI
+                            </div>
+                        }
+
+                        <div class="badge-icon">
+                            @(ub.Badge?.Icon ?? "🏅")
+                        </div>
+
+                        <div class="badge-name">
+                            @(ub.Badge?.Name ?? "Badge")
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(ub.Badge?.Description))
+                        {
+                            <div class="badge-description">
+                                @ub.Badge.Description
+                            </div>
+                        }
 
                     <div class="badge-meta">
-                        <span class="rarity-tag rarity-@rarity">@(rarity switch { "Common" => "Thường", "Rare" => "Hiếm", "Epic" => "Sử Thi", "Legendary" => "Huyền Thoại", _ => rarity })</span>
-                        @if (ub.Badge != null && ub.Badge.RequiredXP > 0)
-                        {
-                            <span class="xp-tag">@ub.Badge.RequiredXP XP</span>
-                        }
-                    </div>
 
-                    <div class="earned-date">
-                        🗓️ Đạt được: @ub.EarnedDate.ToString("dd/MM/yyyy")
+                        <span class="rarity-tag rarity-@rarity">
+
+                            @(rarity switch
+                            {
+                                "Common" => "Thường",
+                                "Rare" => "Hiếm",
+                                "Epic" => "Sử Thi",
+                                "Legendary" => "Huyền Thoại",
+                                _ => rarity
+                            })
+
+                        </span>
+
+                        @if (ub.Badge != null &&
+                                                ub.Badge.RequiredXP > 0)
+                            {
+                                <span class="xp-tag">
+                                    @ub.Badge.RequiredXP XP
+                                </span>
+                            }
+
+                        </div>
+
+                        <div class="earned-date">
+
+                            🗓️ Đạt được:
+                            @ub.EarnedDate.ToString("dd/MM/yyyy")
+
+                        </div>
+
                     </div>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="empty-state">
-            <span class="emoji">🏅</span>
-            <h4>Chưa có badge nào</h4>
-            <p style="margin-top: 8px;">Hoàn thành quest để nhận badge đầu tiên của bạn!</p>
-            <a href="/task" class="btn btn-primary mt-3">📋 Đi làm quest ngay</a>
-        </div>
-    }
-</div>
+                }
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

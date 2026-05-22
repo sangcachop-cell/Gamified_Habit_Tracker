@@ -9,16 +9,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập — HabitTracker</title>
+    <title>Đăng nhập — Vương Quốc</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg: #070711;
             --panel: #10101d;
-            --panel-soft: #17172a;
             --violet: #7c4dff;
             --violet-2: #9b5cff;
             --gold: #ffd166;
@@ -51,7 +50,7 @@
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
-            background: linear-gradient(90deg, rgba(7,7,17,.88), rgba(7,7,17,.38)), url('/fe/login-illustration.png');
+            background: linear-gradient(90deg, rgba(7,7,17,.88), rgba(7,7,17,.38)), url('/fe/login/login-illustration.png');
             background-size: cover;
             background-position: center;
             border-right: 1px solid rgba(255,255,255,.08);
@@ -65,18 +64,63 @@
                 pointer-events: none;
             }
 
+        /* LOGO GIỐNG TRANG BADGES */
         .brand {
             position: relative;
             z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: fit-content;
+            min-width: 220px;
+            height: 64px;
+            padding: 8px 16px;
+            border-radius: 18px;
             color: white;
             text-decoration: none;
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -.5px;
+            background: linear-gradient(135deg, rgba(124,77,255,.22), rgba(8,8,18,.78));
+            border: 1px solid rgba(168,85,247,.45);
+            box-shadow: 0 0 22px rgba(124,77,255,.28), inset 0 0 18px rgba(255,255,255,.04);
+            transition: .25s;
         }
 
-            .brand span {
-                color: var(--gold);
+            .brand:hover {
+                transform: translateY(-2px);
+                border-color: rgba(168,85,247,.75);
+                box-shadow: 0 0 30px rgba(124,77,255,.38), inset 0 0 20px rgba(255,255,255,.05);
+                color: white;
+            }
+
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(168,85,247,.7)) drop-shadow(0 0 22px rgba(124,77,255,.45));
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+            .brand-text span {
+                font-family: "Cinzel", serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #f8fafc;
+                letter-spacing: .6px;
+            }
+
+            .brand-text strong {
+                margin-top: 2px;
+                font-family: "Cinzel", serif;
+                font-size: 1.65rem;
+                font-weight: 800;
+                color: #facc15;
+                letter-spacing: .8px;
+                text-shadow: 0 0 10px rgba(250,204,21,.5), 0 0 24px rgba(168,85,247,.35);
             }
 
         .left-content {
@@ -390,7 +434,14 @@
 
 <body>
     <section class="left-panel">
-        <a href="/" class="brand">⚔️ Vương Quốc</span></a>
+
+        <a href="/" class="brand">
+            <img src="/fe/logo/logo.png" class="brand-logo" alt="Logo" />
+            <div class="brand-text">
+                <span>Vương</span>
+                <strong>Quốc</strong>
+            </div>
+        </a>
 
         <div class="left-content">
             <h1>Đăng nhập để tiếp tục <span>hành trình</span> của bạn</h1>

@@ -12,7 +12,7 @@
     <title>Rừng Sâu — Vương Quốc</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -56,16 +56,61 @@
             border-bottom: 1px solid var(--border);
         }
 
+        /* LOGO GIỐNG TRANG BADGES */
         .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 220px;
+            height: 64px;
+            padding: 8px 16px;
+            border-radius: 18px;
             color: white;
             text-decoration: none;
-            font-size: 1.25rem;
-            font-weight: 800;
-            white-space: nowrap;
+            background: linear-gradient(135deg, rgba(124,77,255,.22), rgba(8,8,18,.78));
+            border: 1px solid rgba(168,85,247,.45);
+            box-shadow: 0 0 22px rgba(124,77,255,.28), inset 0 0 18px rgba(255,255,255,.04);
+            transition: .25s;
+            flex-shrink: 0;
         }
 
-            .brand span {
-                color: var(--gold);
+            .brand:hover {
+                transform: translateY(-2px);
+                border-color: rgba(168,85,247,.75);
+                box-shadow: 0 0 30px rgba(124,77,255,.38), inset 0 0 20px rgba(255,255,255,.05);
+                color: white;
+            }
+
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(168,85,247,.7)) drop-shadow(0 0 22px rgba(124,77,255,.45));
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+            .brand-text span {
+                font-family: "Cinzel", serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #f8fafc;
+                letter-spacing: .6px;
+            }
+
+            .brand-text strong {
+                margin-top: 2px;
+                font-family: "Cinzel", serif;
+                font-size: 1.65rem;
+                font-weight: 800;
+                color: #facc15;
+                letter-spacing: .8px;
+                text-shadow: 0 0 10px rgba(250,204,21,.5), 0 0 24px rgba(168,85,247,.35);
             }
 
         .top-nav {
@@ -115,7 +160,7 @@
             display: flex;
             align-items: center;
             border: 1px solid rgba(88,229,107,.2);
-            background: linear-gradient(90deg, rgba(4,8,8,.95), rgba(4,8,8,.58), rgba(4,8,8,.92)), url('/fe/forest-hero.png');
+            background: linear-gradient(90deg, rgba(4,8,8,.95), rgba(4,8,8,.58), rgba(4,8,8,.92)), url('/fe/forest/forest-hero.png');
             background-size: cover;
             background-position: center;
             box-shadow: 0 20px 70px rgba(0,0,0,.45), inset 0 0 80px rgba(0,0,0,.35);
@@ -313,6 +358,25 @@
                 padding: 128px 18px 60px;
             }
 
+            .brand {
+                min-width: 190px;
+                height: 58px;
+                padding: 7px 12px;
+            }
+
+            .brand-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .brand-text span {
+                font-size: .85rem;
+            }
+
+            .brand-text strong {
+                font-size: 1.35rem;
+            }
+
             .forest-hero {
                 padding: 44px 26px;
                 min-height: 360px;
@@ -337,7 +401,13 @@
 
 <body>
     <header class="topbar">
-        <a href="/Dashboard" class="brand">⚔️ Vương<span> Quốc</span></a>
+        <a href="/Dashboard" class="brand">
+            <img src="/fe/logo/logo.png" class="brand-logo" alt="Logo" />
+            <div class="brand-text">
+                <span>Vương</span>
+                <strong>Quốc</strong>
+            </div>
+        </a>
 
         <nav class="top-nav">
             <a href="/Dashboard">📊 Trang chủ</a>
@@ -358,7 +428,7 @@
                 <div class="forest-eyebrow">Khu vực mạo hiểm</div>
 
                 <h1 class="forest-title">
-                    🌲 Rừng Sâu
+                    🌲Rừng Sâu
                 </h1>
 
                 <div class="forest-subtitle">
@@ -372,7 +442,7 @@
                         @Html.AntiForgeryToken()
 
                         <button type="submit" class="enter-btn">
-                            🌲 Vào Rừng
+                            Vào Rừng
                         </button>
                     </form>
 
@@ -392,7 +462,7 @@
 
         <section class="info-grid">
             <div class="info-card">
-                <img src="/fe/hang_dong.png" class="info-card-img" alt="Hang Động">
+                <img src="/fe/forest/hang_dong.png" class="info-card-img" alt="Hang Động">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Hang Động</div>
@@ -405,7 +475,7 @@
             </div>
 
             <div class="info-card">
-                <img src="/fe/kho_hang.png" class="info-card-img" alt="Kho Hàng">
+                <img src="/fe/forest/kho_hang.png" class="info-card-img" alt="Kho Hàng">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Kho Hàng</div>
@@ -418,7 +488,7 @@
             </div>
 
             <div class="info-card">
-                <img src="/fe/ho_sau.png" class="info-card-img" alt="Hồ Sâu">
+                <img src="/fe/forest/ho_sau.png" class="info-card-img" alt="Hồ Sâu">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Hồ Sâu</div>
@@ -431,7 +501,7 @@
             </div>
 
             <div class="info-card">
-                <img src="/fe/diem_xuat_phat.png" class="info-card-img" alt="Điểm Xuất Phát">
+                <img src="/fe/forest/diem_xuat_phat.png" class="info-card-img" alt="Điểm Xuất Phát">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Điểm Xuất Phát</div>
@@ -444,7 +514,7 @@
             </div>
 
             <div class="info-card">
-                <img src="/fe/diem_rut_lui.png" class="info-card-img" alt="Điểm Rút Lui">
+                <img src="/fe/forest/diem_rut_lui.png" class="info-card-img" alt="Điểm Rút Lui">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Điểm Rút Lui</div>
@@ -457,7 +527,7 @@
             </div>
 
             <div class="info-card">
-                <img src="/fe/tui_do.png" class="info-card-img" alt="Túi Đồ">
+                <img src="/fe/forest/tui_do.png" class="info-card-img" alt="Túi Đồ">
 
                 <div class="info-card-body">
                     <div class="info-card-title">Túi Đồ</div>

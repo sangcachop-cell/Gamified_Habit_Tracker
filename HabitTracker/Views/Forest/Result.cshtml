@@ -1,119 +1,469 @@
 @{
-    string outcome = TempData["ForestOutcome"] as string ?? "success";
-    bool isMia     = outcome == "mia";
+    Layout = null;
 
-    string lootJson  = TempData["ForestLoot"] as string ?? "[]";
-    var lootList     = System.Text.Json.JsonSerializer.Deserialize<List<string>>(lootJson) ?? new();
+    string outcome = TempData["ForestOutcome"] as string ?? "success";
+    bool isMia = outcome == "mia";
+
+    string lootJson = TempData["ForestLoot"] as string ?? "[]";
+    var lootList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(lootJson) ?? new();
 
     ViewData["Title"] = isMia ? "Mất Tích" : "Rút Lui Thành Công";
+
+    int secs = 0;
+    if (TempData["ExtractDuration"] != null)
+    {
+        int.TryParse(TempData["ExtractDuration"]!.ToString(), out secs);
+    }
+
+    string dur = secs >= 60 ? $"{secs / 60}p {secs % 60}s" : $"{secs}s";
 }
 
-<style>
-    .result-card {
-        max-width: 520px; margin: 60px auto;
-        background: @(isMia
-            ? "linear-gradient(135deg, #1a1208, #2a2010)"
-            : "linear-gradient(135deg, #0f1f0f, #1a3a1a)");
-        border: 1.5px solid @(isMia ? "rgba(243,156,18,.3)" : "rgba(76,175,80,.3)");
-        border-radius: 24px; padding: 48px 40px; text-align: center; color: white;
-    }
-    .result-icon  { font-size: 4rem; margin-bottom: 16px; }
-    .result-title { font-size: 2rem; font-weight: 900; margin-bottom: 8px;
-                    color: @(isMia ? "#f39c12" : "#81c784"); }
-    .result-sub   { font-size: .9rem; color: rgba(255,255,255,.5); margin-bottom: 28px; }
-    .stat-list    { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-    .stat-box     { background: rgba(255,255,255,.06); border-radius: 12px; padding: 14px 18px; }
-    .stat-num     { font-size: 1.6rem; font-weight: 900; color: @(isMia ? "#f39c12" : "#81c784"); }
-    .stat-lbl     { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; opacity: .45; margin-top: 2px; }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
 
-    .loot-section {
-        background: rgba(255,255,255,.04); border-radius: 14px;
-        padding: 18px 20px; margin-bottom: 28px; text-align: left;
-    }
-    .loot-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
-                  color: rgba(255,255,255,.3); margin-bottom: 12px; }
-    .loot-item  {
-        display: flex; align-items: center; gap: 10px;
-        padding: 8px 10px; border-radius: 8px; font-size: .84rem;
-        background: rgba(255,255,255,.05); margin-bottom: 6px;
-    }
-    .loot-item.greater { color: #f9ca24; }
-    .loot-item.common  { color: #81c784; }
-    .loot-empty { font-size: .82rem; opacity: .4; text-align: center; }
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    .back-btn {
-        border: none; border-radius: 12px; color: white;
-        font-weight: 800; font-size: 1rem; padding: 14px 36px;
-        cursor: pointer; text-decoration: none; display: inline-block;
-        background: @(isMia
-            ? "linear-gradient(135deg, #7d6608, #b7950b)"
-            : "linear-gradient(135deg, #2e7d32, #43a047)");
-    }
-</style>
-
-<div class="result-card">
-    <div class="result-icon">@(isMia ? "🟡⚠️" : "🌲✅")</div>
-    <div class="result-title">@(isMia ? "Mất Tích" : "Đã Rút Lui!")</div>
-
-    <p class="result-sub">
-        @if (isMia)
-        {
-            <span>Bạn đã cạn kiệt số bước và bị lạc trong rừng.</span>
+    <style>
+        :root {
+            --green: #7ee787;
+            --green2: #39d353;
+            --cyan: #00d8b0;
+            --gold: #ffd166;
+            --orange: #f39c12;
+            --dark: #041006;
+            --panel: rgba(5, 35, 12, .86);
+            --muted: rgba(255,255,255,.58);
+            --border: rgba(126,231,135,.24);
         }
-        else
-        {
-            <span>Thoát qua <strong style="color:#00b89c;">Điểm @TempData["ExtractId"]</strong>.
-            Xuất phát từ <strong>@TempData["ExtractSpawn"]</strong>.</span>
-        }
-    </p>
 
-    <div class="stat-list">
-        <div class="stat-box">
-            <div class="stat-num">@TempData["ExtractMoves"]</div>
-            <div class="stat-lbl">Số Bước Đã Đi</div>
-        </div>
-        @if (!isMia)
-        {
-            <div class="stat-box">
-                @{
-                    int secs = (int)(TempData["ExtractDuration"] ?? 0);
-                    string dur = secs >= 60 ? $"{secs/60}p {secs%60}s" : $"{secs}s";
-                }
-                <div class="stat-num">@dur</div>
-                <div class="stat-lbl">Thời Gian Sống Sót</div>
-            </div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Be Vietnam Pro", sans-serif;
         }
-        <div class="stat-box">
-            <div class="stat-num">@lootList.Count</div>
-            <div class="stat-lbl">Vật Phẩm @(isMia ? "Bị Mất" : "Mang Về")</div>
-        </div>
-    </div>
 
-    <div class="loot-section">
-        <div class="loot-title">@(isMia ? "Vật Phẩm Đã Mất" : "Vật Phẩm Mang Về")</div>
-        @if (lootList.Count == 0)
-        {
-            <div class="loot-empty">@(isMia ? "Không có gì để mất." : "Chưa nhặt được gì lần này.")</div>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #020805;
+            color: white;
         }
-        else
-        {
-            @foreach (var item in lootList)
-            {
-                bool isLost    = item.Contains("lost");
-                bool isGreater = item.Contains("Greater");
-                <div class="loot-item @(isLost ? "greater" : isGreater ? "greater" : "common")">
-                    @(isLost ? "⚠️" : isGreater ? "⭐" : "📦") @item
-                </div>
+
+        body {
+            background: linear-gradient(rgba(0,0,0,.38), rgba(0,0,0,.74)), url('/fe/result/result-bg.png') center/cover no-repeat;
+        }
+
+        .result-page {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .result-page::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(circle at 50% 25%, rgba(126,231,135,.18), transparent 28%), radial-gradient(circle at 50% 88%, rgba(0,216,176,.08), transparent 34%), linear-gradient(90deg, rgba(0,0,0,.55), transparent 28%, transparent 72%, rgba(0,0,0,.55));
+                z-index: 0;
+            }
+
+            .result-page::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background-image: radial-gradient(circle, rgba(126,231,135,.45) 0 1px, transparent 2px), radial-gradient(circle, rgba(0,216,176,.25) 0 1px, transparent 2px);
+                background-size: 110px 110px, 170px 170px;
+                background-position: 20px 40px, 70px 110px;
+                opacity: .22;
+                z-index: 1;
+            }
+
+        .result-card {
+            width: min(720px, 94vw);
+            max-height: calc(100vh - 48px);
+            padding: 42px 52px 40px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            overflow: hidden;
+            border-radius: 34px;
+            background: linear-gradient(180deg, rgba(8,45,16,.88), rgba(3,22,8,.94)), radial-gradient(circle at top, rgba(126,231,135,.18), transparent 42%);
+            border: 1.5px solid @(isMia ? "rgba(243,156,18,.36)" : "rgba(126,231,135,.30)");
+            box-shadow: 0 28px 100px rgba(0,0,0,.58), inset 0 0 90px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+
+            .result-card::before {
+                content: "";
+                position: absolute;
+                inset: 14px;
+                border-radius: 26px;
+                border: 1px solid @(isMia ? "rgba(243,156,18,.12)" : "rgba(126,231,135,.13)");
+                pointer-events: none;
+            }
+
+        .top-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 26px;
+            margin-bottom: 28px;
+        }
+
+        .top-icon {
+            font-size: 4.8rem;
+            line-height: 1;
+            filter: drop-shadow(0 0 16px rgba(126,231,135,.22)) drop-shadow(0 14px 24px rgba(0,0,0,.35));
+        }
+
+        .check-box {
+            width: 92px;
+            height: 92px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #2da44e, #7ee787);
+            box-shadow: 0 0 24px rgba(126,231,135,.28), inset 0 2px 0 rgba(255,255,255,.22), 0 14px 28px rgba(0,0,0,.35);
+        }
+
+        .warn-box {
+            width: 92px;
+            height: 92px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #8a5a00, #f39c12);
+            box-shadow: 0 0 24px rgba(243,156,18,.28), inset 0 2px 0 rgba(255,255,255,.22), 0 14px 28px rgba(0,0,0,.35);
+        }
+
+        .result-title {
+            font-size: clamp(2.3rem, 5vw, 3.7rem);
+            line-height: 1;
+            font-weight: 900;
+            margin-bottom: 18px;
+            color: @(isMia ? "#f39c12" : "#7ee787");
+            text-shadow: 0 0 26px @(isMia ? "rgba(243,156,18,.20)" : "rgba(126,231,135,.22)"), 0 4px 0 rgba(0,0,0,.28);
+        }
+
+        .result-sub {
+            max-width: 620px;
+            margin: 0 auto 28px;
+            font-size: 1.06rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,.68);
+        }
+
+            .result-sub strong {
+                color: @(isMia ? "#f39c12" : "#00d8b0");
+            }
+
+        .stat-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(170px, 1fr));
+            gap: 18px;
+            max-width: 450px;
+            margin: 0 auto 22px;
+        }
+
+        .stat-box {
+            min-height: 108px;
+            padding: 18px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.055);
+            border: 1px solid rgba(255,255,255,.08);
+            box-shadow: inset 0 0 30px rgba(0,0,0,.22), 0 12px 28px rgba(0,0,0,.18);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .stat-box.full {
+                grid-column: 1 / -1;
+                width: 230px;
+                margin: 0 auto;
+            }
+
+        .stat-num {
+            font-size: 2.2rem;
+            line-height: 1;
+            font-weight: 900;
+            color: @(isMia ? "#f39c12" : "#7ee787");
+            text-shadow: 0 0 18px @(isMia ? "rgba(243,156,18,.18)" : "rgba(126,231,135,.18)");
+        }
+
+        .stat-lbl {
+            margin-top: 12px;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+            color: rgba(255,255,255,.46);
+            font-weight: 800;
+        }
+
+        .loot-section {
+            max-width: 610px;
+            margin: 0 auto 26px;
+            padding: 20px 24px;
+            border-radius: 18px;
+            text-align: left;
+            background: rgba(255,255,255,.045);
+            border: 1px solid rgba(255,255,255,.075);
+            box-shadow: inset 0 0 30px rgba(0,0,0,.18);
+        }
+
+        .loot-title {
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: rgba(255,255,255,.42);
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+
+        .loot-list {
+            max-height: 122px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 6px;
+        }
+
+        .loot-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: .88rem;
+            font-weight: 700;
+            background: rgba(255,255,255,.055);
+            border: 1px solid rgba(255,255,255,.06);
+        }
+
+            .loot-item.greater {
+                color: #ffd166;
+            }
+
+            .loot-item.common {
+                color: #7ee787;
+            }
+
+        .loot-empty {
+            min-height: 52px;
+            display: grid;
+            place-items: center;
+            font-size: .9rem;
+            color: rgba(255,255,255,.48);
+            text-align: center;
+        }
+
+        .mia-note {
+            font-size: .86rem;
+            color: rgba(243,156,18,.72);
+            margin: -8px 0 18px;
+        }
+
+        .back-btn {
+            min-width: 270px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            border-radius: 18px;
+            padding: 17px 38px;
+            text-decoration: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 900;
+            background: linear-gradient(180deg, rgba(255,255,255,.14), transparent),
+            @(isMia
+                        ? "linear-gradient(135deg, #7d6608, #b7950b)"
+                        : "linear-gradient(135deg, #2e7d32, #43a047)");
+            box-shadow: 0 8px 0 @(isMia ? "#4d3f05" : "#1f5f23"), 0 22px 45px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
+            transition: .16s ease;
+        }
+
+            .back-btn:hover {
+                color: white;
+                transform: translateY(-3px);
+                box-shadow: 0 11px 0 @(isMia ? "#4d3f05" : "#1f5f23"), 0 28px 50px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.20);
+            }
+
+            .back-btn:active {
+                transform: translateY(3px);
+                box-shadow: 0 4px 0 @(isMia ? "#4d3f05" : "#1f5f23"), 0 14px 28px rgba(0,0,0,.22);
+            }
+
+        @@media(max-height: 820px) {
+            .result-card {
+                padding: 24px 44px 24px;
+            }
+
+            .top-icons {
+                margin-bottom: 16px;
+            }
+
+            .top-icon,
+            .check-box,
+            .warn-box {
+                transform: scale(.8);
+            }
+
+            .result-title {
+                font-size: clamp(2rem, 4vw, 3rem);
+                margin-bottom: 12px;
+            }
+
+            .result-sub {
+                margin-bottom: 18px;
+            }
+
+            .stat-box {
+                min-height: 86px;
+            }
+
+            .loot-section {
+                margin-bottom: 18px;
             }
         }
-    </div>
 
-    @if (isMia)
-    {
-        <p style="font-size:.78rem; color:rgba(243,156,18,.6); margin-bottom:20px;">
-            Mất toàn bộ vật phẩm — vượt quá 5000 bước.
-        </p>
-    }
+        @@media(max-width: 620px) {
+            .result-page {
+                padding: 14px;
+            }
 
-    <a asp-action="Index" class="back-btn">🌲 Vào Lại Rừng</a>
-</div>
+            .result-card {
+                width: 100%;
+                padding: 28px 20px;
+                max-height: none;
+                overflow-y: auto;
+            }
+
+            html,
+            body {
+                overflow: auto;
+            }
+
+            .top-icons {
+                gap: 14px;
+            }
+
+            .top-icon {
+                font-size: 3.2rem;
+            }
+
+            .check-box,
+            .warn-box {
+                width: 66px;
+                height: 66px;
+                font-size: 3rem;
+            }
+
+            .stat-list {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-box.full {
+                width: 100%;
+            }
+
+            .back-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="result-page">
+        <section class="result-card">
+
+            <h1 class="result-title">@(isMia ? "Mất Tích" : "Đã Rút Lui!")</h1>
+
+            <p class="result-sub">
+                @if (isMia)
+                {
+                    <span>Bạn đã cạn kiệt số bước và bị lạc trong rừng.</span>
+                }
+                else
+                {
+                    <span>
+                        Thoát qua <strong>Điểm @TempData["ExtractId"]</strong>.
+                        Xuất phát từ <strong>@TempData["ExtractSpawn"]</strong>.
+                    </span>
+                }
+            </p>
+
+            <div class="stat-list">
+                <div class="stat-box">
+                    <div class="stat-num">@(TempData["ExtractMoves"] ?? 0)</div>
+                    <div class="stat-lbl">Số Bước Đã Đi</div>
+                </div>
+
+                @if (!isMia)
+                {
+                    <div class="stat-box">
+                        <div class="stat-num">@dur</div>
+                        <div class="stat-lbl">Thời Gian Sống Sót</div>
+                    </div>
+                }
+
+                <div class="stat-box full">
+                    <div class="stat-num">@lootList.Count</div>
+                    <div class="stat-lbl">Vật Phẩm @(isMia ? "Bị Mất" : "Mang Về")</div>
+                </div>
+            </div>
+
+            <div class="loot-section">
+                <div class="loot-title">@(isMia ? "Vật Phẩm Đã Mất" : "Vật Phẩm Mang Về")</div>
+
+                @if (lootList.Count == 0)
+                {
+                    <div class="loot-empty">
+                        @(isMia ? "Không có gì để mất." : "Chưa nhặt được gì lần này.")
+                    </div>
+                }
+                else
+                {
+                    <div class="loot-list">
+                        @foreach (var item in lootList)
+                        {
+                            bool isLost = item.Contains("lost");
+                            bool isGreater = item.Contains("Greater");
+
+                            <div class="loot-item @(isLost ? "greater" : isGreater ? "greater" : "common")">
+                                @(isLost ? "⚠️" : isGreater ? "⭐" : "📦") @item
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (isMia)
+            {
+                <p class="mia-note">
+                    Mất toàn bộ vật phẩm — vượt quá 5000 bước.
+                </p>
+            }
+
+            <a asp-action="Index" class="back-btn">Vào Lại Rừng</a>
+        </section>
+    </main>
+</body>
+</html>

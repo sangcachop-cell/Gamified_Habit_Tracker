@@ -1,220 +1,493 @@
 @using HabitTracker.Models
 @{
+    Layout = null;
     ViewData["Title"] = "Rừng — Chạm Trán";
-    var combat  = ViewBag.Combat  as ForestCombatState;
+
+    var combat = ViewBag.Combat as ForestCombatState;
     var session = ViewBag.Session as ForestSession;
+
     bool isRare = combat?.MonsterTier == "rare";
+
     double monsterHpPct = combat == null ? 0 : Math.Max(0, (double)combat.MonsterCurrentHP / combat.MonsterMaxHP * 100);
-    double playerHpPct  = combat == null ? 0 : Math.Max(0, (double)combat.PlayerCurrentHP  / combat.PlayerMaxHP  * 100);
+    double playerHpPct = combat == null ? 0 : Math.Max(0, (double)combat.PlayerCurrentHP / combat.PlayerMaxHP * 100);
+
+    bool playerGoesFirst = (combat?.PlayerSpeed ?? 0) >= (combat?.MonsterSpeed ?? 0);
+    bool playerDbl = (combat?.PlayerSpeed ?? 0) >= (int)((combat?.MonsterSpeed ?? 0) * 1.5);
+    bool monsterDbl = (combat?.MonsterSpeed ?? 0) >= (int)((combat?.PlayerSpeed ?? 0) * 1.5);
+
+    int[] failChances = { 0, 35, 65, 85 };
+    int defIdx = Math.Min(combat?.ConsecutiveDefends ?? 0, 3);
+    int defFail = failChances[defIdx];
+    string defRisk = defIdx == 0 ? "Luôn chặn" : $"{defFail}% thất bại";
 }
 
-<style>
-    body { background: #0a120a; color: #e8f0e8; }
-
-    .encounter-wrap {
-        max-width: 600px; margin: 40px auto;
-        background: linear-gradient(135deg, #0f1f0f, #1a3a1a);
-        border: 1.5px solid rgba(76,175,80,.25); border-radius: 24px;
-        padding: 36px 32px;
-    }
-
-    .encounter-header {
-        text-align: center; margin-bottom: 28px;
-    }
-    .encounter-tag {
-        display: inline-block;
-        padding: 3px 12px; border-radius: 20px; font-size: .72rem;
-        font-weight: 700; letter-spacing: .08em; margin-bottom: 10px;
-        background: @(isRare ? "rgba(249,202,36,.2)" : "rgba(100,180,255,.15)");
-        color: @(isRare ? "#f9ca24" : "#7ec8e3");
-        border: 1px solid @(isRare ? "rgba(249,202,36,.4)" : "rgba(100,180,255,.3)");
-    }
-    .encounter-title {
-        font-size: 1.8rem; font-weight: 900;
-        color: @(isRare ? "#f9ca24" : "#81c784");
-    }
-
-    .combatant-row {
-        display: grid; grid-template-columns: 1fr 60px 1fr; gap: 16px;
-        align-items: center; margin-bottom: 24px;
-    }
-    .combatant { background: rgba(255,255,255,.05); border-radius: 14px; padding: 16px; }
-    .combatant-icon { font-size: 2.4rem; text-align: center; margin-bottom: 6px; }
-    .combatant-name { font-weight: 800; font-size: .9rem; text-align: center; margin-bottom: 10px; }
-    .hp-label { font-size: .68rem; opacity: .5; margin-bottom: 4px; }
-    .hp-bar-bg { background: rgba(255,255,255,.1); border-radius: 6px; height: 10px; overflow: hidden; }
-    .hp-bar-fill { height: 100%; border-radius: 6px; transition: width .3s; }
-    .hp-text { font-size: .75rem; font-weight: 700; margin-top: 4px; text-align: center; }
-
-    .vs-badge {
-        text-align: center; font-size: 1.1rem; font-weight: 900;
-        opacity: .4;
-    }
-
-    .stat-pills {
-        display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px;
-    }
-    .stat-pill {
-        font-size: .65rem; padding: 2px 8px; border-radius: 10px;
-        background: rgba(255,255,255,.08); color: rgba(255,255,255,.6);
-    }
-    .stat-pill.spd-fast { background: rgba(129,199,132,.2); color: #81c784; }
-    .stat-pill.spd-slow { background: rgba(231,76,60,.15);  color: #e74c3c; }
-
-    .combat-log {
-        background: rgba(0,0,0,.3); border-radius: 10px; padding: 12px 14px;
-        max-height: 140px; overflow-y: auto;
-        font-size: .78rem; color: rgba(255,255,255,.45);
-        display: flex; flex-direction: column; gap: 4px;
-        margin-bottom: 20px;
-    }
-    .combat-log .log-hit    { color: #e74c3c; }
-    .combat-log .log-player { color: #81c784; }
-    .combat-log .log-system { color: rgba(255,255,255,.25); }
-
-    .action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .action-row form { display: block; width: 100%; }
-    .btn-action {
-        border: none; border-radius: 16px; color: white;
-        font-weight: 800; font-size: 1.1rem;
-        padding: 22px 10px;
-        cursor: pointer; transition: transform .12s, box-shadow .12s;
-        width: 100%;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-        box-shadow: 0 3px 0 rgba(0,0,0,.25);
-        line-height: 1.15;
-    }
-    .btn-action:hover  { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,.25); }
-    .btn-action:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
-    .btn-action .ico { font-size: 1.7rem; line-height: 1; }
-    .btn-action small { display: block; font-size: .72rem; opacity: .8; margin-top: 2px; font-weight: 500; letter-spacing: .02em; }
-    .btn-attack { background: linear-gradient(135deg, #c0392b, #e74c3c); }
-    .btn-defend { background: linear-gradient(135deg, #1f618d, #2980b9); }
-    .btn-flee   { background: linear-gradient(135deg, #4a4a4a, #6b6b6b); opacity: .85; }
-
-    .moves-badge {
-        text-align: center; font-size: .72rem; opacity: .35; margin-top: 14px;
-    }
-</style>
-
-<div class="encounter-wrap">
-    <div class="encounter-header">
-        <div class="encounter-tag">@(isRare ? "⭐ Quái Hiếm" : "⚡ Chạm Trán")</div>
-        <div class="encounter-title">@combat?.MonsterName</div>
-    </div>
-
-    <div class="combatant-row">
-        <!-- Player -->
-        <div class="combatant">
-            <div class="combatant-icon">🧍</div>
-            <div class="combatant-name">Bạn</div>
-            <div class="hp-label">Máu</div>
-            <div class="hp-bar-bg">
-                <div class="hp-bar-fill" style="width:@playerHpPct%;
-                    background: @(playerHpPct > 50 ? "#27ae60" : playerHpPct > 25 ? "#f39c12" : "#c0392b");"></div>
-            </div>
-            <div class="hp-text" style="color:#81c784;">@combat?.PlayerCurrentHP / @combat?.PlayerMaxHP</div>
-            <div class="stat-pills">
-                <div class="stat-pill">ATK @combat?.PlayerAttack</div>
-                <div class="stat-pill">ARM @combat?.PlayerArmor</div>
-                <div class="stat-pill @(combat?.PlayerSpeed >= combat?.MonsterSpeed ? "spd-fast" : "spd-slow")">
-                    SPD @combat?.PlayerSpeed
-                </div>
-            </div>
-        </div>
-
-        <div class="vs-badge">VS</div>
-
-        <!-- Monster -->
-        <div class="combatant">
-            <div class="combatant-icon">@combat?.MonsterIcon</div>
-            <div class="combatant-name">@combat?.MonsterName</div>
-            <div class="hp-label">Máu</div>
-            <div class="hp-bar-bg">
-                <div class="hp-bar-fill" style="width:@monsterHpPct%;
-                    background: @(monsterHpPct > 50 ? "#e74c3c" : monsterHpPct > 25 ? "#e67e22" : "#c0392b");"></div>
-            </div>
-            <div class="hp-text" style="color:#e74c3c;">@combat?.MonsterCurrentHP / @combat?.MonsterMaxHP</div>
-            <div class="stat-pills">
-                <div class="stat-pill">ATK @combat?.MonsterAttack</div>
-                <div class="stat-pill">ARM @combat?.MonsterArmor</div>
-                <div class="stat-pill">SPD @combat?.MonsterSpeed</div>
-            </div>
-        </div>
-    </div>
-
-    @{
-        bool playerGoesFirst = (combat?.PlayerSpeed ?? 0) >= (combat?.MonsterSpeed ?? 0);
-        bool playerDbl = (combat?.PlayerSpeed ?? 0) >= (int)((combat?.MonsterSpeed ?? 0) * 1.5);
-        bool monsterDbl = (combat?.MonsterSpeed ?? 0) >= (int)((combat?.PlayerSpeed ?? 0) * 1.5);
-    }
-    <div style="text-align:center; font-size:.72rem; color:rgba(255,255,255,.3); margin-bottom:14px;">
-        @if (playerGoesFirst)
+@functions {
+    public string GetMonsterImage(string? name)
+    {
+        return name switch
         {
-            <span style="color:rgba(129,199,132,.6);">
-                ⚡ Bạn ra đòn trước@(playerDbl ? " — đòn kép!" : "")
-            </span>
+            "Khổng Lồ Xương" => "/fe/combat/khongloxuong.png",
+            "Cổ Thụ Tha Hóa" => "/fe/combat/thahoa.png",
+            "Xạ Thủ Xương Khô" => "/fe/combat/xuongkho.png",
+            "Quái Vật Rừng Thẳm" => "/fe/combat/forest-demon.png",
+            "Thám Tử Rừng" => "/fe/combat/shadow-wolf.png",
+            "Cóc Đầm Lầy" => "/fe/combat/swamp-toad.png",
+            "Thuồng Luồng Hồ Sâu" => "/fe/combat/deep-serpent.png",
+            "Kẻ Rình Bóng" => "/fe/combat/shadow-eye.png",
+            "Người Máy Sắt" => "/fe/combat/iron-golem.png",
+            _ => "/fe/default-monster.png"
+        };
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Combat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Be Vietnam Pro", sans-serif;
         }
-        else
-        {
-            <span style="color:rgba(231,76,60,.6);">
-                ⚠️ @combat?.MonsterName ra đòn trước@(monsterDbl ? " — đòn kép!" : "")
-            </span>
-        }
-    </div>
 
-    <!-- Combat log -->
-    <div class="combat-log">
-        @if (combat?.Log != null)
-        {
-            @foreach (var entry in combat.Log)
-            {
-                var cls = entry.Contains("You strike")    ? "log-player"
-                        : entry.Contains("hits you")      ? "log-hit"
-                        : entry.Contains("blocked")       ? "log-player"
-                        : entry.Contains("guard breaks")  ? "log-hit"
-                        : entry.Contains("Escape Scroll") ? "log-hit"
-                        : "log-system";
-                <div class="@cls">@entry</div>
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #050510;
+            color: #fff;
+        }
+
+        .combat-page {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0,0,0,.48), rgba(0,0,0,.72)), url('/fe/combat/combat-bg.png') center/cover no-repeat;
+        }
+
+        .combat-wrap {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            padding: clamp(12px, 2vh, 22px) clamp(28px, 4vw, 72px);
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+            gap: clamp(8px, 1.2vh, 16px);
+            background: radial-gradient(circle at center, rgba(0,0,0,.08), rgba(0,0,0,.52));
+        }
+
+        .combat-header {
+            text-align: center;
+            min-height: 0;
+        }
+
+        .encounter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 18px;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            background: @(isRare ? "rgba(255,209,102,.18)" : "rgba(74,158,221,.16)");
+            color: @(isRare ? "#ffd166" : "#7ec8e3");
+            border: 1px solid @(isRare ? "rgba(255,209,102,.45)" : "rgba(126,200,227,.35)");
+        }
+
+        .combat-title {
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            line-height: 1.02;
+            font-weight: 900;
+            color: @(isRare ? "#ffd166" : "#81c784");
+            text-shadow: 0 8px 30px rgba(0,0,0,.8);
+        }
+
+        .combat-arena {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 92px 1fr;
+            align-items: stretch;
+            gap: clamp(18px, 3vw, 36px);
+        }
+
+        .fighter-card {
+            min-height: 0;
+            height: 100%;
+            border-radius: 26px;
+            padding: clamp(14px, 2.2vh, 24px);
+            background: rgba(8, 30, 15, .68);
+            border: 1px solid rgba(150,255,170,.16);
+            backdrop-filter: blur(8px);
+            box-shadow: inset 0 0 40px rgba(255,255,255,.02), 0 20px 70px rgba(0,0,0,.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fighter-img {
+            width: clamp(86px, 13vh, 145px);
+            height: clamp(86px, 13vh, 145px);
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 18px rgba(0,0,0,.8)) drop-shadow(0 0 24px rgba(124,77,255,.25));
+            margin-bottom: 8px;
+        }
+
+        .monster-img {
+            width: clamp(96px, 14vh, 155px);
+            height: clamp(96px, 14vh, 155px);
+        }
+
+        .fighter-name {
+            font-size: clamp(1.05rem, 2.2vh, 1.35rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .fighter-lv {
+            color: #ffd166;
+            font-size: .95rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .hp-area {
+            width: 100%;
+        }
+
+        .hp-label {
+            font-size: .78rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+            .hp-label.player {
+                color: #48d597;
+            }
+
+            .hp-label.monster {
+                color: #ff4f3d;
+            }
+
+        .hp-bar {
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.14);
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width .25s;
+        }
+
+        .hp-text {
+            margin-top: 7px;
+            text-align: center;
+            font-weight: 900;
+            font-size: .95rem;
+        }
+
+        .stat-pills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-pill {
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.11);
+            color: rgba(255,255,255,.78);
+            font-size: .76rem;
+            font-weight: 900;
+        }
+
+            .stat-pill.fast {
+                background: rgba(72,213,151,.18);
+                color: #86efac;
+            }
+
+            .stat-pill.slow {
+                background: rgba(255,79,79,.17);
+                color: #ff9b9b;
+            }
+
+        .vs-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vs-badge {
+            width: clamp(64px, 9vh, 86px);
+            height: clamp(64px, 9vh, 86px);
+            border-radius: 26px;
+            transform: rotate(45deg);
+            display: grid;
+            place-items: center;
+            background: rgba(5, 30, 12, .9);
+            border: 1px solid rgba(255,209,102,.4);
+            box-shadow: 0 0 30px rgba(255,209,102,.15), inset 0 0 28px rgba(0,0,0,.45);
+        }
+
+            .vs-badge span {
+                transform: rotate(-45deg);
+                color: #ffd166;
+                font-size: clamp(1.3rem, 3vh, 1.7rem);
+                font-weight: 900;
+            }
+
+        .turn-info {
+            text-align: center;
+            font-size: .92rem;
+            font-weight: 900;
+        }
+
+            .turn-info.player {
+                color: #48d597;
+            }
+
+            .turn-info.monster {
+                color: #ff8a8a;
+            }
+
+        .combat-log {
+            max-width: 820px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 12px 18px;
+            height: clamp(54px, 10vh, 86px);
+            overflow-y: auto;
+            border-radius: 16px;
+            background: rgba(0,0,0,.5);
+            border: 1px solid rgba(255,255,255,.08);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: .86rem;
+        }
+
+        .log-player {
+            color: #6ee7b7;
+        }
+
+        .log-hit {
+            color: #ff8a8a;
+        }
+
+        .log-system {
+            color: rgba(255,255,255,.62);
+        }
+
+        .action-row {
+            max-width: 880px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+            .action-row form {
+                width: 100%;
+            }
+
+        .btn-action {
+            width: 100%;
+            height: clamp(78px, 12vh, 110px);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            box-shadow: 0 7px 0 rgba(0,0,0,.28);
+            transition: .18s;
+        }
+
+            .btn-action:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 11px 0 rgba(0,0,0,.28);
+            }
+
+            .btn-action:active {
+                transform: translateY(2px);
+                box-shadow: 0 4px 0 rgba(0,0,0,.28);
+            }
+
+            .btn-action .ico {
+                font-size: clamp(1.45rem, 3vh, 2rem);
+            }
+
+            .btn-action .label {
+                font-size: clamp(1rem, 2.5vh, 1.3rem);
+            }
+
+            .btn-action small {
+                font-size: .78rem;
+                opacity: .78;
+                font-weight: 700;
+            }
+
+        .btn-attack {
+            background: linear-gradient(135deg, #991b1b, #ef4444);
+        }
+
+        .btn-defend {
+            background: linear-gradient(135deg, #0f3b75, #2563eb);
+        }
+
+        .btn-flee {
+            background: linear-gradient(135deg, #303030, #737373);
+        }
+
+        .moves-badge {
+            text-align: center;
+            color: rgba(255,255,255,.58);
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        @@media(max-width: 900px) {
+            html, body {
+                overflow-y: auto;
+            }
+
+            .combat-page, .combat-wrap {
+                min-height: 100vh;
+                height: auto;
+                overflow: visible;
+            }
+
+            .combat-wrap {
+                padding: 22px;
+            }
+
+            .combat-arena {
+                grid-template-columns: 1fr;
+            }
+
+            .action-row {
+                grid-template-columns: 1fr;
             }
         }
-    </div>
+    </style>
+</head>
+<body>
+    <div class="combat-page">
+        <div class="combat-wrap">
+            <div class="combat-header">
+                <div class="encounter-tag">@(isRare ? "⭐ Quái Hiếm" : "⚡ Chạm Trán")</div>
+                <h1 class="combat-title">@combat?.MonsterName</h1>
+            </div>
 
-    <!-- Actions -->
-    @{
-        int[] failChances = { 0, 35, 65, 85 };
-        int defIdx = Math.Min(combat?.ConsecutiveDefends ?? 0, 3);
-        int defFail = failChances[defIdx];
-        string defRisk = defIdx == 0 ? "Luôn chặn" : $"{defFail}% thất bại";
-    }
-    <div class="action-row">
-        <form asp-action="CombatAttack" asp-controller="Forest" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn-action btn-attack">
-                <span class="ico">⚔️</span>
-                <span>Tấn Công</span>
-                <small>Xóa thế thủ</small>
-            </button>
-        </form>
-        <form asp-action="CombatDefend" asp-controller="Forest" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn-action btn-defend">
-                <span class="ico">🛡️</span>
-                <span>Phòng Thủ</span>
-                <small>@defRisk</small>
-            </button>
-        </form>
-        <form asp-action="CombatFlee" asp-controller="Forest" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn-action btn-flee">
-                <span class="ico">🏃</span>
-                <span>Bỏ Chạy</span>
-                <small>Cần Cuộn Thoát</small>
-            </button>
-        </form>
-    </div>
+            <div class="combat-arena">
+                <div class="fighter-card">
+                    <img src="/fe/combat/player.png" class="fighter-img" alt="Bạn" />
+                    <div class="fighter-name">Bạn</div>
+                    <div class="fighter-lv">LV 3</div>
+                    <div class="hp-area">
+                        <div class="hp-label player">HP</div>
+                        <div class="hp-bar"><div class="hp-fill" style="width:@playerHpPct%; background:linear-gradient(90deg,#22c55e,#48d597);"></div></div>
+                        <div class="hp-text" style="color:#48d597;">@combat?.PlayerCurrentHP / @combat?.PlayerMaxHP</div>
+                    </div>
+                    <div class="stat-pills">
+                        <span class="stat-pill">ATK @combat?.PlayerAttack</span>
+                        <span class="stat-pill">ARM @combat?.PlayerArmor</span>
+                        <span class="stat-pill @(combat?.PlayerSpeed >= combat?.MonsterSpeed ? "fast" : "slow")">SPD @combat?.PlayerSpeed</span>
+                    </div>
+                </div>
 
-    <div class="moves-badge">
-        @session?.MovesSpent bước đã đi &nbsp;|&nbsp; @(session?.Pouch?.Count ?? 0) đồ trong túi
+                <div class="vs-wrap"><div class="vs-badge"><span>VS</span></div></div>
+
+                <div class="fighter-card">
+                    <img src="@GetMonsterImage(combat?.MonsterName)" class="fighter-img monster-img" alt="@combat?.MonsterName" />
+                    <div class="fighter-name">@combat?.MonsterName</div>
+                    <div class="fighter-lv">LV 2</div>
+                    <div class="hp-area">
+                        <div class="hp-label monster">HP</div>
+                        <div class="hp-bar"><div class="hp-fill" style="width:@monsterHpPct%; background:linear-gradient(90deg,#ef4444,#f97316);"></div></div>
+                        <div class="hp-text" style="color:#ef4444;">@combat?.MonsterCurrentHP / @combat?.MonsterMaxHP</div>
+                    </div>
+                    <div class="stat-pills">
+                        <span class="stat-pill">ATK @combat?.MonsterAttack</span>
+                        <span class="stat-pill">ARM @combat?.MonsterArmor</span>
+                        <span class="stat-pill">SPD @combat?.MonsterSpeed</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="turn-info @(playerGoesFirst ? "player" : "monster")">
+                @if (playerGoesFirst)
+                {
+                    <span>⚡ Bạn ra đòn trước@(playerDbl ? " — đòn kép!" : "")</span>
+                }
+                else
+                {
+
+                    <span>⚠️ @combat?.MonsterName ra đòn trước@(monsterDbl ? " — đòn kép!" : "")</span>
+                }
+            </div>
+
+            <div class="combat-log">
+                @if (combat?.Log != null && combat.Log.Any())
+                {
+                    foreach (var entry in combat.Log)
+                    {
+                        var cls = entry.Contains("You strike") ? "log-player"
+                        : entry.Contains("hits you") ? "log-hit"
+                        : entry.Contains("blocked") ? "log-player"
+                        : entry.Contains("guard breaks") ? "log-hit"
+                        : entry.Contains("Escape Scroll") ? "log-hit"
+                        : "log-system";
+                        <div class="@cls">@entry</div>
+                    }
+                }
+                else
+                {
+
+                    <div class="log-system">Một @combat?.MonsterName chặn đường bạn!</div>
+                }
+            </div>
+
+            <div class="action-row">
+                <form asp-action="CombatAttack" asp-controller="Forest" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-action btn-attack"><span class="ico">⚔️</span><span class="label">Tấn Công</span><small>Xóa thế thủ</small></button>
+                </form>
+                <form asp-action="CombatDefend" asp-controller="Forest" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-action btn-defend"><span class="ico">🛡️</span><span class="label">Phòng Thủ</span><small>@defRisk</small></button>
+                </form>
+                <form asp-action="CombatFlee" asp-controller="Forest" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-action btn-flee"><span class="ico">🏃</span><span class="label">Bỏ Chạy</span><small>Cần Cuộn Thoát</small></button>
+                </form>
+            </div>
+
+            <div class="moves-badge">✨ Mẹo: Trang bị tốt và nâng cấp nhân vật sẽ giúp bạn chiến thắng dễ dàng hơn!<br />@session?.MovesSpent bước đã đi · @(session?.Pouch?.Count ?? 0) đồ trong túi</div>
+        </div>
     </div>
-</div>
+</body>
+</html>

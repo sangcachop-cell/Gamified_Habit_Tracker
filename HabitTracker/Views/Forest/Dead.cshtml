@@ -1,44 +1,287 @@
-@{ ViewData["Title"] = "Tử Vong"; }
+@{
+    ViewData["Title"] = "Tử Vong";
+    Layout = null;
+}
 
-<style>
-    .dead-card {
-        max-width: 440px; margin: 60px auto;
-        background: linear-gradient(135deg, #1a0808, #2a1010);
-        border: 1.5px solid rgba(231,76,60,.3); border-radius: 24px;
-        padding: 48px 40px; text-align: center; color: white;
-    }
-    .dead-icon  { font-size: 4rem; margin-bottom: 16px; }
-    .dead-title { font-size: 2rem; font-weight: 900; color: #e74c3c; margin-bottom: 8px; }
-    .dead-sub   { font-size: .9rem; color: rgba(255,255,255,.45); margin-bottom: 28px; line-height: 1.6; }
-    .stat-box   {
-        background: rgba(255,255,255,.06); border-radius: 12px;
-        padding: 16px 20px; margin-bottom: 28px; display: inline-block;
-    }
-    .stat-num { font-size: 1.8rem; font-weight: 900; color: #e74c3c; }
-    .stat-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; opacity: .4; margin-top: 2px; }
-    .retry-btn {
-        background: linear-gradient(135deg, #922b21, #c0392b);
-        border: none; border-radius: 12px; color: white;
-        font-weight: 800; font-size: 1rem; padding: 14px 36px;
-        cursor: pointer; text-decoration: none; display: inline-block;
-    }
-    .loot-lost { font-size: .8rem; color: rgba(231,76,60,.6); margin-top: 16px; }
-</style>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tử Vong</title>
 
-<div class="dead-card">
-    <div class="dead-icon">💀</div>
-    <div class="dead-title">Bạn Đã Tử Vong</div>
-    <p class="dead-sub">
-        Bạn đã bị tiêu diệt trong rừng sâu.<br>
-        Toàn bộ vật phẩm tích lũy đã bị mất.
-    </p>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <div class="stat-box">
-        <div class="stat-num">@(ViewBag.MovesSpent ?? 0)</div>
-        <div class="stat-lbl">Số Bước Đã Đi</div>
-    </div>
+    <style>
+        :root {
+            --red: #e74c3c;
+            --red2: #ff5b4d;
+            --dark: #080204;
+            --gold: #ffd166;
+            --text: #f7e7df;
+            --muted: rgba(255,255,255,.62);
+        }
 
-    <br>
-    <a asp-action="Index" class="retry-btn">🌲 Thử Lại</a>
-    <div class="loot-lost">Chết là mất sạch đồ.</div>
-</div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Be Vietnam Pro", sans-serif;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #050105;
+            color: var(--text);
+        }
+
+        body {
+            background: radial-gradient(circle at center, rgba(150, 20, 20, .34), transparent 34%), linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.88)), url('/fe/dead/death-bg.png') center/cover no-repeat;
+        }
+
+        .death-page {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .death-page::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(circle at 50% 38%, rgba(255, 59, 48, .18), transparent 24%), radial-gradient(circle at 50% 100%, rgba(255, 0, 0, .08), transparent 42%), linear-gradient(90deg, rgba(0,0,0,.5), transparent 28%, transparent 72%, rgba(0,0,0,.5));
+                z-index: 0;
+            }
+
+            .death-page::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background-image: radial-gradient(circle, rgba(255,80,60,.45) 0 1px, transparent 2px), radial-gradient(circle, rgba(255,180,100,.25) 0 1px, transparent 2px);
+                background-size: 90px 90px, 130px 130px;
+                background-position: 10px 20px, 40px 70px;
+                opacity: .28;
+                z-index: 1;
+            }
+
+        .dead-card {
+            width: min(760px, 92vw);
+            min-height: 720px;
+            padding: 44px 58px 46px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(32, 8, 8, .86), rgba(17, 4, 4, .92)), radial-gradient(circle at top, rgba(231, 76, 60, .28), transparent 42%);
+            border: 1.5px solid rgba(231,76,60,.38);
+            box-shadow: 0 30px 110px rgba(0,0,0,.62), inset 0 0 90px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.05);
+            overflow: hidden;
+        }
+
+            .dead-card::before {
+                content: "";
+                position: absolute;
+                inset: 14px;
+                border-radius: 22px;
+                border: 1px solid rgba(231,76,60,.13);
+                pointer-events: none;
+            }
+
+        .dead-art {
+            width: min(390px, 78vw);
+            height: 200px;
+            margin: 0 auto 18px;
+            background: radial-gradient(circle at 50% 55%, rgba(231,76,60,.28), transparent 48%), url('/fe/dead/death-skull.png') center/contain no-repeat;
+            filter: drop-shadow(0 0 22px rgba(231,76,60,.28)) drop-shadow(0 22px 28px rgba(0,0,0,.5));
+        }
+
+        .dead-title {
+            font-size: clamp(3rem, 6vw, 5.1rem);
+            line-height: .95;
+            font-weight: 900;
+            color: var(--red2);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 0 rgba(65,0,0,.75), 0 0 28px rgba(231,76,60,.28);
+            margin-bottom: 22px;
+        }
+
+        .divider {
+            width: min(330px, 70vw);
+            margin: 0 auto 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,.28);
+        }
+
+            .divider::before,
+            .divider::after {
+                content: "";
+                height: 1px;
+                flex: 1;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+            }
+
+        .dead-sub {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,.66);
+            margin-bottom: 28px;
+            line-height: 1.7;
+            text-shadow: 0 2px 8px rgba(0,0,0,.5);
+        }
+
+        .stat-box {
+            width: 260px;
+            margin: 0 auto 28px;
+            padding: 20px 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.055);
+            border: 1px solid rgba(255,255,255,.1);
+            box-shadow: inset 0 0 25px rgba(0,0,0,.28), 0 14px 34px rgba(0,0,0,.24);
+        }
+
+        .stat-num {
+            font-size: 3.1rem;
+            line-height: 1;
+            font-weight: 900;
+            color: var(--red2);
+            text-shadow: 0 0 18px rgba(231,76,60,.22);
+        }
+
+        .stat-lbl {
+            margin-top: 9px;
+            font-size: .82rem;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: rgba(255,255,255,.48);
+            font-weight: 800;
+        }
+
+        .retry-btn {
+            min-width: 250px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            border: none;
+            border-radius: 18px;
+            padding: 18px 42px;
+            color: #fff;
+            font-size: 1.32rem;
+            font-weight: 900;
+            background: linear-gradient(180deg, rgba(255,115,88,.22), transparent), linear-gradient(135deg, #9f241c, #d43c2f);
+            box-shadow: 0 8px 0 #651611, 0 22px 45px rgba(231,76,60,.2), inset 0 1px 0 rgba(255,255,255,.18);
+            cursor: pointer;
+            transition: .16s ease;
+        }
+
+            .retry-btn:hover {
+                color: white;
+                transform: translateY(-3px);
+                box-shadow: 0 11px 0 #651611, 0 28px 50px rgba(231,76,60,.25), inset 0 1px 0 rgba(255,255,255,.2);
+            }
+
+            .retry-btn:active {
+                transform: translateY(3px);
+                box-shadow: 0 4px 0 #651611, 0 14px 30px rgba(231,76,60,.18);
+            }
+
+        .loot-lost {
+            margin-top: 28px;
+            font-size: 1.05rem;
+            color: rgba(255,88,72,.82);
+            text-shadow: 0 0 12px rgba(231,76,60,.2);
+        }
+
+        @@media(max-height: 780px) {
+            .dead-card {
+                min-height: auto;
+                padding: 24px 48px 28px;
+            }
+
+            .dead-art {
+                height: 145px;
+                margin-bottom: 10px;
+            }
+
+            .dead-title {
+                font-size: clamp(2.5rem, 5vw, 4rem);
+                margin-bottom: 14px;
+            }
+
+            .dead-sub {
+                margin-bottom: 18px;
+            }
+
+            .stat-box {
+                margin-bottom: 20px;
+            }
+
+            .loot-lost {
+                margin-top: 18px;
+            }
+        }
+
+        @@media(max-width: 620px) {
+            .death-page {
+                padding: 14px;
+            }
+
+            .dead-card {
+                width: 100%;
+                padding: 28px 22px;
+                min-height: auto;
+            }
+
+            .dead-title {
+                font-size: 2.8rem;
+            }
+
+            .dead-sub {
+                font-size: .95rem;
+            }
+
+            .retry-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="death-page">
+        <section class="dead-card">
+            <div class="dead-art"></div>
+
+            <h1 class="dead-title">Bạn Đã Tử Vong</h1>
+
+            <div class="divider">💀</div>
+
+            <p class="dead-sub">
+                Bạn đã bị tiêu diệt trong rừng sâu.<br />
+                Toàn bộ vật phẩm tích lũy đã bị mất.
+            </p>
+
+            <div class="stat-box">
+                <div class="stat-num">@(ViewBag.MovesSpent ?? 0)</div>
+                <div class="stat-lbl">Số Bước Đã Đi</div>
+            </div>
+
+            <a asp-action="Index" class="retry-btn">Thử Lại</a>
+
+            <div class="loot-lost">Chết là mất sạch đồ.</div>
+        </section>
+    </main>
+</body>
+</html>

@@ -9,20 +9,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HabitTracker — Gamify Your Life</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --ink: #0a0a12;
+            --ink: #070711;
             --paper: #f7f4ee;
             --gold: #ffd166;
             --violet: #7c4dff;
-            --deep-violet: #21164d;
+            --violet2: #9b7cff;
             --rose: #ff4f8b;
             --teal: #2de2c5;
             --soft: #edeaf5;
-            --glass: rgba(255,255,255,.13);
-            --glass-border: rgba(255,255,255,.24);
         }
 
         *, *::before, *::after {
@@ -39,78 +39,119 @@
             background: radial-gradient(circle at 20% 0%, rgba(124,77,255,.14), transparent 32%), radial-gradient(circle at 80% 20%, rgba(255,209,102,.12), transparent 28%), var(--paper);
             color: var(--ink);
             font-family: "Be Vietnam Pro", sans-serif;
-            font-size: 16px;
             overflow-x: hidden;
         }
 
-        h1, h2, h3, h4, .brand {
-            font-family: "Be Vietnam Pro", sans-serif;
-        }
-
         /* NAV */
-        nav {
+        nav#navbar {
             position: fixed;
-            top: 18px;
+            top: 12px;
             left: 50%;
-            right: auto;
             transform: translateX(-50%);
-            width: min(1120px, calc(100% - 32px));
-            z-index: 100;
+            width: min(1160px, calc(100% - 24px));
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 20px;
-            background: rgba(10,10,18,.58);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255,255,255,.16);
-            border-radius: 999px;
-            box-shadow: 0 16px 45px rgba(0,0,0,.22);
-            transition: padding .3s, background .3s, box-shadow .3s;
+            gap: 18px;
+            padding: 10px 16px;
+            background: rgba(7,7,17,.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 28px;
+            box-shadow: 0 18px 48px rgba(0,0,0,.35);
+            transition: .25s;
         }
 
+        /* LOGO GIỐNG TRANG BADGES */
         .brand {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -.5px;
-            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 275px;
+            height: 78px;
+            padding: 8px 18px;
+            border-radius: 22px;
+            color: white;
             text-decoration: none;
+            background: linear-gradient(135deg, rgba(124,77,255,.26), rgba(8,8,18,.88));
+            border: 1px solid rgba(168,85,247,.65);
+            box-shadow: 0 0 24px rgba(124,77,255,.34), inset 0 0 18px rgba(255,255,255,.05);
+            transition: .25s;
         }
 
-            .brand span {
-                color: var(--gold);
+            .brand:hover {
+                transform: translateY(-2px);
+                border-color: rgba(168,85,247,.9);
+                box-shadow: 0 0 34px rgba(124,77,255,.48), inset 0 0 22px rgba(255,255,255,.07);
+                color: white;
+            }
+
+        .brand-logo {
+            width: 76px;
+            height: 76px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(168,85,247,.75)) drop-shadow(0 0 22px rgba(124,77,255,.5));
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+            .brand-text span {
+                font-family: "Cinzel", serif;
+                font-size: 1.12rem;
+                font-weight: 800;
+                color: #f8fafc;
+                letter-spacing: .8px;
+            }
+
+            .brand-text strong {
+                margin-top: 2px;
+                font-family: "Cinzel", serif;
+                font-size: 2rem;
+                font-weight: 800;
+                color: #facc15;
+                letter-spacing: 1px;
+                text-shadow: 0 0 10px rgba(250,204,21,.6), 0 0 24px rgba(168,85,247,.38);
             }
 
         .nav-links {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            overflow-x: auto;
         }
 
             .nav-links a {
-                padding: 9px 20px;
-                border-radius: 50px;
-                font-weight: 500;
-                font-size: .92rem;
+                padding: 10px 16px;
+                border-radius: 999px;
+                font-weight: 700;
+                font-size: .9rem;
                 text-decoration: none;
-                color: rgba(255,255,255,.82);
-                transition: background .2s, color .2s;
+                color: rgba(255,255,255,.74);
+                white-space: nowrap;
+                transition: .2s;
             }
 
                 .nav-links a:hover {
-                    background: rgba(255,255,255,.12);
+                    background: rgba(124,77,255,.18);
                     color: #fff;
                 }
 
         .btn-nav-cta {
-            background: linear-gradient(135deg, var(--gold), var(--rose)) !important;
-            color: #16111f !important;
-            font-weight: 800 !important;
-            box-shadow: 0 8px 24px rgba(255,79,139,.28);
+            background: linear-gradient(135deg, var(--gold), #ff9f1c) !important;
+            color: #17111f !important;
+            font-weight: 900 !important;
+            box-shadow: 0 10px 26px rgba(255,209,102,.25);
         }
 
             .btn-nav-cta:hover {
-                background: var(--violet) !important;
+                background: linear-gradient(135deg, var(--violet), var(--teal)) !important;
                 color: #fff !important;
             }
 
@@ -120,13 +161,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 130px 24px 90px;
+            padding: 150px 24px 90px;
             position: relative;
             overflow: hidden;
             text-align: center;
             isolation: isolate;
-            background-image: linear-gradient(135deg, rgba(8,7,18,.72), rgba(22,14,58,.58) 48%, rgba(6,5,14,.78)), url('/fe/background.png');
-            background-size: 100% auto;
+            background-image: linear-gradient(135deg, rgba(8,7,18,.76), rgba(22,14,58,.6) 48%, rgba(6,5,14,.82)), url('/fe/home/background.png');
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -180,22 +221,21 @@
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 520px;
-            background: rgba(255,255,255,.08);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,.12);
-            border-radius: 26px;
-            padding: 38px 36px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,.28);
+            max-width: 620px;
+            background: rgba(8,8,18,.56);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 30px;
+            padding: 42px 38px;
+            box-shadow: 0 20px 55px rgba(0,0,0,.36);
         }
 
             .hero-content::before {
                 content: "";
                 position: absolute;
                 inset: 14px;
-                border-radius: 28px;
-                border: 1px solid rgba(255,255,255,.12);
+                border-radius: 24px;
+                border: 1px solid rgba(255,255,255,.1);
                 pointer-events: none;
             }
 
@@ -203,12 +243,12 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255,255,255,.16);
-            border: 1px solid rgba(255,255,255,.26);
-            border-radius: 50px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 999px;
             padding: 8px 18px;
             font-size: .78rem;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: 1.2px;
             text-transform: uppercase;
             color: #fff;
@@ -219,40 +259,28 @@
 
         .hero h1 {
             color: #fff;
-            text-shadow: 0 4px 18px rgba(0,0,0,.45);
-            font-size: clamp(2.6rem, 6vw, 5.6rem);
-            font-weight: 800;
-            line-height: .98;
-            letter-spacing: -2.8px;
-            margin-bottom: 26px;
-            text-shadow: 0 10px 34px rgba(0,0,0,.35);
+            font-size: clamp(2.35rem, 5.4vw, 5.2rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -2.4px;
+            margin-bottom: 28px;
+            text-shadow: 0 12px 36px rgba(0,0,0,.48);
             opacity: 0;
             animation: fadeUp .7s .25s forwards;
         }
 
-            .hero h1 .accent-gold {
-                color: transparent;
-                background: linear-gradient(135deg, #ffe08a, #ff9f1c);
-                -webkit-background-clip: text;
-                background-clip: text;
-            }
+        .accent-gold {
+            color: transparent;
+            background: linear-gradient(135deg, #ffe08a, #ff9f1c);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
 
-            .hero h1 .accent-violet {
-                color: transparent;
-                background: linear-gradient(135deg, #a98cff, #2de2c5);
-                -webkit-background-clip: text;
-                background-clip: text;
-            }
-
-        .hero-sub {
-            font-size: 1.16rem;
-            color: rgba(255,255,255,.86);
-            line-height: 1.75;
-            max-width: 650px;
-            margin: 0 auto 34px;
-            font-weight: 400;
-            opacity: 0;
-            animation: fadeUp .7s .4s forwards;
+        .accent-violet {
+            color: transparent;
+            background: linear-gradient(135deg, #a98cff, #2de2c5);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
 
         .hero-ctas {
@@ -268,22 +296,20 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: linear-gradient(135deg,#7c4dff,#5c3dde);
-            color: #17111f;
+            background: linear-gradient(135deg, var(--violet), #6d28d9);
+            color: white;
             padding: 15px 34px;
-            border-radius: 50px;
-            font-family: "Syne", sans-serif;
-            font-weight: 700;
+            border-radius: 999px;
+            font-weight: 900;
             font-size: 1rem;
             text-decoration: none;
-            transition: transform .2s, background .2s, box-shadow .2s;
-            box-shadow: 0 14px 34px rgba(255,79,139,.32);
+            transition: .2s;
+            box-shadow: 0 14px 34px rgba(124,77,255,.32);
         }
 
             .btn-primary-hero:hover {
                 background: linear-gradient(135deg, var(--violet), var(--teal));
                 transform: translateY(-2px);
-                box-shadow: 0 8px 30px rgba(92,61,222,.35);
                 color: #fff;
             }
 
@@ -294,47 +320,17 @@
             background: rgba(255,255,255,.12);
             color: #fff;
             padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: 500;
+            border-radius: 999px;
+            font-weight: 700;
             font-size: 1rem;
             text-decoration: none;
             border: 1.5px solid rgba(255,255,255,.24);
-            transition: all .2s;
+            transition: .2s;
         }
 
             .btn-secondary-hero:hover {
-                border-color: rgba(255,255,255,.55);
                 color: #fff;
                 background: rgba(255,255,255,.18);
-            }
-
-
-
-        .hero-mini-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin: 34px auto 0;
-            max-width: 650px;
-            opacity: 0;
-            animation: fadeUp .7s .7s forwards;
-        }
-
-        .mini-stat {
-            padding: 16px 12px;
-            border-radius: 22px;
-            background: rgba(255,255,255,.12);
-            border: 1px solid rgba(255,255,255,.18);
-            color: rgba(255,255,255,.74);
-        }
-
-            .mini-stat strong {
-                display: block;
-                font-family: "Syne", sans-serif;
-                font-size: 1.35rem;
-                line-height: 1;
-                color: #fff;
-                margin-bottom: 6px;
             }
 
         .login-bubble {
@@ -349,7 +345,7 @@
             border-radius: 999px;
             background: rgba(255,255,255,.1);
             border: 1px solid rgba(255,255,255,.16);
-            transition: transform .2s, background .2s;
+            transition: .2s;
         }
 
             .login-bubble:hover {
@@ -358,144 +354,32 @@
                 background: rgba(255,255,255,.16);
             }
 
-        /* FLOATING CARDS */
-        .hero-visual {
-            position: absolute;
-            right: 6vw;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 380px;
+        .hero-mini-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin: 34px auto 0;
             opacity: 0;
-            animation: fadeLeft .9s .6s forwards;
+            animation: fadeUp .7s .7s forwards;
         }
 
-        .card-stack {
-            position: relative;
-            height: 460px;
-        }
-
-        .hcard {
-            position: absolute;
-            background: white;
-            border-radius: 20px;
-            padding: 22px 24px;
-            box-shadow: 0 12px 40px rgba(0,0,0,.1);
-        }
-
-            .hcard:hover {
-                transform: translateY(-6px) !important;
-                transition: transform .3s;
-            }
-
-        .hcard-main {
-            width: 320px;
-            left: 30px;
-            top: 20px;
-            z-index: 3;
-            border: 1.5px solid rgba(92,61,222,.12);
-            animation: cardFloat 6s ease-in-out infinite;
-        }
-
-        .hcard-xp {
-            width: 200px;
-            right: 0;
-            top: 200px;
-            z-index: 4;
-            background: var(--violet);
-            color: white;
-            animation: cardFloat 7s 1s ease-in-out infinite;
-        }
-
-        .hcard-streak {
-            width: 180px;
-            left: 0;
-            bottom: 30px;
-            z-index: 2;
-            background: var(--gold);
-            animation: cardFloat 5s 2s ease-in-out infinite;
-        }
-
-        @@keyframes cardFloat {
-            0%, 100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .hcard-main .card-title {
-            font-family: "Syne",sans-serif;
+        .mini-stat {
+            padding: 16px 12px;
+            border-radius: 22px;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.14);
+            color: rgba(255,255,255,.74);
             font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 14px;
-            color: var(--ink);
         }
 
-        .quest-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-            .quest-row:last-child {
-                border: none;
+            .mini-stat strong {
+                display: block;
+                font-size: 1.35rem;
+                line-height: 1;
+                color: var(--gold);
+                margin-bottom: 6px;
+                font-weight: 900;
             }
-
-        .quest-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .quest-name {
-            font-size: .85rem;
-            font-weight: 500;
-            color: #333;
-            flex: 1;
-        }
-
-        .quest-xp {
-            font-size: .78rem;
-            font-weight: 700;
-            color: var(--violet);
-        }
-
-        .xp-label {
-            font-size: .75rem;
-            opacity: .8;
-            margin-bottom: 4px;
-        }
-
-        .xp-big {
-            font-family: "Syne",sans-serif;
-            font-size: 2rem;
-            font-weight: 800;
-        }
-
-        .xp-sub {
-            font-size: .8rem;
-            opacity: .8;
-            margin-top: 2px;
-        }
-
-        .streak-label {
-            font-size: .75rem;
-            font-weight: 600;
-            color: rgba(0,0,0,.6);
-            margin-bottom: 4px;
-        }
-
-        .streak-big {
-            font-family: "Syne",sans-serif;
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--ink);
-        }
 
         /* STATS */
         .stats-strip {
@@ -524,9 +408,8 @@
             }
 
         .stat-num {
-            font-family: "Syne",sans-serif;
             font-size: 2.8rem;
-            font-weight: 800;
+            font-weight: 900;
             line-height: 1;
             background: linear-gradient(135deg, var(--gold), var(--rose));
             -webkit-background-clip: text;
@@ -549,7 +432,7 @@
 
         .section-label {
             font-size: .78rem;
-            font-weight: 700;
+            font-weight: 900;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--violet);
@@ -558,7 +441,7 @@
 
         .section-title {
             font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: -1.5px;
             line-height: 1.1;
             margin-bottom: 60px;
@@ -576,7 +459,7 @@
             border-radius: 20px;
             padding: 32px 28px;
             border: 1.5px solid rgba(0,0,0,.06);
-            transition: transform .25s, box-shadow .25s, border-color .25s;
+            transition: .25s;
             opacity: 0;
         }
 
@@ -602,9 +485,8 @@
         }
 
         .feat-title {
-            font-family: "Syne",sans-serif;
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 10px;
         }
 
@@ -671,8 +553,7 @@
             border-radius: 50%;
             background: var(--ink);
             color: var(--paper);
-            font-family: "Syne",sans-serif;
-            font-weight: 800;
+            font-weight: 900;
             font-size: 1.3rem;
             display: flex;
             align-items: center;
@@ -682,7 +563,7 @@
 
         .step h4 {
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 900;
             margin-bottom: 8px;
         }
 
@@ -709,29 +590,28 @@
             text-align: left;
         }
 
-        .lb-head {
+        .lb-head, .lb-row {
             display: grid;
             grid-template-columns: 64px 1fr 120px 140px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .lb-head {
             padding: 14px 28px;
             background: var(--ink);
             color: var(--paper);
-            font-family: "Syne",sans-serif;
             font-size: .8rem;
-            font-weight: 700;
+            font-weight: 900;
             letter-spacing: .5px;
             text-transform: uppercase;
-            gap: 10px;
         }
 
         .lb-row {
-            display: grid;
-            grid-template-columns: 64px 1fr 120px 140px;
             padding: 18px 28px;
             border-bottom: 1px solid #f0f0f0;
-            align-items: center;
-            gap: 10px;
             opacity: 0;
-            transition: background .2s;
+            transition: .2s;
         }
 
             .lb-row.visible {
@@ -742,13 +622,8 @@
                 background: var(--soft);
             }
 
-            .lb-row:last-child {
-                border: none;
-            }
-
         .lb-rank {
-            font-family: "Syne",sans-serif;
-            font-weight: 800;
+            font-weight: 900;
             color: #bbb;
             font-size: 1.1rem;
         }
@@ -779,13 +654,12 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            font-weight: 700;
-            flex-shrink: 0;
+            font-weight: 900;
             object-fit: cover;
         }
 
         .lb-name {
-            font-weight: 700;
+            font-weight: 900;
             font-size: .95rem;
         }
 
@@ -796,8 +670,7 @@
         }
 
         .lb-xp {
-            font-family: "Syne",sans-serif;
-            font-weight: 800;
+            font-weight: 900;
             color: var(--violet);
             font-size: 1rem;
         }
@@ -814,7 +687,6 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            flex-shrink: 0;
         }
 
         .r-Legendary {
@@ -848,13 +720,13 @@
                 content: "";
                 position: absolute;
                 inset: 0;
-                background: radial-gradient(ellipse at 30% 50%, rgba(92,61,222,.4), transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(240,180,41,.25), transparent 60%);
+                background: radial-gradient(ellipse at 30% 50%, rgba(124,77,255,.4), transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(255,209,102,.25), transparent 60%);
                 pointer-events: none;
             }
 
             .cta-banner h2 {
                 font-size: clamp(2rem, 4vw, 3.2rem);
-                font-weight: 800;
+                font-weight: 900;
                 letter-spacing: -1.5px;
                 color: white;
                 margin-bottom: 16px;
@@ -883,17 +755,15 @@
             background: white;
             color: var(--ink);
             padding: 15px 36px;
-            border-radius: 50px;
-            font-family: "Syne",sans-serif;
-            font-weight: 700;
+            border-radius: 999px;
+            font-weight: 900;
             font-size: 1rem;
             text-decoration: none;
-            transition: transform .2s, box-shadow .2s;
+            transition: .2s;
         }
 
             .btn-cta-white:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(255,255,255,.2);
                 color: var(--violet);
             }
 
@@ -904,12 +774,12 @@
             background: transparent;
             color: white;
             padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: 500;
+            border-radius: 999px;
+            font-weight: 700;
             font-size: 1rem;
             text-decoration: none;
             border: 1.5px solid rgba(255,255,255,.3);
-            transition: border-color .2s, background .2s;
+            transition: .2s;
         }
 
             .btn-cta-ghost:hover {
@@ -918,7 +788,6 @@
                 color: white;
             }
 
-        /* FOOTER */
         footer {
             background: var(--ink);
             color: rgba(255,255,255,.4);
@@ -940,7 +809,6 @@
                     color: white;
                 }
 
-        /* ANIMATIONS */
         @@keyframes fadeUp {
             from {
                 opacity: 0;
@@ -965,30 +833,31 @@
             }
         }
 
-        /* RESPONSIVE */
-        @@media (max-width: 960px) {
-            nav {
-                top: 10px;
-                width: calc(100% - 20px);
-                padding: 12px 14px;
+        @@media (max-width: 980px) {
+            nav#navbar {
+                align-items: flex-start;
+                flex-direction: column;
                 border-radius: 24px;
             }
 
-            .hero {
-                padding: 120px 18px 70px;
-                background-attachment: scroll;
+            .brand {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
             }
 
-            .hero-content {
-                border-radius: 28px;
+            .nav-links {
+                width: 100%;
+                padding-bottom: 4px;
+            }
+
+            .hero {
+                padding-top: 210px;
+                background-attachment: scroll;
             }
 
             .hero-mini-stats {
                 grid-template-columns: 1fr;
-            }
-
-            .hero-visual {
-                display: none;
             }
 
             .stats-strip {
@@ -1002,27 +871,13 @@
                 flex: 0 0 45%;
             }
 
-            .features {
-                padding: 70px 24px;
-            }
-
-            .how {
-                padding: 70px 24px;
-            }
-
-            .preview-section {
+            .features, .how, .preview-section {
                 padding: 70px 24px;
             }
 
             .cta-banner {
                 margin: 0 24px 60px;
                 padding: 50px 30px;
-            }
-
-            footer {
-                padding: 24px;
-                flex-direction: column;
-                text-align: center;
             }
 
             .lb-head, .lb-row {
@@ -1032,13 +887,49 @@
             .lb-badge {
                 display: none;
             }
+
+            footer {
+                padding: 24px;
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @@media (max-width: 560px) {
+            .brand {
+                height: 68px;
+            }
+
+            .brand-logo {
+                width: 62px;
+                height: 62px;
+            }
+
+            .brand-text span {
+                font-size: .95rem;
+            }
+
+            .brand-text strong {
+                font-size: 1.65rem;
+            }
+
+            .hero-content {
+                padding: 34px 22px;
+            }
         }
     </style>
 </head>
 <body>
 
     <nav id="navbar">
-        <a href="/" class="brand">⚔️ Vương Quốc</span></a>
+        <a href="/" class="brand">
+            <img src="/fe/logo/logo.png" class="brand-logo" alt="Logo" />
+            <div class="brand-text">
+                <span>Vương</span>
+                <strong>Quốc</strong>
+            </div>
+        </a>
+
         <div class="nav-links">
             <a href="#features">Tính năng</a>
             <a href="#how">Cách dùng</a>
@@ -1048,12 +939,15 @@
         </div>
     </nav>
 
-    <!-- HERO -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-eyebrow"><span>✨</span> RPG Habit Builder</div>
 
-            <h1>Biến thói quen nhỏ<br>thành <span class="accent-gold">nhiệm vụ mỗi ngày</span><br><span class="accent-violet">và level up bản thân.</span></h1>
+            <h1>
+                Biến thói quen nhỏ<br>
+                thành <span class="accent-gold">nhiệm vụ mỗi ngày</span><br>
+                <span class="accent-violet">và level up bản thân.</span>
+            </h1>
 
             <div class="hero-ctas">
                 <a href="/Account/Register" class="btn-primary-hero">Bắt đầu miễn phí</a>
@@ -1079,7 +973,6 @@
         </div>
     </section>
 
-    <!-- STATS STRIP — dữ liệu thật từ DB -->
     <div class="stats-strip">
         <div class="stat-block">
             <div class="stat-num" data-target="@Model.TotalUsers">0</div>
@@ -1099,44 +992,94 @@
         </div>
     </div>
 
-    <!-- FEATURES -->
     <section class="features" id="features">
         <div class="section-label">Tính năng</div>
         <h2 class="section-title">Mọi thứ bạn cần để không bỏ cuộc.</h2>
-        <div class="features-grid">
-            <div class="feat-card" style="animation-delay:.05s"><div class="feat-icon fi-violet">🎯</div><div class="feat-title">Quest System</div><div class="feat-desc">Chuyển đổi thói quen thành nhiệm vụ với độ khó và phần thưởng XP rõ ràng. Daily, Weekly, Monthly quests.</div></div>
-            <div class="feat-card" style="animation-delay:.12s"><div class="feat-icon fi-gold">⚡</div><div class="feat-title">XP & Level Up</div><div class="feat-desc">Mỗi quest hoàn thành mang lại XP. Tích lũy đủ để lên level và mở khóa uy tín trong cộng đồng.</div></div>
-            <div class="feat-card" style="animation-delay:.19s"><div class="feat-icon fi-rose">🔥</div><div class="feat-title">Streak Tracking</div><div class="feat-desc">Theo dõi chuỗi ngày liên tiếp. Duy trì streak càng lâu, phần thưởng càng lớn và động lực càng cao.</div></div>
-            <div class="feat-card" style="animation-delay:.26s"><div class="feat-icon fi-teal">🏆</div><div class="feat-title">Badge Collection</div><div class="feat-desc">Kiếm huy hiệu theo độ hiếm Common → Rare → Epic → Legendary. Trưng bày trên profile của bạn.</div></div>
-            <div class="feat-card" style="animation-delay:.33s"><div class="feat-icon fi-ink">🏅</div><div class="feat-title">Leaderboard</div><div class="feat-desc">Cạnh tranh lành mạnh với người dùng khác. Xem bảng xếp hạng XP và cố gắng leo lên top.</div></div>
-            <div class="feat-card" style="animation-delay:.4s"><div class="feat-icon fi-green">📊</div><div class="feat-title">Statistics & Charts</div><div class="feat-desc">Dashboard thống kê chi tiết: XP trend 30 ngày, breakdown theo category, so sánh với trung bình.</div></div>
-        </div>
-    </section>
 
-    <!-- HOW IT WORKS -->
-    <section class="how" id="how">
-        <div class="how-inner">
-            <div class="section-label">Cách hoạt động</div>
-            <h2 class="section-title">4 bước đơn giản để bắt đầu.</h2>
-            <div class="steps">
-                <div class="step" style="animation-delay:.05s"><div class="step-num">1</div><h4>Đăng ký tài khoản</h4><p>Tạo profile chỉ mất 30 giây. Không cần thẻ tín dụng, hoàn toàn miễn phí.</p></div>
-                <div class="step" style="animation-delay:.15s"><div class="step-num">2</div><h4>Chọn Quest phù hợp</h4><p>Browse thư viện quest theo category, độ khó. Tìm những thói quen bạn muốn xây dựng.</p></div>
-                <div class="step" style="animation-delay:.25s"><div class="step-num">3</div><h4>Hoàn thành & nhận thưởng</h4><p>Tick quest mỗi ngày, nhận XP, duy trì streak và leo bảng xếp hạng cộng đồng.</p></div>
-                <div class="step" style="animation-delay:.35s"><div class="step-num">4</div><h4>Unlock badge & lên level</h4><p>Đạt đủ XP để lên level. Hoàn thành thử thách để unlock badge Rare, Epic, Legendary.</p></div>
+        <div class="features-grid">
+            <div class="feat-card" style="animation-delay:.05s">
+                <div class="feat-icon fi-violet">🎯</div>
+                <div class="feat-title">Quest System</div>
+                <div class="feat-desc">Chuyển đổi thói quen thành nhiệm vụ với độ khó và phần thưởng XP rõ ràng.</div>
+            </div>
+
+            <div class="feat-card" style="animation-delay:.12s">
+                <div class="feat-icon fi-gold">⚡</div>
+                <div class="feat-title">XP & Level Up</div>
+                <div class="feat-desc">Mỗi quest hoàn thành mang lại XP. Tích lũy đủ để lên level.</div>
+            </div>
+
+            <div class="feat-card" style="animation-delay:.19s">
+                <div class="feat-icon fi-rose">🔥</div>
+                <div class="feat-title">Streak Tracking</div>
+                <div class="feat-desc">Theo dõi chuỗi ngày liên tiếp và giữ động lực mỗi ngày.</div>
+            </div>
+
+            <div class="feat-card" style="animation-delay:.26s">
+                <div class="feat-icon fi-teal">🏆</div>
+                <div class="feat-title">Badge Collection</div>
+                <div class="feat-desc">Kiếm huy hiệu Common, Rare, Epic và Legendary.</div>
+            </div>
+
+            <div class="feat-card" style="animation-delay:.33s">
+                <div class="feat-icon fi-ink">🏅</div>
+                <div class="feat-title">Leaderboard</div>
+                <div class="feat-desc">Cạnh tranh lành mạnh và leo top bảng xếp hạng XP.</div>
+            </div>
+
+            <div class="feat-card" style="animation-delay:.4s">
+                <div class="feat-icon fi-green">📊</div>
+                <div class="feat-title">Statistics & Charts</div>
+                <div class="feat-desc">Dashboard thống kê chi tiết tiến trình rèn luyện của bạn.</div>
             </div>
         </div>
     </section>
 
-    <!-- LEADERBOARD — dữ liệu thật từ DB -->
+    <section class="how" id="how">
+        <div class="how-inner">
+            <div class="section-label">Cách hoạt động</div>
+            <h2 class="section-title">4 bước đơn giản để bắt đầu.</h2>
+
+            <div class="steps">
+                <div class="step" style="animation-delay:.05s">
+                    <div class="step-num">1</div>
+                    <h4>Đăng ký tài khoản</h4>
+                    <p>Tạo profile nhanh chóng và bắt đầu hành trình trong Vương Quốc.</p>
+                </div>
+
+                <div class="step" style="animation-delay:.15s">
+                    <div class="step-num">2</div>
+                    <h4>Chọn Quest phù hợp</h4>
+                    <p>Tìm những nhiệm vụ phù hợp với thói quen bạn muốn xây dựng.</p>
+                </div>
+
+                <div class="step" style="animation-delay:.25s">
+                    <div class="step-num">3</div>
+                    <h4>Hoàn thành & nhận thưởng</h4>
+                    <p>Tick quest mỗi ngày, nhận XP và duy trì streak.</p>
+                </div>
+
+                <div class="step" style="animation-delay:.35s">
+                    <div class="step-num">4</div>
+                    <h4>Unlock badge & lên level</h4>
+                    <p>Mở khóa huy hiệu hiếm và nâng cấp bản thân mỗi ngày.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="preview-section" id="leaderboard">
         <div class="section-label">Leaderboard</div>
-        <h2 class="section-title" style="margin:0 auto 0;text-align:center;max-width:100%">Top người dùng hiện tại</h2>
+        <h2 class="section-title" style="margin:0 auto;text-align:center;max-width:100%">Top người dùng hiện tại</h2>
 
         @if (Model.TopUsers != null && Model.TopUsers.Count > 0)
         {
             <div class="lb-table">
                 <div class="lb-head">
-                    <span>#</span><span>Người dùng</span><span>XP</span><span>Badge hiếm nhất</span>
+                    <span>#</span>
+                    <span>Người dùng</span>
+                    <span>XP</span>
+                    <span>Badge hiếm nhất</span>
                 </div>
 
                 @for (int i = 0; i < Model.TopUsers.Count; i++)
@@ -1149,6 +1092,7 @@
 
                     <div class="lb-row" style="animation-delay:@((i * 0.07).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))s">
                         <span class="lb-rank @rankClass">@rankIcon</span>
+
                         <div class="lb-user">
                             @if (!string.IsNullOrEmpty(u.Avatar) && u.Avatar.StartsWith("http"))
                             {
@@ -1160,12 +1104,15 @@
                                     @u.Username.Substring(0, 1).ToUpper()
                                 </div>
                             }
+
                             <div>
                                 <div class="lb-name">@u.Username</div>
                                 <div class="lb-level">Level @u.Level @(u.CurrentStreak > 0 ? $"· 🔥{u.CurrentStreak} ngày" : "")</div>
                             </div>
                         </div>
+
                         <span class="lb-xp">@u.XP.ToString("N0")</span>
+
                         <div class="lb-badge">
                             @if (!string.IsNullOrEmpty(u.TopBadgeName))
                             {
@@ -1197,10 +1144,10 @@
         }
     </section>
 
-    <!-- CTA -->
     <div class="cta-banner">
         <h2>Sẵn sàng level up<br>cuộc sống của bạn?</h2>
         <p>Tham gia cùng @Model.TotalUsers người dùng — miễn phí, không cần thẻ tín dụng.</p>
+
         <div class="cta-btn-group">
             <a href="/Account/Register" class="btn-cta-white">🚀 Tạo tài khoản miễn phí</a>
             <a href="/Account/Login" class="btn-cta-ghost">Đã có tài khoản →</a>
@@ -1218,19 +1165,32 @@
 
     <script>
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add("visible"); observer.unobserve(el.target); } });
+            entries.forEach(el => {
+                if (el.isIntersecting) {
+                    el.target.classList.add("visible");
+                    observer.unobserve(el.target);
+                }
+            });
         }, { threshold: 0.12 });
-        document.querySelectorAll(".stat-block, .feat-card, .step, .lb-row").forEach(el => observer.observe(el));
+
+        document.querySelectorAll(".stat-block, .feat-card, .step, .lb-row")
+            .forEach(el => observer.observe(el));
 
         function countUp(el, target) {
-            let start = 0; const duration = 1600;
+            let start = 0;
+            const duration = 1600;
+
             const step = (ts) => {
                 if (!start) start = ts;
+
                 const p = Math.min((ts - start) / duration, 1);
                 const e = 1 - Math.pow(1 - p, 3);
+
                 el.textContent = Math.floor(e * target).toLocaleString("vi");
+
                 if (p < 1) requestAnimationFrame(step);
             };
+
             requestAnimationFrame(step);
         }
 
@@ -1240,16 +1200,22 @@
                     entry.target.querySelectorAll("[data-target]").forEach(el => {
                         countUp(el, parseInt(el.dataset.target));
                     });
+
                     statsObserver.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.3 });
+
         const strip = document.querySelector(".stats-strip");
         if (strip) statsObserver.observe(strip);
 
         window.addEventListener("scroll", () => {
-            document.getElementById("navbar").style.padding = window.scrollY > 60 ? "10px 20px" : "14px 20px";
+            const nav = document.getElementById("navbar");
+            if (!nav) return;
+
+            nav.style.padding = window.scrollY > 60 ? "8px 16px" : "10px 16px";
         });
     </script>
+
 </body>
 </html>
