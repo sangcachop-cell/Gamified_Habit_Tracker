@@ -10,16 +10,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HabitTracker — Gamify Your Life</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --ink: #0a0a12;
-            --paper: #f5f3ef;
-            --gold: #f0b429;
-            --violet: #5c3dde;
-            --rose: #e8436a;
-            --teal: #00b89c;
+            --paper: #f7f4ee;
+            --gold: #ffd166;
+            --violet: #7c4dff;
+            --deep-violet: #21164d;
+            --rose: #ff4f8b;
+            --teal: #2de2c5;
             --soft: #edeaf5;
+            --glass: rgba(255,255,255,.13);
+            --glass-border: rgba(255,255,255,.24);
         }
 
         *, *::before, *::after {
@@ -33,44 +36,49 @@
         }
 
         body {
-            background: var(--paper);
+            background: radial-gradient(circle at 20% 0%, rgba(124,77,255,.14), transparent 32%), radial-gradient(circle at 80% 20%, rgba(255,209,102,.12), transparent 28%), var(--paper);
             color: var(--ink);
-            font-family: "DM Sans", sans-serif;
+            font-family: "Be Vietnam Pro", sans-serif;
             font-size: 16px;
             overflow-x: hidden;
         }
 
         h1, h2, h3, h4, .brand {
-            font-family: "Syne", sans-serif;
+            font-family: "Be Vietnam Pro", sans-serif;
         }
 
         /* NAV */
         nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 18px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            width: min(1120px, calc(100% - 32px));
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 48px;
-            background: rgba(245,243,239,.88);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(0,0,0,.07);
-            transition: padding .3s;
+            padding: 14px 20px;
+            background: rgba(10,10,18,.58);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 999px;
+            box-shadow: 0 16px 45px rgba(0,0,0,.22);
+            transition: padding .3s, background .3s, box-shadow .3s;
         }
 
         .brand {
             font-size: 1.35rem;
             font-weight: 800;
             letter-spacing: -.5px;
-            color: var(--ink);
+            color: #fff;
             text-decoration: none;
         }
 
             .brand span {
-                color: var(--violet);
+                color: var(--gold);
             }
 
         .nav-links {
@@ -85,18 +93,20 @@
                 font-weight: 500;
                 font-size: .92rem;
                 text-decoration: none;
-                color: var(--ink);
-                transition: background .2s;
+                color: rgba(255,255,255,.82);
+                transition: background .2s, color .2s;
             }
 
                 .nav-links a:hover {
-                    background: var(--soft);
+                    background: rgba(255,255,255,.12);
+                    color: #fff;
                 }
 
         .btn-nav-cta {
-            background: var(--ink) !important;
-            color: var(--paper) !important;
-            font-weight: 700 !important;
+            background: linear-gradient(135deg, var(--gold), var(--rose)) !important;
+            color: #16111f !important;
+            font-weight: 800 !important;
+            box-shadow: 0 8px 24px rgba(255,79,139,.28);
         }
 
             .btn-nav-cta:hover {
@@ -109,100 +119,145 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 120px 48px 80px;
+            justify-content: center;
+            padding: 130px 24px 90px;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            isolation: isolate;
+            background-image: linear-gradient(135deg, rgba(8,7,18,.72), rgba(22,14,58,.58) 48%, rgba(6,5,14,.78)), url('/fe/background.png');
+            background-size: 100% auto;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
             .hero::before {
                 content: "";
                 position: absolute;
-                width: 700px;
-                height: 700px;
-                border-radius: 50%;
-                background: radial-gradient(circle, rgba(92,61,222,.13) 0%, transparent 70%);
-                top: -160px;
-                right: -180px;
-                animation: blobFloat 8s ease-in-out infinite;
+                inset: 0;
+                background: radial-gradient(circle at 50% 48%, rgba(255,255,255,.16), transparent 0 2px, transparent 3px), radial-gradient(circle at 18% 30%, rgba(255,209,102,.32), transparent 0 2px, transparent 3px), radial-gradient(circle at 77% 22%, rgba(45,226,197,.26), transparent 0 2px, transparent 3px), radial-gradient(circle at 70% 76%, rgba(255,79,139,.24), transparent 0 2px, transparent 3px);
+                background-size: 220px 220px, 280px 280px, 250px 250px, 310px 310px;
+                opacity: .85;
+                z-index: -2;
+                animation: sparkleMove 16s linear infinite;
             }
 
             .hero::after {
                 content: "";
                 position: absolute;
-                width: 500px;
-                height: 500px;
+                width: min(760px, 92vw);
+                height: min(760px, 92vw);
                 border-radius: 50%;
-                background: radial-gradient(circle, rgba(240,180,41,.12) 0%, transparent 70%);
-                bottom: -100px;
-                left: -100px;
-                animation: blobFloat 11s ease-in-out infinite reverse;
+                background: radial-gradient(circle, rgba(124,77,255,.38) 0%, rgba(255,209,102,.12) 36%, transparent 68%);
+                filter: blur(10px);
+                z-index: -1;
+                animation: haloPulse 5.5s ease-in-out infinite;
             }
 
-        @@keyframes blobFloat {
+        @@keyframes sparkleMove {
+            from {
+                background-position: 0 0, 0 0, 0 0, 0 0;
+            }
+
+            to {
+                background-position: 220px 220px, -280px 280px, 250px -250px, -310px -310px;
+            }
+        }
+
+        @@keyframes haloPulse {
             0%, 100% {
-                transform: translate(0,0) scale(1);
+                transform: scale(.96);
+                opacity: .75;
             }
 
             50% {
-                transform: translate(30px,-30px) scale(1.05);
+                transform: scale(1.04);
+                opacity: 1;
             }
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 680px;
+            max-width: 520px;
+            background: rgba(255,255,255,.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 26px;
+            padding: 38px 36px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,.28);
         }
+
+            .hero-content::before {
+                content: "";
+                position: absolute;
+                inset: 14px;
+                border-radius: 28px;
+                border: 1px solid rgba(255,255,255,.12);
+                pointer-events: none;
+            }
 
         .hero-eyebrow {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: var(--soft);
-            border: 1px solid rgba(92,61,222,.2);
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.26);
             border-radius: 50px;
-            padding: 6px 16px;
-            font-size: .8rem;
-            font-weight: 600;
-            letter-spacing: .5px;
+            padding: 8px 18px;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            color: var(--violet);
-            margin-bottom: 28px;
+            color: #fff;
+            margin-bottom: 26px;
             opacity: 0;
             animation: fadeUp .7s .1s forwards;
         }
 
         .hero h1 {
-            font-size: clamp(2.8rem, 6vw, 5rem);
+            color: #fff;
+            text-shadow: 0 4px 18px rgba(0,0,0,.45);
+            font-size: clamp(2.6rem, 6vw, 5.6rem);
             font-weight: 800;
-            line-height: 1.05;
-            letter-spacing: -2px;
-            margin-bottom: 24px;
+            line-height: .98;
+            letter-spacing: -2.8px;
+            margin-bottom: 26px;
+            text-shadow: 0 10px 34px rgba(0,0,0,.35);
             opacity: 0;
             animation: fadeUp .7s .25s forwards;
         }
 
             .hero h1 .accent-gold {
-                color: var(--gold);
+                color: transparent;
+                background: linear-gradient(135deg, #ffe08a, #ff9f1c);
+                -webkit-background-clip: text;
+                background-clip: text;
             }
 
             .hero h1 .accent-violet {
-                color: var(--violet);
+                color: transparent;
+                background: linear-gradient(135deg, #a98cff, #2de2c5);
+                -webkit-background-clip: text;
+                background-clip: text;
             }
 
         .hero-sub {
-            font-size: 1.15rem;
-            color: #555;
-            line-height: 1.7;
-            max-width: 520px;
-            margin-bottom: 40px;
-            font-weight: 300;
+            font-size: 1.16rem;
+            color: rgba(255,255,255,.86);
+            line-height: 1.75;
+            max-width: 650px;
+            margin: 0 auto 34px;
+            font-weight: 400;
             opacity: 0;
             animation: fadeUp .7s .4s forwards;
         }
 
         .hero-ctas {
             display: flex;
+            justify-content: center;
             gap: 14px;
             flex-wrap: wrap;
             opacity: 0;
@@ -213,8 +268,8 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: var(--ink);
-            color: var(--paper);
+            background: linear-gradient(135deg,#7c4dff,#5c3dde);
+            color: #17111f;
             padding: 15px 34px;
             border-radius: 50px;
             font-family: "Syne", sans-serif;
@@ -222,11 +277,11 @@
             font-size: 1rem;
             text-decoration: none;
             transition: transform .2s, background .2s, box-shadow .2s;
-            box-shadow: 0 4px 20px rgba(0,0,0,.18);
+            box-shadow: 0 14px 34px rgba(255,79,139,.32);
         }
 
             .btn-primary-hero:hover {
-                background: var(--violet);
+                background: linear-gradient(135deg, var(--violet), var(--teal));
                 transform: translateY(-2px);
                 box-shadow: 0 8px 30px rgba(92,61,222,.35);
                 color: #fff;
@@ -236,21 +291,71 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: transparent;
-            color: var(--ink);
+            background: rgba(255,255,255,.12);
+            color: #fff;
             padding: 15px 30px;
             border-radius: 50px;
             font-weight: 500;
             font-size: 1rem;
             text-decoration: none;
-            border: 1.5px solid rgba(0,0,0,.18);
+            border: 1.5px solid rgba(255,255,255,.24);
             transition: all .2s;
         }
 
             .btn-secondary-hero:hover {
-                border-color: var(--violet);
-                color: var(--violet);
-                background: var(--soft);
+                border-color: rgba(255,255,255,.55);
+                color: #fff;
+                background: rgba(255,255,255,.18);
+            }
+
+
+
+        .hero-mini-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin: 34px auto 0;
+            max-width: 650px;
+            opacity: 0;
+            animation: fadeUp .7s .7s forwards;
+        }
+
+        .mini-stat {
+            padding: 16px 12px;
+            border-radius: 22px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.18);
+            color: rgba(255,255,255,.74);
+        }
+
+            .mini-stat strong {
+                display: block;
+                font-family: "Syne", sans-serif;
+                font-size: 1.35rem;
+                line-height: 1;
+                color: #fff;
+                margin-bottom: 6px;
+            }
+
+        .login-bubble {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 18px;
+            color: rgba(255,255,255,.82);
+            text-decoration: none;
+            border-radius: 999px;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.16);
+            transition: transform .2s, background .2s;
+        }
+
+            .login-bubble:hover {
+                transform: translateY(-2px);
+                color: #fff;
+                background: rgba(255,255,255,.16);
             }
 
         /* FLOATING CARDS */
@@ -863,11 +968,23 @@
         /* RESPONSIVE */
         @@media (max-width: 960px) {
             nav {
-                padding: 16px 24px;
+                top: 10px;
+                width: calc(100% - 20px);
+                padding: 12px 14px;
+                border-radius: 24px;
             }
 
             .hero {
-                padding: 110px 24px 60px;
+                padding: 120px 18px 70px;
+                background-attachment: scroll;
+            }
+
+            .hero-content {
+                border-radius: 28px;
+            }
+
+            .hero-mini-stats {
+                grid-template-columns: 1fr;
             }
 
             .hero-visual {
@@ -921,7 +1038,7 @@
 <body>
 
     <nav id="navbar">
-        <a href="/" class="brand">🚀 Habit<span>Tracker</span></a>
+        <a href="/" class="brand">⚔️ Vương Quốc</span></a>
         <div class="nav-links">
             <a href="#features">Tính năng</a>
             <a href="#how">Cách dùng</a>
@@ -934,31 +1051,29 @@
     <!-- HERO -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-eyebrow"><span>🎮</span> Gamify Your Daily Life</div>
-            <h1>Biến thói quen<br>thành <span class="accent-gold">cuộc phiêu lưu</span><br><span class="accent-violet">epic.</span></h1>
-            <p class="hero-sub">HabitTracker giúp bạn xây dựng thói quen tốt thông qua hệ thống quest, XP, level và badge — như chơi game, nhưng là cuộc sống thật của bạn.</p>
+            <div class="hero-eyebrow"><span>✨</span> RPG Habit Builder</div>
+
+            <h1>Biến thói quen nhỏ<br>thành <span class="accent-gold">nhiệm vụ mỗi ngày</span><br><span class="accent-violet">và level up bản thân.</span></h1>
+
             <div class="hero-ctas">
-                <a href="/Account/Register" class="btn-primary-hero">🚀 Bắt đầu ngay — Miễn phí</a>
-                <a href="#features" class="btn-secondary-hero">Xem tính năng ↓</a>
+                <a href="/Account/Register" class="btn-primary-hero">Bắt đầu miễn phí</a>
+                <a href="/Account/Login" class="btn-secondary-hero">Đăng nhập</a>
             </div>
-        </div>
-        <div class="hero-visual">
-            <div class="card-stack">
-                <div class="hcard hcard-main">
-                    <div class="card-title">📋 Quests hôm nay</div>
-                    <div class="quest-row"><div class="quest-dot" style="background:#5c3dde"></div><span class="quest-name">Thiền 10 phút</span><span class="quest-xp">+10 XP</span><span>✅</span></div>
-                    <div class="quest-row"><div class="quest-dot" style="background:#00b89c"></div><span class="quest-name">Đọc sách 20 phút</span><span class="quest-xp">+10 XP</span><span>✅</span></div>
-                    <div class="quest-row"><div class="quest-dot" style="background:#f0b429"></div><span class="quest-name">Tập thể dục 30 phút</span><span class="quest-xp">+25 XP</span><span>⬜</span></div>
-                    <div class="quest-row"><div class="quest-dot" style="background:#e8436a"></div><span class="quest-name">Uống 2L nước</span><span class="quest-xp">+10 XP</span><span>⬜</span></div>
+
+            <a href="#features" class="login-bubble">Khám phá tính năng ↓</a>
+
+            <div class="hero-mini-stats">
+                <div class="mini-stat">
+                    <strong>@Model.TotalUsers.ToString("N0")</strong>
+                    Người dùng
                 </div>
-                <div class="hcard hcard-xp">
-                    <div class="xp-label">⚡ Total XP</div>
-                    <div class="xp-big">@(Model.TopUsers.FirstOrDefault()?.XP.ToString("N0") ?? "0")</div>
-                    <div class="xp-sub">Top player · Level @(Model.TopUsers.FirstOrDefault()?.Level ?? 1)</div>
+                <div class="mini-stat">
+                    <strong>@Model.TotalQuestsCompleted.ToString("N0")</strong>
+                    Quest hoàn thành
                 </div>
-                <div class="hcard hcard-streak">
-                    <div class="streak-label">🔥 Best Streak</div>
-                    <div class="streak-big">@(Model.TopUsers.OrderByDescending(u => u.CurrentStreak).FirstOrDefault()?.CurrentStreak ?? 0) ngày</div>
+                <div class="mini-stat">
+                    <strong>@Model.TotalBadges.ToString("N0")</strong>
+                    Badge đã kiếm
                 </div>
             </div>
         </div>
@@ -1133,7 +1248,7 @@
         if (strip) statsObserver.observe(strip);
 
         window.addEventListener("scroll", () => {
-            document.getElementById("navbar").style.padding = window.scrollY > 60 ? "12px 48px" : "18px 48px";
+            document.getElementById("navbar").style.padding = window.scrollY > 60 ? "10px 20px" : "14px 20px";
         });
     </script>
 </body>

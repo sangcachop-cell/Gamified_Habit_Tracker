@@ -3,486 +3,862 @@
 @using HabitTracker.Models
 @{
     ViewData["Title"] = "Quest";
-    var completedIds = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
-    var facilities   = (ViewBag.Facilities as List<Facility> ?? new List<Facility>())
-                           .ToDictionary(f => f.Id);
-    int doneCount = completedIds.Count;
+    Layout = null;
 
-    // Accent colours keyed by StatAffected
+    var completedIds = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
+    var facilities = (ViewBag.Facilities as List<Facility> ?? new List<Facility>())
+        .ToDictionary(f => f.Id);
+
+    int doneCount = completedIds.Count;
+    int totalCount = Model?.Count ?? 0;
+    int pct = totalCount > 0 ? doneCount * 100 / totalCount : 0;
+
     var accentColor = new Dictionary<string, string>
     {
-        ["ATK"]    = "#e8436a",
-        ["HP"]     = "#e84343",
-        ["XPGain"] = "#f0b429",
-        ["Stamina"]= "#00b89c",
-        ["Armor"]  = "#4a9edd",
+        ["ATK"] = "#ff4f8b",
+        ["HP"] = "#ef4444",
+        ["XPGain"] = "#ffd166",
+        ["Stamina"] = "#2de2c5",
+        ["Armor"] = "#4a9edd",
     };
 }
-<style>
-    :root {
-        --ink: #110d22;
-        --paper: #0d0a1a;
-        --violet: #7c3aed;
-        --gold: #c9a84c;
-        --gold-light: #f0c878;
-        --rose: #b91c1c;
-        --teal: #0e7490;
-        --soft: #1e1535;
-        --text: #e8dfc8;
-        --text-muted: #8b7fa8;
-        --border: #2d1f4e
-    }
 
-    body {
-        background: var(--paper);
-        font-family: "Crimson Pro","DM Sans",serif;
-        color: var(--text)
-    }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhiệm vụ — HabitTracker</title>
 
-    h1, h2, h3, h4 {
-        font-family: "Cinzel","Syne",serif
-    }
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 28px;
-        flex-wrap: wrap;
-        gap: 12px
-    }
-
-        .page-header h2 {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin: 0
+    <style>
+        :root {
+            --bg: #070711;
+            --panel: #121020;
+            --violet: #7c4dff;
+            --violet2: #9b7cff;
+            --gold: #ffd166;
+            --rose: #ff4f8b;
+            --green: #48d597;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,.58);
+            --border: rgba(255,255,255,.1);
         }
 
-        .page-header p {
-            color: var(--text-muted);
-            font-size: .9rem;
-            margin: 4px 0 0
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-    /* filter bar */
-    .filter-bar {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 28px;
-        padding: 16px 20px;
-        background: #16112a;
-        border-radius: 14px;
-        border: 1.5px solid var(--border)
-    }
 
-        .filter-bar select {
-            padding: 8px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 50px;
-            font-family: "Crimson Pro",serif;
-            font-size: .9rem;
-            background: #1e1535;
+        body {
+            min-height: 100vh;
+            background: var(--bg);
             color: var(--text);
-            outline: none;
-            cursor: pointer;
-            transition: border-color .2s
+            font-family: "Be Vietnam Pro", sans-serif;
+            overflow-x: hidden;
         }
 
-            .filter-bar select:hover {
-                border-color: var(--gold)
+        .topbar {
+            height: 78px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            padding: 0 28px;
+            background: rgba(8,8,18,.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+            .brand span {
+                color: var(--gold);
             }
-    /* quest cards */
-    .quests-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-        gap: 16px
-    }
 
-    .qcard {
-        background: #16112a;
-        border-radius: 16px;
-        border: 1.5px solid var(--border);
-        padding: 20px;
-        transition: all .25s;
-        position: relative;
-        overflow: hidden;
-        color: var(--text)
-    }
-
-        .qcard:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 28px rgba(0,0,0,.4), 0 0 20px rgba(201,168,76,0.1);
-            border-color: rgba(201,168,76,.4)
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow-x: auto;
         }
 
-        .qcard.done {
-            background: rgba(22,101,52,0.1);
-            border-color: rgba(22,101,52,.4)
+            .top-nav a {
+                color: rgba(255,255,255,.66);
+                text-decoration: none;
+                padding: 10px 13px;
+                border-radius: 14px;
+                font-size: .84rem;
+                font-weight: 700;
+                white-space: nowrap;
+                transition: .2s;
+            }
+
+                .top-nav a:hover,
+                .top-nav a.active {
+                    color: white;
+                    background: rgba(124,77,255,.18);
+                }
+
+        .top-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
         }
 
-            .qcard.done::after {
-                content: "✓";
-                position: absolute;
-                top: 12px;
-                right: 14px;
-                width: 26px;
-                height: 26px;
-                border-radius: 50%;
-                background: #166534;
-                color: #86efac;
+        .level-chip {
+            color: var(--gold);
+            font-size: .84rem;
+            font-weight: 800;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: white;
+            border: 2px solid rgba(255,255,255,.32);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            padding-top: 78px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 78px;
+            bottom: 0;
+            width: 260px;
+            padding: 22px 16px;
+            background: radial-gradient(circle at 20% 0%, rgba(124,77,255,.2), transparent 34%), #080814;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .side-title {
+            font-size: .72rem;
+            color: rgba(255,255,255,.36);
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            margin: 18px 12px 8px;
+            font-weight: 800;
+        }
+
+        .side-menu {
+            display: grid;
+            gap: 8px;
+        }
+
+            .side-menu a {
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                gap: 12px;
+                padding: 12px 14px;
+                border-radius: 15px;
+                color: rgba(255,255,255,.68);
+                text-decoration: none;
+                font-size: .9rem;
                 font-weight: 700;
-                font-size: .85rem
+                transition: .2s;
             }
 
-    .qcard-top {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 14px
-    }
-
-    .q-checkbox {
-        margin-top: 3px;
-        width: 18px;
-        height: 18px;
-        accent-color: var(--violet);
-        cursor: pointer;
-        flex-shrink: 0
-    }
-
-    .q-icon-box {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: rgba(201,168,76,.1);
-        border: 1px solid rgba(201,168,76,.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0
-    }
-
-    .q-title {
-        font-family: "Cinzel","Syne",serif;
-        font-weight: 700;
-        font-size: .9rem;
-        line-height: 1.3;
-        color: var(--text)
-    }
-
-        .q-title.done-text {
-            text-decoration: line-through;
-            color: var(--text-muted)
-        }
-
-    .q-tags {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 12px
-    }
-
-    .qtag {
-        padding: 3px 10px;
-        border-radius: 50px;
-        font-size: .72rem;
-        font-weight: 600;
-        font-family: "Cinzel",serif;
-        letter-spacing: 0.5px
-    }
-
-    .qtag-easy {
-        background: rgba(22,101,52,0.2);
-        color: #86efac;
-        border: 1px solid rgba(22,101,52,0.4)
-    }
-
-    .qtag-medium {
-        background: rgba(201,168,76,0.15);
-        color: var(--gold-light);
-        border: 1px solid rgba(201,168,76,0.3)
-    }
-
-    .qtag-hard {
-        background: rgba(185,28,28,0.15);
-        color: #fca5a5;
-        border: 1px solid rgba(185,28,28,0.3)
-    }
-
-    .qtag-cat {
-        background: rgba(124,58,237,0.15);
-        color: #c4b5fd;
-        border: 1px solid rgba(124,58,237,0.3)
-    }
-
-    .qtag-freq {
-        background: rgba(91,163,201,0.15);
-        color: #7dd3fc;
-        border: 1px solid rgba(91,163,201,0.3)
-    }
-
-    .q-xp {
-        font-family: "Cinzel","Syne",serif;
-        font-weight: 700;
-        color: var(--gold);
-        font-size: .85rem
-    }
-
-    .stat-gains {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-top: 8px
-    }
-
-    .sg-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        padding: 2px 8px;
-        border-radius: 50px;
-        font-size: .7rem;
-        font-weight: 700;
-        opacity: .85
-    }
-    /* submit bar */
-    .submit-bar {
-        position: sticky;
-        bottom: 24px;
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 28px
-    }
-
-    .btn-confirm {
-        background: linear-gradient(135deg, var(--violet), #9f45f5);
-        color: white;
-        border: none;
-        padding: 14px 36px;
-        border-radius: 50px;
-        font-family: "Cinzel",serif;
-        font-weight: 700;
-        font-size: .9rem;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all .2s;
-        box-shadow: 0 4px 20px rgba(124,58,237,0.3);
-        display: flex;
-        align-items: center;
-        gap: 8px
-    }
-
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(124,58,237,0.4)
-        }
-
-    .progress-bar-wrap {
-        height: 6px;
-        background: rgba(255,255,255,.06);
-        border-radius: 50px;
-        overflow: hidden;
-        margin-bottom: 4px
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--gold), var(--violet));
-        border-radius: 50px;
-        transition: width .5s ease
-    }
-
-    @@media(max-width:600px) {
-        .quests-grid {
-            grid-template-columns: 1fr
-        }
-    }
-
-    /* facility section headers */
-    .facility-section {
-        margin-bottom: 32px
-    }
-
-    .facility-header {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 20px;
-        border-radius: 14px;
-        margin-bottom: 16px;
-        border-left: 4px solid transparent
-    }
-
-    .facility-header-icon {
-        font-size: 1.6rem;
-        line-height: 1;
-        flex-shrink: 0
-    }
-
-    .facility-header-name {
-        font-family: "Syne", sans-serif;
-        font-weight: 800;
-        font-size: 1rem;
-        margin: 0
-    }
-
-    .facility-header-desc {
-        font-size: .78rem;
-        opacity: .6;
-        margin: 2px 0 0
-    }
-
-    .facility-header-stat {
-        margin-left: auto;
-        font-size: .75rem;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 50px;
-        white-space: nowrap
-    }
-</style>
-
-<div style="padding:8px 0 48px">
-
-    <div class="page-header">
-        <div>
-            <h2>⚔️ Nhiệm vụ hôm nay</h2>
-            <p>Tick quest đã hoàn thành, rồi nhấn Xác nhận để nhận XP</p>
-        </div>
-        <a href="/Task/search" style="display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--violet);padding:10px 18px;border-radius:50px;font-weight:600;font-size:.88rem;text-decoration:none;border:1.5px solid rgba(92,61,222,.2)">🔍 Tìm quest</a>
-    </div>
-
-    <!-- Progress -->
-    @if (Model.Count > 0)
-    {
-        int pct = doneCount * 100 / Model.Count;
-        <div style="background:white;border-radius:14px;border:1.5px solid rgba(0,0,0,.07);padding:18px 22px;margin-bottom:24px">
-            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin-bottom:8px">
-                <span>Tiến trình hôm nay</span>
-                <span style="color:var(--violet)">@doneCount / @Model.Count quest</span>
-            </div>
-            <div class="progress-bar-wrap"><div class="progress-fill" style="width:@pct%"></div></div>
-        </div>
-    }
-
-    <!-- Alerts -->
-    @if (TempData["Error"] != null)
-    {
-        <div style="background:#fde8ed;color:#c0392b;padding:12px 18px;border-radius:10px;margin-bottom:18px;font-size:.9rem">❌ @TempData["Error"]</div>
-    }
-
-    <!-- Filters -->
-    <form method="get" class="filter-bar">
-        <select name="category" onchange="this.form.submit()">
-            <option value="">📂 Tất cả danh mục</option>
-            @foreach (var cat in (ViewBag.Categories as string[] ?? new string[0]))
-            {
-                <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
-            }
-        </select>
-        <select name="difficulty" onchange="this.form.submit()">
-            <option value="">⚡ Độ khó</option>
-            <option value="Easy" selected="@(ViewBag.SelectedDifficulty == "Easy")">🟢 Dễ</option>
-            <option value="Medium" selected="@(ViewBag.SelectedDifficulty == "Medium")">🟡 Trung bình</option>
-            <option value="Hard" selected="@(ViewBag.SelectedDifficulty == "Hard")">🔴 Khó</option>
-        </select>
-        <select name="frequency" onchange="this.form.submit()">
-            <option value="">🔁 Tần suất</option>
-            <option value="Daily" selected="@(ViewBag.SelectedFrequency == "Daily")">Hàng ngày</option>
-            <option value="Weekly" selected="@(ViewBag.SelectedFrequency == "Weekly")">Hàng tuần</option>
-            <option value="Monthly" selected="@(ViewBag.SelectedFrequency == "Monthly")">Hàng tháng</option>
-        </select>
-    </form>
-
-    <!-- Quest Grid — grouped by facility -->
-    <form asp-action="Confirm" method="post">
-    @{
-        var grouped = Model
-            .GroupBy(q => q.FacilityId)
-            .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
-    }
-
-    @foreach (var group in grouped)
-    {
-        Facility? fac = group.Key.HasValue && facilities.ContainsKey(group.Key.Value)
-            ? facilities[group.Key.Value]
-            : null;
-
-        string color   = fac != null && accentColor.ContainsKey(fac.StatAffected)
-            ? accentColor[fac.StatAffected] : "#888";
-
-        <div class="facility-section">
-            <!-- Section header -->
-            <div class="facility-header"
-                 style="background:@(color)12; border-left-color:@color;">
-                <div class="facility-header-icon">
-                    @(fac?.Icon ?? "📋")
-                </div>
-                <div>
-                    <p class="facility-header-name" style="color:@color;">
-                        @(fac?.Name ?? "Nhiệm Vụ Khác")
-                    </p>
-                    <p class="facility-header-desc">
-                        @(fac?.Description ?? "Nhiệm vụ không gắn với cơ sở nào")
-                    </p>
-                </div>
-                @if (fac != null)
-                {
-                    <span class="facility-header-stat"
-                          style="background:@(color)18; color:@color;">
-                        @fac.BuffDescription
-                    </span>
+                .side-menu a:hover,
+                .side-menu a.active {
+                    color: white;
+                    background: rgba(124,77,255,.18);
+                    box-shadow: inset 0 0 0 1px rgba(124,77,255,.28);
                 }
-            </div>
 
-            <!-- Quest cards -->
-            <div class="quests-grid">
-                @foreach (var quest in group)
+        .side-card {
+            margin-top: 24px;
+            padding: 18px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(124,77,255,.2), rgba(255,209,102,.08));
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+            .side-card h4 {
+                font-size: .9rem;
+                font-weight: 800;
+                color: var(--gold);
+                margin-bottom: 8px;
+            }
+
+            .side-card p {
+                color: var(--muted);
+                font-size: .78rem;
+                line-height: 1.6;
+                margin-bottom: 14px;
+            }
+
+            .side-card a {
+                display: block;
+                text-align: center;
+                padding: 10px 14px;
+                border-radius: 14px;
+                background: linear-gradient(135deg, var(--violet), #6d28d9);
+                color: white;
+                text-decoration: none;
+                font-size: .82rem;
+                font-weight: 800;
+            }
+
+        .main {
+            grid-column: 2;
+            padding: 28px;
+            background: radial-gradient(circle at 90% 0%, rgba(124,77,255,.15), transparent 34%), radial-gradient(circle at 20% 100%, rgba(45,226,197,.07), transparent 30%), var(--bg);
+        }
+
+        .task-hero {
+            border-radius: 28px;
+            padding: 34px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.12);
+            background: linear-gradient(90deg, rgba(8,8,20,.94), rgba(8,8,20,.45), rgba(8,8,20,.88)), url('/fe/task-banner.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+            .task-hero h1 {
+                font-size: clamp(2rem, 4vw, 3.1rem);
+                font-weight: 800;
+                letter-spacing: -1.4px;
+                margin-bottom: 8px;
+            }
+
+            .task-hero p {
+                color: rgba(255,255,255,.68);
+                margin-bottom: 26px;
+            }
+
+        .hero-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 22px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .progress-panel {
+            flex: 1;
+            min-width: 280px;
+            padding: 20px;
+            border-radius: 22px;
+            background: rgba(8,8,18,.48);
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        .progress-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: .86rem;
+            color: rgba(255,255,255,.74);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .progress-line {
+            height: 12px;
+            background: rgba(255,255,255,.12);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: @pct %;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--gold), var(--violet));
+        }
+
+        .hero-reward {
+            display: flex;
+            gap: 12px;
+        }
+
+        .reward-box {
+            min-width: 110px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            text-align: center;
+        }
+
+            .reward-box strong {
+                display: block;
+                color: var(--gold);
+                font-size: 1rem;
+                margin-top: 6px;
+            }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(124,77,255,.07));
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 22px;
+        }
+
+            .filter-bar select {
+                min-width: 190px;
+                padding: 12px 16px;
+                border-radius: 999px;
+                border: 1px solid rgba(255,255,255,.12);
+                background: rgba(8,8,18,.55);
+                color: white;
+                outline: none;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+        .alert-custom {
+            background: rgba(239,68,68,.13);
+            border: 1px solid rgba(239,68,68,.35);
+            color: #fca5a5;
+            padding: 13px 18px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+        }
+
+        .facility-section {
+            margin-bottom: 28px;
+        }
+
+        .facility-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 22px;
+            border-radius: 22px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255,255,255,.1);
+            border-left: 4px solid var(--rose);
+            background: rgba(255,79,139,.08);
+        }
+
+        .facility-header-icon {
+            font-size: 2rem;
+        }
+
+        .facility-header-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .facility-header-desc {
+            color: rgba(255,255,255,.58);
+            font-size: .86rem;
+            margin: 4px 0 0;
+        }
+
+        .facility-header-stat {
+            margin-left: auto;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 800;
+            background: rgba(255,255,255,.08);
+            white-space: nowrap;
+        }
+
+        .quests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 16px;
+        }
+
+        .qcard {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(124,77,255,.08));
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 22px;
+            padding: 20px;
+            color: white;
+            transition: .25s;
+        }
+
+            .qcard:hover {
+                transform: translateY(-4px);
+                border-color: rgba(124,77,255,.45);
+                box-shadow: 0 18px 42px rgba(0,0,0,.26);
+            }
+
+            .qcard.done {
+                border-color: rgba(72,213,151,.45);
+                background: linear-gradient(135deg, rgba(72,213,151,.12), rgba(124,77,255,.06));
+            }
+
+                .qcard.done::after {
+                    content: "✓";
+                    position: absolute;
+                    top: 14px;
+                    right: 14px;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    background: var(--green);
+                    color: #06120c;
+                    display: grid;
+                    place-items: center;
+                    font-weight: 900;
+                }
+
+        .qcard-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .q-checkbox {
+            margin-top: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--violet);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .q-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(124,77,255,.16);
+            border: 1px solid rgba(124,77,255,.28);
+            font-size: 1.45rem;
+            flex-shrink: 0;
+        }
+
+        .q-title {
+            font-weight: 800;
+            font-size: 1rem;
+            line-height: 1.35;
+            color: white;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+            .q-title.done-text {
+                text-decoration: line-through;
+                color: rgba(255,255,255,.45);
+            }
+
+        .q-tags {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .qtag {
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .2px;
+        }
+
+        .qtag-easy {
+            background: rgba(72,213,151,.16);
+            color: #86efac;
+            border: 1px solid rgba(72,213,151,.3);
+        }
+
+        .qtag-medium {
+            background: rgba(255,209,102,.15);
+            color: var(--gold);
+            border: 1px solid rgba(255,209,102,.3);
+        }
+
+        .qtag-hard {
+            background: rgba(255,79,139,.15);
+            color: #fda4af;
+            border: 1px solid rgba(255,79,139,.3);
+        }
+
+        .qtag-cat {
+            background: rgba(124,77,255,.16);
+            color: #c4b5fd;
+            border: 1px solid rgba(124,77,255,.3);
+        }
+
+        .qtag-freq {
+            background: rgba(74,158,221,.15);
+            color: #93c5fd;
+            border: 1px solid rgba(74,158,221,.3);
+        }
+
+        .q-xp {
+            font-weight: 900;
+            color: var(--gold);
+            font-size: .92rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-gains {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .sg-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: .7rem;
+            font-weight: 900;
+        }
+
+        .submit-bar {
+            position: sticky;
+            bottom: 24px;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+            z-index: 20;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--violet), #a855f7);
+            color: white;
+            border: none;
+            padding: 15px 34px;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: .95rem;
+            cursor: pointer;
+            box-shadow: 0 18px 42px rgba(124,77,255,.36);
+            transition: .25s;
+        }
+
+            .btn-confirm:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 22px 52px rgba(124,77,255,.45);
+            }
+
+        @@media (max-width: 1180px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                grid-column: 1;
+            }
+
+            .topbar {
+                height: auto;
+                min-height: 78px;
+                flex-wrap: wrap;
+                padding: 14px 18px;
+            }
+
+            .layout {
+                padding-top: 118px;
+            }
+
+            .top-nav {
+                order: 3;
+                width: 100%;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .main {
+                padding: 18px;
+            }
+
+            .task-hero {
+                padding: 24px;
+                border-radius: 22px;
+            }
+
+            .facility-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .facility-header-stat {
+                margin-left: 0;
+            }
+
+            .quests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <a href="/Dashboard" class="brand">⚔️ Vương <span>Quốc</span>
+
+        <nav class="top-nav">
+            <a href="/Dashboard">📊 Trang chủ</a>
+            <a href="/Task" class="active">📋 Nhiệm vụ</a>
+            <a href="/Account/Leaderboard">🏆 Bảng xếp hạng</a>
+            <a href="/Friend">👥 Bạn bè</a>
+            <a href="/Dashboard/Badges">🏅 Thành tựu</a>
+            <a href="/Inventory">🎒 Kho đồ</a>
+            <a href="/Hideout/Index">🏰 Căn cứ</a>
+            <a href="/Task/search">🔍 Tìm nhiệm vụ</a>
+        </nav>
+
+        <div class="top-user">
+            <span class="level-chip">LV</span>
+            <img src="/images/default.png" class="avatar" alt="Avatar" />
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="side-title">Chính</div>
+            <nav class="side-menu">
+                <a href="/Dashboard">🏠 Dashboard</a>
+                <a href="/Task" class="active">📋 Danh sách Quest</a>
+                <a href="/Task/search">🔍 Tìm kiếm Quest</a>
+                <a href="/Dashboard/Statistics">📊 Thống kê</a>
+                <a href="/Forest/Index">🌲 Rừng Sâu</a>
+            </nav>
+
+            <div class="side-title">Cộng đồng</div>
+            <nav class="side-menu">
+                <a href="/Account/Leaderboard">🏆 Bảng xếp hạng</a>
+                <a href="/Friend">👥 Bạn bè</a>
+                <a href="/Dashboard/Badges">🏅 Thành tựu</a>
+            </nav>
+
+            <div class="side-title">Tài khoản</div>
+            <nav class="side-menu">
+                <a href="/Account/Profile">🧙 Hồ sơ cá nhân</a>
+                <a href="/Dashboard/Character">🧝 Nhân vật</a>
+                <a href="/Inventory">🎒 Kho đồ</a>
+                <a href="/Hideout/Index">🏰 Căn cứ</a>
+                <a href="/Account/Logout">🚪 Đăng xuất</a>
+            </nav>
+
+            <div class="side-card">
+                <h4>Nhiệm vụ hôm nay</h4>
+                <p>Hoàn thành quest để nhận XP, giữ streak và mở khóa huy hiệu.</p>
+                <a href="/Task/search">Tìm quest mới</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <section class="task-hero">
+                <h1>⚔️ Nhiệm vụ hôm nay</h1>
+                <p>Tick quest đã hoàn thành, rồi nhấn xác nhận để nhận XP và phần thưởng.</p>
+
+                <div class="hero-row">
+                    <div class="progress-panel">
+                        <div class="progress-head">
+                            <span>Tiến trình hôm nay</span>
+                            <span>@doneCount / @totalCount quest</span>
+                        </div>
+                        <div class="progress-line">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="hero-reward">
+                        <div class="reward-box">
+                            💎
+                            <strong>+XP</strong>
+                        </div>
+
+                        <div class="reward-box">
+                            🪙
+                            <strong>Coins</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert-custom">❌ @TempData["Error"]</div>
+            }
+
+            <form method="get" class="filter-bar">
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">📂 Tất cả danh mục</option>
+                    @foreach (var cat in (ViewBag.Categories as string[] ?? new string[0]))
+                    {
+                        <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
+                    }
+                </select>
+
+                <select name="difficulty" onchange="this.form.submit()">
+                    <option value="">⚡ Độ khó</option>
+                    <option value="Easy" selected="@(ViewBag.SelectedDifficulty == "Easy")">🟢 Dễ</option>
+                    <option value="Medium" selected="@(ViewBag.SelectedDifficulty == "Medium")">🟡 Trung bình</option>
+                    <option value="Hard" selected="@(ViewBag.SelectedDifficulty == "Hard")">🔴 Khó</option>
+                </select>
+
+                <select name="frequency" onchange="this.form.submit()">
+                    <option value="">🔁 Tần suất</option>
+                    <option value="Daily" selected="@(ViewBag.SelectedFrequency == "Daily")">Hàng ngày</option>
+                    <option value="Weekly" selected="@(ViewBag.SelectedFrequency == "Weekly")">Hàng tuần</option>
+                    <option value="Monthly" selected="@(ViewBag.SelectedFrequency == "Monthly")">Hàng tháng</option>
+                </select>
+            </form>
+
+            <form asp-action="Confirm" method="post">
+                @{
+                    var grouped = Model
+                    .GroupBy(q => q.FacilityId)
+                    .OrderBy(g => g.Key.HasValue ? g.Key.Value : int.MaxValue);
+                }
+
+                @foreach (var group in grouped)
                 {
-                    var isDone  = completedIds.Contains(quest.Id);
-                    var diffTag = quest.Difficulty == "Easy" ? "qtag-easy"
+                    Facility? fac = group.Key.HasValue && facilities.ContainsKey(group.Key.Value)
+                    ? facilities[group.Key.Value]
+                    : null;
+
+                    string color = fac != null && accentColor.ContainsKey(fac.StatAffected)
+                    ? accentColor[fac.StatAffected]
+                    : "#9b7cff";
+
+                    <div class="facility-section">
+                        <div class="facility-header" style="border-left-color:@color;background:@(color)14;">
+                            <div class="facility-header-icon">
+                                @(fac?.Icon ?? "📋")
+                            </div>
+
+                            <div>
+                                <p class="facility-header-name" style="color:@color;">
+                                    @(fac?.Name ?? "Nhiệm Vụ Khác")
+                                </p>
+
+                                <p class="facility-header-desc">
+                                    @(fac?.Description ?? "Nhiệm vụ không gắn với cơ sở nào")
+                                </p>
+                            </div>
+
+                            @if (fac != null)
+                            {
+                                <span class="facility-header-stat" style="color:@color;">
+                                    @fac.BuffDescription
+                                </span>
+                            }
+                        </div>
+
+                        <div class="quests-grid">
+                            @foreach (var quest in group)
+                            {
+                                var isDone = completedIds.Contains(quest.Id);
+                                var diffTag = quest.Difficulty == "Easy" ? "qtag-easy"
                                 : quest.Difficulty == "Medium" ? "qtag-medium"
                                 : "qtag-hard";
 
-                    <div class="qcard @(isDone ? "done" : "")">
-                        <div class="qcard-top">
-                            <input class="q-checkbox" type="checkbox" name="questIds"
-                                   value="@quest.Id" id="q_@quest.Id"
-                                   @(isDone ? "checked disabled" : "") />
-                            <div class="q-icon-box">@quest.Icon</div>
-                            <label class="q-title @(isDone ? "done-text" : "")"
-                                   for="q_@quest.Id">@quest.Name</label>
-                        </div>
-                        <div class="q-tags">
-                            <span class="qtag @diffTag">@quest.Difficulty</span>
-                            <span class="qtag qtag-cat">@quest.Category</span>
-                            <span class="qtag qtag-freq">@quest.Frequency</span>
-                        </div>
-                        <div class="q-xp">+@quest.XPReward XP</div>
-                        @{
-                            var (gs, gw, gi, ga, ge) = AppConstants.RpgStats.ComputeStatGains(
-                                quest.Category, quest.Difficulty, quest.Frequency);
-                        }
-                        <div class="stat-gains">
-                            @if (gs > 0) { <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️ +@gs STR</span> }
-                            @if (gw > 0) { <span class="sg-pill" style="background:#edeaf5;color:#5c3dde;">🧘 +@gw WILL</span> }
-                            @if (gi > 0) { <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚 +@gi INT</span> }
-                            @if (ga > 0) { <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹 +@ga AGL</span> }
-                            @if (ge > 0) { <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️ +@ge END</span> }
+                                <div class="qcard @(isDone ? "done" : "")">
+                                    <div class="qcard-top">
+                                        <input class="q-checkbox"
+                                               type="checkbox"
+                                               name="questIds"
+                                               value="@quest.Id"
+                                               id="q_@quest.Id"
+                                               @(isDone ? "checked disabled" : "") />
+
+                                        <div class="q-icon-box">@quest.Icon</div>
+
+                                        <label class="q-title @(isDone ? "done-text" : "")" for="q_@quest.Id">
+                                            @quest.Name
+                                        </label>
+                                    </div>
+
+                                    <div class="q-tags">
+                                        <span class="qtag @diffTag">@quest.Difficulty</span>
+                                        <span class="qtag qtag-cat">@quest.Category</span>
+                                        <span class="qtag qtag-freq">@quest.Frequency</span>
+                                    </div>
+
+                                    <div class="q-xp">+@quest.XPReward XP</div>
+
+                                    @{
+                                        var (gs, gw, gi, ga, ge) = AppConstants.RpgStats.ComputeStatGains(
+                                        quest.Category, quest.Difficulty, quest.Frequency);
+                                    }
+
+                                    <div class="stat-gains">
+                                        @if (gs > 0)
+                                        {
+                                            <span class="sg-pill" style="background:#fde8ed;color:#e8436a;">⚔️ +@gs STR</span>
+                                        }
+
+                                        @if (gw > 0)
+                                        {
+                                            <span class="sg-pill" style="background:#edeaf5;color:#9b7cff;">🧘 +@gw WILL</span>
+                                        }
+
+                                        @if (gi > 0)
+                                        {
+                                            <span class="sg-pill" style="background:#e0f7f3;color:#00b89c;">📚 +@gi INT</span>
+                                        }
+
+                                        @if (ga > 0)
+                                        {
+                                            <span class="sg-pill" style="background:#fff8e1;color:#b07800;">🏹 +@ga AGL</span>
+                                        }
+
+                                        @if (ge > 0)
+                                        {
+                                            <span class="sg-pill" style="background:#e8f2fb;color:#4a9edd;">🛡️ +@ge END</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
-            </div>
-        </div>
-    }
 
-        <div class="submit-bar">
-            <button type="submit" class="btn-confirm">✅ Xác nhận hoàn thành</button>
-        </div>
-    </form>
-</div>
+                <div class="submit-bar">
+                    <button type="submit" class="btn-confirm">
+                        ✅ Xác nhận hoàn thành
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

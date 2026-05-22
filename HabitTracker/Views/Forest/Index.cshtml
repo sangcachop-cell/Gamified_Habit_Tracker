@@ -1,96 +1,474 @@
 @using HabitTracker.Constants
-@{ ViewData["Title"] = "Rừng Sâu"; }
+@{
+    ViewData["Title"] = "Rừng Sâu";
+    Layout = null;
+}
 
-<style>
-    .forest-hero {
-        background: linear-gradient(135deg, #0d1f0d 0%, #1a3a1a 60%, #0d2a0d 100%);
-        border-radius: 24px; padding: 48px 40px; color: white;
-        position: relative; overflow: hidden; margin-bottom: 32px;
-    }
-    .forest-hero::before {
-        content: "";
-        position: absolute; inset: 0;
-        background: radial-gradient(ellipse at 30% 50%, rgba(0,180,60,.15) 0%, transparent 60%),
-                    radial-gradient(ellipse at 80% 20%, rgba(0,80,160,.1) 0%, transparent 50%);
-        pointer-events: none;
-    }
-    .forest-title {
-        font-size: 3rem; font-weight: 900; letter-spacing: -2px;
-        background: linear-gradient(135deg, #4caf50, #81c784);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin: 0 0 8px;
-    }
-    .forest-subtitle { font-size: 1rem; opacity: .6; margin-bottom: 28px; }
-    .enter-btn {
-        background: linear-gradient(135deg, #2e7d32, #43a047);
-        border: none; border-radius: 14px; color: white; font-size: 1.1rem;
-        font-weight: 800; padding: 16px 40px; cursor: pointer;
-        transition: transform .15s, box-shadow .15s;
-        box-shadow: 0 4px 20px rgba(76,175,80,.35);
-    }
-    .enter-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(76,175,80,.5); }
-    .resume-btn {
-        background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.2);
-        border-radius: 14px; color: white; font-size: 1rem;
-        font-weight: 700; padding: 14px 36px; cursor: pointer;
-        margin-left: 14px; transition: background .15s;
-    }
-    .resume-btn:hover { background: rgba(255,255,255,.14); }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .info-card {
-        background: white; border-radius: 16px; padding: 20px 18px;
-        border: 1.5px solid rgba(0,0,0,.07);
-        box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-    .info-card-icon { font-size: 2rem; margin-bottom: 10px; }
-    .info-card-title { font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
-    .info-card-desc  { font-size: .8rem; color: #777; line-height: 1.5; }
-</style>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rừng Sâu — Vương Quốc</title>
 
-<div class="forest-hero">
-    <div style="position:relative; z-index:1;">
-        <h1 class="forest-title">🌲 Rừng Sâu</h1>
-        <p class="forest-subtitle">Vùng hoang dã hiểm nguy. Vào, khám phá và rút lui — hoặc mãi mãi mất tích.</p>
-        <div>
-            <form asp-action="Enter" method="post" style="display:inline;">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="enter-btn">🌲 Vào Rừng</button>
-            </form>
-            @if ((bool)(ViewBag.HasActiveSession ?? false))
-            {
-                <a asp-action="Map" class="resume-btn" style="display:inline-block; text-decoration:none; line-height:1; padding:14px 36px;">
-                    ↩ Tiếp Tục Hành Trình
-                </a>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #070711;
+            --panel: #121020;
+            --violet: #7c4dff;
+            --gold: #ffd166;
+            --green: #58e56b;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,.62);
+            --border: rgba(255,255,255,.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Be Vietnam Pro", sans-serif;
+            overflow-x: hidden;
+        }
+
+        .topbar {
+            height: 78px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            padding: 0 28px;
+            background: rgba(8,8,18,.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+            .brand span {
+                color: var(--gold);
             }
-        </div>
-        <div style="margin-top:20px; font-size:.8rem; opacity:.4;">
-            Mỗi lần vào đều ngẫu nhiên. Điểm xuất phát quyết định điểm rút lui bắt buộc.
-        </div>
-    </div>
-</div>
 
-<div class="info-grid">
-    @foreach (var loc in ForestMap.Locations)
-    {
-        <div class="info-card">
-            <div class="info-card-icon">@loc.Icon</div>
-            <div class="info-card-title">@loc.Name</div>
-            <div class="info-card-desc">@loc.Description</div>
-        </div>
-    }
-    <div class="info-card">
-        <div class="info-card-icon">🔵🔴</div>
-        <div class="info-card-title">Điểm Xuất Phát</div>
-        <div class="info-card-desc">Hai vị trí xuất phát đối lập. Được chọn ngẫu nhiên mỗi lần vào.</div>
-    </div>
-    <div class="info-card">
-        <div class="info-card-icon">⬆️</div>
-        <div class="info-card-title">Điểm Rút Lui</div>
-        <div class="info-card-desc">Hai khu vực rút lui. Bạn phải đến điểm đối diện với nơi xuất phát.</div>
-    </div>
-    <div class="info-card">
-        <div class="info-card-icon">👣</div>
-        <div class="info-card-title">Di Chuyển</div>
-        <div class="info-card-desc">Dùng WASD / phím mũi tên để di chuyển. Nước không thể đi qua.</div>
-    </div>
-</div>
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+            .top-nav a {
+                color: rgba(255,255,255,.66);
+                text-decoration: none;
+                padding: 10px 13px;
+                border-radius: 14px;
+                font-size: .84rem;
+                font-weight: 700;
+                white-space: nowrap;
+                transition: .2s;
+            }
+
+                .top-nav a:hover,
+                .top-nav a.active {
+                    color: white;
+                    background: rgba(124,77,255,.18);
+                }
+
+        .search-top {
+            border: 1px solid rgba(255,209,102,.45);
+            color: var(--gold) !important;
+            background: rgba(255,209,102,.04);
+        }
+
+        .forest-page {
+            min-height: 100vh;
+            padding: 108px 40px 80px;
+            background: radial-gradient(circle at 20% 0%, rgba(88,229,107,.12), transparent 30%), radial-gradient(circle at 90% 20%, rgba(124,77,255,.15), transparent 34%), radial-gradient(circle at 40% 100%, rgba(45,226,197,.08), transparent 30%), var(--bg);
+        }
+
+        .forest-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            padding: 70px 56px;
+            min-height: 420px;
+            margin-bottom: 34px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(88,229,107,.2);
+            background: linear-gradient(90deg, rgba(4,8,8,.95), rgba(4,8,8,.58), rgba(4,8,8,.92)), url('/fe/forest-hero.png');
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 20px 70px rgba(0,0,0,.45), inset 0 0 80px rgba(0,0,0,.35);
+        }
+
+            .forest-hero::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at 18% 30%, rgba(88,229,107,.18), transparent 25%), radial-gradient(circle at 82% 70%, rgba(124,77,255,.18), transparent 28%);
+                pointer-events: none;
+            }
+
+        .forest-hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 720px;
+        }
+
+        .forest-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(88,229,107,.1);
+            border: 1px solid rgba(88,229,107,.22);
+            color: #b7ffb4;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .forest-title {
+            font-size: clamp(3rem, 7vw, 5.4rem);
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+            color: #9cff8f;
+            text-shadow: 0 0 18px rgba(108,255,104,.28), 0 0 44px rgba(108,255,104,.16);
+        }
+
+        .forest-subtitle {
+            font-size: 1rem;
+            max-width: 650px;
+            line-height: 1.8;
+            color: rgba(255,255,255,.78);
+            margin-bottom: 30px;
+        }
+
+        .forest-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .enter-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 15px 34px;
+            font-size: .95rem;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, #22c55e, #15803d);
+            box-shadow: 0 14px 35px rgba(34,197,94,.28);
+            transition: .25s;
+        }
+
+            .enter-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 44px rgba(34,197,94,.42);
+            }
+
+        .resume-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 30px;
+            border-radius: 999px;
+            text-decoration: none;
+            color: white;
+            font-weight: 800;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.07);
+            transition: .25s;
+        }
+
+            .resume-btn:hover {
+                color: white;
+                background: rgba(255,255,255,.13);
+                transform: translateY(-2px);
+            }
+
+        .forest-note {
+            margin-top: 22px;
+            color: rgba(255,255,255,.48);
+            font-size: .86rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .info-card {
+            border-radius: 24px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(88,229,107,.055));
+            border: 1px solid rgba(255,255,255,.1);
+            box-shadow: 0 16px 42px rgba(0,0,0,.24);
+            transition: .25s;
+        }
+
+            .info-card:hover {
+                transform: translateY(-6px);
+                border-color: rgba(255,209,102,.38);
+                box-shadow: 0 22px 54px rgba(0,0,0,.38);
+            }
+
+        .info-card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .info-card-body {
+            padding: 24px;
+        }
+
+        .info-card-title {
+            font-size: 1.55rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--gold);
+        }
+
+        .info-card-desc {
+            color: rgba(255,255,255,.72);
+            line-height: 1.75;
+            font-size: .92rem;
+            min-height: 110px;
+        }
+
+        .card-arrow {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 20px;
+            font-weight: 900;
+            margin-top: 20px;
+            transition: .2s;
+        }
+
+        .info-card:hover .card-arrow {
+            background: var(--gold);
+            color: black;
+        }
+
+        @@media(max-width: 1200px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .topbar {
+                height: auto;
+                min-height: 78px;
+                flex-wrap: wrap;
+                padding: 14px 18px;
+            }
+
+            .top-nav {
+                order: 3;
+                width: 100%;
+            }
+
+            .forest-page {
+                padding-top: 128px;
+            }
+        }
+
+        @@media(max-width: 768px) {
+            .forest-page {
+                padding: 128px 18px 60px;
+            }
+
+            .forest-hero {
+                padding: 44px 26px;
+                min-height: 360px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .forest-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .enter-btn,
+            .resume-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <a href="/Dashboard" class="brand">⚔️ Vương<span> Quốc</span></a>
+
+        <nav class="top-nav">
+            <a href="/Dashboard">📊 Trang chủ</a>
+            <a href="/Task">📋 Nhiệm vụ</a>
+            <a href="/Account/Leaderboard">🏆 Bảng xếp hạng</a>
+            <a href="/Friend">👥 Bạn bè</a>
+            <a href="/Dashboard/Badges">🏅 Thành tựu</a>
+            <a href="/Forest" class="active">🌲 Rừng</a>
+            <a href="/Inventory">🎒 Kho đồ</a>
+            <a href="/Hideout/Index">🏰 Căn cứ</a>
+            <a href="/Task/search" class="search-top">🔍 Tìm nhiệm vụ</a>
+        </nav>
+    </header>
+
+    <main class="forest-page">
+        <section class="forest-hero">
+            <div class="forest-hero-content">
+                <div class="forest-eyebrow">Khu vực mạo hiểm</div>
+
+                <h1 class="forest-title">
+                    🌲 Rừng Sâu
+                </h1>
+
+                <div class="forest-subtitle">
+                    Vùng hoang dã hiểm nguy đang chờ bạn khám phá.
+                    Mỗi lần tiến vào rừng là một hành trình mới với điểm xuất phát,
+                    quái vật, kho báu và lối rút lui hoàn toàn ngẫu nhiên.
+                </div>
+
+                <div class="forest-actions">
+                    <form asp-action="Enter" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit" class="enter-btn">
+                            🌲 Vào Rừng
+                        </button>
+                    </form>
+
+                    @if ((bool)(ViewBag.HasActiveSession ?? false))
+                    {
+                        <a asp-action="Map" class="resume-btn">
+                            ↩ Tiếp tục hành trình
+                        </a>
+                    }
+                </div>
+
+                <div class="forest-note">
+                    Hãy chuẩn bị kỹ. Một khi đã vào rừng, mọi thứ đều có thể thay đổi.
+                </div>
+            </div>
+        </section>
+
+        <section class="info-grid">
+            <div class="info-card">
+                <img src="/fe/hang_dong.png" class="info-card-img" alt="Hang Động">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Hang Động</div>
+                    <div class="info-card-desc">
+                        Hang động cổ kính, bí ẩn sâu trong lòng đất.
+                        Có gì đó đang chờ bạn ở bên trong.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="/fe/kho_hang.png" class="info-card-img" alt="Kho Hàng">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Kho Hàng</div>
+                    <div class="info-card-desc">
+                        Kho lưu trữ đồ hoang.
+                        Những kệ hàng xếp dọc các bức tường đang vỡ vụn.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="/fe/ho_sau.png" class="info-card-img" alt="Hồ Sâu">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Hồ Sâu</div>
+                    <div class="info-card-desc">
+                        Mặt nước yên tĩnh bao phủ bởi bí ẩn.
+                        Sương mù lơ lửng thấp trên mặt hồ.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="/fe/diem_xuat_phat.png" class="info-card-img" alt="Điểm Xuất Phát">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Điểm Xuất Phát</div>
+                    <div class="info-card-desc">
+                        Hai vị trí xuất phát độc lập.
+                        Được chọn ngẫu nhiên mỗi lần vào.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="/fe/diem_rut_lui.png" class="info-card-img" alt="Điểm Rút Lui">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Điểm Rút Lui</div>
+                    <div class="info-card-desc">
+                        Lối thoát duy nhất.
+                        Bạn phải đến đúng vị trí để rút lui thành công.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="/fe/tui_do.png" class="info-card-img" alt="Túi Đồ">
+
+                <div class="info-card-body">
+                    <div class="info-card-title">Túi Đồ</div>
+                    <div class="info-card-desc">
+                        Mang theo vừa đủ.
+                        Nhưng đừng quên chừa chỗ cho chiến lợi phẩm.
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

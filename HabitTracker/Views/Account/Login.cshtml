@@ -3,371 +3,499 @@
     ViewData["Title"] = "Đăng nhập";
     Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập — HabitTracker</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --bg: #070711;
+            --panel: #10101d;
+            --panel-soft: #17172a;
+            --violet: #7c4dff;
+            --violet-2: #9b5cff;
+            --gold: #ffd166;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,.62);
+            --border: rgba(255,255,255,.12);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
-            padding: 0
-        }
-
-        :root {
-            --bg-deep: #0d0a1a;
-            --bg-card: #16112a;
-            --bg-panel: #1e1535;
-            --gold: #c9a84c;
-            --gold-light: #f0c878;
-            --purple: #7c3aed;
-            --text: #e8dfc8;
-            --text-muted: #8b7fa8;
-            --border: #2d1f4e;
-            --glow-gold: rgba(201,168,76,0.2);
-            --glow-purple: rgba(124,58,237,0.2);
+            padding: 0;
         }
 
         body {
-            font-family: "Crimson Pro","DM Sans",serif;
-            background: var(--bg-deep);
-            color: var(--text);
             min-height: 100vh;
             display: grid;
-            grid-template-columns: 1fr 1fr
-        }
-
-        h1, h2, h3 {
-            font-family: "Cinzel","Syne",serif
+            grid-template-columns: 1.05fr .95fr;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Be Vietnam Pro", sans-serif;
+            overflow-x: hidden;
         }
 
         .left-panel {
-            background: #0a0818;
-            color: var(--text);
+            position: relative;
+            min-height: 100vh;
+            padding: 48px 56px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 52px 56px;
-            position: relative;
             overflow: hidden;
-            border-right: 1px solid var(--border)
+            background: linear-gradient(90deg, rgba(7,7,17,.88), rgba(7,7,17,.38)), url('/fe/login-illustration.png');
+            background-size: cover;
+            background-position: center;
+            border-right: 1px solid rgba(255,255,255,.08);
         }
-
-            .left-panel::before {
-                content: "";
-                position: absolute;
-                width: 600px;
-                height: 600px;
-                border-radius: 50%;
-                background: radial-gradient(circle,rgba(124,58,237,.25) 0%,transparent 70%);
-                top: -200px;
-                right: -200px
-            }
 
             .left-panel::after {
                 content: "";
                 position: absolute;
-                width: 400px;
-                height: 400px;
-                border-radius: 50%;
-                background: radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 70%);
-                bottom: -100px;
-                left: -100px
+                inset: 0;
+                background: radial-gradient(circle at 25% 20%, rgba(124,77,255,.25), transparent 28%), radial-gradient(circle at 18% 85%, rgba(45,226,197,.12), transparent 30%);
+                pointer-events: none;
             }
 
         .brand {
-            font-family: "Cinzel",serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--gold);
-            text-decoration: none;
             position: relative;
             z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 20px rgba(201,168,76,0.3)
+            color: white;
+            text-decoration: none;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
         }
 
             .brand span {
-                color: var(--gold-light)
+                color: var(--gold);
             }
 
-        .hero-text {
+        .left-content {
             position: relative;
-            z-index: 2
+            z-index: 2;
+            max-width: 520px;
         }
 
-            .hero-text h2 {
-                font-family: "Cinzel",serif;
-                font-size: clamp(1.8rem,3.5vw,2.8rem);
-                font-weight: 700;
-                line-height: 1.2;
-                letter-spacing: 1px;
-                margin-bottom: 16px;
-                color: var(--text)
+            .left-content h1 {
+                font-size: clamp(2.1rem, 4vw, 4rem);
+                font-weight: 800;
+                line-height: 1.12;
+                letter-spacing: -1.8px;
+                margin-bottom: 18px;
+                text-shadow: 0 10px 30px rgba(0,0,0,.45);
             }
 
-            .hero-text p {
-                color: var(--text-muted);
+                .left-content h1 span {
+                    color: #9b7cff;
+                }
+
+            .left-content p {
+                color: rgba(255,255,255,.78);
                 font-size: 1rem;
-                line-height: 1.7;
-                max-width: 380px
+                line-height: 1.8;
+                max-width: 430px;
             }
 
         .feature-list {
             position: relative;
             z-index: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 12px
+            display: grid;
+            gap: 16px;
+            max-width: 430px;
         }
 
         .feat-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: var(--text-muted);
-            font-size: .9rem
+            gap: 14px;
+            color: rgba(255,255,255,.78);
         }
 
-        .feat-dot {
-            width: 28px;
-            height: 28px;
+        .feat-icon {
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
-            background: rgba(201,168,76,.12);
-            border: 1px solid rgba(201,168,76,.3);
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.14);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: .9rem;
-            flex-shrink: 0
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            box-shadow: 0 10px 26px rgba(0,0,0,.2);
         }
-        /* RIGHT */
+
+        .feat-item strong {
+            display: block;
+            font-size: .95rem;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .feat-item span {
+            font-size: .84rem;
+            color: rgba(255,255,255,.62);
+        }
+
+        .footer-left {
+            position: relative;
+            z-index: 2;
+            color: rgba(255,255,255,.55);
+            font-size: .85rem;
+        }
+
         .right-panel {
-            background: var(--bg-card);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 52px
+            padding: 48px;
+            background: radial-gradient(circle at 80% 10%, rgba(124,77,255,.16), transparent 28%), radial-gradient(circle at 15% 90%, rgba(255,209,102,.06), transparent 26%), #080814;
         }
 
         .auth-box {
             width: 100%;
-            max-width: 420px
+            max-width: 520px;
         }
 
-            .auth-box h3 {
-                font-family: "Cinzel",serif;
-                font-size: 1.7rem;
-                font-weight: 700;
-                letter-spacing: 1px;
-                margin-bottom: 5px;
-                color: var(--gold)
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,.55);
+            text-decoration: none;
+            font-size: .86rem;
+            margin-bottom: 32px;
+            transition: .2s;
+        }
+
+            .back-home:hover {
+                color: white;
             }
 
-            .auth-box .subtitle {
-                color: var(--text-muted);
-                font-size: .9rem;
-                margin-bottom: 34px
+        .auth-box h2 {
+            font-size: clamp(2rem, 4vw, 3.1rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+            .auth-box h2 span {
+                color: var(--violet-2);
             }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: .98rem;
+            margin-bottom: 34px;
+        }
+
+        .error-msg {
+            background: rgba(239,68,68,.12);
+            border: 1px solid rgba(239,68,68,.32);
+            color: #fca5a5;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: .9rem;
+            margin-bottom: 18px;
+        }
 
         .form-field {
-            margin-bottom: 18px
+            margin-bottom: 20px;
         }
 
             .form-field label {
-                font-weight: 600;
-                font-size: .83rem;
-                color: var(--text-muted);
                 display: block;
-                margin-bottom: 7px;
-                font-family: "Cinzel",serif;
-                letter-spacing: 0.5px
+                color: white;
+                font-size: .9rem;
+                font-weight: 700;
+                margin-bottom: 8px;
             }
 
-            .form-field input {
-                width: 100%;
-                padding: 12px 16px;
-                border: 1.5px solid var(--border);
-                border-radius: 10px;
-                font-family: "Crimson Pro",serif;
+        .input-wrap {
+            position: relative;
+        }
+
+            .input-wrap .input-icon {
+                position: absolute;
+                left: 18px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: rgba(255,255,255,.42);
                 font-size: 1rem;
-                background: var(--bg-panel);
-                color: var(--text);
-                transition: border-color .2s,box-shadow .2s;
-                outline: none
             }
 
-                .form-field input:focus {
-                    border-color: var(--gold);
-                    box-shadow: 0 0 0 3px var(--glow-gold)
-                }
+        .form-field input {
+            width: 100%;
+            height: 58px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.045);
+            color: white;
+            padding: 0 18px 0 48px;
+            outline: none;
+            font-size: .96rem;
+            transition: .25s;
+        }
 
-                .form-field input::placeholder {
-                    color: var(--text-muted)
-                }
+            .form-field input:focus {
+                border-color: rgba(124,77,255,.75);
+                box-shadow: 0 0 0 4px rgba(124,77,255,.14);
+                background: rgba(255,255,255,.07);
+            }
+
+            .form-field input::placeholder {
+                color: rgba(255,255,255,.36);
+            }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 4px 0 24px;
+            gap: 12px;
+            color: var(--muted);
+            font-size: .88rem;
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .remember input {
+                accent-color: var(--violet);
+            }
+
+        .forgot {
+            color: #9b7cff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .forgot:hover {
+                color: white;
+            }
 
         .btn-submit {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--purple), #9f45f5);
-            color: white;
+            height: 60px;
             border: none;
-            border-radius: 50px;
-            font-family: "Cinzel",serif;
-            font-weight: 700;
-            font-size: .9rem;
-            letter-spacing: 1.5px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), #6d28d9);
+            color: white;
+            font-size: 1rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: all .2s;
-            margin-bottom: 18px
+            transition: .25s;
+            box-shadow: 0 16px 36px rgba(124,77,255,.26);
         }
 
             .btn-submit:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 6px 24px var(--glow-purple)
+                transform: translateY(-2px);
+                box-shadow: 0 20px 42px rgba(124,77,255,.36);
             }
 
         .divider {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: var(--text-muted);
-            font-size: .8rem;
-            margin: 20px 0
+            gap: 16px;
+            color: rgba(255,255,255,.48);
+            font-size: .86rem;
+            margin: 28px 0;
         }
 
-            .divider::before, .divider::after {
+            .divider::before,
+            .divider::after {
                 content: "";
                 flex: 1;
                 height: 1px;
-                background: var(--border)
+                background: rgba(255,255,255,.1);
             }
 
         .btn-google {
             width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-panel);
-            color: var(--text);
-            border: 1.5px solid var(--border);
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: .9rem;
-            cursor: pointer;
-            transition: all .2s;
+            height: 58px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.035);
+            color: white;
+            border: 1px solid rgba(255,255,255,.12);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
-            margin-bottom: 22px
+            font-weight: 700;
+            transition: .25s;
         }
 
             .btn-google:hover {
-                border-color: var(--gold);
-                color: var(--gold)
+                background: rgba(255,255,255,.07);
+                border-color: rgba(124,77,255,.55);
+                color: white;
+                transform: translateY(-1px);
             }
 
         .auth-footer {
             text-align: center;
-            font-size: .88rem;
-            color: var(--text-muted)
+            margin-top: 28px;
+            color: var(--muted);
+            font-size: .9rem;
         }
 
             .auth-footer a {
-                color: var(--gold);
-                font-weight: 600;
-                text-decoration: none
+                color: #9b7cff;
+                text-decoration: none;
+                font-weight: 800;
             }
 
                 .auth-footer a:hover {
-                    color: var(--gold-light);
-                    text-decoration: underline
+                    color: white;
                 }
 
-        .error-msg {
-            background: rgba(185,28,28,0.15);
-            color: #fca5a5;
-            border: 1px solid rgba(185,28,28,0.4);
-            padding: 11px 15px;
-            border-radius: 8px;
-            font-size: .86rem;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px
-        }
-
-        @@media(max-width:768px) {
+        @@media (max-width: 960px) {
             body {
-                grid-template-columns: 1fr
+                grid-template-columns: 1fr;
             }
 
             .left-panel {
-                display: none
+                display: none;
             }
+
+            .right-panel {
+                padding: 32px 20px;
+            }
+
+            .auth-box {
+                max-width: 440px;
+            }
+
+                .auth-box h2 {
+                    font-size: 2.1rem;
+                }
         }
     </style>
 </head>
-<body>
-    <!-- LEFT -->
-    <div class="left-panel">
-        <a href="/" class="brand">⚔️ Vương<span>Quốc</span></a>
 
-        <div class="hero-text">
-            <h2>Huyền Thoại<br>Của Bạn Bắt Đầu.</h2>
-            <p>Hoàn thành nhiệm vụ. Nhận XP. Nâng cấp cuộc sống thực — từng thói quen một.</p>
+<body>
+    <section class="left-panel">
+        <a href="/" class="brand">⚔️ Vương Quốc</span></a>
+
+        <div class="left-content">
+            <h1>Đăng nhập để tiếp tục <span>hành trình</span> của bạn</h1>
+            <p>Hoàn thành thói quen mỗi ngày, nhận XP, giữ streak và leo bảng xếp hạng cùng cộng đồng.</p>
         </div>
 
         <div class="feature-list">
-            <div class="feat-item"><div class="feat-dot">⚔️</div><span>Nhiệm vụ dựa trên thói quen, nhận XP thực</span></div>
-            <div class="feat-item"><div class="feat-dot">🔥</div><span>Theo dõi streak — giữ ngọn lửa cháy mãi</span></div>
-            <div class="feat-item"><div class="feat-dot">🏰</div><span>Căn cứ, đột kích rừng & chế tạo đồ</span></div>
-            <div class="feat-item"><div class="feat-dot">🏆</div><span>Huy hiệu, bảng xếp hạng & đối thủ</span></div>
-        </div>
-    </div>
+            <div class="feat-item">
+                <div class="feat-icon">🎮</div>
+                <div>
+                    <strong>Nhiệm vụ mỗi ngày</strong>
+                    <span>Hoàn thành quest và nhận XP hấp dẫn</span>
+                </div>
+            </div>
 
-    <!-- RIGHT -->
-    <div class="right-panel">
+            <div class="feat-item">
+                <div class="feat-icon">🔥</div>
+                <div>
+                    <strong>Duy trì chuỗi ngày</strong>
+                    <span>Giữ streak càng dài, phần thưởng càng lớn</span>
+                </div>
+            </div>
+
+            <div class="feat-item">
+                <div class="feat-icon">🏆</div>
+                <div>
+                    <strong>Thành tích & Huy hiệu</strong>
+                    <span>Mở khóa huy hiệu hiếm và thể hiện đẳng cấp</span>
+                </div>
+            </div>
+
+            <div class="feat-item">
+                <div class="feat-icon">📊</div>
+                <div>
+                    <strong>Bảng xếp hạng</strong>
+                    <span>Cạnh tranh lành mạnh và vươn lên top</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-left">
+            © 2026 HabitTracker
+        </div>
+    </section>
+
+    <section class="right-panel">
         <div class="auth-box">
-            <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:#8b7fa8;text-decoration:none;font-size:.85rem;margin-bottom:24px;transition:color .2s" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8b7fa8'">← Về trang chủ</a>
-            <h3>Chào Mừng Trở Lại ⚔️</h3>
-            <p class="subtitle">Tiếp tục hành trình của bạn</p>
+            <a href="/" class="back-home">← Về trang chủ</a>
+
+            <h2>Chào mừng <span>trở lại!</span></h2>
+            <p class="subtitle">Đăng nhập để tiếp tục hành trình chinh phục thói quen.</p>
 
             @if (ViewBag.Error != null)
             {
-                <div class="error-msg">❌ @ViewBag.Error</div>
+                <div class="error-msg">@ViewBag.Error</div>
             }
 
             <form method="post">
                 <div class="form-field">
                     <label>Email</label>
-                    <input asp-for="Email" placeholder="you@example.com" autocomplete="email" />
+                    <div class="input-wrap">
+                        <span class="input-icon">✉</span>
+                        <input asp-for="Email" placeholder="Nhập email của bạn" autocomplete="email" />
+                    </div>
                 </div>
+
                 <div class="form-field">
                     <label>Mật khẩu</label>
-                    <input asp-for="Password" type="password" placeholder="••••••••" />
+                    <div class="input-wrap">
+                        <span class="input-icon">⌕</span>
+                        <input asp-for="Password" type="password" placeholder="Nhập mật khẩu của bạn" autocomplete="current-password" />
+                    </div>
                 </div>
-                <button type="submit" class="btn-submit">Bước Vào Vương Quốc →</button>
+
+                <div class="form-options">
+                    <label class="remember">
+                        <input type="checkbox" />
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+
+                    <a href="#" class="forgot">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Đăng nhập →
+                </button>
             </form>
 
             <div class="divider">hoặc</div>
 
             <a asp-controller="Account" asp-action="GoogleLogin" class="btn-google">
-                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /></svg>
+                <svg width="19" height="19" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                </svg>
                 Tiếp tục với Google
             </a>
 
             <div class="auth-footer">
-                Chưa có tài khoản? <a href="/Account/Register">Đăng ký miễn phí</a>
+                Chưa có tài khoản?
+                <a href="/Account/Register">Đăng ký miễn phí</a>
             </div>
         </div>
-    </div>
+    </section>
 </body>
 </html>
