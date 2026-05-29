@@ -3,467 +3,739 @@
     ViewData["Title"] = "Customize Avatar";
     var u = Model.User;
 
-    // Resolve equipped gear for preview layers (static — gear doesn't change on this page)
     string bodyType = u.BodyType ?? "broad";
+
     HabitTracker.Models.GearItem? FindGear(string? key) =>
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear  = FindGear(u.EquippedArmor);
-    var headGear   = FindGear(u.EquippedHead);
+    var armorGear = FindGear(u.EquippedArmor);
+    var headGear = FindGear(u.EquippedHead);
     var shieldGear = FindGear(u.EquippedShield);
     var weaponGear = FindGear(u.EquippedWeapon);
-    bool wep2H     = weaponGear?.TwoHanded ?? false;
+    bool wep2H = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
 
-<!-- Hidden form — submitted by Save button -->
 <form id="customize-form" method="post" action="/Character/SaveAppearance">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="bodyType"     id="val-bodyType"     value="@u.BodyType" />
-    <input type="hidden" name="skinColor"    id="val-skinColor"    value="@u.SkinColor" />
-    <input type="hidden" name="hairStyle"    id="val-hairStyle"    value="@u.HairStyle" />
-    <input type="hidden" name="hairColor"    id="val-hairColor"    value="@u.HairColor" />
-    <input type="hidden" name="hairBangs"    id="val-hairBangs"    value="@u.HairBangs" />
-    <input type="hidden" name="hairBeard"    id="val-hairBeard"    value="@u.HairBeard" />
+    <input type="hidden" name="bodyType" id="val-bodyType" value="@u.BodyType" />
+    <input type="hidden" name="skinColor" id="val-skinColor" value="@u.SkinColor" />
+    <input type="hidden" name="hairStyle" id="val-hairStyle" value="@u.HairStyle" />
+    <input type="hidden" name="hairColor" id="val-hairColor" value="@u.HairColor" />
+    <input type="hidden" name="hairBangs" id="val-hairBangs" value="@u.HairBangs" />
+    <input type="hidden" name="hairBeard" id="val-hairBeard" value="@u.HairBeard" />
     <input type="hidden" name="hairMustache" id="val-hairMustache" value="@u.HairMustache" />
-    <input type="hidden" name="shirtStyle"   id="val-shirtStyle"   value="@u.ShirtStyle" />
+    <input type="hidden" name="shirtStyle" id="val-shirtStyle" value="@u.ShirtStyle" />
 </form>
 
-<div class="container-fluid py-4" style="max-width:1100px;">
-    <div class="row g-4">
+<style>
+    .customize-page {
+        max-width: 1220px;
+        margin: 18px auto;
+        padding: 0 14px;
+    }
 
-        <!-- ===== LEFT: Controls ===== -->
-        <div class="col-md-8">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <a href="/Character" class="btn btn-outline-secondary btn-sm">← Character</a>
-                <h2 class="mb-0">✨ Customize Avatar</h2>
-            </div>
+    .customize-shell {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 26px;
+        padding: 24px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .08);
+    }
 
-            @if (!string.IsNullOrEmpty(TempData["ToastLevel"]?.ToString()))
-            {
-                <div class="alert alert-success py-2 small mb-3">✅ @TempData["ToastLevel"]</div>
+    .customize-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .customize-head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .customize-title {
+        font-size: 30px;
+        font-weight: 900;
+        margin: 0;
+        color: #111827;
+    }
+
+    .back-btn {
+        border: 1px solid #d1d5db;
+        color: #475569;
+        background: #fff;
+        border-radius: 10px;
+        padding: 8px 14px;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+        .back-btn:hover {
+            background: #f8fafc;
+            color: #111827;
+        }
+
+    .custom-tabs {
+        display: flex;
+        gap: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 16px;
+    }
+
+        .custom-tabs .nav-link {
+            border: 0;
+            border-radius: 14px 14px 0 0;
+            color: #64748b;
+            font-weight: 800;
+            padding: 12px 20px;
+        }
+
+            .custom-tabs .nav-link.active {
+                color: #7c3aed;
+                background: #f5f3ff;
+                border-bottom: 3px solid #a78bfa;
             }
 
-            <!-- Tabs -->
-            <ul class="nav nav-tabs mb-3" id="customizeTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-appearance" type="button">🎨 Appearance</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hair" type="button">💇 Hair</button>
-                </li>
-            </ul>
+    .option-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
 
-            <div class="tab-content">
+    .option-title {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        letter-spacing: .04em;
+    }
 
-                <!-- ===== APPEARANCE TAB ===== -->
-                <div class="tab-pane fade show active" id="tab-appearance">
+    .option-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        align-items: center;
+    }
 
-                    <!-- Body Type -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">BODY TYPE</div>
-                            <div class="d-flex gap-2">
+    .customize-swatch {
+        width: 38px;
+        height: 38px;
+        padding: 4px;
+        image-rendering: pixelated;
+        cursor: pointer;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background: #fff;
+        transition: .15s ease;
+    }
+
+        .customize-swatch:hover {
+            transform: translateY(-2px);
+            background: #f8fafc;
+            border-color: #c4b5fd !important;
+        }
+
+    .bodytype-btn,
+    .none-btn {
+        min-width: 76px;
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    .preview-card {
+        position: sticky;
+        top: 86px;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff, #faf5ff);
+        padding: 24px 18px;
+        text-align: center;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .08);
+    }
+
+    .preview-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        color: #7c3aed;
+        font-weight: 900;
+        margin-bottom: 18px;
+        letter-spacing: .06em;
+    }
+
+        .preview-title::before,
+        .preview-title::after {
+            content: "";
+            width: 80px;
+            height: 2px;
+            background: #ddd6fe;
+        }
+
+    .preview-stage {
+        position: relative;
+        width: 260px;
+        height: 235px;
+        margin: 0 auto 18px;
+        border-radius: 24px;
+        background: radial-gradient(circle at center, rgba(167, 139, 250, .20), transparent 58%), linear-gradient(180deg, #faf5ff, #ffffff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .preview-stage::before {
+            content: "";
+            position: absolute;
+            width: 152px;
+            height: 152px;
+            border-radius: 999px;
+            border: 4px solid rgba(167, 139, 250, .28);
+        }
+
+        .preview-stage::after {
+            content: "";
+            position: absolute;
+            bottom: 34px;
+            width: 180px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #bbf7d0, #86efac);
+            border: 4px solid #94a3b8;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .16);
+        }
+
+    #avatar-preview {
+        position: relative;
+        z-index: 2;
+        width: 141px;
+        height: 147px;
+        box-sizing: border-box;
+        transform: scale(1.45);
+        image-rendering: pixelated;
+    }
+
+    .preview-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .preview-info {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: #fff;
+        padding: 12px;
+        text-align: left;
+    }
+
+        .preview-info strong {
+            display: block;
+            color: #111827;
+            font-size: 15px;
+        }
+
+        .preview-info small {
+            color: #64748b;
+            font-weight: 700;
+        }
+
+    .save-btn {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #16a34a, #059669);
+        color: #fff;
+        font-weight: 900;
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
+
+    .save-note {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
+    .tip-box {
+        margin-top: 16px;
+        border: 1px solid #e9d5ff;
+        background: #faf5ff;
+        color: #7c3aed;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 992px) {
+        .customize-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-card {
+            position: static;
+        }
+    }
+</style>
+
+<div class="customize-page">
+    <div class="customize-shell">
+
+        <div class="customize-layout">
+
+            <div>
+                <div class="customize-head">
+                    <a href="/Character" class="back-btn">← Back to Character</a>
+                    <h2 class="customize-title">✨ Customize Avatar</h2>
+                </div>
+
+                @if (!string.IsNullOrEmpty(TempData["ToastLevel"]?.ToString()))
+                {
+                    <div class="alert alert-success py-2 small mb-3">✅ @TempData["ToastLevel"]</div>
+                }
+
+                <ul class="nav custom-tabs" id="customizeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-appearance" type="button">
+                            🎨 Appearance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hair" type="button">
+                            💇 Hair
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+
+                    <div class="tab-pane fade show active" id="tab-appearance">
+
+                        <div class="option-card">
+                            <div class="option-title">BODY TYPE</div>
+                            <div class="option-list">
                                 <button type="button" id="btn-broad"
                                         class="btn btn-sm @(u.BodyType == "broad" ? "btn-primary" : "btn-outline-secondary") bodytype-btn"
-                                        data-value="broad" onclick="selectBodyType('broad')">Broad</button>
+                                        data-value="broad" onclick="selectBodyType('broad')">
+                                    Broad
+                                </button>
+
                                 <button type="button" id="btn-slim"
                                         class="btn btn-sm @(u.BodyType == "slim" ? "btn-primary" : "btn-outline-secondary") bodytype-btn"
-                                        data-value="slim" onclick="selectBodyType('slim')">Slim</button>
+                                        data-value="slim" onclick="selectBodyType('slim')">
+                                    Slim
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Skin Color -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">SKIN COLOR</div>
-                            <div class="d-flex flex-wrap gap-1">
+                        <div class="option-card">
+                            <div class="option-title">SKIN COLOR</div>
+                            <div class="option-list">
                                 @foreach (var color in Model.SkinColors)
                                 {
-                                    <img src="/images/habitica/customize/skin/skin_@(color).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/skin/skin_@(color).png"
                                          class="skin-opt customize-swatch"
                                          data-color="@color"
                                          title="@color"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.SkinColor == color ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.SkinColor == color ? "#a855f7" : "transparent");"
                                          onclick="selectSkin('@color')" />
                                 }
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Shirt -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">SHIRT</div>
-                            <div class="d-flex flex-wrap gap-1">
+                        <div class="option-card">
+                            <div class="option-title">SHIRT</div>
+                            <div class="option-list">
                                 @foreach (var shirt in Model.ShirtStyles)
                                 {
-                                    <img src="/images/habitica/customize/shirts/@(u.BodyType)_shirt_@(shirt).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/shirts/@(u.BodyType)_shirt_@(shirt).png"
                                          class="shirt-opt customize-swatch"
                                          data-style="@shirt"
                                          title="@shirt"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.ShirtStyle == shirt ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.ShirtStyle == shirt ? "#a855f7" : "transparent");"
                                          onclick="selectShirt('@shirt')" />
                                 }
                             </div>
                         </div>
+
                     </div>
 
-                </div><!-- /tab-appearance -->
+                    <div class="tab-pane fade" id="tab-hair">
 
-                <!-- ===== HAIR TAB ===== -->
-                <div class="tab-pane fade" id="tab-hair">
-
-                    <!-- Hair Style -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">HAIR STYLE</div>
-                            <div class="d-flex flex-wrap gap-1">
+                        <div class="option-card">
+                            <div class="option-title">HAIR STYLE</div>
+                            <div class="option-list">
                                 @for (int i = 1; i <= Model.HairStyleCount; i++)
                                 {
-                                    <img src="/images/habitica/customize/hair/hair_base_@(i)_@(u.HairColor).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/hair/hair_base_@(i)_@(u.HairColor).png"
                                          class="hairstyle-opt customize-swatch"
                                          data-style="@i"
                                          title="Style @i"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.HairStyle == i ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.HairStyle == i ? "#a855f7" : "transparent");"
                                          onclick="selectHairStyle(@i)" />
                                 }
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Hair Color -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">HAIR COLOR</div>
-                            <div class="d-flex flex-wrap gap-1">
+                        <div class="option-card">
+                            <div class="option-title">HAIR COLOR</div>
+                            <div class="option-list">
                                 @foreach (var color in Model.HairColors)
                                 {
-                                    <img src="/images/habitica/customize/hair/hair_base_1_@(color).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/hair/hair_base_1_@(color).png"
                                          class="haircolor-opt customize-swatch"
                                          data-color="@color"
                                          title="@color"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.HairColor == color ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.HairColor == color ? "#a855f7" : "transparent");"
                                          onclick="selectHairColor('@color')" />
                                 }
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Bangs -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">BANGS</div>
-                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                        <div class="option-card">
+                            <div class="option-title">BANGS</div>
+                            <div class="option-list">
                                 <button type="button" id="bangs-none-btn"
-                                        class="btn btn-sm @(u.HairBangs == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectBangs(0)">None</button>
+                                        class="btn btn-sm none-btn @(u.HairBangs == 0 ? "btn-primary" : "btn-outline-secondary")"
+                                        onclick="selectBangs(0)">
+                                    None
+                                </button>
+
                                 @for (int i = 1; i <= Model.HairBangsCount; i++)
                                 {
-                                    <img src="/images/habitica/customize/hair/hair_bangs_@(i)_@(u.HairColor).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/hair/hair_bangs_@(i)_@(u.HairColor).png"
                                          class="bangs-opt customize-swatch"
                                          data-style="@i"
                                          title="Bangs @i"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.HairBangs == i ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.HairBangs == i ? "#a855f7" : "transparent");"
                                          onclick="selectBangs(@i)" />
                                 }
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Beard -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">BEARD</div>
-                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                        <div class="option-card">
+                            <div class="option-title">BEARD</div>
+                            <div class="option-list">
                                 <button type="button" id="beard-none-btn"
-                                        class="btn btn-sm @(u.HairBeard == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectBeard(0)">None</button>
+                                        class="btn btn-sm none-btn @(u.HairBeard == 0 ? "btn-primary" : "btn-outline-secondary")"
+                                        onclick="selectBeard(0)">
+                                    None
+                                </button>
+
                                 @for (int i = 1; i <= Model.HairBeardCount; i++)
                                 {
-                                    <img src="/images/habitica/customize/beards/hair_beard_@(i)_@(u.HairColor).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/beards/hair_beard_@(i)_@(u.HairColor).png"
                                          class="beard-opt customize-swatch"
                                          data-style="@i"
                                          title="Beard @i"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.HairBeard == i ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.HairBeard == i ? "#a855f7" : "transparent");"
                                          onclick="selectBeard(@i)" />
                                 }
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Mustache -->
-                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
-                        <div class="card-body py-3">
-                            <div class="small fw-semibold text-muted mb-2">MUSTACHE</div>
-                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                        <div class="option-card">
+                            <div class="option-title">MUSTACHE</div>
+                            <div class="option-list">
                                 <button type="button" id="mustache-none-btn"
-                                        class="btn btn-sm @(u.HairMustache == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectMustache(0)">None</button>
+                                        class="btn btn-sm none-btn @(u.HairMustache == 0 ? "btn-primary" : "btn-outline-secondary")"
+                                        onclick="selectMustache(0)">
+                                    None
+                                </button>
+
                                 @for (int i = 1; i <= Model.HairMustacheCount; i++)
                                 {
-                                    <img src="/images/habitica/customize/beards/hair_mustache_@(i)_@(u.HairColor).png"
-                                         width="40" height="40"
+                                    <img src="/fe/customize/beards/hair_mustache_@(i)_@(u.HairColor).png"
                                          class="mustache-opt customize-swatch"
                                          data-style="@i"
                                          title="Mustache @i"
-                                         style="image-rendering:pixelated; cursor:pointer; border-radius:4px; border:2px solid @(u.HairMustache == i ? "#4a90d9" : "transparent");"
+                                         style="border-color:@(u.HairMustache == i ? "#a855f7" : "transparent");"
                                          onclick="selectMustache(@i)" />
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="preview-card">
+                    <div class="preview-title">PREVIEW</div>
+
+                    <div class="preview-stage">
+                        <div id="avatar-preview" style="padding-top:@(isMounted ? "0" : "24")px;">
+                            <div style="position:relative; margin-left:24px; width:90px; height:90px;">
+                                @if (isMounted)
+                                {
+                                    <img src="/fe/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
+                                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                                }
+
+                                <img id="layer-skin"
+                                     src="/fe/customize/skin/skin_@(u.SkinColor).png"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+
+                                <img id="layer-shirt"
+                                     src="/fe/customize/shirts/@(u.BodyType)_shirt_@(u.ShirtStyle).png"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+
+                                <img id="layer-bangs"
+                                     src="@(u.HairBangs > 0 ? $"/fe/customize/hair/hair_bangs_{u.HairBangs}_{u.HairColor}.png" : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBangs == 0 ? "display:none;" : "")" />
+
+                                <img id="layer-hair"
+                                     src="/fe/customize/hair/hair_base_@(u.HairStyle)_@(u.HairColor).png"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+
+                                <img id="layer-mustache"
+                                     src="@(u.HairMustache > 0 ? $"/fe/customize/beards/hair_mustache_{u.HairMustache}_{u.HairColor}.png" : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairMustache == 0 ? "display:none;" : "")" />
+
+                                <img id="layer-beard"
+                                     src="@(u.HairBeard > 0 ? $"/fe/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
+
+                                <img id="layer-armor-gear"
+                                     src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
+
+                                <img id="layer-head-gear"
+                                     src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
+
+                                <img id="layer-shield-gear"
+                                     src="@(shieldGear != null && !wep2H ? shieldGear.GetWornImagePath(bodyType) : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || wep2H ? "display:none;" : "")" />
+
+                                <img id="layer-weapon-gear"
+                                     src="@(weaponGear != null ? weaponGear.GetWornImagePath(bodyType) : "")"
+                                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(weaponGear == null ? "display:none;" : "")" />
+
+                                @if (isMounted)
+                                {
+                                    <img src="/fe/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
+                                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                                }
+
+                                @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
+                                {
+                                    <img src="/fe/stable/pets/Pet-@(u.ActivePetKey).png"
+                                         style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
                                 }
                             </div>
                         </div>
                     </div>
 
-                </div><!-- /tab-hair -->
-            </div><!-- /tab-content -->
-        </div><!-- /col-md-8 -->
-
-        <!-- ===== RIGHT: Preview + Save ===== -->
-        <div class="col-md-4">
-            <div class="sticky-top" style="top:80px;">
-                <div class="card border-0 bg-dark text-center" style="background:#1e1e2e!important;">
-                    <div class="card-body py-4">
-                        <div class="small fw-semibold text-muted mb-3">PREVIEW</div>
-
-                        <!-- Avatar Stack -->
-                        <div class="d-flex justify-content-center mb-4">
-                            <div id="avatar-preview"
-                                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible;">
-                                <!-- Layer order: mount-body → skin → shirt → bangs → base → mustache → beard → gear → mount-head / pet -->
-                                <div style="position:relative; margin-left:24px; width:90px; height:90px;">
-                                    @if (isMounted)
-                                    {
-                                        <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
-                                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                                    }
-                                    <img id="layer-skin"
-                                         src="/images/habitica/customize/skin/skin_@(u.SkinColor).png"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                                    <img id="layer-shirt"
-                                         src="/images/habitica/customize/shirts/@(u.BodyType)_shirt_@(u.ShirtStyle).png"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                                    <img id="layer-bangs"
-                                         src="@(u.HairBangs > 0 ? $"/images/habitica/customize/hair/hair_bangs_{u.HairBangs}_{u.HairColor}.png" : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBangs == 0 ? "display:none;" : "")" />
-                                    <img id="layer-hair"
-                                         src="/images/habitica/customize/hair/hair_base_@(u.HairStyle)_@(u.HairColor).png"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                                    <img id="layer-mustache"
-                                         src="@(u.HairMustache > 0 ? $"/images/habitica/customize/beards/hair_mustache_{u.HairMustache}_{u.HairColor}.png" : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairMustache == 0 ? "display:none;" : "")" />
-                                    <img id="layer-beard"
-                                         src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
-                                    <img id="layer-armor-gear"
-                                         src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
-                                    <img id="layer-head-gear"
-                                         src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
-                                    <img id="layer-shield-gear"
-                                         src="@(shieldGear != null && !wep2H ? shieldGear.GetWornImagePath(bodyType) : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || wep2H ? "display:none;" : "")" />
-                                    <img id="layer-weapon-gear"
-                                         src="@(weaponGear != null ? weaponGear.GetWornImagePath(bodyType) : "")"
-                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(weaponGear == null ? "display:none;" : "")" />
-                                    @if (isMounted)
-                                    {
-                                        <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
-                                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                                    }
-                                    @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
-                                    {
-                                        <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                                             style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
-                                    }
-                                </div>
-                            </div>
+                    <div class="preview-info-grid">
+                        <div class="preview-info">
+                            <strong>⚔️ Level @u.Level</strong>
+                            <small>Adventurer</small>
                         </div>
 
-                        <button type="submit" form="customize-form" class="btn btn-success w-100 mb-2">
-                            💾 Save Appearance
-                        </button>
-                        <div class="small text-muted">Changes preview instantly — save to keep.</div>
+                        <div class="preview-info">
+                            <strong>🛡️ @(string.IsNullOrEmpty(u.Class) ? "No Class" : u.Class)</strong>
+                            <small>Choose your path</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" form="customize-form" class="save-btn">
+                        💾 Save Appearance
+                    </button>
+
+                    <div class="save-note">
+                        Changes preview instantly — save to keep.
+                    </div>
+
+                    <div class="tip-box">
+                        💡 Tip: Your appearance is visible to your friends and other players.
                     </div>
                 </div>
             </div>
-        </div><!-- /col-md-4 -->
 
-    </div><!-- /row -->
-</div><!-- /container -->
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-<script>
-(function () {
-    // Current selections (JS state)
-    var cur = {
-        bodyType:    '@u.BodyType',
-        skinColor:   '@u.SkinColor',
-        hairStyle:   @u.HairStyle,
-        hairColor:   '@u.HairColor',
-        hairBangs:   @u.HairBangs,
-        hairBeard:   @u.HairBeard,
-        hairMustache: @u.HairMustache,
-        shirtStyle:  '@u.ShirtStyle'
-    };
+    <script>
+        (function () {
+            var cur = {
+                bodyType:    '@u.BodyType',
+                skinColor:   '@u.SkinColor',
+                hairStyle:   @u.HairStyle,
+                hairColor:   '@u.HairColor',
+                hairBangs:   @u.HairBangs,
+                hairBeard:   @u.HairBeard,
+                hairMustache: @u.HairMustache,
+                shirtStyle:  '@u.ShirtStyle'
+            };
 
-    // ===== UPDATE FUNCTIONS =====
+            function updatePreview() {
+                $('#layer-skin').attr('src', '/fe/customize/skin/skin_' + cur.skinColor + '.png');
+                $('#layer-shirt').attr('src', '/fe/customize/shirts/' + cur.bodyType + '_shirt_' + cur.shirtStyle + '.png');
 
-    function updatePreview() {
-        // Update layer images — order: skin → shirt → bangs → base → mustache → beard
-        $('#layer-skin').attr('src', '/images/habitica/customize/skin/skin_' + cur.skinColor + '.png');
-        $('#layer-shirt').attr('src', '/images/habitica/customize/shirts/' + cur.bodyType + '_shirt_' + cur.shirtStyle + '.png');
+                if (cur.hairBangs > 0) {
+                    $('#layer-bangs').attr('src', '/fe/customize/hair/hair_bangs_' + cur.hairBangs + '_' + cur.hairColor + '.png').show();
+                } else {
+                    $('#layer-bangs').hide();
+                }
 
-        if (cur.hairBangs > 0) {
-            $('#layer-bangs').attr('src', '/images/habitica/customize/hair/hair_bangs_' + cur.hairBangs + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-bangs').hide(); }
+                $('#layer-hair').attr('src', '/fe/customize/hair/hair_base_' + cur.hairStyle + '_' + cur.hairColor + '.png');
 
-        $('#layer-hair').attr('src', '/images/habitica/customize/hair/hair_base_' + cur.hairStyle + '_' + cur.hairColor + '.png');
+                if (cur.hairMustache > 0) {
+                    $('#layer-mustache').attr('src', '/fe/customize/beards/hair_mustache_' + cur.hairMustache + '_' + cur.hairColor + '.png').show();
+                } else {
+                    $('#layer-mustache').hide();
+                }
 
-        if (cur.hairMustache > 0) {
-            $('#layer-mustache').attr('src', '/images/habitica/customize/beards/hair_mustache_' + cur.hairMustache + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-mustache').hide(); }
+                if (cur.hairBeard > 0) {
+                    $('#layer-beard').attr('src', '/fe/customize/beards/hair_beard_' + cur.hairBeard + '_' + cur.hairColor + '.png').show();
+                } else {
+                    $('#layer-beard').hide();
+                }
 
-        if (cur.hairBeard > 0) {
-            $('#layer-beard').attr('src', '/images/habitica/customize/beards/hair_beard_' + cur.hairBeard + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-beard').hide(); }
+                updateHairThumbs();
+                updateShirtThumbs();
 
-        // Re-src thumbnails that depend on mutable props
-        updateHairThumbs();
-        updateShirtThumbs();
-
-        // Sync hidden form inputs
-        $('#val-bodyType').val(cur.bodyType);
-        $('#val-skinColor').val(cur.skinColor);
-        $('#val-hairStyle').val(cur.hairStyle);
-        $('#val-hairColor').val(cur.hairColor);
-        $('#val-hairBangs').val(cur.hairBangs);
-        $('#val-hairBeard').val(cur.hairBeard);
-        $('#val-hairMustache').val(cur.hairMustache);
-        $('#val-shirtStyle').val(cur.shirtStyle);
-    }
-
-    function updateHairThumbs() {
-        var col = cur.hairColor;
-        $('.hairstyle-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/hair/hair_base_' + s + '_' + col + '.png');
-        });
-        $('.bangs-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/hair/hair_bangs_' + s + '_' + col + '.png');
-        });
-        $('.beard-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/beards/hair_beard_' + s + '_' + col + '.png');
-        });
-        $('.mustache-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/beards/hair_mustache_' + s + '_' + col + '.png');
-        });
-    }
-
-    function updateShirtThumbs() {
-        var bt = cur.bodyType;
-        $('.shirt-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/shirts/' + bt + '_shirt_' + s + '.png');
-        });
-    }
-
-    // ===== HIGHLIGHT HELPERS =====
-
-    function highlightSwatch(selector, activeVal, attr) {
-        $(selector).each(function () {
-            var v = $(this).data(attr);
-            $(this).css('border-color', String(v) === String(activeVal) ? '#4a90d9' : 'transparent');
-        });
-    }
-
-    function highlightBtn(selector, activeVal) {
-        $(selector).each(function () {
-            var v = $(this).data('value');
-            if (String(v) === String(activeVal)) {
-                $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
-            } else {
-                $(this).removeClass('btn-primary').addClass('btn-outline-secondary');
+                $('#val-bodyType').val(cur.bodyType);
+                $('#val-skinColor').val(cur.skinColor);
+                $('#val-hairStyle').val(cur.hairStyle);
+                $('#val-hairColor').val(cur.hairColor);
+                $('#val-hairBangs').val(cur.hairBangs);
+                $('#val-hairBeard').val(cur.hairBeard);
+                $('#val-hairMustache').val(cur.hairMustache);
+                $('#val-shirtStyle').val(cur.shirtStyle);
             }
-        });
-    }
 
-    // ===== PUBLIC SELECTION HANDLERS =====
+            function updateHairThumbs() {
+                var col = cur.hairColor;
 
-    window.selectBodyType = function (val) {
-        cur.bodyType = val;
-        highlightBtn('.bodytype-btn', val);
-        updatePreview();
-    };
+                $('.hairstyle-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/fe/customize/hair/hair_base_' + s + '_' + col + '.png');
+                });
 
-    window.selectSkin = function (color) {
-        cur.skinColor = color;
-        highlightSwatch('.skin-opt', color, 'color');
-        updatePreview();
-    };
+                $('.bangs-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/fe/customize/hair/hair_bangs_' + s + '_' + col + '.png');
+                });
 
-    window.selectShirt = function (style) {
-        cur.shirtStyle = style;
-        highlightSwatch('.shirt-opt', style, 'style');
-        updatePreview();
-    };
+                $('.beard-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/fe/customize/beards/hair_beard_' + s + '_' + col + '.png');
+                });
 
-    window.selectHairStyle = function (style) {
-        cur.hairStyle = style;
-        highlightSwatch('.hairstyle-opt', style, 'style');
-        updatePreview();
-    };
+                $('.mustache-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/fe/customize/beards/hair_mustache_' + s + '_' + col + '.png');
+                });
+            }
 
-    window.selectHairColor = function (color) {
-        cur.hairColor = color;
-        highlightSwatch('.haircolor-opt', color, 'color');
-        updatePreview();
-    };
+            function updateShirtThumbs() {
+                var bt = cur.bodyType;
 
-    window.selectBangs = function (style) {
-        cur.hairBangs = style;
-        if (style === 0) {
-            $('#bangs-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#bangs-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.bangs-opt', style, 'style');
-        updatePreview();
-    };
+                $('.shirt-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/fe/customize/shirts/' + bt + '_shirt_' + s + '.png');
+                });
+            }
 
-    window.selectBeard = function (style) {
-        cur.hairBeard = style;
-        if (style === 0) {
-            $('#beard-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#beard-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.beard-opt', style, 'style');
-        updatePreview();
-    };
+            function highlightSwatch(selector, activeVal, attr) {
+                $(selector).each(function () {
+                    var v = $(this).data(attr);
+                    $(this).css('border-color', String(v) === String(activeVal) ? '#a855f7' : 'transparent');
+                });
+            }
 
-    window.selectMustache = function (style) {
-        cur.hairMustache = style;
-        if (style === 0) {
-            $('#mustache-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#mustache-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.mustache-opt', style, 'style');
-        updatePreview();
-    };
+            function highlightBtn(selector, activeVal) {
+                $(selector).each(function () {
+                    var v = $(this).data('value');
+                    if (String(v) === String(activeVal)) {
+                        $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
+                    } else {
+                        $(this).removeClass('btn-primary').addClass('btn-outline-secondary');
+                    }
+                });
+            }
 
-})();
-</script>
+            window.selectBodyType = function (val) {
+                cur.bodyType = val;
+                highlightBtn('.bodytype-btn', val);
+                updatePreview();
+            };
+
+            window.selectSkin = function (color) {
+                cur.skinColor = color;
+                highlightSwatch('.skin-opt', color, 'color');
+                updatePreview();
+            };
+
+            window.selectShirt = function (style) {
+                cur.shirtStyle = style;
+                highlightSwatch('.shirt-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectHairStyle = function (style) {
+                cur.hairStyle = style;
+                highlightSwatch('.hairstyle-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectHairColor = function (color) {
+                cur.hairColor = color;
+                highlightSwatch('.haircolor-opt', color, 'color');
+                updatePreview();
+            };
+
+            window.selectBangs = function (style) {
+                cur.hairBangs = style;
+
+                if (style === 0) {
+                    $('#bangs-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#bangs-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+
+                highlightSwatch('.bangs-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectBeard = function (style) {
+                cur.hairBeard = style;
+
+                if (style === 0) {
+                    $('#beard-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#beard-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+
+                highlightSwatch('.beard-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectMustache = function (style) {
+                cur.hairMustache = style;
+
+                if (style === 0) {
+                    $('#mustache-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#mustache-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+
+                highlightSwatch('.mustache-opt', style, 'style');
+                updatePreview();
+            };
+        })();
+    </script>
 }

@@ -1,476 +1,325 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@using HabitTracker.Data
+@using HabitTracker.Constants
+@using HabitTracker.Models
+@using Microsoft.AspNetCore.Http
+@using System.Text.Json
+@inject AppDbContext Db
 
 @{
-    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
-    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var sessionUserId = Context.Session.GetInt32(AppConstants.SESSION_USER_ID);
+    User? currentUser = null;
 
-    bool isFullPage = controller == "Account" &&
-        (action == "Login" || action == "Register"
-         || action == "Profile"
-         || action == "EditProfile"
-         || action == "ChangePassword");
+    if (sessionUserId.HasValue)
+    {
+        currentUser = Db.Users.FirstOrDefault(u => u.Id == sessionUserId.Value);
+    }
+
+    double maxHp = 50;
+    double maxMana = 32;
+
+    double hp = currentUser?.HP ?? 0;
+    double mana = currentUser?.Mana ?? 0;
+    double gold = currentUser?.Gold ?? 0;
+
+    double hpPercent = maxHp > 0 ? Math.Min(100, Math.Max(0, hp * 100 / maxHp)) : 0;
+    double manaPercent = maxMana > 0 ? Math.Min(100, Math.Max(0, mana * 100 / maxMana)) : 0;
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    string Active(string controller, string? action = null)
+    {
+        if (action == null)
+        {
+            return string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
+                ? "active"
+                : "";
+        }
+
+        return string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)
+                ? "active"
+                : "";
+    }
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HabitTracker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        .nav-item-link {
+            height: 68px;
+            min-width: 86px;
+            padding: 8px 12px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: .18s ease;
+        }
+
+            .nav-item-link .line-icon {
+                font-size: 21px;
+                line-height: 1;
+            }
+
+            .nav-item-link small {
+                font-size: .86rem;
+                font-weight: 900;
+            }
+
+            .nav-item-link:hover,
+            .nav-item-link.active {
+                background: #f0eaff;
+                color: #6d28d9;
+            }
+
+                .nav-item-link.active .line-icon {
+                    color: #6d28d9;
+                }
+    </style>
 </head>
 
 <body>
+    <header class="app-header">
+        <nav class="top-navbar">
 
-    @if (!isFullPage)
-    {
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
-                <div class="container-fluid">
+            <a class="brand-logo" asp-controller="Dashboard" asp-action="Index">
+                <span class="brand-icon">✦</span>
+                <span>HabitTracker</span>
+            </a>
 
-                    <!-- Logo -->
-                    <a class="navbar-brand fw-bold text-primary"
-                       asp-controller="Dashboard" asp-action="Index">
-                        🚀 HabitTracker
-                    </a>
+            <div class="nav-menu">
+                <a class="nav-item-link @Active("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
+                    <span class="line-icon">⌂</span>
+                    <small>Dashboard</small>
+                </a>
 
-                    <button class="navbar-toggler" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#navbarContent">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+                <a class="nav-item-link @Active("Task")" asp-controller="Task" asp-action="Index">
+                    <span class="line-icon">☑</span>
+                    <small>Tasks</small>
+                </a>
 
-                    <div class="collapse navbar-collapse" id="navbarContent">
+                <a class="nav-item-link @Active("Account", "Leaderboard")" asp-controller="Account" asp-action="Leaderboard">
+                    <span class="line-icon">♛</span>
+                    <small>Leaderboard</small>
+                </a>
 
-                        <!-- LEFT MENU -->
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <a class="nav-item-link @Active("Friend")" asp-controller="Friend" asp-action="Index">
+                    <span class="line-icon">☺</span>
+                    <small>Bạn bè</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
-                                    📊 Dashboard
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Economy")" asp-controller="Economy" asp-action="Index">
+                    <span class="line-icon">◉</span>
+                    <small>Economy</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Task" asp-action="Index">
-                                    📋 Tasks
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Character")" asp-controller="Character" asp-action="Index">
+                    <span class="line-icon">⚔</span>
+                    <small>Character</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Leaderboard">
-                                    🏆 Leaderboard
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Equipment")" asp-controller="Equipment" asp-action="Index">
+                    <span class="line-icon">⛨</span>
+                    <small>Equipment</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Friend" asp-action="Index">
-                                    👥 Bạn bè
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Market")" asp-controller="Market" asp-action="Index">
+                    <span class="line-icon">⌘</span>
+                    <small>Market</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Economy" asp-action="Index">
-                                    🛡️ Economy
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Inventory")" asp-controller="Inventory" asp-action="Index">
+                    <span class="line-icon">▣</span>
+                    <small>Inventory</small>
+                </a>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Character" asp-action="Index">
-                                    ⚔️ Character
-                                </a>
-                            </li>
+                <a class="nav-item-link @Active("Stable")" asp-controller="Stable" asp-action="Index">
+                    <span class="line-icon">♞</span>
+                    <small>Stable</small>
+                </a>
+            </div>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Equipment" asp-action="Index">
-                                    🛡️ Equipment
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Market" asp-action="Index">
-                                    🏪 Market
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Inventory" asp-action="Index">
-                                    🎒 Inventory
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Stable" asp-action="Index">
-                                    🐾 Stable
-                                </a>
-                            </li>
-
-                            @if (Context.Session.GetString("IsAdmin") == "true")
-                            {
-                                <li class="nav-item ms-2">
-                                    <a class="nav-link text-warning fw-bold"
-                                       asp-controller="Admin" asp-action="Index">
-                                        ⚙️ Admin
-                                    </a>
-                                </li>
-                            }
-
-                        </ul>
-
-                        <!-- CENTER - HUD BARS -->
-                        @if (Context.Session.GetString("Username") != null)
-                        {
-                            <div id="hud-bars" style="margin:0 16px;display:flex;gap:10px;align-items:center;flex-wrap:nowrap;">
-                                <div title="HP" style="display:flex;align-items:center;gap:4px;">
-                                    <span>❤️</span>
-                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
-                                        <div id="hud-hp-bar" style="height:100%;background:#e8436a;border-radius:4px;transition:width .3s;width:100%;"></div>
-                                    </div>
-                                    <small id="hud-hp-text" style="color:#e8436a;font-weight:700;font-size:.75rem;min-width:36px;"></small>
-                                </div>
-                                <div title="MP" style="display:flex;align-items:center;gap:4px;">
-                                    <span>💙</span>
-                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
-                                        <div id="hud-mana-bar" style="height:100%;background:#4a90d9;border-radius:4px;transition:width .3s;width:100%;"></div>
-                                    </div>
-                                    <small id="hud-mana-text" style="color:#4a90d9;font-weight:700;font-size:.75rem;min-width:36px;"></small>
-                                </div>
-                                <div title="Gold" style="display:flex;align-items:center;gap:3px;">
-                                    <span>🪙</span>
-                                    <small id="hud-gold-text" style="color:#f0b429;font-weight:700;font-size:.8rem;min-width:32px;">0</small>
-                                </div>
-                                <div title="Gems" style="display:flex;align-items:center;gap:3px;">
-                                    <span>💎</span>
-                                    <small id="hud-gems-text" style="color:#a78bfa;font-weight:700;font-size:.8rem;min-width:16px;">0</small>
-                                </div>
-                                <small style="color:#667eea;font-size:.75rem;font-weight:700;">Lv<span id="navbar-level">-</span></small>
-                                <small id="hud-sleep" style="display:none;" title="Rest mode active">🌙</small>
-                                <a id="hud-dead" href="/Economy" style="display:none;color:#e8436a;font-weight:700;font-size:.75rem;text-decoration:none;" title="You died! Click to revive.">💀 Dead!</a>
-                            </div>
-                        }
-
-                        <!-- RIGHT USER MENU -->
-                        <ul class="navbar-nav align-items-center">
-
-                            @if (Context.Session.GetString("Username") != null)
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center"
-                                       href="#"
-                                       data-bs-toggle="dropdown"
-                                       style="gap:10px;">
-                                        <img src="@(Context.Session.GetString("Avatar") != null
-                                                                                                                                                                                               && Context.Session.GetString("Avatar").StartsWith("http")
-                                                                                                                                                                                               ? Context.Session.GetString("Avatar")
-                                                                                                                                                                                               : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
-                                     width="40" height="40"
-                                     class="rounded-circle border"
-                                     style="object-fit:cover;" />
-                                <span class="fw-semibold d-none d-md-inline">
-                                    @Context.Session.GetString("Username")
-                                </span>
-                            </a>
-
-                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
-
-                                        <!-- PROFILE LINK -->
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                                👤 My Profile
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
-                                                📊 Dashboard
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Statistics">
-                                                📈 Statistics
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Task" asp-action="Index">
-                                                📋 All Tasks
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">
-                                                🏆 My Badges
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">
-                                                🏅 Leaderboard
-                                            </a>
-                                        </li>
-
-                                        <li><hr class="dropdown-divider"></li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
-                                                🔐 Change Password
-                                            </a>
-                                        </li>
-
-                                        <li><hr class="dropdown-divider"></li>
-
-                                        <li>
-                                            <a class="dropdown-item text-danger"
-                                               asp-controller="Account"
-                                               asp-action="Logout">
-                                                🚪 Logout
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                                }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                        🔐 Login
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Register">
-                                        📝 Register
-                                    </a>
-                                </li>
-                            }
-
-                        </ul>
+            <div class="player-status">
+                <div class="mini-stat">
+                    <span class="stat-icon">♡</span>
+                    <div>
+                        <strong>@hp.ToString("0")/@maxHp.ToString("0")</strong>
+                        <div class="mini-bar hp">
+                            <span style="width:@hpPercent.ToString("0")%"></span>
+                        </div>
                     </div>
                 </div>
-            </nav>
-        </header>
 
-        @* ===== TOAST DATA TỪ TEMPDATA ===== *@
-        @if (TempData["ToastXP"] != null)
-        {
-            <div id="toast-data-xp" data-value="@TempData["ToastXP"]" style="display:none"></div>
-        }
-        @if (TempData["ToastBadge"] != null)
-        {
-            <div id="toast-data-badge" data-value="@TempData["ToastBadge"]" style="display:none"></div>
-        }
-        @if (TempData["ToastLevel"] != null)
-        {
-            <div id="toast-data-level" data-value="@TempData["ToastLevel"]" style="display:none"></div>
-        }
-        @if (TempData["ToastStreak"] != null)
-        {
-            <div id="toast-data-streak" data-value="@TempData["ToastStreak"]" style="display:none"></div>
-        }
-        @if (TempData["ToastRebirth"] != null)
-        {
-            <div id="toast-data-rebirth" data-value="@TempData["ToastRebirth"]" style="display:none"></div>
-        }
-    }
+                <div class="mini-stat">
+                    <span class="stat-icon">♢</span>
+                    <div>
+                        <strong>@mana.ToString("0")/@maxMana.ToString("0")</strong>
+                        <div class="mini-bar mana">
+                            <span style="width:@manaPercent.ToString("0")%"></span>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- ================= BODY ================= -->
-    <div class="@(isFullPage ? "" : "container mt-4")">
-        <main role="main">
-            @RenderBody()
-        </main>
-    </div>
-
-    <!-- ================= FOOTER ================= -->
-    @if (!isFullPage)
-    {
-        <footer class="border-top mt-5">
-            <div class="container text-center py-3 text-muted">
-                © 2026 - HabitTracker 🚀 | v1.0 | 5 Features
+                <div class="mini-stat gold">
+                    <span class="coin-icon">◉</span>
+                    <strong>@gold.ToString("N0")</strong>
+                </div>
             </div>
-        </footer>
-    }
 
-    <!-- SCRIPTS -->
+            <div class="user-dropdown dropdown">
+                <button class="avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="avatar-icon">◉</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end user-menu">
+                    <li>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                            👤 Hồ sơ cá nhân
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Character" asp-action="Index">
+                            🧙 Nhân vật
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Inventory" asp-action="Index">
+                            🎒 Kho đồ
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Equipment" asp-action="Index">
+                            🛡️ Trang bị
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">
+                            🏅 Huy hiệu
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">
+                            🏆 Bảng xếp hạng
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
+                            🔐 Đổi mật khẩu
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider" /></li>
+
+                    <li>
+                        <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                            🚪 Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+    </header>
+
+    <main class="page-wrapper">
+        @RenderBody()
+    </main>
+
+    <div id="toast-area"></div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @RenderSection("Scripts", required: false)
-
-    <!-- ===== TOAST CONTAINER + SCRIPT ===== -->
-    <div id="toast-container"></div>
-
-    <style>
-        #toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast-noti {
-            min-width: 280px;
-            max-width: 340px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 500;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            opacity: 0;
-            transform: translateX(120px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .toast-noti.show {
-                opacity: 1;
-                transform: translateX(0);
-            }
-
-            .toast-noti.hide {
-                opacity: 0;
-                transform: translateX(120px);
-            }
-
-        .toast-xp {
-            background: linear-gradient(135deg, #f6a623, #f76b1c);
-        }
-
-        .toast-badge {
-            background: linear-gradient(135deg, #7b2ff7, #4a90d9);
-        }
-
-        .toast-streak {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-        }
-
-        .toast-level {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            color: #1a1a1a;
-        }
-
-        .toast-gold  { background: linear-gradient(135deg, #f0b429, #f76b1c); }
-        .toast-hp    { background: linear-gradient(135deg, #e8436a, #c0392b); }
-        .toast-crit  { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #1a1a1a; }
-        .toast-drop  { background: linear-gradient(135deg, #7b2ff7, #4a90d9); }
-        .toast-death { background: linear-gradient(135deg, #1a1a2e, #c0392b); }
-
-        .toast-icon {
-            font-size: 2rem;
-            line-height: 1;
-            flex-shrink: 0;
-            animation: bounceIcon 0.5s ease;
-        }
-
-        .toast-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 0 0 12px 12px;
-            animation: progressBar 3.5s linear forwards;
-        }
-
-        @@keyframes bounceIcon {
-            0% {
-                transform: scale(0.5);
-            }
-
-            60% {
-                transform: scale(1.3);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @@keyframes progressBar {
-            from {
-                width: 100%;
-            }
-
-            to {
-                width: 0%;
-            }
-        }
-    </style>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        function showToast(icon, title, message, type, duration) {
-            duration = duration || 3500;
-            var container = document.getElementById('toast-container');
+        window.showToast = function (icon, title, message, type, duration) {
+            var area = document.getElementById('toast-area');
+
+            if (!area) {
+                area = document.createElement('div');
+                area.id = 'toast-area';
+                document.body.appendChild(area);
+            }
+
             var toast = document.createElement('div');
-            toast.className = 'toast-noti ' + type;
+            toast.className = 'game-toast ' + (type || 'toast-success');
+
             toast.innerHTML =
-                '<div class="toast-icon">' + icon + '</div>' +
-                '<div>' +
-                    '<div style="font-weight:700;font-size:1rem;">' + title + '</div>' +
-                    '<div style="font-size:0.85rem;opacity:0.9;">' + message + '</div>' +
+                '<div class="game-toast-icon">' + icon + '</div>' +
+                '<div class="game-toast-body">' +
+                    '<strong>' + title + '</strong>' +
+                    '<span>' + message + '</span>' +
                 '</div>' +
-                '<div class="toast-progress"></div>';
+                '<button class="game-toast-close" type="button">×</button>';
 
-            container.appendChild(toast);
+            area.appendChild(toast);
 
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    toast.classList.add('show');
-                });
+            toast.querySelector('.game-toast-close').addEventListener('click', function () {
+                removeToast(toast);
             });
 
             setTimeout(function () {
-                toast.classList.remove('show');
-                toast.classList.add('hide');
-                setTimeout(function () { toast.remove(); }, 400);
-            }, duration);
+                removeToast(toast);
+            }, duration || 3500);
+        };
+
+        function removeToast(toast) {
+            if (!toast) return;
+
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(35px)';
+
+            setTimeout(function () {
+                toast.remove();
+            }, 300);
         }
 
-        function refreshHud() {
-            $.getJSON('/Economy/GetStats', function(s) {
-                if (!s) return;
-                document.getElementById('navbar-level').textContent    = s.level;
-                var hpPct   = s.maxHp   > 0 ? Math.round(s.hp   / s.maxHp   * 100) : 0;
-                var mpPct   = s.maxMana > 0 ? Math.round(s.mana / s.maxMana * 100) : 0;
-                document.getElementById('hud-hp-bar').style.width      = hpPct  + '%';
-                document.getElementById('hud-mana-bar').style.width    = mpPct  + '%';
-                document.getElementById('hud-hp-text').textContent     = Math.round(s.hp)   + '/' + s.maxHp;
-                document.getElementById('hud-mana-text').textContent   = Math.round(s.mana) + '/' + s.maxMana;
-                document.getElementById('hud-gold-text').textContent   = Math.round(s.gold * 10) / 10;
-                document.getElementById('hud-gems-text').textContent   = s.gems ?? 0;
-                document.getElementById('hud-sleep').style.display     = s.isSleeping ? 'inline' : 'none';
-                document.getElementById('hud-dead').style.display      = s.isDead     ? 'inline' : 'none';
-            });
+        @if (TempData["Success"] != null)
+        {
+                <text>
+                    showToast('✅', 'Thành công', @Html.Raw(JsonSerializer.Serialize(TempData["Success"]?.ToString())), 'toast-success', 3500);
+                </text>
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var xp     = document.getElementById('toast-data-xp');
-            var badge  = document.getElementById('toast-data-badge');
-            var level  = document.getElementById('toast-data-level');
-            var streak = document.getElementById('toast-data-streak');
+        @if (TempData["Error"] != null)
+        {
+                <text>
+                    showToast('❌', 'Lỗi', @Html.Raw(JsonSerializer.Serialize(TempData["Error"]?.ToString())), 'toast-death', 4000);
+                </text>
+        }
 
-            var rebirth = document.getElementById('toast-data-rebirth');
-
-            if (xp)      showToast('⚡', 'Nhận XP!',      xp.dataset.value,      'toast-xp',      3500);
-            if (streak)  setTimeout(function(){ showToast('🔥', 'Streak!',        streak.dataset.value,  'toast-streak',  4000); }, 300);
-            if (badge)   setTimeout(function(){ showToast('🏅', 'Huy hiệu mới!', badge.dataset.value,   'toast-badge',   5000); }, 800);
-            if (level)   setTimeout(function(){ showToast('⬆️', 'Level Up!',      level.dataset.value,   'toast-level',   5000); }, 1400);
-            if (rebirth) setTimeout(function(){ showToast('🔁', 'Reborn!',        rebirth.dataset.value, 'toast-rebirth', 5000); }, 300);
-
-            @if (Context.Session.GetString("Username") != null)
-            {
-                <text>refreshHud();</text>
-            }
-        });
+        @if (TempData["Warning"] != null)
+        {
+                <text>
+                    showToast('⚠️', 'Thông báo', @Html.Raw(JsonSerializer.Serialize(TempData["Warning"]?.ToString())), 'toast-hp', 4000);
+                </text>
+        }
     </script>
 
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

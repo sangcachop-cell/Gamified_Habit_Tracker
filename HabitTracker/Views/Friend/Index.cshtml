@@ -8,389 +8,618 @@
     var pendingIds = ViewBag.PendingIds as HashSet<int> ?? new();
     int me = (int)(ViewBag.CurrentUserId ?? 0);
 }
+
 <style>
-    :root {
-        --ink: #0a0a12;
-        --paper: #f5f3ef;
-        --violet: #5c3dde;
-        --gold: #f0b429;
-        --rose: #e8436a;
-        --teal: #00b89c;
-        --soft: #edeaf5
-    }
-
     body {
-        background: var(--paper);
-        font-family: "DM Sans",sans-serif
+        background: #f8fafc !important;
+        font-family: "Nunito", sans-serif;
     }
 
-    h1, h2, h3, h4 {
-        font-family: "Syne",sans-serif
+    .friends-page {
+        padding: 26px 0 50px;
     }
 
-    .page-hero {
-        background: var(--ink);
-        border-radius: 20px;
-        padding: 30px 36px;
-        color: white;
-        margin-bottom: 28px;
-        position: relative;
-        overflow: hidden;
+    .friends-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 16px;
-        flex-wrap: wrap
+        gap: 20px;
+        margin-bottom: 24px;
     }
 
-        .page-hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.4),transparent 55%);
-            pointer-events: none
-        }
-
-        .page-hero h2 {
-            font-size: 1.7rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            position: relative;
-            z-index: 2;
-            margin: 0
-        }
-
-        .page-hero p {
-            color: rgba(255,255,255,.55);
-            font-size: .88rem;
-            margin: 4px 0 0;
-            position: relative;
-            z-index: 2
-        }
-    /* search */
-    .search-wrap {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        position: relative;
-        z-index: 2
-    }
-
-    .search-input {
-        padding: 11px 18px;
-        border: none;
-        border-radius: 50px;
-        font-family: "DM Sans",sans-serif;
-        font-size: .9rem;
-        width: 260px;
-        outline: none;
-        background: rgba(255,255,255,.12);
-        color: white;
-        border: 1.5px solid rgba(255,255,255,.2)
-    }
-
-        .search-input::placeholder {
-            color: rgba(255,255,255,.4)
-        }
-
-        .search-input:focus {
-            background: rgba(255,255,255,.18);
-            border-color: rgba(255,255,255,.4)
-        }
-
-    .btn-search {
-        padding: 11px 20px;
-        background: var(--violet);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-family: "Syne",sans-serif;
-        font-weight: 700;
-        font-size: .85rem;
-        cursor: pointer;
-        transition: background .2s
-    }
-
-        .btn-search:hover {
-            background: #4a2fc0
-        }
-    /* layout */
-    .fl-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        align-items: start
-    }
-
-    .glass-card {
-        background: white;
-        border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
-        padding: 22px;
-        margin-bottom: 20px
-    }
-
-    .card-title {
-        font-size: .95rem;
-        font-weight: 700;
-        letter-spacing: -.3px;
-        margin-bottom: 18px;
+    .friends-title {
         display: flex;
         align-items: center;
-        justify-content: space-between
+        gap: 14px;
     }
 
-    .badge-count {
-        background: var(--violet);
-        color: white;
-        border-radius: 50px;
-        padding: 2px 9px;
-        font-size: .72rem;
-        font-weight: 700
-    }
-    /* user row */
-    .user-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid #f5f5f5
-    }
-
-        .user-row:last-child {
-            border: none
-        }
-
-    .u-av {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
+    .friends-title-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: #ede9fe;
+        color: #6d28d9;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: "Syne",sans-serif;
-        font-weight: 800;
-        font-size: 1rem;
-        flex-shrink: 0;
-        object-fit: cover;
-        text-decoration: none
+        font-size: 1.8rem;
+        font-weight: 900;
     }
 
-    .u-name {
+    .friends-title h1 {
+        margin: 0;
+        font-size: 2.1rem;
+        font-weight: 900;
+        color: #020617;
+        letter-spacing: -.04em;
+    }
+
+    .friends-title p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .friend-search {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+        .friend-search input {
+            width: 340px;
+            height: 48px;
+            border-radius: 15px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            padding: 0 16px;
+            outline: none;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+            .friend-search input:focus {
+                border-color: #7c3aed;
+                box-shadow: 0 0 0 4px rgba(124, 58, 237, .1);
+            }
+
+    .btn-main {
+        height: 48px;
+        border: none;
+        border-radius: 15px;
+        background: #6d28d9;
+        color: white;
+        padding: 0 22px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 10px 22px rgba(109, 40, 217, .18);
+    }
+
+        .btn-main:hover {
+            background: #5b21b6;
+        }
+
+    .tabs {
+        display: inline-flex;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 6px;
+        gap: 6px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+    }
+
+    .tab {
+        padding: 11px 18px;
+        border-radius: 13px;
+        background: transparent;
+        color: #64748b;
+        font-weight: 900;
+        border: none;
+    }
+
+        .tab.active {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+    .tab-badge {
+        margin-left: 6px;
+        background: #fee2e2;
+        color: #ef4444;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: .75rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+    }
+
+    .stat-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .stat-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .stat-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .stat-orange {
+        background: #ffedd5;
+        color: #f97316;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #020617;
+    }
+
+    .stat-card p {
+        margin: 2px 0 0;
+        color: #64748b;
         font-weight: 700;
         font-size: .9rem;
-        margin-bottom: 1px
     }
 
-    .u-sub {
-        font-size: .75rem;
-        color: #aaa
+    .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        align-items: start;
     }
 
-    .u-actions {
-        margin-left: auto;
+    .card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+        margin-bottom: 20px;
+    }
+
+    .card-header {
         display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+        .card-header h2 {
+            margin: 0;
+            color: #020617;
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+    .sort-select {
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 0 12px;
+        background: white;
+        font-weight: 800;
+        color: #334155;
+    }
+
+    .user-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 120px 120px auto;
+        align-items: center;
+        gap: 16px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .user-row:last-child {
+            border-bottom: none;
+        }
+
+    .user-main {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+    }
+
+    .avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: #ede9fe;
+        color: #6d28d9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.1rem;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+
+    .user-name {
+        font-weight: 900;
+        color: #020617;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .user-name:hover {
+            color: #6d28d9;
+        }
+
+    .level-pill {
+        background: #ede9fe;
+        color: #6d28d9;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 900;
+    }
+
+    .user-sub {
+        margin-top: 4px;
+        color: #94a3b8;
+        font-size: .84rem;
+        font-weight: 700;
+    }
+
+    .metric {
+        font-weight: 900;
+        color: #020617;
+    }
+
+        .metric small {
+            display: block;
+            margin-top: 3px;
+            color: #64748b;
+            font-weight: 700;
+            font-size: .78rem;
+        }
+
+    .heart {
+        color: #f43f5e;
+    }
+
+    .fire {
+        color: #f97316;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 12px;
+        min-height: 38px;
+        padding: 0 14px;
+        font-weight: 900;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         gap: 6px;
-        flex-shrink: 0
-    }
-
-    .btn-accept {
-        padding: 6px 14px;
-        background: var(--teal);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background .2s
-    }
-
-        .btn-accept:hover {
-            background: #009f87
-        }
-
-    .btn-reject {
-        padding: 6px 14px;
-        background: #f0f0f0;
-        color: #666;
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .2s
-    }
-
-        .btn-reject:hover {
-            background: #e0e0e0
-        }
-
-    .btn-unfriend {
-        padding: 6px 14px;
-        background: #fde8ed;
-        color: var(--rose);
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .2s
-    }
-
-        .btn-unfriend:hover {
-            background: #f9c9d4
-        }
-
-    .btn-add {
-        padding: 6px 16px;
-        background: var(--violet);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all .2s
-    }
-
-        .btn-add:hover {
-            background: #4a2fc0
-        }
-
-    .btn-pending {
-        padding: 6px 14px;
-        background: #f0f0f0;
-        color: #888;
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        cursor: default
+        white-space: nowrap;
     }
 
     .btn-view {
-        padding: 6px 14px;
-        background: var(--soft);
-        color: var(--violet);
-        border: none;
-        border-radius: 50px;
-        font-size: .78rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: background .2s
+        background: #ede9fe;
+        color: #6d28d9;
     }
 
         .btn-view:hover {
-            background: #ddd8f5;
-            color: var(--violet)
+            background: #ddd6fe;
+            color: #5b21b6;
         }
 
-    .empty {
-        text-align: center;
-        padding: 28px 16px;
-        color: #ccc;
-        font-size: .88rem
+    .btn-add {
+        background: #6d28d9;
+        color: white;
     }
 
-    .empty-emoji {
-        font-size: 2rem;
-        display: block;
-        margin-bottom: 8px
+        .btn-add:hover {
+            background: #5b21b6;
+        }
+
+    .btn-accept {
+        background: #ecfdf5;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
     }
-    /* search results */
+
+    .btn-reject {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e5e7eb;
+    }
+
+    .btn-unfriend {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-pending {
+        background: #f1f5f9;
+        color: #64748b;
+        cursor: default;
+    }
+
+    .btn-chat {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        padding: 0;
+        background: #6d28d9;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .mini-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .mini-row:last-child {
+            border-bottom: none;
+        }
+
+    .mini-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .mini-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
+        background: #ede9fe;
+        color: #6d28d9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+
+    .mini-name {
+        color: #020617;
+        font-weight: 900;
+    }
+
+    .mini-sub {
+        color: #94a3b8;
+        font-size: .8rem;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+
+    .empty {
+        padding: 46px 20px;
+        text-align: center;
+        color: #94a3b8;
+        font-weight: 700;
+    }
+
+        .empty span {
+            display: block;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+
     .search-card {
         background: white;
-        border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
         padding: 22px;
-        margin-bottom: 24px
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+        margin-bottom: 20px;
     }
 
     .results-label {
-        font-size: .75rem;
-        font-weight: 700;
-        letter-spacing: 1.5px;
+        font-size: .78rem;
         text-transform: uppercase;
-        color: #aaa;
-        margin-bottom: 14px
+        letter-spacing: .08em;
+        color: #94a3b8;
+        font-weight: 900;
+        margin-bottom: 14px;
     }
 
-    .alert-s {
-        background: #d4f5ef;
-        color: #006651;
-        padding: 11px 16px;
-        border-radius: 10px;
-        font-size: .88rem;
-        margin-bottom: 20px
+    .search-result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid #f1f5f9;
     }
 
-    @@media(max-width:800px) {
-        .fl-layout {
-            grid-template-columns: 1fr
+        .search-result-row:last-child {
+            border-bottom: none;
         }
 
-        .search-input {
-            width: 180px
+    .alert-s {
+        background: #dcfce7;
+        color: #166534;
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-weight: 800;
+        margin-bottom: 18px;
+        border: 1px solid #bbf7d0;
+    }
+
+    @@media(max-width: 1050px) {
+        .friends-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .friend-search input {
+            width: 100%;
+        }
+
+        .stats-grid,
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .user-row {
+            grid-template-columns: 1fr;
+            align-items: start;
+        }
+
+        .actions {
+            justify-content: flex-start;
+        }
+    }
+
+    @@media(max-width: 600px) {
+        .friends-title h1 {
+            font-size: 1.7rem;
+        }
+
+        .friend-search {
+            flex-direction: column;
+        }
+
+            .friend-search input,
+            .btn-main {
+                width: 100%;
+            }
+
+        .tabs {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        .search-result-row,
+        .mini-row {
+            flex-direction: column;
+            align-items: flex-start;
         }
     }
 </style>
 
-<div style="padding:8px 0 48px">
+<div class="friends-page">
 
     @if (TempData["Success"] != null)
     {
         <div class="alert-s">@TempData["Success"]</div>
     }
 
-    <!-- Hero -->
-    <div class="page-hero">
-        <div style="position:relative;z-index:2">
-            <h2>👥 Bạn bè</h2>
-            <p>@friends.Count bạn bè · @pendingReceived.Count lời mời đang chờ</p>
-        </div>
-        <form method="get" class="search-wrap">
-            <input type="text" name="q" class="search-input"
-                   placeholder="Tìm theo tên hoặc email..."
+    <div class="friends-header">
+
+        <form method="get" class="friend-search">
+            <input type="text"
+                   name="q"
+                   placeholder="Tìm kiếm bạn bè theo email hoặc tên"
                    value="@ViewBag.SearchQuery" />
-            <button type="submit" class="btn-search">🔍 Tìm</button>
+            <button type="submit" class="btn-main">🔍 Tìm</button>
         </form>
     </div>
 
-    <!-- Search Results -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-purple">👥</div>
+            <div>
+                <h3>@friends.Count</h3>
+                <p>Bạn bè</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon stat-green">✓</div>
+            <div>
+                <h3>@pendingReceived.Count</h3>
+                <p>Lời mời đang chờ</p>
+            </div>
+        </div>
+    </div>
+
     @if (!string.IsNullOrEmpty(ViewBag.SearchQuery as string))
     {
         <div class="search-card">
             <div class="results-label">Kết quả tìm kiếm cho "@ViewBag.SearchQuery"</div>
+
             @if (searchResults.Count > 0)
             {
                 foreach (var u in searchResults)
                 {
                     var isFriend = friendIds.Contains(u.Id);
                     var isPending = pendingIds.Contains(u.Id);
-                    var avBg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" };
-                    var bg = avBg[Math.Abs(u.Id) % avBg.Length];
-                    <div class="user-row">
-                        <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">
-                            @u.Username.Substring(0, 1).ToUpper()
-                        </a>
-                        <div>
-                            <div class="u-name">@u.Username</div>
-                            <div class="u-sub">Level @u.Level · @u.XP XP</div>
+                    var first = string.IsNullOrWhiteSpace(u.Username) ? "?" : u.Username.Substring(0, 1).ToUpper();
+
+                    <div class="search-result-row">
+                        <div class="user-main">
+                            <a href="/Friend/ViewProfile/@u.Id" class="avatar">@first</a>
+                            <div>
+                                <a href="/Friend/ViewProfile/@u.Id" class="user-name">
+                                    @u.Username
+                                    <span class="level-pill">Level @u.Level</span>
+                                </a>
+                                <div class="user-sub">@u.XP XP · 🔥 @u.CurrentStreak ngày</div>
+                            </div>
                         </div>
-                        <div class="u-actions">
-                            <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem profile</a>
+
+                        <div class="actions">
+                            <a href="/Friend/ViewProfile/@u.Id" class="btn btn-view">Xem profile</a>
+
                             @if (isFriend)
                             {
-                                <span class="btn-pending">✓ Bạn bè</span>
+                                <span class="btn btn-pending">✓ Bạn bè</span>
                             }
                             else if (isPending)
                             {
-
-                                <span class="btn-pending">⏳ Đang chờ</span>
+                                <span class="btn btn-pending">⏳ Đang chờ</span>
                             }
                             else
                             {
-                                <button class="btn-add" onclick="sendRequest(@u.Id, this)">+ Kết bạn</button>
+                                <button class="btn btn-add" onclick="sendRequest(@u.Id, this)">+ Kết bạn</button>
                             }
                         </div>
                     </div>
@@ -398,96 +627,107 @@
             }
             else
             {
-
-                <div class="empty"><span class="empty-emoji">🔍</span>Không tìm thấy người dùng nào</div>
+                <div class="empty">
+                    <span>🔍</span>
+                    Không tìm thấy người dùng nào
+                </div>
             }
         </div>
     }
 
-    <div class="fl-layout">
-        <!-- LEFT -->
-        <div>
-            <!-- Pending received -->
-            @if (pendingReceived.Count > 0)
-            {
-                <div class="glass-card">
-                    <div class="card-title">
-                        <span>🔔 Lời mời kết bạn</span>
-                        <span class="badge-count">@pendingReceived.Count</span>
-                    </div>
-                    @foreach (var f in pendingReceived)
-                    {
-                        var u = f.Requester!;
-                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
-                        <div class="user-row">
-                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
-                            <div>
-                                <div class="u-name">@u.Username</div>
-                                <div class="u-sub">Level @u.Level · @u.XP XP</div>
-                            </div>
-                            <div class="u-actions">
-                                <form method="post" action="/Friend/Accept" style="display:inline">
-                                    <input type="hidden" name="friendshipId" value="@f.Id" />
-                                    <button type="submit" class="btn-accept">✓ Chấp nhận</button>
-                                </form>
-                                <form method="post" action="/Friend/Reject" style="display:inline">
-                                    <input type="hidden" name="friendshipId" value="@f.Id" />
-                                    <button type="submit" class="btn-reject">✕ Từ chối</button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
+    <div class="main-grid">
 
-            <!-- Sent pending -->
-            @if (pendingSent.Count > 0)
+        <div class="card">
+            <div class="card-header">
+                <h2>👥 Danh sách bạn bè (@friends.Count)</h2>
+                <select class="sort-select">
+                    <option>Sắp xếp: Mới nhất</option>
+                    <option>Level cao nhất</option>
+                    <option>XP cao nhất</option>
+                </select>
+            </div>
+
+            @if (friends.Count > 0)
             {
-                <div class="glass-card">
-                    <div class="card-title"><span>⏳ Đã gửi lời mời</span><span class="badge-count">@pendingSent.Count</span></div>
-                    @foreach (var f in pendingSent)
-                    {
-                        var u = f.Receiver!;
-                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
-                        <div class="user-row">
-                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
-                            <div><div class="u-name">@u.Username</div><div class="u-sub">Level @u.Level</div></div>
-                            <div class="u-actions">
-                                <form method="post" action="/Friend/Reject" style="display:inline">
-                                    <input type="hidden" name="friendshipId" value="@f.Id" />
-                                    <button type="submit" class="btn-reject">✕ Huỷ</button>
-                                </form>
+                foreach (var f in friends)
+                {
+                    var u = f.RequesterId == me ? f.Receiver! : f.Requester!;
+                    var first = string.IsNullOrWhiteSpace(u.Username) ? "?" : u.Username.Substring(0, 1).ToUpper();
+
+                    <div class="user-row">
+                        <div class="user-main">
+                            <a href="/Friend/ViewProfile/@u.Id" class="avatar">@first</a>
+                            <div>
+                                <a href="/Friend/ViewProfile/@u.Id" class="user-name">
+                                    @u.Username
+                                    <span class="level-pill">Level @u.Level</span>
+                                </a>
+                                <div class="user-sub">Đang hoạt động</div>
                             </div>
                         </div>
-                    }
+
+                        <div class="metric">
+                            <span class="heart">♥</span> @u.XP
+                            <small>XP từ bạn</small>
+                        </div>
+
+                        <div class="metric">
+                            <span class="fire">🔥</span> @u.CurrentStreak ngày
+                            <small>Chuỗi hiện tại</small>
+                        </div>
+
+                        <div class="actions">
+                            <a href="/Friend/ViewProfile/@u.Id" class="btn btn-chat">💬</a>
+
+                            <form method="post" action="/Friend/Unfriend" style="display:inline">
+                                <input type="hidden" name="friendshipId" value="@f.Id" />
+                                <button type="submit" class="btn btn-unfriend">Huỷ bạn</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty">
+                    <span>👥</span>
+                    Chưa có bạn bè nào.<br />
+                    Tìm kiếm và kết bạn ngay!
                 </div>
             }
         </div>
 
-        <!-- RIGHT: Friend list -->
         <div>
-            <div class="glass-card">
-                <div class="card-title">
-                    <span>👥 Danh sách bạn bè</span>
-                    <span class="badge-count">@friends.Count</span>
+            <div class="card">
+                <div class="card-header">
+                    <h2>👥 Lời mời kết bạn (@pendingReceived.Count)</h2>
                 </div>
-                @if (friends.Count > 0)
+
+                @if (pendingReceived.Count > 0)
                 {
-                    foreach (var f in friends)
+                    foreach (var f in pendingReceived)
                     {
-                        var u = f.RequesterId == me ? f.Receiver! : f.Requester!;
-                        var bg = new[] { "#fff5d6", "#edeaf5", "#d4f5ef", "#fde8ed", "#e2f5e2" }[Math.Abs(u.Id) % 5];
-                        <div class="user-row">
-                            <a href="/Friend/ViewProfile/@u.Id" class="u-av" style="background:@bg">@u.Username.Substring(0, 1).ToUpper()</a>
-                            <div>
-                                <div class="u-name">@u.Username</div>
-                                <div class="u-sub">Level @u.Level · @u.XP XP · 🔥@u.CurrentStreak</div>
+                        var u = f.Requester!;
+                        var first = string.IsNullOrWhiteSpace(u.Username) ? "?" : u.Username.Substring(0, 1).ToUpper();
+
+                        <div class="mini-row">
+                            <div class="mini-left">
+                                <a href="/Friend/ViewProfile/@u.Id" class="mini-avatar">@first</a>
+                                <div>
+                                    <div class="mini-name">@u.Username <span class="level-pill">Level @u.Level</span></div>
+                                    <div class="mini-sub">@u.XP XP</div>
+                                </div>
                             </div>
-                            <div class="u-actions">
-                                <a href="/Friend/ViewProfile/@u.Id" class="btn-view">Xem</a>
-                                <form method="post" action="/Friend/Unfriend" style="display:inline">
+
+                            <div class="actions">
+                                <form method="post" action="/Friend/Accept" style="display:inline">
                                     <input type="hidden" name="friendshipId" value="@f.Id" />
-                                    <button type="submit" class="btn-unfriend">Huỷ bạn</button>
+                                    <button type="submit" class="btn btn-accept">✓ Chấp nhận</button>
+                                </form>
+
+                                <form method="post" action="/Friend/Reject" style="display:inline">
+                                    <input type="hidden" name="friendshipId" value="@f.Id" />
+                                    <button type="submit" class="btn btn-reject">× Từ chối</button>
                                 </form>
                             </div>
                         </div>
@@ -495,24 +735,44 @@
                 }
                 else
                 {
-
-                    <div class="empty"><span class="empty-emoji">👥</span>Chưa có bạn bè nào.<br />Tìm kiếm và kết bạn ngay!</div>
+                    <div class="empty">
+                        <span>📩</span>
+                        Chưa có lời mời nào
+                    </div>
                 }
             </div>
+
         </div>
+
     </div>
 </div>
 
 @section Scripts {
     <script>
         async function sendRequest(uid, btn) {
-            btn.disabled = true; btn.textContent = '...';
+            btn.disabled = true;
+            btn.textContent = '...';
+
             const form = new FormData();
             form.append('receiverId', uid);
-            const r = await fetch('/Friend/SendRequest', { method:'POST', body: form, headers:{'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value ?? ''} });
+
+            const token = document.querySelector('input[name=__RequestVerificationToken]')?.value ?? '';
+
+            const r = await fetch('/Friend/SendRequest', {
+                method: 'POST',
+                body: form,
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            });
+
             const d = await r.json();
+
             btn.textContent = d.ok ? '⏳ Đã gửi' : '❌ Lỗi';
-            if (!d.ok) { btn.disabled = false; }
+
+            if (!d.ok) {
+                btn.disabled = false;
+            }
         }
     </script>
 }

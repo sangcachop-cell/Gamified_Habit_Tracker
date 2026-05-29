@@ -40,7 +40,7 @@ namespace HabitTracker.Services.Implementations
             "Floral", "Fluorite", "Frost", "Ghost", "Gingerbread", "Glass",
             "Glow", "Holly", "IcySnow", "Jade", "Koi", "Moonglow", "MossyStone",
             "Onyx", "Opal", "Peppermint", "PinkMarble", "PolkaDot", "Porcelain",
-            "Purple", "Rainbow", "RoseGold", "RoseQuartz", "RoyalPurple", "Ruby",
+            "Rainbow", "RoseGold", "RoseQuartz", "RoyalPurple", "Ruby",
             "SandSculpture", "Shadow", "Shimmer", "Silver", "SolarSystem",
             "Spooky", "StainedGlass", "StarryNight", "Sunset", "Sunshine",
             "Thunderstorm", "Turquoise", "Vampire", "Watery"
@@ -126,7 +126,7 @@ namespace HabitTracker.Services.Implementations
         public PetCatalogService()
         {
             _catalog = BuildCatalog();
-            _index   = _catalog.ToDictionary(e => e.PetKey, StringComparer.Ordinal);
+            _index = _catalog.ToDictionary(e => e.PetKey, StringComparer.Ordinal);
         }
 
         public bool IsValidHatch(string animalKey, string colorKey)
@@ -276,50 +276,50 @@ namespace HabitTracker.Services.Implementations
         {
             var key = $"{animal}-{color}";
             return new PetCatalogEntry(
-                PetKey:       key,
-                AnimalKey:    animal,
-                ColorKey:     color,
-                Category:     cat,
+                PetKey: key,
+                AnimalKey: animal,
+                ColorKey: color,
+                Category: cat,
                 CanBecomeMount: canMount,
-                PetImagePath:   $"/images/habitica/stable/pets/Pet-{key}.png",
-                MountIconPath:  canMount ? $"/images/habitica/stable/mounts/icon/Mount_Icon_{key}.png" : null);
+                PetImagePath: $"/fe/stable/pets/Pet-{key}.png",
+                MountIconPath: canMount ? $"/fe/stable/mounts/icon/Mount_Icon_{key}.png" : null);
         }
 
         private static PetCatalogEntry MakeSpecial(string animal, string color, bool canMount)
         {
             var key = $"{animal}-{color}";
             return new PetCatalogEntry(
-                PetKey:       key,
-                AnimalKey:    animal,
-                ColorKey:     color,
-                Category:     PetCategory.Special,
+                PetKey: key,
+                AnimalKey: animal,
+                ColorKey: color,
+                Category: PetCategory.Special,
                 CanBecomeMount: canMount,
-                PetImagePath:   $"/images/habitica/stable/pets/Pet-{key}.png",
-                MountIconPath:  canMount ? $"/images/habitica/stable/mounts/icon/Mount_Icon_{key}.png" : null);
+                PetImagePath: $"/fe/stable/pets/Pet-{key}.png",
+                MountIconPath: canMount ? $"/fe/stable/mounts/icon/Mount_Icon_{key}.png" : null);
         }
 
         // Slot for view rendering — owned/mount fields start false, populated by StableService
         private static PetSlotEntry MakeSlot(PetCatalogEntry e) => new(
-            PetKey:          e.PetKey,
-            ColorKey:        e.ColorKey,
+            PetKey: e.PetKey,
+            ColorKey: e.ColorKey,
             ColorDisplayName: FormatColorName(e.ColorKey),
-            SlotCategory:    e.Category,
-            CanBecomeMount:  e.CanBecomeMount,
-            PetImagePath:    e.PetImagePath,
-            MountIconPath:   e.MountIconPath,
-            IsOwned:         false,
-            IsMount:         false,
-            FeedingPoints:   0,
-            IsActivePet:     false,
-            IsActiveMount:   false);
+            SlotCategory: e.Category,
+            CanBecomeMount: e.CanBecomeMount,
+            PetImagePath: e.PetImagePath,
+            MountIconPath: e.MountIconPath,
+            IsOwned: false,
+            IsMount: false,
+            FeedingPoints: 0,
+            IsActivePet: false,
+            IsActiveMount: false);
 
         // Order: drop colors first, then premium, then wacky
         private static int SlotOrder(PetCatalogEntry e) => e.Category switch
         {
-            PetCategory.Drop    => 0,
+            PetCategory.Drop => 0,
             PetCategory.Premium => 1,
-            PetCategory.Wacky   => 2,
-            _                   => 3
+            PetCategory.Wacky => 2,
+            _ => 3
         };
 
         public static string FormatAnimalName(string key)
