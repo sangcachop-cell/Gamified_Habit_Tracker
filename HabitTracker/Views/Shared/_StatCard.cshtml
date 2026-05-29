@@ -1,0 +1,76 @@
+@model HabitTracker.Models.ViewModels.StatCardModel
+@{
+    string statLow = Model.Stat.ToLower();
+}
+
+<div class="card h-100 text-center p-3" title="@Model.Tooltip">
+    <div class="mb-1" style="font-size:1.5rem;">@Model.Icon</div>
+    <div class="fw-bold mb-2">@Model.Label (@Model.Stat)</div>
+
+    <!-- Total (big display) -->
+    <div id="total-@statLow" style="font-size:2rem;font-weight:700;line-height:1;">@Model.Total</div>
+
+    <!-- Breakdown table -->
+    <table class="table table-sm table-borderless mt-2 mb-0" style="font-size:0.78rem;">
+        <tbody>
+            <tr>
+                <td class="text-start text-muted">Base</td>
+                <td class="text-end" id="base-@statLow">@Model.Base</td>
+            </tr>
+            @if (Model.GearBonus != 0)
+            {
+                <tr>
+                    <td class="text-start text-muted">Gear</td>
+                    <td class="text-end text-success" id="gear-@statLow">+@Model.GearBonus</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td class="text-start text-muted">Gear</td>
+                    <td class="text-end text-muted" id="gear-@statLow">0</td>
+                </tr>
+            }
+            @if (Model.ClassBonus != 0)
+            {
+                <tr>
+                    <td class="text-start text-muted">Class</td>
+                    <td class="text-end text-primary" id="classbns-@statLow">+@Model.ClassBonus</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td class="text-start text-muted">Class</td>
+                    <td class="text-end text-muted" id="classbns-@statLow">0</td>
+                </tr>
+            }
+            <tr>
+                <td class="text-start text-muted">Level</td>
+                <td class="text-end text-info" id="lvlbns-@statLow">+@Model.LevelBonus</td>
+            </tr>
+            @if (Model.Buff != 0)
+            {
+                <tr>
+                    <td class="text-start text-muted">Buff ✨</td>
+                    <td class="text-end text-warning" id="buff-@statLow">+@Model.Buff</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td class="text-start text-muted">Buff</td>
+                    <td class="text-end text-muted" id="buff-@statLow">0</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Allocate button -->
+    <button class="btn btn-sm mt-2 btn-allocate @(Model.CanAllocate ? "btn-success" : "btn-outline-secondary")"
+            data-stat="@Model.Stat"
+            @(Model.CanAllocate ? "" : "disabled")
+            title="@(Model.CanAllocate ? "Spend 1 stat point on " + Model.Stat : "No stat points available")">
+        + Allocate
+    </button>
+</div>

@@ -1,0 +1,205 @@
+@{
+    ViewData["Title"] = "Choose Your Class";
+}
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-2">
+        <a href="/Character" class="btn btn-outline-secondary btn-sm me-3">← Back</a>
+        <div>
+            <h2 class="mb-0">⚔️ Choose Your Class</h2>
+            <p class="text-muted mb-0 small">You've reached level 10 — your adventure specialization awaits.</p>
+        </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+        <span class="me-2">⚠️</span>
+        <span><strong>This choice is permanent.</strong> You cannot change your class without an Orb of Rebirth (available in a future update).</span>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Hidden CSRF form -->
+    <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+    <!-- Class Cards -->
+    <div class="row g-4">
+
+        <!-- WARRIOR -->
+        <div class="col-md-6">
+            <div class="card h-100 border-danger class-card" data-class="warrior">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size:2.5rem; line-height:1; margin-right:12px;">⚔️</span>
+                        <div>
+                            <h4 class="mb-0 text-danger">Warrior</h4>
+                            <span class="badge bg-danger">STR &amp; CON</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Masters of strength and endurance. Warriors deal heavy damage on tasks and
+                        can boost their own defenses. Best for users who complete difficult tasks frequently.
+                    </p>
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-muted mb-1">SPELLS UNLOCKED</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge bg-secondary">⚡ Brutal Smash <small>(Lv 11)</small></span>
+                            <span class="badge bg-secondary">🛡️ Defensive Stance <small>(Lv 12)</small></span>
+                            <span class="badge bg-light text-muted border">💪 Valorous Presence <small>(Lv 13)</small></span>
+                            <span class="badge bg-light text-muted border">👁️ Intimidating Gaze <small>(Lv 14)</small></span>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-3">
+                        <span class="me-3">❤️ <strong>Max HP</strong> bonus via gear</span>
+                        <span>⚔️ <strong>Task value</strong> boost on Brutal Smash</span>
+                    </div>
+                    <form method="post" action="/Character/ChooseClass">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="selectedClass" value="warrior" />
+                        <button type="submit" class="btn btn-danger w-100">
+                            Choose Warrior
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAGE -->
+        <div class="col-md-6">
+            <div class="card h-100 border-primary class-card" data-class="mage">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size:2.5rem; line-height:1; margin-right:12px;">🔮</span>
+                        <div>
+                            <h4 class="mb-0 text-primary">Mage</h4>
+                            <span class="badge bg-primary">INT &amp; PER</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Wielders of arcane power. Mages earn bonus XP from tasks and can freeze
+                        streaks to protect them. Best for users focused on long-term progression.
+                    </p>
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-muted mb-1">SPELLS UNLOCKED</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge bg-secondary">🔥 Burst of Flames <small>(Lv 11)</small></span>
+                            <span class="badge bg-secondary">❄️ Chilling Frost <small>(Lv 14)</small></span>
+                            <span class="badge bg-light text-muted border">💧 Ethereal Surge <small>(Lv 12)</small></span>
+                            <span class="badge bg-light text-muted border">🌍 Stone Skin <small>(Lv 13)</small></span>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-3">
+                        <span class="me-3">✨ <strong>XP boost</strong> on task completion</span>
+                        <span>❄️ <strong>Freeze streaks</strong> for one day</span>
+                    </div>
+                    <form method="post" action="/Character/ChooseClass">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="selectedClass" value="mage" />
+                        <button type="submit" class="btn btn-primary w-100">
+                            Choose Mage
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROGUE -->
+        <div class="col-md-6">
+            <div class="card h-100 border-warning class-card" data-class="rogue">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size:2.5rem; line-height:1; margin-right:12px;">🗡️</span>
+                        <div>
+                            <h4 class="mb-0 text-warning">Rogue</h4>
+                            <span class="badge bg-warning text-dark">STR &amp; PER</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Quick and cunning. Rogues earn bonus gold and can hide in the shadows to
+                        avoid daily penalties. Best for gold-hungry players who want to shop early.
+                    </p>
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-muted mb-1">SPELLS UNLOCKED</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge bg-secondary">💰 Pickpocket <small>(Lv 11)</small></span>
+                            <span class="badge bg-secondary">🗡️ Backstab <small>(Lv 12)</small></span>
+                            <span class="badge bg-secondary">🌑 Stealth <small>(Lv 14)</small></span>
+                            <span class="badge bg-light text-muted border">🔧 Tools of Trade <small>(Lv 13)</small></span>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-3">
+                        <span class="me-3">🪙 <strong>Gold boost</strong> from tasks</span>
+                        <span>🌑 <strong>Skip daily damage</strong> instances</span>
+                    </div>
+                    <form method="post" action="/Character/ChooseClass">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="selectedClass" value="rogue" />
+                        <button type="submit" class="btn btn-warning w-100">
+                            Choose Rogue
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- HEALER -->
+        <div class="col-md-6">
+            <div class="card h-100 border-success class-card" data-class="healer">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size:2.5rem; line-height:1; margin-right:12px;">💚</span>
+                        <div>
+                            <h4 class="mb-0 text-success">Healer</h4>
+                            <span class="badge bg-success">CON &amp; INT</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Resilient and supportive. Healers can restore HP and boost all task values.
+                        Best for players who want to stay alive through difficult periods.
+                    </p>
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-muted mb-1">SPELLS UNLOCKED</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge bg-secondary">💊 Healing Light <small>(Lv 11)</small></span>
+                            <span class="badge bg-secondary">☀️ Searing Brightness <small>(Lv 12)</small></span>
+                            <span class="badge bg-light text-muted border">🛡️ Protective Aura <small>(Lv 13)</small></span>
+                            <span class="badge bg-light text-muted border">🙏 Blessing <small>(Lv 14)</small></span>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-3">
+                        <span class="me-3">❤️ <strong>Restore HP</strong> on demand</span>
+                        <span>☀️ <strong>Boost all task values</strong></span>
+                    </div>
+                    <form method="post" action="/Character/ChooseClass">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="selectedClass" value="healer" />
+                        <button type="submit" class="btn btn-success w-100">
+                            Choose Healer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /row -->
+
+    <p class="text-center text-muted small mt-4">
+        Gray badges = party spells (unlocked in a future update when party system launches).
+    </p>
+</div>
+
+<style>
+    .class-card {
+        transition: transform .15s, box-shadow .15s;
+        cursor: default;
+    }
+    .class-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,.15);
+    }
+</style>

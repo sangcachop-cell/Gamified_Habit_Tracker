@@ -1,0 +1,261 @@
+@model HabitTracker.Models.ViewModels.SpellsViewModel
+@using HabitTracker.Constants
+
+@{
+    ViewData["Title"] = "Spells";
+    var u     = Model.User;
+    var es    = Model.EffectiveStats;
+    var mana  = (int)u.Mana;
+    var maxMp = Model.MaxMana;
+    var mpPct = maxMp > 0 ? Math.Round((double)mana / maxMp * 100, 1) : 0;
+
+    string classColor = u.Class switch {
+        "warrior" => "danger",
+        "mage"    => "primary",
+        "rogue"   => "warning",
+        "healer"  => "success",
+        _         => "secondary"
+    };
+    string classEmoji = u.Class switch {
+        "warrior" => "⚔️",
+        "mage"    => "🔮",
+        "rogue"   => "🗡️",
+        "healer"  => "💚",
+        _         => "✨"
+    };
+    string className = u.Class != null
+        ? char.ToUpper(u.Class[0]) + u.Class[1..]
+        : "Unknown";
+
+    bool hasTaskSpells = Model.Spells.Any(s => s.TargetsTask);
+}
+
+<!-- Hidden AntiForgery -->
+<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/Character" class="btn btn-outline-secondary btn-sm">← Character</a>
+            <div>
+                <h2 class="mb-0">@classEmoji @className Spells</h2>
+                <small class="text-muted">Level @u.Level &nbsp;·&nbsp; Lv @u.Level</small>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="small text-muted mb-1">Mana</div>
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:120px; height:12px; background:#2a2a3e; border-radius:6px; overflow:hidden;">
+                    <div id="spell-mana-bar"
+                         style="width:@mpPct%; height:100%; background:linear-gradient(90deg,#4a90d9,#7ec8e3); border-radius:6px; transition:width .4s;"></div>
+                </div>
+                <span id="spell-mana-text" class="small fw-semibold text-primary">@mana / @maxMp</span>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["SpellError"]?.ToString()))
+    {
+        <div class="alert alert-danger">@TempData["SpellError"]</div>
+    }
+
+    <!-- Active Spell Buffs Banner -->
+    @if (u.StealthBuff > 0 || u.FrozenStreaks)
+    {
+        <div class="alert alert-info d-flex flex-wrap gap-3 mb-3 py-2">
+            <span class="fw-semibold small">Active Buffs:</span>
+            @if (u.StealthBuff > 0)
+            {
+                <span class="badge bg-dark fs-6">🌑 Stealth ×@u.StealthBuff &nbsp;<small>(absorbs @u.StealthBuff daily damage instance@(u.StealthBuff != 1 ? "s" : ""))</small></span>
+            }
+            @if (u.FrozenStreaks)
+            {
+                <span class="badge bg-primary fs-6">❄️ Chilling Frost active &nbsp;<small>(streaks frozen today)</small></span>
+            }
+        </div>
+    }
+
+    <!-- Task Selector (shown when task-targeting spells exist) -->
+    @if (hasTaskSpells && Model.Tasks.Any())
+    {
+        <div class="card mb-4 border-0 bg-dark" style="background:#1e1e2e!important;">
+            <div class="card-body py-3">
+                <label class="form-label small fw-semibold text-muted mb-1">🎯 TARGET TASK (for task-targeting spells)</label>
+                <select id="target-task-id" class="form-select form-select-sm">
+                    <option value="">— Select a task —</option>
+                    @{
+                        var grouped = Model.Tasks.GroupBy(t => t.Type);
+                        foreach (var group in grouped.OrderBy(g => g.Key))
+                        {
+                            var groupLabel = group.Key switch {
+                                TaskType.Habit => "Habits",
+                                TaskType.Daily => "Dailies",
+                                TaskType.Todo  => "To-Dos",
+                                _ => group.Key.ToString()
+                            };
+                            <optgroup label="@groupLabel">
+                                @foreach (var t in group.OrderBy(t => t.SortOrder))
+                                {
+                                    <option value="@t.Id">@t.Text</option>
+                                }
+                            </optgroup>
+                        }
+                    }
+                </select>
+                <div class="small text-muted mt-1">Select a task before casting a task-targeting spell (🎯 badge).</div>
+            </div>
+        </div>
+    }
+    else if (hasTaskSpells && !Model.Tasks.Any())
+    {
+        <div class="alert alert-secondary small mb-4">
+            No tasks available to target. Create some habits, dailies, or to-dos first.
+        </div>
+    }
+
+    <!-- Spell Cards -->
+    <div class="row g-3">
+        @foreach (var spell in Model.Spells)
+        {
+            bool canCast = Model.CanCast(spell);
+            string? cantReason = Model.CantCastReason(spell);
+            bool isPartySpell = !spell.TargetsTask
+                                && !spell.TargetsAllTasks
+                                && (spell.Key == "valorousPresence" || spell.Key == "intimidate"
+                                    || spell.Key == "mpheal" || spell.Key == "earth"
+                                    || spell.Key == "toolsOfTrade"
+                                    || spell.Key == "protectAura" || spell.Key == "healAll");
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 text-center @(canCast ? "" : "opacity-75") @(isPartySpell ? "border-secondary" : $"border-{classColor}")">
+                    <div class="card-body p-3 d-flex flex-column">
+
+                        <!-- Spell Icon -->
+                        <div class="mb-2">
+                            <img src="/images/habitica/skills/shop_@(spell.Key).png"
+                                 width="56" height="56"
+                                 style="image-rendering:pixelated; @(canCast ? "" : "filter:grayscale(60%);")"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                 alt="@spell.Name" />
+                            <div style="display:none; font-size:2rem; line-height:1;">✨</div>
+                        </div>
+
+                        <!-- Name & badges -->
+                        <h6 class="card-title mb-1 small fw-bold">@spell.Name</h6>
+                        <div class="d-flex flex-wrap justify-content-center gap-1 mb-2">
+                            <span class="badge bg-primary">@spell.ManaCost MP</span>
+                            <span class="badge @(u.Level >= spell.MinLevel ? "bg-success" : "bg-secondary")">Lv @spell.MinLevel</span>
+                            @if (spell.TargetsTask)
+                            {
+                                <span class="badge bg-warning text-dark" title="Requires a task target">🎯</span>
+                            }
+                            else if (spell.TargetsAllTasks)
+                            {
+                                <span class="badge bg-info text-dark" title="Affects all your tasks">🌟</span>
+                            }
+                            else if (isPartySpell)
+                            {
+                                <span class="badge bg-secondary" title="Party spell — Phase 7">👥</span>
+                            }
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-muted small mb-3 flex-grow-1">@spell.Description</p>
+
+                        <!-- Cast button -->
+                        @if (isPartySpell)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled
+                                    title="Party spells unlock when the party system launches.">
+                                👥 Party (Phase 7)
+                            </button>
+                        }
+                        else if (canCast)
+                        {
+                            <button class="btn btn-sm btn-@classColor btn-cast"
+                                    data-spell="@spell.Key"
+                                    data-targets-task="@(spell.TargetsTask ? "1" : "0")"
+                                    data-spell-name="@spell.Name">
+                                ✨ Cast
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled
+                                    title="@cantReason">
+                                🔒 @cantReason
+                            </button>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div><!-- /row -->
+
+</div><!-- /container -->
+
+@section Scripts {
+<script>
+(function () {
+    var token = function () {
+        return $('input[name="__RequestVerificationToken"]').first().val();
+    };
+
+    $(document).on('click', '.btn-cast', function () {
+        var btn         = $(this);
+        var spellKey    = btn.data('spell');
+        var spellName   = btn.data('spell-name');
+        var needsTask   = String(btn.data('targets-task')) === '1';
+        var taskId      = needsTask ? $('#target-task-id').val() : null;
+
+        if (needsTask && (!taskId || taskId === '')) {
+            showToast('⚠️', 'No Target', 'Select a task first.', 'toast-death', 3000);
+            return;
+        }
+
+        btn.prop('disabled', true).text('Casting…');
+
+        var formData = {
+            __RequestVerificationToken: token(),
+            spellKey: spellKey
+        };
+        if (taskId) formData.taskId = taskId;
+
+        $.ajax({
+            url:    '/Character/CastSpell',
+            method: 'POST',
+            data:   formData,
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Spell Failed', r.error || 'Cannot cast.', 'toast-death', 3500);
+                    btn.prop('disabled', false).text('✨ Cast');
+                    return;
+                }
+
+                // Update mana bar
+                var pct = r.maxMana > 0 ? Math.round(r.newMana / r.maxMana * 100) : 0;
+                $('#spell-mana-bar').css('width', pct + '%');
+                $('#spell-mana-text').text(r.newMana + ' / ' + r.maxMana);
+
+                // Refresh HUD navbar
+                if (typeof refreshHud === 'function') refreshHud();
+
+                // Toast
+                var msg = (r.data && r.data.toastMessage) ? r.data.toastMessage : spellName + ' cast!';
+                showToast('✨', spellName, msg, 'toast-xp', 3500);
+
+                // Reload after short delay so page reflects updated state
+                setTimeout(function () { location.reload(); }, 1800);
+            },
+            error: function () {
+                showToast('❌', 'Error', 'Request failed. Try again.', 'toast-death', 3500);
+                btn.prop('disabled', false).text('✨ Cast');
+            }
+        });
+    });
+})();
+</script>
+}

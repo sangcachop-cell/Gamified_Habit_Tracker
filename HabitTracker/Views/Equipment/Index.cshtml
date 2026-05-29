@@ -1,0 +1,458 @@
+@model HabitTracker.Models.ViewModels.EquipmentViewModel
+@{
+    ViewData["Title"] = "Equipment";
+    var u  = Model.User;
+    var es = Model.Stats;
+
+    var primarySlots = new[] { "weapon", "armor", "head", "shield" };
+
+    string SlotIcon(string slot) => slot switch
+    {
+        "weapon"        => "⚔️",
+        "armor"         => "🛡️",
+        "head"          => "🪖",
+        "shield"        => "🔰",
+        "back"          => "🌊",
+        "eyewear"       => "👓",
+        "headAccessory" => "🎀",
+        "body"          => "👘",
+        _               => "📦"
+    };
+
+    // Resolve equipped GearItem objects for avatar rendering
+    var equippedGear = new Dictionary<string, HabitTracker.Models.GearItem?>();
+    foreach (var slot in primarySlots)
+    {
+        string? key = Model.EquippedKeys.GetValueOrDefault(slot);
+        if (key != null && Model.OwnedBySlot.TryGetValue(slot, out var items))
+            equippedGear[slot] = items.FirstOrDefault(g => g.Key == key);
+        else
+            equippedGear[slot] = null;
+    }
+
+    var armorGear   = equippedGear.GetValueOrDefault("armor");
+    var headGear    = equippedGear.GetValueOrDefault("head");
+    var shieldGear  = equippedGear.GetValueOrDefault("shield");
+    var weaponGear  = equippedGear.GetValueOrDefault("weapon");
+    bool weaponIs2H = weaponGear?.TwoHanded ?? false;
+    string bodyType = u.BodyType ?? "broad";
+    bool isMounted  = !string.IsNullOrEmpty(u.ActiveMountKey);
+}
+
+<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+<div class="container-fluid py-4" style="max-width:1200px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/Character" class="btn btn-outline-secondary btn-sm">← Character</a>
+            <h2 class="mb-0">⚔️ Equipment</h2>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="small text-muted">Mode:</span>
+            <button id="btn-toggle-costume" class="btn btn-sm @(u.CostumeModeEnabled ? "btn-warning" : "btn-outline-secondary")"
+                    title="@(u.CostumeModeEnabled ? "Costume mode ON — stats from Battle Gear" : "Battle Gear mode")">
+                @(u.CostumeModeEnabled ? "🎭 Costume" : "⚔️ Battle Gear")
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ===== LEFT: Equipped slots + Stats ===== -->
+        <div class="col-md-4">
+
+            <!-- Equipped Slots -->
+            <div class="card mb-3">
+                <div class="card-header py-2 fw-semibold small text-muted">EQUIPPED</div>
+                <div class="card-body p-2">
+                    @foreach (var slot in primarySlots)
+                    {
+                        var eqKey  = Model.EquippedKeys.GetValueOrDefault(slot);
+                        var eqItem = equippedGear.GetValueOrDefault(slot);
+                        <div class="d-flex align-items-center gap-2 p-2 border-bottom slot-row" data-slot="@slot" id="slot-@slot">
+                            <span class="fs-5" style="width:28px;text-align:center;">@SlotIcon(slot)</span>
+                            @if (eqItem != null)
+                            {
+                                <img src="@eqItem.ShopImagePath" width="36" height="36"
+                                     style="image-rendering:pixelated;border-radius:4px;background:rgba(255,255,255,0.05);"
+                                     onerror="this.style.display='none'" />
+                                <div class="flex-grow-1 lh-sm">
+                                    <div class="small fw-semibold" id="slot-name-@slot">@eqItem.Name</div>
+                                    <div class="text-muted" style="font-size:0.7rem;" id="slot-stats-@slot">
+                                        @(eqItem.STR > 0 ? $"STR +{eqItem.STR} " : "")@(eqItem.CON > 0 ? $"CON +{eqItem.CON} " : "")@(eqItem.INT > 0 ? $"INT +{eqItem.INT} " : "")@(eqItem.PER > 0 ? $"PER +{eqItem.PER}" : "")
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm py-0 px-2"
+                                        onclick="unequipSlot('@slot')">✕</button>
+                            }
+                            else
+                            {
+                                <img src="" width="36" height="36" style="display:none;image-rendering:pixelated;border-radius:4px;background:rgba(255,255,255,0.05);" id="slot-img-@slot" />
+                                <div class="flex-grow-1 lh-sm">
+                                    <div class="small text-muted fst-italic" id="slot-name-@slot">Empty</div>
+                                    <div style="font-size:0.7rem;" id="slot-stats-@slot"></div>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm py-0 px-2" style="display:none;"
+                                        id="slot-unequip-@slot" onclick="unequipSlot('@slot')">✕</button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Effective Stats -->
+            <div class="card">
+                <div class="card-header py-2 fw-semibold small text-muted">EFFECTIVE STATS</div>
+                <div class="card-body p-3">
+                    <div class="row text-center g-2">
+                        <div class="col-3">
+                            <div class="small text-muted">STR</div>
+                            <div class="fw-bold" id="stat-STR">@es.STR</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="small text-muted">CON</div>
+                            <div class="fw-bold" id="stat-CON">@es.CON</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="small text-muted">INT</div>
+                            <div class="fw-bold" id="stat-INT">@es.INT</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="small text-muted">PER</div>
+                            <div class="fw-bold" id="stat-PER">@es.PER</div>
+                        </div>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="row text-center g-2">
+                        <div class="col-6">
+                            <div class="small text-muted">Max Mana</div>
+                            <div class="fw-bold" id="stat-MaxMana">@es.MaxMana</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">Max HP</div>
+                            <div class="fw-bold">@es.MaxHP</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== CENTER: Avatar Preview ===== -->
+        <div class="col-md-3 d-flex flex-column align-items-center">
+            <div class="small fw-semibold text-muted mb-2">PREVIEW</div>
+            <div id="avatar-preview"
+                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible;">
+                <!-- Layer order: mount-body → skin → shirt → armor → bangs → hair → mustache → beard → head → shield → weapon → mount-head / pet -->
+                <div style="position:relative; margin-left:24px; width:90px; height:90px;">
+                    @if (isMounted)
+                    {
+                        <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
+                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                    }
+                    <img id="layer-skin"
+                         src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                    <img id="layer-shirt"
+                         src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                    <img id="layer-armor"
+                         src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
+                    <img id="layer-bangs"
+                         src="@(u.HairBangs > 0 ? $"/images/habitica/customize/hair/hair_bangs_{u.HairBangs}_{u.HairColor}.png" : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBangs == 0 ? "display:none;" : "")" />
+                    <img id="layer-hair"
+                         src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                    <img id="layer-mustache"
+                         src="@(u.HairMustache > 0 ? $"/images/habitica/customize/beards/hair_mustache_{u.HairMustache}_{u.HairColor}.png" : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairMustache == 0 ? "display:none;" : "")" />
+                    <img id="layer-beard"
+                         src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
+                    <img id="layer-head"
+                         src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
+                    <img id="layer-shield"
+                         src="@(shieldGear != null && !weaponIs2H ? shieldGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || weaponIs2H ? "display:none;" : "")" />
+                    <img id="layer-weapon"
+                         src="@(weaponGear != null ? weaponGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(weaponGear == null ? "display:none;" : "")" />
+                    @if (isMounted)
+                    {
+                        <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
+                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                    }
+                    @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
+                    {
+                        <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
+                             style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
+                    }
+                </div>
+            </div>
+            @if (u.CostumeModeEnabled)
+            {
+                <div class="small text-warning mt-2 text-center">🎭 Costume mode<br><span class="text-muted" style="font-size:0.7rem;">Stats come from battle gear</span></div>
+            }
+        </div>
+
+        <!-- ===== RIGHT: Inventory + Shop tabs ===== -->
+        <div class="col-md-5">
+            <ul class="nav nav-tabs mb-3" id="equipTabs">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-inventory">📦 Inventory</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shop">🛒 Shop</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" style="max-height:520px;overflow-y:auto;">
+
+                <!-- INVENTORY TAB -->
+                <div class="tab-pane fade show active" id="tab-inventory">
+                    @if (!Model.OwnedBySlot.Any())
+                    {
+                        <div class="text-center text-muted py-5">
+                            <div class="fs-1">📦</div>
+                            <div>No gear yet — visit the Shop tab!</div>
+                            @if (string.IsNullOrEmpty(u.Class))
+                            {
+                                <div class="mt-2 small text-warning">Choose a class first to see class gear.</div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var slot in primarySlots)
+                        {
+                            if (!Model.OwnedBySlot.TryGetValue(slot, out var items) || !items.Any())
+                                continue;
+                            <div class="mb-3">
+                                <div class="small fw-semibold text-muted mb-1 text-uppercase">@SlotIcon(slot) @slot</div>
+                                @foreach (var item in items)
+                                {
+                                    bool isEquipped = Model.EquippedKeys.GetValueOrDefault(slot) == item.Key;
+                                    <div class="d-flex align-items-center gap-2 p-2 rounded mb-1"
+                                         style="background:@(isEquipped ? "rgba(74,144,217,0.15)" : "rgba(255,255,255,0.03)");border:1px solid @(isEquipped ? "#4a90d9" : "transparent");">
+                                        <img src="@item.ShopImagePath" width="36" height="36"
+                                             style="image-rendering:pixelated;border-radius:4px;"
+                                             onerror="this.style.display='none'" />
+                                        <div class="flex-grow-1 lh-sm">
+                                            <div class="small fw-semibold">@item.Name</div>
+                                            <div class="text-muted" style="font-size:0.7rem;">
+                                                @(item.STR > 0 ? $"STR +{item.STR} " : "")@(item.CON > 0 ? $"CON +{item.CON} " : "")@(item.INT > 0 ? $"INT +{item.INT} " : "")@(item.PER > 0 ? $"PER +{item.PER}" : "")
+                                                @if (item.TwoHanded) { <span class="badge bg-secondary ms-1" style="font-size:0.6rem;">2H</span> }
+                                            </div>
+                                        </div>
+                                        @if (isEquipped)
+                                        {
+                                            <span class="badge bg-primary">Equipped</span>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-success py-0"
+                                                    onclick="equipItem('@item.Key')">Equip</button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- SHOP TAB -->
+                <div class="tab-pane fade" id="tab-shop">
+                    @if (!Model.ShopBySlot.Any())
+                    {
+                        <div class="text-center text-muted py-5">
+                            <div class="fs-1">🛒</div>
+                            @if (string.IsNullOrEmpty(u.Class))
+                            {
+                                <div>Choose a class first to unlock your class shop.</div>
+                                <a href="/Character/SelectClass" class="btn btn-warning btn-sm mt-2">Choose Class</a>
+                            }
+                            else
+                            {
+                                <div>No items available.</div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="small text-muted mb-2">💰 You have <strong id="gold-display">@u.Gold.ToString("F0") GP</strong></div>
+                        foreach (var slot in primarySlots)
+                        {
+                            if (!Model.ShopBySlot.TryGetValue(slot, out var items) || !items.Any())
+                                continue;
+                            <div class="mb-3">
+                                <div class="small fw-semibold text-muted mb-1 text-uppercase">@SlotIcon(slot) @slot</div>
+                                @foreach (var item in items)
+                                {
+                                    bool owned    = Model.OwnedKeys.Contains(item.Key);
+                                    bool canAfford = u.Gold >= item.GoldCost;
+                                    <div class="d-flex align-items-center gap-2 p-2 rounded mb-1"
+                                         style="background:rgba(255,255,255,0.03);opacity:@(owned ? "0.6" : "1");">
+                                        <img src="@item.ShopImagePath" width="36" height="36"
+                                             style="image-rendering:pixelated;border-radius:4px;"
+                                             onerror="this.style.display='none'" />
+                                        <div class="flex-grow-1 lh-sm">
+                                            <div class="small fw-semibold">@item.Name</div>
+                                            <div class="text-muted" style="font-size:0.7rem;">
+                                                @(item.STR > 0 ? $"STR +{item.STR} " : "")@(item.CON > 0 ? $"CON +{item.CON} " : "")@(item.INT > 0 ? $"INT +{item.INT} " : "")@(item.PER > 0 ? $"PER +{item.PER}" : "")
+                                                @if (item.TwoHanded) { <span class="badge bg-secondary ms-1" style="font-size:0.6rem;">2H</span> }
+                                            </div>
+                                        </div>
+                                        @if (owned)
+                                        {
+                                            <span class="badge bg-success">Owned</span>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm @(canAfford ? "btn-outline-warning" : "btn-outline-secondary") py-0"
+                                                    onclick="buyItem('@item.Key', this)"
+                                                    @(!canAfford ? "disabled" : "")
+                                                    title="@item.GoldCost GP">
+                                                🪙 @item.GoldCost
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    'use strict';
+
+    const token = () => $('input[name="__RequestVerificationToken"]').first().val();
+
+    // ── Avatar update helpers ────────────────────────────────────────────────
+
+    function updateAvatarLayer(slot, imgPath, twoHanded) {
+        var layerId = '#layer-' + slot;
+        if (!imgPath) {
+            $(layerId).hide().attr('src', '');
+        } else {
+            $(layerId).attr('src', imgPath).show();
+        }
+        if (slot === 'weapon' && twoHanded) {
+            $('#layer-shield').hide();
+        }
+        if (slot === 'weapon' && !twoHanded) {
+            // Re-show shield if previously hidden by 2H
+            var shieldSrc = $('#layer-shield').attr('src');
+            if (shieldSrc) $('#layer-shield').show();
+        }
+    }
+
+    function updateStats(s) {
+        if (!s) return;
+        $('#stat-STR').text(s.str !== undefined ? s.str : s.STR);
+        $('#stat-CON').text(s.con !== undefined ? s.con : s.CON);
+        $('#stat-INT').text(s.int !== undefined ? s.int : s.INT);
+        $('#stat-PER').text(s.per !== undefined ? s.per : s.PER);
+        $('#stat-MaxMana').text(s.maxMana !== undefined ? s.maxMana : s.MaxMana);
+    }
+
+    // ── Equip ────────────────────────────────────────────────────────────────
+
+    window.equipItem = function (key) {
+        $.ajax({
+            url: '/Equipment/Equip?key=' + encodeURIComponent(key),
+            method: 'POST',
+            data: { __RequestVerificationToken: token() },
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                    return;
+                }
+                updateAvatarLayer(r.slot, r.wornImgPath, r.twoHanded);
+                updateStats(r.newStats);
+                refreshHud();
+                showToast('⚔️', 'Equipped!', r.itemName + ' equipped.', 'toast-xp', 2000);
+                // Reload page to sync inventory/equipped state
+                location.reload();
+            },
+            error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
+        });
+    };
+
+    // ── Unequip ──────────────────────────────────────────────────────────────
+
+    window.unequipSlot = function (slot) {
+        $.ajax({
+            url: '/Equipment/Unequip?slot=' + slot,
+            method: 'POST',
+            data: { __RequestVerificationToken: token() },
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                    return;
+                }
+                updateAvatarLayer(slot, null, false);
+                updateStats(r.newStats);
+                refreshHud();
+                showToast('📦', 'Unequipped', slot + ' slot cleared.', 'toast-gold', 2000);
+                location.reload();
+            },
+            error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
+        });
+    };
+
+    // ── Buy ──────────────────────────────────────────────────────────────────
+
+    window.buyItem = function (key, btn) {
+        $(btn).prop('disabled', true);
+        $.ajax({
+            url: '/Equipment/Buy?key=' + encodeURIComponent(key),
+            method: 'POST',
+            data: { __RequestVerificationToken: token() },
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                    $(btn).prop('disabled', false);
+                    return;
+                }
+                refreshHud();
+                $('#gold-display').text(Math.round(r.newGold) + ' GP');
+                showToast('🛒', 'Purchased!', r.itemName + ' added to inventory.', 'toast-gold', 2500);
+                location.reload();
+            },
+            error: function () {
+                showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000);
+                $(btn).prop('disabled', false);
+            }
+        });
+    };
+
+    // ── Toggle Costume ────────────────────────────────────────────────────────
+
+    $('#btn-toggle-costume').on('click', function () {
+        $.ajax({
+            url: '/Equipment/ToggleCostume',
+            method: 'POST',
+            data: { __RequestVerificationToken: token() },
+            success: function (r) {
+                if (!r.success) return;
+                location.reload();
+            }
+        });
+    });
+
+})();
+</script>
+}

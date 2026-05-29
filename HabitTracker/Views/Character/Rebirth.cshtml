@@ -1,0 +1,80 @@
+@model HabitTracker.Models.User
+@{
+    ViewData["Title"] = "Rebirth";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="card border-danger mb-4">
+            <div class="card-header bg-danger text-white text-center">
+                <h4 class="mb-0">🔁 Rebirth</h4>
+            </div>
+            <div class="card-body">
+
+                <div class="text-center mb-4">
+                    <p class="text-muted">You are about to start over as a Level 1 adventurer.</p>
+                    <p><strong>Current level: @Model.Level</strong>
+                        @if (!string.IsNullOrEmpty(Model.Class))
+                        {
+                            <span class="ms-2 badge bg-secondary">@Model.Class</span>
+                        }
+                    </p>
+                    @if (Model.RebirthCount > 0)
+                    {
+                        <p class="text-muted small">Previous rebirths: @Model.RebirthCount</p>
+                    }
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-danger h-100">
+                            <div class="card-header text-danger fw-bold">❌ Will be RESET</div>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item">Level → 1 &amp; XP → 0</li>
+                                <li class="list-group-item">Stats (STR/CON/INT/PER) → 0</li>
+                                <li class="list-group-item">Class → unselected</li>
+                                <li class="list-group-item">Gold → 0</li>
+                                <li class="list-group-item">HP → 50 &amp; Mana → 30</li>
+                                <li class="list-group-item">All active buffs</li>
+                                <li class="list-group-item">Current streak</li>
+                                <li class="list-group-item">Equipped gear (slots cleared)</li>
+                                <li class="list-group-item">Task values &amp; Daily streaks</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header text-success fw-bold">✅ Will be KEPT</div>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item">Achievements &amp; badges</li>
+                                <li class="list-group-item">Avatar cosmetics</li>
+                                <li class="list-group-item">Owned gear collection</li>
+                                <li class="list-group-item">Longest streak (personal best)</li>
+                                <li class="list-group-item">Account &amp; profile info</li>
+                                <li class="list-group-item">Tasks (values reset, not deleted)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>⚠️ This cannot be undone.</strong> Your progression will be permanently reset.
+                </div>
+
+                <form method="post" action="/Character/Rebirth">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="confirm" value="yes" />
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/Character" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            🔁 Confirm Rebirth
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
