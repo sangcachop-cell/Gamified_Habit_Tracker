@@ -1,0 +1,244 @@
+@model HabitTracker.Models.ViewModels.EditTaskViewModel
+@using HabitTracker.Constants
+@{
+    ViewData["Title"] = "Edit Task";
+    string typeLabel = Model.Type switch {
+        TaskType.Habit  => "🔄 Habit",
+        TaskType.Daily  => "☀️ Daily",
+        TaskType.Todo   => "✅ To-Do",
+        TaskType.Reward => "🎁 Reward",
+        _               => "Task"
+    };
+    string typeName = Model.Type.ToString().ToLower();
+}
+
+<style>
+    :root { --ink:#0a0a12; --paper:#f5f3ef; --violet:#5c3dde; --gold:#f0b429; --rose:#e8436a; --teal:#00b89c; --soft:#edeaf5; }
+    body { background: var(--paper); }
+
+    .form-card { background: white; border-radius: 20px; border: 1.5px solid rgba(0,0,0,.07); padding: 32px; max-width: 680px; margin: 0 auto; }
+    .form-card h2 { font-weight: 800; font-size: 1.5rem; color: var(--ink); margin-bottom: 4px; }
+    .type-badge { display: inline-block; background: var(--soft); color: var(--violet); font-weight: 700; font-size: .82rem; padding: 3px 12px; border-radius: 20px; margin-bottom: 24px; }
+
+    .form-label { font-weight: 600; font-size: .88rem; color: var(--ink); margin-bottom: 4px; }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #ddd; font-size: .9rem; padding: 9px 14px; }
+    .form-control:focus, .form-select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(92,61,222,.12); }
+
+    .day-checks { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .day-check-label { padding: 6px 12px; border-radius: 8px; border: 1.5px solid #ddd; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s; user-select: none; }
+    .day-check-label input { display: none; }
+    .day-check-label.checked { background: var(--violet); color: white; border-color: var(--violet); }
+
+    .btn-primary-custom { background: var(--violet); color: white; border: none; border-radius: 12px; padding: 11px 28px; font-weight: 700; font-size: .95rem; cursor: pointer; transition: opacity .15s; }
+    .btn-primary-custom:hover { opacity: .88; }
+    .btn-cancel { background: none; border: 1.5px solid #ddd; border-radius: 12px; padding: 11px 24px; font-weight: 600; font-size: .9rem; color: #666; text-decoration: none; }
+    .btn-cancel:hover { border-color: #aaa; color: var(--ink); }
+
+    .checklist-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .btn-remove-item { background: none; border: none; color: var(--rose); font-size: 1.1rem; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
+
+    .existing-checklist-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+</style>
+
+<div class="form-card">
+    <h2>✏️ Edit Task</h2>
+    <div class="type-badge">@typeLabel</div>
+
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Type" />
+
+        <!-- COMMON FIELDS -->
+        <div class="mb-3">
+            <label class="form-label">Task name *</label>
+            <input asp-for="Text" class="form-control" autofocus />
+            <span asp-validation-for="Text" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notes <small class="text-muted">(optional)</small></label>
+            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Difficulty</label>
+            <select asp-for="Priority" class="form-select">
+                <option value="@((int)TaskPriority.Trivial)">Trivial (+5 XP)</option>
+                <option value="@((int)TaskPriority.Easy)">Easy (+10 XP)</option>
+                <option value="@((int)TaskPriority.Medium)">Medium (+15 XP)</option>
+                <option value="@((int)TaskPriority.Hard)">Hard (+25 XP)</option>
+            </select>
+        </div>
+
+        <!-- HABIT -->
+        @if (Model.Type == TaskType.Habit)
+        {
+            <div class="mb-3">
+                <label class="form-label">Score direction</label>
+                <div class="d-flex gap-3 mt-1">
+                    <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+                        <input asp-for="Up" type="checkbox" /> Allow positive (+)
+                    </label>
+                    <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+                        <input asp-for="Down" type="checkbox" /> Allow negative (−)
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Reset counters</label>
+                <select asp-for="HabitFrequency" class="form-select">
+                    <option value="@((int)HabitResetFrequency.Daily)">Daily</option>
+                    <option value="@((int)HabitResetFrequency.Weekly)">Weekly</option>
+                    <option value="@((int)HabitResetFrequency.Monthly)">Monthly</option>
+                </select>
+            </div>
+        }
+
+        <!-- DAILY -->
+        @if (Model.Type == TaskType.Daily)
+        {
+            <div class="mb-3">
+                <label class="form-label">Frequency</label>
+                <select asp-for="DailyFrequency" class="form-select" id="daily-freq-select">
+                    <option value="@((int)DailyFrequency.Weekly)">Weekly (pick days)</option>
+                    <option value="@((int)DailyFrequency.Daily)">Every N days</option>
+                    <option value="@((int)DailyFrequency.Monthly)">Monthly</option>
+                    <option value="@((int)DailyFrequency.Yearly)">Yearly</option>
+                </select>
+            </div>
+            <div id="weekly-days" class="mb-3" @(Model.DailyFrequency != DailyFrequency.Weekly ? "style=display:none" : "")>
+                <label class="form-label">Repeat on</label>
+                <div class="day-checks">
+                    @foreach (var (propName, shortLabel, dayProp) in new[] {
+                        ("RepeatMonday",    "Mon", Model.RepeatMonday),
+                        ("RepeatTuesday",   "Tue", Model.RepeatTuesday),
+                        ("RepeatWednesday", "Wed", Model.RepeatWednesday),
+                        ("RepeatThursday",  "Thu", Model.RepeatThursday),
+                        ("RepeatFriday",    "Fri", Model.RepeatFriday),
+                        ("RepeatSaturday",  "Sat", Model.RepeatSaturday),
+                        ("RepeatSunday",    "Sun", Model.RepeatSunday)
+                    })
+                    {
+                        <label class="day-check-label @(dayProp ? "checked" : "")">
+                            <input type="checkbox" name="@propName" value="true" @(dayProp ? "checked" : "") /> @shortLabel
+                        </label>
+                    }
+                </div>
+                <input type="hidden" name="RepeatMonday"    value="false" />
+                <input type="hidden" name="RepeatTuesday"   value="false" />
+                <input type="hidden" name="RepeatWednesday" value="false" />
+                <input type="hidden" name="RepeatThursday"  value="false" />
+                <input type="hidden" name="RepeatFriday"    value="false" />
+                <input type="hidden" name="RepeatSaturday"  value="false" />
+                <input type="hidden" name="RepeatSunday"    value="false" />
+            </div>
+            <div id="every-x-field" class="mb-3" @(Model.DailyFrequency != DailyFrequency.Daily ? "style=display:none" : "")>
+                <label class="form-label">Every N days</label>
+                <input asp-for="EveryX" type="number" class="form-control" min="1" max="999" style="max-width:120px" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Start date</label>
+                <input asp-for="StartDate" type="date" class="form-control" style="max-width:200px"
+                       value="@(Model.StartDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <!-- Existing checklist -->
+            @if (Model.ExistingChecklist.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Checklist items</label>
+                    @for (int i = 0; i < Model.ExistingChecklist.Count; i++)
+                    {
+                        <div class="existing-checklist-item">
+                            <input type="hidden" name="ExistingChecklist[@i].ItemId" value="@Model.ExistingChecklist[i].ItemId" />
+                            <input type="text" name="ExistingChecklist[@i].Text" class="form-control form-control-sm"
+                                   value="@Model.ExistingChecklist[i].Text" />
+                            <input type="hidden" name="ExistingChecklist[@i].IsCompleted" value="@Model.ExistingChecklist[i].IsCompleted.ToString().ToLower()" />
+                            <button type="button" class="btn-remove-item" onclick="$(this).closest('.existing-checklist-item').remove()">×</button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="mb-3">
+                <label class="form-label">Add more items</label>
+                <div id="new-checklist-items"></div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="addNewItem()">+ Add item</button>
+            </div>
+        }
+
+        <!-- TODO -->
+        @if (Model.Type == TaskType.Todo)
+        {
+            <div class="mb-3">
+                <label class="form-label">Due date <small class="text-muted">(optional)</small></label>
+                <input asp-for="DueDate" type="date" class="form-control" style="max-width:200px"
+                       value="@(Model.DueDate?.ToString("yyyy-MM-dd") ?? "")" />
+            </div>
+
+            @if (Model.ExistingChecklist.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Checklist items</label>
+                    @for (int i = 0; i < Model.ExistingChecklist.Count; i++)
+                    {
+                        <div class="existing-checklist-item">
+                            <input type="hidden" name="ExistingChecklist[@i].ItemId" value="@Model.ExistingChecklist[i].ItemId" />
+                            <input type="text" name="ExistingChecklist[@i].Text" class="form-control form-control-sm"
+                                   value="@Model.ExistingChecklist[i].Text" />
+                            <input type="hidden" name="ExistingChecklist[@i].IsCompleted" value="@Model.ExistingChecklist[i].IsCompleted.ToString().ToLower()" />
+                            <button type="button" class="btn-remove-item" onclick="$(this).closest('.existing-checklist-item').remove()">×</button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="mb-3">
+                <label class="form-label">Add more items</label>
+                <div id="new-checklist-items"></div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="addNewItem()">+ Add item</button>
+            </div>
+        }
+
+        <!-- REWARD -->
+        @if (Model.Type == TaskType.Reward)
+        {
+            <div class="mb-3">
+                <label class="form-label">Gold cost 🪙</label>
+                <input asp-for="GoldCost" type="number" class="form-control" min="1" max="9999" step="1" style="max-width:160px" />
+                <small class="text-muted">Phase 2: gold balance not enforced yet.</small>
+            </div>
+        }
+
+        <!-- BUTTONS -->
+        <div class="d-flex gap-3 mt-4 align-items-center">
+            <button type="submit" class="btn-primary-custom">💾 Save Changes</button>
+            <a href="/Task" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    var newItemCounter = 0;
+    function addNewItem() {
+        var html = '<div class="checklist-row">' +
+            '<input type="text" name="NewChecklistItems[' + newItemCounter++ + ']" class="form-control form-control-sm" placeholder="New checklist item..." />' +
+            '<button type="button" class="btn-remove-item" onclick="$(this).closest(\'.checklist-row\').remove()">×</button>' +
+            '</div>';
+        $('#new-checklist-items').append(html);
+    }
+
+    $('#daily-freq-select').on('change', function () {
+        var val = parseInt($(this).val());
+        if (val === 1) { $('#weekly-days').show(); $('#every-x-field').hide(); }
+        else if (val === 0) { $('#weekly-days').hide(); $('#every-x-field').show(); }
+        else { $('#weekly-days').hide(); $('#every-x-field').hide(); }
+    });
+
+    $(document).on('change', '.day-check-label input', function () {
+        var $lbl = $(this).closest('.day-check-label');
+        if ($(this).is(':checked')) $lbl.addClass('checked');
+        else                        $lbl.removeClass('checked');
+    });
+</script>
+}

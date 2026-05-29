@@ -1,338 +1,364 @@
-﻿@model List<HabitTracker.Models.Quest>
+@model HabitTracker.Models.ViewModels.TaskBoardViewModel
+@using HabitTracker.Constants
 @{
-    ViewData["Title"] = "Quest";
-    var completedIds = ViewBag.CompletedTodayIds as List<int> ?? new List<int>();
-    int doneCount = completedIds.Count;
+    ViewData["Title"] = "My Tasks";
 }
+
 <style>
     :root {
-        --ink: #0a0a12;
-        --paper: #f5f3ef;
+        --ink:    #0a0a12;
+        --paper:  #f5f3ef;
         --violet: #5c3dde;
-        --gold: #f0b429;
-        --rose: #e8436a;
-        --teal: #00b89c;
-        --soft: #edeaf5
+        --gold:   #f0b429;
+        --rose:   #e8436a;
+        --teal:   #00b89c;
+        --soft:   #edeaf5;
     }
 
-    body {
-        background: var(--paper);
-        font-family: "DM Sans",sans-serif
-    }
+    body { background: var(--paper); }
 
-    h1, h2, h3, h4 {
-        font-family: "Syne",sans-serif
-    }
-
-    .page-header {
+    .board-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 28px;
-        flex-wrap: wrap;
-        gap: 12px
+        align-items: center;
+        margin-bottom: 24px;
     }
 
-        .page-header h2 {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin: 0
-        }
-
-        .page-header p {
-            color: #888;
-            font-size: .9rem;
-            margin: 4px 0 0
-        }
-    /* filter bar */
-    .filter-bar {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 28px;
-        padding: 16px 20px;
-        background: white;
-        border-radius: 14px;
-        border: 1.5px solid rgba(0,0,0,.07)
+    .board-header h1 {
+        font-weight: 800;
+        font-size: 1.8rem;
+        color: var(--ink);
     }
 
-        .filter-bar select {
-            padding: 8px 14px;
-            border: 1.5px solid rgba(0,0,0,.1);
-            border-radius: 50px;
-            font-family: "DM Sans",sans-serif;
-            font-size: .85rem;
-            background: white;
-            outline: none;
-            cursor: pointer;
-            transition: border-color .2s
-        }
-
-            .filter-bar select:hover {
-                border-color: var(--violet)
-            }
-    /* quest cards */
-    .quests-grid {
+    .task-board {
         display: grid;
-        grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-        gap: 16px
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        align-items: start;
     }
 
-    .qcard {
+    @@media (max-width: 1100px) { .task-board { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 600px)  { .task-board { grid-template-columns: 1fr; } }
+
+    .board-col {
         background: white;
         border-radius: 16px;
         border: 1.5px solid rgba(0,0,0,.07);
-        padding: 20px;
-        transition: all .25s;
-        position: relative;
-        overflow: hidden
+        padding: 16px;
+        min-height: 300px;
     }
 
-        .qcard:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 28px rgba(0,0,0,.1);
-            border-color: rgba(92,61,222,.3)
-        }
-
-        .qcard.done {
-            background: #f8fef9;
-            border-color: rgba(0,184,156,.3)
-        }
-
-            .qcard.done::after {
-                content: "✓";
-                position: absolute;
-                top: 12px;
-                right: 14px;
-                width: 26px;
-                height: 26px;
-                border-radius: 50%;
-                background: var(--teal);
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 700;
-                font-size: .85rem
-            }
-
-    .qcard-top {
+    .col-header {
         display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 14px
-    }
-
-    .q-checkbox {
-        margin-top: 3px;
-        width: 18px;
-        height: 18px;
-        accent-color: var(--violet);
-        cursor: pointer;
-        flex-shrink: 0
-    }
-
-    .q-icon-box {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: var(--soft);
-        display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid rgba(0,0,0,.06);
     }
 
-    .q-title {
-        font-family: "Syne",sans-serif;
-        font-weight: 700;
-        font-size: .95rem;
-        line-height: 1.3
-    }
-
-        .q-title.done-text {
-            text-decoration: line-through;
-            color: #aaa
-        }
-
-    .q-tags {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 12px
-    }
-
-    .qtag {
-        padding: 3px 10px;
-        border-radius: 50px;
-        font-size: .73rem;
-        font-weight: 600
-    }
-
-    .qtag-easy {
-        background: #e2f5e2;
-        color: #2e7d2e
-    }
-
-    .qtag-medium {
-        background: #fff5d6;
-        color: #b07800
-    }
-
-    .qtag-hard {
-        background: #fde8ed;
-        color: #c0392b
-    }
-
-    .qtag-cat {
-        background: #edeaf5;
-        color: var(--violet)
-    }
-
-    .qtag-freq {
-        background: #f0f4ff;
-        color: #4457aa
-    }
-
-    .q-xp {
-        font-family: "Syne",sans-serif;
-        font-weight: 800;
-        color: var(--violet);
-        font-size: .9rem
-    }
-    /* submit bar */
-    .submit-bar {
-        position: sticky;
-        bottom: 24px;
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 28px
-    }
-
-    .btn-confirm {
-        background: var(--ink);
-        color: white;
-        border: none;
-        padding: 14px 36px;
-        border-radius: 50px;
-        font-family: "Syne",sans-serif;
+    .col-title {
         font-weight: 700;
         font-size: 1rem;
-        cursor: pointer;
-        transition: background .2s,transform .2s;
-        box-shadow: 0 4px 20px rgba(0,0,0,.18);
+        color: var(--ink);
         display: flex;
         align-items: center;
-        gap: 8px
+        gap: 8px;
     }
 
-        .btn-confirm:hover {
-            background: var(--violet);
-            transform: translateY(-2px)
-        }
+    .col-count { background: var(--soft); color: var(--violet); font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .col-count.urgent { background: #fde8ed; color: var(--rose); }
 
-    .progress-bar-wrap {
-        height: 6px;
-        background: rgba(0,0,0,.06);
-        border-radius: 50px;
-        overflow: hidden;
-        margin-bottom: 4px
+    .btn-add-task {
+        background: var(--violet);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: .8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity .15s;
     }
+    .btn-add-task:hover { opacity: .85; color: white; }
 
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg,var(--violet),var(--teal));
-        border-radius: 50px;
-        transition: width .5s ease
-    }
+    .empty-state { text-align: center; padding: 40px 20px; color: #aaa; font-size: .9rem; }
 
-    @@media(max-width:600px) {
-        .quests-grid {
-            grid-template-columns: 1fr
-        }
+    /* Task cards */
+    .task-card {
+        background: #fafafa;
+        border-radius: 12px;
+        border: 1.5px solid rgba(0,0,0,.06);
+        border-left: 4px solid var(--teal);
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        transition: box-shadow .15s;
     }
+    .task-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+    .val-blue   { border-left-color: #4457aa; }
+    .val-green  { border-left-color: var(--teal); }
+    .val-yellow { border-left-color: var(--gold); }
+    .val-orange { border-left-color: #e8743a; }
+    .val-red    { border-left-color: var(--rose); }
+
+    .task-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .task-text { font-weight: 600; font-size: .95rem; color: var(--ink); flex: 1; line-height: 1.3; }
+    .task-text.done { text-decoration: line-through; opacity: .5; }
+    .task-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+
+    .btn-task-icon { background: none; border: none; cursor: pointer; font-size: .85rem; padding: 2px 5px; border-radius: 6px; color: #999; transition: background .15s, color .15s; text-decoration: none; }
+    .btn-task-icon:hover { background: #f0f0f0; color: var(--ink); }
+
+    .priority-badge { font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: .04em; }
+    .priority-trivial { background: #f0f0f0; color: #888; }
+    .priority-easy    { background: #e2f5e2; color: #2e7d2e; }
+    .priority-medium  { background: #fff5d6; color: #b07800; }
+    .priority-hard    { background: #fde8ed; color: #c0392b; }
+
+    .habit-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .btn-score { border: none; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform .1s, opacity .15s; }
+    .btn-score:hover { opacity: .85; }
+    .btn-score:active { transform: scale(.93); }
+    .btn-score-up   { background: var(--teal); color: white; }
+    .btn-score-down { background: var(--rose); color: white; }
+    .btn-claim      { background: var(--gold); color: var(--ink); font-size: .85rem; padding: 5px 14px; }
+    .habit-counter  { font-size: .8rem; color: #777; font-weight: 600; flex: 1; text-align: center; }
+
+    .daily-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .daily-check-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: .88rem; color: #555; flex: 1; }
+    .daily-check-label input[type=checkbox] { cursor: pointer; width: 16px; height: 16px; }
+    .daily-check-label input:disabled { cursor: default; opacity: .5; }
+    .streak-badge { font-size: .78rem; font-weight: 700; color: #e8743a; white-space: nowrap; }
+
+    .due-badge { font-size: .72rem; font-weight: 600; padding: 2px 7px; border-radius: 8px; background: #f0f4ff; color: #4457aa; white-space: nowrap; }
+    .due-badge.overdue { background: #fde8ed; color: var(--rose); }
+
+    .checklist-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.06); }
+    .checklist-item { display: flex; align-items: center; gap: 7px; font-size: .83rem; color: #555; padding: 3px 0; }
+    .checklist-item input[type=checkbox] { cursor: pointer; }
+    .checklist-item.done span { text-decoration: line-through; opacity: .5; }
+
+    .gold-cost { font-size: .8rem; font-weight: 700; color: var(--gold); }
+    .reward-note { font-size: .7rem; color: #aaa; }
+
+    .clear-todos-link { font-size: .75rem; color: #aaa; text-decoration: none; margin-top: 8px; display: block; text-align: center; }
+    .clear-todos-link:hover { color: var(--rose); }
 </style>
 
-<div style="padding:8px 0 48px">
+<div class="board-header">
+    <h1>📋 My Tasks</h1>
+</div>
 
-    <div class="page-header">
-        <div>
-            <h2>⚔️ Nhiệm vụ hôm nay</h2>
-            <p>Tick quest đã hoàn thành, rồi nhấn Xác nhận để nhận XP</p>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Hidden CSRF token for AJAX posts -->
+<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+<div class="task-board">
+
+    <!-- HABITS -->
+    <div class="board-col">
+        <div class="col-header">
+            <div class="col-title">🔄 Habits <span class="col-count">@Model.Habits.Count</span></div>
+            <a href="/Task/Create?type=habit" class="btn-add-task">+ Add</a>
         </div>
-        <a href="/Task/search" style="display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--violet);padding:10px 18px;border-radius:50px;font-weight:600;font-size:.88rem;text-decoration:none;border:1.5px solid rgba(92,61,222,.2)">🔍 Tìm quest</a>
+        @if (!Model.Habits.Any()) {
+            <div class="empty-state">No habits yet.<br /><small>Track recurring behaviors.</small></div>
+        }
+        @foreach (var task in Model.Habits) { <partial name="_TaskCard" model="task" /> }
     </div>
 
-    <!-- Progress -->
-    @if (Model.Count > 0)
-    {
-        int pct = doneCount * 100 / Model.Count;
-        <div style="background:white;border-radius:14px;border:1.5px solid rgba(0,0,0,.07);padding:18px 22px;margin-bottom:24px">
-            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin-bottom:8px">
-                <span>Tiến trình hôm nay</span>
-                <span style="color:var(--violet)">@doneCount / @Model.Count quest</span>
+    <!-- DAILIES -->
+    <div class="board-col">
+        <div class="col-header">
+            <div class="col-title">
+                ☀️ Dailies
+                @if (Model.DueDailiesCount > 0) {
+                    <span class="col-count urgent">@Model.DueDailiesCount due</span>
+                } else {
+                    <span class="col-count">@Model.Dailies.Count</span>
+                }
             </div>
-            <div class="progress-bar-wrap"><div class="progress-fill" style="width:@pct%"></div></div>
+            <a href="/Task/Create?type=daily" class="btn-add-task">+ Add</a>
         </div>
-    }
+        @if (!Model.Dailies.Any()) {
+            <div class="empty-state">No dailies yet.<br /><small>Build daily routines.</small></div>
+        }
+        @foreach (var task in Model.Dailies) { <partial name="_TaskCard" model="task" /> }
+    </div>
 
-    <!-- Alerts -->
-    @if (TempData["Error"] != null)
-    {
-        <div style="background:#fde8ed;color:#c0392b;padding:12px 18px;border-radius:10px;margin-bottom:18px;font-size:.9rem">❌ @TempData["Error"]</div>
-    }
-
-    <!-- Filters -->
-    <form method="get" class="filter-bar">
-        <select name="category" onchange="this.form.submit()">
-            <option value="">📂 Tất cả danh mục</option>
-            @foreach (var cat in (ViewBag.Categories as string[] ?? new string[0]))
-            {
-                <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
-            }
-        </select>
-        <select name="difficulty" onchange="this.form.submit()">
-            <option value="">⚡ Độ khó</option>
-            <option value="Easy" selected="@(ViewBag.SelectedDifficulty == "Easy")">🟢 Dễ</option>
-            <option value="Medium" selected="@(ViewBag.SelectedDifficulty == "Medium")">🟡 Trung bình</option>
-            <option value="Hard" selected="@(ViewBag.SelectedDifficulty == "Hard")">🔴 Khó</option>
-        </select>
-        <select name="frequency" onchange="this.form.submit()">
-            <option value="">🔁 Tần suất</option>
-            <option value="Daily" selected="@(ViewBag.SelectedFrequency == "Daily")">Hàng ngày</option>
-            <option value="Weekly" selected="@(ViewBag.SelectedFrequency == "Weekly")">Hàng tuần</option>
-            <option value="Monthly" selected="@(ViewBag.SelectedFrequency == "Monthly")">Hàng tháng</option>
-        </select>
-    </form>
-
-    <!-- Quest Grid -->
-    <form asp-action="Confirm" method="post">
-        <div class="quests-grid">
-            @foreach (var quest in Model)
-            {
-                var isDone = completedIds.Contains(quest.Id);
-                var diffTag = quest.Difficulty == "Easy" ? "qtag-easy" : quest.Difficulty == "Medium" ? "qtag-medium" : "qtag-hard";
-                <div class="qcard @(isDone ? "done" : "")">
-                    <div class="qcard-top">
-                        <input class="q-checkbox" type="checkbox" name="questIds" value="@quest.Id"
-                               id="q_@quest.Id" @(isDone ? "checked disabled" : "") />
-                        <div class="q-icon-box">@quest.Icon</div>
-                        <label class="q-title @(isDone ? "done-text" : "")" for="q_@quest.Id">@quest.Name</label>
-                    </div>
-                    <div class="q-tags">
-                        <span class="qtag @diffTag">@quest.Difficulty</span>
-                        <span class="qtag qtag-cat">@quest.Category</span>
-                        <span class="qtag qtag-freq">@quest.Frequency</span>
-                    </div>
-                    <div class="q-xp">+@quest.XPReward XP</div>
-                </div>
-            }
+    <!-- TO-DOS -->
+    <div class="board-col">
+        <div class="col-header">
+            <div class="col-title">✅ To-Dos <span class="col-count">@Model.PendingTodosCount</span></div>
+            <a href="/Task/Create?type=todo" class="btn-add-task">+ Add</a>
         </div>
+        @if (!Model.Todos.Any()) {
+            <div class="empty-state">No to-dos yet.<br /><small>One-time tasks.</small></div>
+        }
+        @foreach (var task in Model.Todos) { <partial name="_TaskCard" model="task" /> }
+        @if (Model.Todos.Any()) {
+            <a href="/Task/ClearCompleted" class="clear-todos-link">🗑 Clear completed</a>
+        }
+    </div>
 
-        <div class="submit-bar">
-            <button type="submit" class="btn-confirm">✅ Xác nhận hoàn thành</button>
+    <!-- REWARDS -->
+    <div class="board-col">
+        <div class="col-header">
+            <div class="col-title">🎁 Rewards <span class="col-count">@Model.Rewards.Count</span></div>
+            <a href="/Task/Create?type=reward" class="btn-add-task">+ Add</a>
         </div>
-    </form>
+        @if (!Model.Rewards.Any()) {
+            <div class="empty-state">No rewards yet.<br /><small>Treat yourself!</small></div>
+        }
+        @foreach (var task in Model.Rewards) { <partial name="_TaskCard" model="task" /> }
+    </div>
+
 </div>
+
+@section Scripts {
+<script>
+    var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+    function handleEconomyToasts(r) {
+        if (r.notEnoughGold) {
+            showToast('🚫', 'Not Enough Gold', 'Need more GP to claim this reward.', 'toast-hp', 3500);
+            return;
+        }
+        if (r.goldGained > 0)
+            showToast('🪙', 'Gold!', '+' + r.goldGained.toFixed(1) + ' GP', 'toast-gold', 2500);
+        if (r.isCrit)
+            setTimeout(function(){ showToast('⚡', 'Critical Hit!', '1.5× bonus!', 'toast-crit', 3000); }, 300);
+        if (r.droppedItemName)
+            setTimeout(function(){ showToast(r.droppedItemIcon || '📦', 'Item Drop!', r.droppedItemName, 'toast-drop', 5000); }, 700);
+        if (r.died)
+            setTimeout(function(){
+                showToast('💀', 'You Died!', 'Visit Economy to revive.', 'toast-death', 8000);
+            }, 1000);
+        if (typeof refreshHud === 'function') refreshHud();
+    }
+
+    function valueColor(v) {
+        if (v > 5)   return 'val-blue';
+        if (v > 0)   return 'val-green';
+        if (v > -5)  return 'val-yellow';
+        if (v > -15) return 'val-orange';
+        return 'val-red';
+    }
+
+    function updateCardColor(taskId, newValue) {
+        var $card = $('#task-' + taskId);
+        $card.removeClass('val-blue val-green val-yellow val-orange val-red').addClass(valueColor(newValue));
+    }
+
+    // Habit +/- score
+    $(document).on('click', '.btn-score', function (e) {
+        e.preventDefault();
+        var $btn      = $(this);
+        var taskId    = $btn.data('id');
+        var direction = $btn.data('direction');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=' + direction,
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (!r.success && !r.notEnoughGold) return;
+                handleEconomyToasts(r);
+                if (!r.success) return;
+                updateCardColor(taskId, r.newValue);
+                var $card = $('#task-' + taskId);
+                $card.find('.counter-up').text(r.counterUp);
+                $card.find('.counter-down').text(r.counterDown);
+                if (r.isCompleted) {
+                    $card.find('.daily-check-input').prop('checked', true).prop('disabled', true);
+                    $card.find('.task-text').addClass('done');
+                }
+                if (r.xpGained > 0) showToast('⚡', 'XP Gained!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                if (r.leveledUp)    setTimeout(function(){ showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000); }, 400);
+                if (r.newBadges && r.newBadges.length) setTimeout(function(){ showToast('🏅', 'New Badge!', r.newBadges.join(', '), 'toast-badge', 5000); }, 900);
+                if (r.died) setTimeout(function(){ window.location.href = '/Economy'; }, 2500);
+            },
+            complete: function () { $btn.prop('disabled', false); }
+        });
+    });
+
+    // Daily checkbox
+    $(document).on('change', '.daily-check-input', function () {
+        var $cb    = $(this);
+        var taskId = $cb.data('id');
+        if (!$cb.is(':checked')) return;
+        $cb.prop('disabled', true);
+
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=up',
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.success) {
+                    updateCardColor(taskId, r.newValue);
+                    var $card = $('#task-' + taskId);
+                    $card.find('.task-text').addClass('done');
+                    $card.find('.streak-badge').text('🔥 ' + r.newStreak);
+                    if (r.xpGained > 0) showToast('⚡', 'Daily done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                    if (r.leveledUp)    setTimeout(function(){ showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000); }, 400);
+                    handleEconomyToasts(r);
+                    if (r.died) setTimeout(function(){ window.location.href = '/Economy'; }, 2500);
+                } else {
+                    $cb.prop('checked', false).prop('disabled', false);
+                }
+            },
+            error: function () { $cb.prop('checked', false).prop('disabled', false); }
+        });
+    });
+
+    // Todo checkbox
+    $(document).on('change', '.todo-check-input', function () {
+        var $cb    = $(this);
+        var taskId = $cb.data('id');
+        if (!$cb.is(':checked')) return;
+        $cb.prop('disabled', true);
+
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=up',
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.success) {
+                    var $card = $('#task-' + taskId);
+                    $card.find('.task-text').addClass('done');
+                    if (r.xpGained > 0) showToast('⚡', 'To-Do done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                    handleEconomyToasts(r);
+                    setTimeout(function() { $card.fadeOut(400, function(){ $(this).remove(); }); }, 1200);
+                } else {
+                    $cb.prop('checked', false).prop('disabled', false);
+                }
+            },
+            error: function () { $cb.prop('checked', false).prop('disabled', false); }
+        });
+    });
+
+    // Checklist toggle
+    $(document).on('change', '.checklist-check', function () {
+        var itemId = $(this).data('item-id');
+        var $row   = $(this).closest('.checklist-item');
+        $.ajax({
+            url:  '/Task/ChecklistToggle/' + itemId,
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.isCompleted) $row.addClass('done');
+                else               $row.removeClass('done');
+            }
+        });
+    });
+</script>
+}

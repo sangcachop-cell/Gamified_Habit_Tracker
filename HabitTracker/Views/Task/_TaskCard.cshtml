@@ -1,0 +1,135 @@
+@model HabitTracker.Models.HabitTask
+@using HabitTracker.Constants
+@{
+    string colorClass = Model.Value switch {
+        > 5   => "val-blue",
+        > 0   => "val-green",
+        > -5  => "val-yellow",
+        > -15 => "val-orange",
+        _     => "val-red"
+    };
+    string priorityLabel = Model.Priority switch {
+        TaskPriority.Trivial => "trivial",
+        TaskPriority.Easy    => "easy",
+        TaskPriority.Medium  => "medium",
+        TaskPriority.Hard    => "hard",
+        _                    => "easy"
+    };
+    bool isOverdue = Model.DueDate.HasValue
+        && Model.DueDate.Value.Date < DateTime.Today
+        && Model.DateCompleted == null;
+}
+
+<div class="task-card @colorClass" id="task-@Model.Id">
+
+    <div class="task-card-top">
+        <span class="task-text @(Model.IsCompleted || Model.DateCompleted != null ? "done" : "")">
+            @Model.Text
+        </span>
+        <div class="task-actions">
+            <span class="priority-badge priority-@priorityLabel">@Model.Priority</span>
+            <a href="/Task/Edit/@Model.Id" class="btn-task-icon" title="Edit">✏️</a>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display:inline"
+                  onsubmit="return confirm('Delete this task?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-task-icon" title="Delete">🗑️</button>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div style="font-size:.78rem;color:#888;margin-bottom:6px;">@Model.Notes</div>
+    }
+
+    @switch (Model.Type)
+    {
+        case TaskType.Habit:
+            <div class="habit-controls">
+                @if (Model.Up == true)
+                {
+                    <button class="btn-score btn-score-up" data-id="@Model.Id" data-direction="up">+</button>
+                }
+                <div class="habit-counter">
+                    <span class="counter-up">@Model.CounterUp</span>
+                    @if (Model.Up == true && Model.Down == true) { <text> / </text> }
+                    @if (Model.Down == true) { <span class="counter-down">@Model.CounterDown</span> }
+                </div>
+                @if (Model.Down == true)
+                {
+                    <button class="btn-score btn-score-down" data-id="@Model.Id" data-direction="down">−</button>
+                }
+            </div>
+            break;
+
+        case TaskType.Daily:
+            <div class="daily-controls">
+                <label class="daily-check-label">
+                    <input type="checkbox"
+                           class="daily-check-input"
+                           data-id="@Model.Id"
+                           @(Model.IsCompleted ? "checked disabled" : "") />
+                    <span>@(Model.IsCompleted ? "Done today" : "Mark complete")</span>
+                </label>
+                <span class="streak-badge">🔥 @Model.Streak</span>
+            </div>
+            @if (Model.ChecklistItems?.Any() == true)
+            {
+                <div class="checklist-section">
+                    @foreach (var item in Model.ChecklistItems.OrderBy(c => c.SortOrder))
+                    {
+                        <div class="checklist-item @(item.IsCompleted ? "done" : "")">
+                            <input type="checkbox"
+                                   class="checklist-check"
+                                   data-item-id="@item.Id"
+                                   @(item.IsCompleted ? "checked" : "") />
+                            <span>@item.Text</span>
+                        </div>
+                    }
+                </div>
+            }
+            break;
+
+        case TaskType.Todo:
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                <label class="daily-check-label">
+                    <input type="checkbox"
+                           class="todo-check-input"
+                           data-id="@Model.Id"
+                           @(Model.DateCompleted != null ? "checked disabled" : "") />
+                    <span>@(Model.DateCompleted != null ? "Completed" : "Mark done")</span>
+                </label>
+                @if (Model.DueDate.HasValue)
+                {
+                    <span class="due-badge @(isOverdue ? "overdue" : "")">
+                        @(isOverdue ? "⚠️ " : "📅 ")@Model.DueDate.Value.ToString("MMM d")
+                    </span>
+                }
+            </div>
+            @if (Model.ChecklistItems?.Any() == true)
+            {
+                <div class="checklist-section">
+                    @foreach (var item in Model.ChecklistItems.OrderBy(c => c.SortOrder))
+                    {
+                        <div class="checklist-item @(item.IsCompleted ? "done" : "")">
+                            <input type="checkbox"
+                                   class="checklist-check"
+                                   data-item-id="@item.Id"
+                                   @(item.IsCompleted ? "checked" : "") />
+                            <span>@item.Text</span>
+                        </div>
+                    }
+                </div>
+            }
+            break;
+
+        case TaskType.Reward:
+            <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+                <span class="gold-cost">🪙 @Model.GoldCost GP</span>
+                <button class="btn-score btn-claim" data-id="@Model.Id" data-direction="up">
+                    Claim
+                </button>
+            </div>
+            break;
+    }
+</div>

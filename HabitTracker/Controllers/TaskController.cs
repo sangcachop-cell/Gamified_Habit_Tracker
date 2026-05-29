@@ -1,261 +1,220 @@
-﻿using HabitTracker.Constants;
-using HabitTracker.Data;
-using HabitTracker.Models;
+using HabitTracker.Constants;
+using HabitTracker.Models.ViewModels;
 using HabitTracker.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HabitTracker.Controllers
 {
-    /// <summary>
-    /// Quản lý Quest của user - xem danh sách, hoàn thành quest
-    /// </summary>
     [Route("[controller]")]
     public class TaskController : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly IQuestService _questService;
-        private readonly ISearchService _searchService;
+        private readonly ITaskService _taskService;
         private readonly ILogger<TaskController> _logger;
 
-        public TaskController(
-            AppDbContext context,
-            IQuestService questService,
-            ISearchService searchService,
-            ILogger<TaskController> logger)
+        public TaskController(ITaskService taskService, ILogger<TaskController> logger)
         {
-            _context = context;
-            _questService = questService;
-            _searchService = searchService;
-            _logger = logger;
+            _taskService = taskService;
+            _logger      = logger;
         }
 
-        // ===== DANH SÁCH QUEST VỚI FILTER =====
+        // ===== BOARD =====
+
         [HttpGet("")]
         [HttpGet("Index")]
-        public async Task<IActionResult> Index(
-            string? category,
-            string? difficulty,
-            string? frequency)
+        public async Task<IActionResult> Index()
         {
             var userId = GetUserId();
-            if (userId == null)
-                return RedirectToAction("Login", "Account");
+            if (userId == null) return RedirectToAction("Login", "Account");
 
-            // Lấy quest đã hoàn thành hôm nay
-            var completedTodayIds = await _questService.GetCompletedTodayAsync(userId.Value);
+            await _taskService.RunCronAsync(userId.Value);
 
-            // Query với filter
-            var query = _context.Quests.Where(q => q.IsActive);
-
-            if (!string.IsNullOrEmpty(category))
-                query = query.Where(q => q.Category == category);
-
-            if (!string.IsNullOrEmpty(difficulty))
-                query = query.Where(q => q.Difficulty == difficulty);
-
-            if (!string.IsNullOrEmpty(frequency))
-                query = query.Where(q => q.Frequency == frequency);
-
-            var quests = await query
-                .OrderBy(q => q.Category)
-                .ThenBy(q => q.Name)
-                .ToListAsync();
-
-            ViewBag.CompletedTodayIds = completedTodayIds;
-            ViewBag.Categories = AppConstants.Categories.All;
-            ViewBag.Difficulties = AppConstants.Difficulty.All;
-            ViewBag.Frequencies = AppConstants.Frequency.All;
-            ViewBag.SelectedCategory = category;
-            ViewBag.SelectedDifficulty = difficulty;
-            ViewBag.SelectedFrequency = frequency;
-
-            return View(quests);
+            var board = await _taskService.GetUserTasksAsync(userId.Value);
+            return View(board);
         }
 
-        // ===== SEARCH VỚI FILTER NÂNG CAO =====
-        [HttpGet("search")]
-        public async Task<IActionResult> Search(
-            string? q,
-            string? category,
-            string? difficulty,
-            string? frequency,
-            bool? completed)
+        // ===== CREATE =====
+
+        [HttpGet("Create")]
+        public IActionResult Create([FromQuery] string type = "habit")
         {
             var userId = GetUserId();
-            if (userId == null)
-                return RedirectToAction("Login", "Account");
+            if (userId == null) return RedirectToAction("Login", "Account");
 
-            // Use search service for advanced filtering
-            var quests = await _searchService.SearchQuestsAsync(
-                userId.Value, q, category, difficulty, frequency, completed, null, null);
+            var taskType = type.ToLower() switch
+            {
+                "daily"  => TaskType.Daily,
+                "todo"   => TaskType.Todo,
+                "reward" => TaskType.Reward,
+                _        => TaskType.Habit
+            };
 
-            ViewBag.SearchQuery = q;
-            ViewBag.SelectedCategory = category;
-            ViewBag.SelectedDifficulty = difficulty;
-            ViewBag.SelectedFrequency = frequency;
-            ViewBag.Categories = AppConstants.Categories.All;
-            ViewBag.Difficulties = AppConstants.Difficulty.All;
-            ViewBag.Frequencies = AppConstants.Frequency.All;
-
-            _logger.LogInformation($"User {userId} searched quests: query='{q}', found {quests.Count} results");
-
-            return View("Search", quests);
+            var model = new CreateTaskViewModel { Type = taskType };
+            ViewBag.InitialType = type.ToLower();
+            return View(model);
         }
 
-        // ===== AUTOCOMPLETE SUGGESTIONS =====
-        [HttpGet("autocomplete")]
-        public async Task<IActionResult> Autocomplete(string q)
-        {
-            if (string.IsNullOrWhiteSpace(q))
-                return Json(new List<string>());
-
-            var suggestions = await _searchService.AutocompleteQuestAsync(q, limit: 10);
-            return Json(suggestions);
-        }
-
-        // ===== XÁC NHẬN HOÀN THÀNH QUEST =====
-        [HttpPost("Confirm")]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Confirm(List<int> questIds)
+        public async Task<IActionResult> Create(CreateTaskViewModel model)
         {
             var userId = GetUserId();
-            if (userId == null)
-                return RedirectToAction("Login", "Account");
+            if (userId == null) return RedirectToAction("Login", "Account");
 
-            // Validate input
-            if (questIds == null || !questIds.Any())
+            if (!ModelState.IsValid)
             {
-                TempData["Error"] = AppConstants.Messages.NO_QUEST_SELECTED;
-                return RedirectToAction(nameof(Index));
+                ViewBag.InitialType = model.Type.ToString().ToLower();
+                return View(model);
             }
 
-            var user = await _context.Users
-                .Include(u => u.UserBadges)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-                return RedirectToAction("Login", "Account");
-
-            // Lấy quest đã hoàn thành hôm nay
-            var completedTodayIds = await _questService.GetCompletedTodayAsync(userId.Value);
-
-            // Lọc những quest chưa làm hôm nay
-            var newQuestIds = questIds
-                .Where(id => !completedTodayIds.Contains(id))
-                .ToList();
-
-            if (!newQuestIds.Any())
-            {
-                TempData["Error"] = AppConstants.Messages.ALL_QUESTS_DONE;
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Lấy thông tin quest
-            var quests = await _context.Quests
-                .Where(q => newQuestIds.Contains(q.Id))
-                .ToListAsync();
-
-            // Track old values
-            int oldXP = user.XP;
-            int oldLevel = user.Level;
-
-            // Cộng XP và tạo UserQuest records
-            int totalXP = 0;
-            foreach (var quest in quests)
-            {
-                _context.UserQuests.Add(new UserQuest
-                {
-                    UserId = user.Id,
-                    QuestId = quest.Id,
-                    CompletedDate = DateTime.Today,
-                    Status = "Confirmed",
-                    XPEarned = quest.XPReward
-                });
-
-                totalXP += quest.XPReward;
-                quest.TimesCompleted++; // Track for trending
-            }
-
-            // Update user stats
-            user.XP += totalXP;
-            user.Level = _questService.CalculateLevel(user.XP);
-            user.TotalQuestsCompleted += quests.Count;
-            user.TotalXPEarned += totalXP;
-            user.LastActiveDate = DateTime.UtcNow;
-
-            // Update streak
-            _questService.UpdateStreak(user);
-
-            // Save changes
-            await _context.SaveChangesAsync();
-
-            // ===== TOAST NOTIFICATIONS =====
-            SetToastXP(totalXP, quests.Count);
-            SetToastStreak(user);
-            SetToastLevelUp(oldLevel, user.Level);
-            await SetToastBadges(user, oldXP);
-
-            _logger.LogInformation(
-                $"User {userId} completed {quests.Count} quests, gained {totalXP} XP, Level: {oldLevel}->{user.Level}");
-
+            await _taskService.CreateTaskAsync(userId.Value, model);
+            TempData["Success"] = $"Task \"{model.Text}\" created!";
             return RedirectToAction(nameof(Index));
         }
 
-        // ===== QUEST DETAILS =====
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> Details(int id)
+        // ===== EDIT =====
+
+        [HttpGet("Edit/{id:int}")]
+        public async Task<IActionResult> Edit(int id)
         {
-            var quest = await _context.Quests
-                .Include(q => q.UserQuests)
-                .FirstOrDefaultAsync(q => q.Id == id && q.IsActive);
-
-            if (quest == null)
-                return NotFound();
-
             var userId = GetUserId();
-            if (userId != null)
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            // Load task with ownership check via service
+            var board = await _taskService.GetUserTasksAsync(userId.Value);
+            var allTasks = board.Habits
+                .Concat(board.Dailies)
+                .Concat(board.Todos)
+                .Concat(board.Rewards)
+                .ToList();
+
+            var task = allTasks.FirstOrDefault(t => t.Id == id);
+            if (task == null) return NotFound();
+
+            var model = new EditTaskViewModel
             {
-                var completedCount = await _context.UserQuests
-                    .CountAsync(uq => uq.QuestId == id && uq.UserId == userId);
+                Id              = task.Id,
+                Type            = task.Type,
+                Text            = task.Text,
+                Notes           = task.Notes,
+                Priority        = task.Priority,
+                Up              = task.Up ?? true,
+                Down            = task.Down ?? true,
+                HabitFrequency  = task.HabitFrequency ?? HabitResetFrequency.Daily,
+                DailyFrequency  = task.DailyFrequency ?? DailyFrequency.Weekly,
+                EveryX          = task.EveryX,
+                StartDate       = task.StartDate,
+                RepeatMonday    = task.RepeatMonday,
+                RepeatTuesday   = task.RepeatTuesday,
+                RepeatWednesday = task.RepeatWednesday,
+                RepeatThursday  = task.RepeatThursday,
+                RepeatFriday    = task.RepeatFriday,
+                RepeatSaturday  = task.RepeatSaturday,
+                RepeatSunday    = task.RepeatSunday,
+                DueDate         = task.DueDate,
+                GoldCost        = task.GoldCost,
+                ExistingChecklist = task.ChecklistItems?
+                    .OrderBy(c => c.SortOrder)
+                    .Select(c => new EditTaskViewModel.ExistingChecklistItem
+                    {
+                        ItemId      = c.Id,
+                        Text        = c.Text,
+                        IsCompleted = c.IsCompleted
+                    }).ToList() ?? new()
+            };
 
-                ViewBag.UserCompletedCount = completedCount;
-            }
-
-            ViewBag.TotalCompleted = quest.UserQuests?.Count ?? 0;
-
-            return View(quest);
+            return View(model);
         }
 
-        // ===== HELPER METHODS =====
-        private int? GetUserId()
+        [HttpPost("Edit/{id:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, EditTaskViewModel model)
         {
-            return HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid) return View(model);
+
+            await _taskService.UpdateTaskAsync(id, userId.Value, model);
+            TempData["Success"] = $"Task updated!";
+            return RedirectToAction(nameof(Index));
         }
 
-        private void SetToastXP(int totalXP, int questCount)
+        // ===== DELETE =====
+
+        [HttpPost("Delete/{id:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
-            TempData["ToastXP"] = $"✅ +{totalXP} XP từ {questCount} nhiệm vụ!";
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            await _taskService.DeleteTaskAsync(id, userId.Value);
+            return RedirectToAction(nameof(Index));
         }
 
-        private void SetToastStreak(User user)
+        // ===== SCORE (AJAX → JSON) =====
+
+        [HttpPost("Score/{id:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Score(int id, [FromQuery] string direction = "up")
         {
-            if (user.CurrentStreak > 1)
-                TempData["ToastStreak"] = $"🔥 Streak {user.CurrentStreak} ngày liên tiếp!";
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { success = false, error = "Not logged in" });
+
+            var result = await _taskService.ScoreTaskAsync(id, userId.Value, direction);
+            return Json(result);
         }
 
-        private void SetToastLevelUp(int oldLevel, int newLevel)
+        // ===== CHECKLIST TOGGLE (AJAX → JSON) =====
+
+        [HttpPost("ChecklistToggle/{itemId:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChecklistToggle(int itemId)
         {
-            if (newLevel > oldLevel)
-                TempData["ToastLevel"] = $"⬆️ Lên Level {newLevel}!";
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { success = false });
+
+            var newState = await _taskService.ToggleChecklistItemAsync(itemId, userId.Value);
+            return Json(new { success = true, isCompleted = newState });
         }
 
-        private async Task SetToastBadges(User user, int oldXP)
-        {
-            var newBadges = await _questService.AwardBadgesAsync(user, oldXP);
+        // ===== REORDER (AJAX → JSON) =====
 
-            if (newBadges.Any())
-                TempData["ToastBadge"] = $"🏆 Đạt badge: {string.Join(", ", newBadges)}";
+        [HttpPost("Reorder")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reorder([FromBody] ReorderRequest request)
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { success = false });
+
+            await _taskService.ReorderTasksAsync(userId.Value, request.Type, request.Ids);
+            return Json(new { success = true });
+        }
+
+        // ===== CLEAR COMPLETED TODOS =====
+
+        [HttpGet("ClearCompleted")]
+        public async Task<IActionResult> ClearCompleted()
+        {
+            var userId = GetUserId();
+            if (userId == null) return RedirectToAction("Login", "Account");
+
+            await _taskService.ClearCompletedTodosAsync(userId.Value);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ===== HELPERS =====
+
+        private int? GetUserId() =>
+            HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+
+        public class ReorderRequest
+        {
+            public TaskType  Type { get; set; }
+            public List<int> Ids  { get; set; } = new();
         }
     }
 }

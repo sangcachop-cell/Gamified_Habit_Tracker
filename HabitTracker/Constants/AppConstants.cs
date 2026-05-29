@@ -58,7 +58,8 @@
         }
 
         // ===== LEVEL & XP =====
-        public const int XP_PER_LEVEL = 100;
+        public const int XP_PER_LEVEL = 100;   // kept for badge backward-compat
+        public const int MAX_LEVEL    = 100;    // Habitica cap
 
         // ===== BADGES =====
         public static class Badges
@@ -123,5 +124,120 @@
 
         // ===== LEADERBOARD =====
         public const int LEADERBOARD_TOP_COUNT = 10;
+
+        // ===== TASK SYSTEM (Phase 1) =====
+        public static class TaskXPRewards
+        {
+            public const int TRIVIAL = 5;
+            public const int EASY    = 10;
+            public const int MEDIUM  = 15;
+            public const int HARD    = 25;
+
+            public static int GetByPriority(TaskPriority priority) => priority switch
+            {
+                TaskPriority.Trivial => TRIVIAL,
+                TaskPriority.Easy    => EASY,
+                TaskPriority.Medium  => MEDIUM,
+                TaskPriority.Hard    => HARD,
+                _                    => EASY
+            };
+        }
+
+        public static class TaskValueLimits
+        {
+            public const double MIN   = -47.27;
+            public const double MAX   =  21.27;
+            public const double DECAY =   0.9747;
+        }
+
+        // ===== ECONOMY (Phase 2) =====
+        public const double MAX_HP             = 50.0;
+        // ===== SHOP (Phase 4) =====
+        public const int    GEM_GOLD_COST           = 25;   // 25 GP = 1 Gem
+        public const int    ARMOIRE_COST            = 100;  // GP per pull
+        public const double ARMOIRE_GEAR_THRESHOLD  = 0.6;  // [0, 0.6) → gear
+        public const double ARMOIRE_FOOD_THRESHOLD  = 0.8;  // [0.6, 0.8) → food; else XP
+        public const int    ARMOIRE_XP_MIN          = 10;
+        public const int    ARMOIRE_XP_MAX          = 49;
+        public const double MANA_BASE          = 30.0;
+        public const double CRIT_CHANCE        = 0.03;
+        public const double CRIT_MULT          = 1.5;
+        public const double HEALTH_POTION_COST = 25.0;
+        public const double HEALTH_POTION_HEAL = 15.0;
+        public const int    DAILY_DROP_CAP     = 5;
+
+        public static class PriorityMultipliers
+        {
+            public static double Get(TaskPriority p) => p switch
+            {
+                TaskPriority.Trivial => 0.1,
+                TaskPriority.Easy    => 1.0,
+                TaskPriority.Medium  => 1.5,
+                TaskPriority.Hard    => 2.0,
+                _                    => 1.0
+            };
+        }
+    }
+
+    // ===== TASK ENUMS =====
+    public enum TaskType
+    {
+        Habit  = 0,
+        Daily  = 1,
+        Todo   = 2,
+        Reward = 3
+    }
+
+    public enum TaskPriority
+    {
+        Trivial = 0,
+        Easy    = 1,
+        Medium  = 2,
+        Hard    = 3
+    }
+
+    public enum HabitResetFrequency
+    {
+        Daily   = 0,
+        Weekly  = 1,
+        Monthly = 2
+    }
+
+    public enum DailyFrequency
+    {
+        Daily   = 0,
+        Weekly  = 1,
+        Monthly = 2,
+        Yearly  = 3
+    }
+
+    public enum ItemType   { Food = 0, Egg = 1, HatchingPotion = 2 }
+    public enum ItemRarity { Common = 0, Uncommon = 1, Rare = 2, VeryRare = 3 }
+
+    // ===== CHARACTER SYSTEM (Phase 3) =====
+    public static class CharacterClass
+    {
+        public const string Warrior = "warrior";
+        public const string Mage    = "mage";
+        public const string Rogue   = "rogue";
+        public const string Healer  = "healer";
+
+        public static readonly string[] All = { Warrior, Mage, Rogue, Healer };
+
+        /// <summary>Our "mage" maps to Habitica's "wizard" for image file paths.</summary>
+        public static string ToHabiticaKey(string cls) =>
+            cls == Mage ? "wizard" : cls;
+    }
+
+    public static class GearSlot
+    {
+        public const string Weapon          = "weapon";
+        public const string Armor           = "armor";
+        public const string Head            = "head";
+        public const string Shield          = "shield";
+        public const string Back            = "back";
+        public const string HeadAccessory   = "headAccessory";
+        public const string Eyewear         = "eyewear";
+        public const string Body            = "body";
     }
 }
