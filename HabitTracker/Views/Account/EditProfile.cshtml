@@ -97,24 +97,24 @@
 <div id="toast" class="toast-box">Updated successfully!</div>
 
 @section Scripts {
-<script>
-function previewImage(event) {
-    const reader = new FileReader();
-    reader.onload = function () {
-        document.getElementById('preview').src = reader.result;
-    }
-    reader.readAsDataURL(event.target.files[0]);
-}
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('preview').src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
 
-        // Show toast
-                function showToast(message) {
-                    let toast = document.getElementById("toast");
-                    toast.innerText = message;
-                    toast.style.display = "block";
+                // Show toast
+                        function showToast(message) {
+                            let toast = document.getElementById("toast");
+                            toast.innerText = message;
+                            toast.style.display = "block";
 
-                    setTimeout(() => {
-                        toast.style.display = "none";
-                    }, 2500);
-                }
-</script>
+                            setTimeout(() => {
+                                toast.style.display = "none";
+                            }, 2500);
+                        }
+    </script>
 }

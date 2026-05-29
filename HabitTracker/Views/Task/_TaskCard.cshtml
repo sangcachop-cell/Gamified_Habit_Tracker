@@ -1,19 +1,21 @@
 @model HabitTracker.Models.HabitTask
 @using HabitTracker.Constants
 @{
-    string colorClass = Model.Value switch {
-        > 5   => "val-blue",
-        > 0   => "val-green",
-        > -5  => "val-yellow",
+    string colorClass = Model.Value switch
+    {
+        > 5 => "val-blue",
+        > 0 => "val-green",
+        > -5 => "val-yellow",
         > -15 => "val-orange",
-        _     => "val-red"
+        _ => "val-red"
     };
-    string priorityLabel = Model.Priority switch {
+    string priorityLabel = Model.Priority switch
+    {
         TaskPriority.Trivial => "trivial",
-        TaskPriority.Easy    => "easy",
-        TaskPriority.Medium  => "medium",
-        TaskPriority.Hard    => "hard",
-        _                    => "easy"
+        TaskPriority.Easy => "easy",
+        TaskPriority.Medium => "medium",
+        TaskPriority.Hard => "hard",
+        _ => "easy"
     };
     bool isOverdue = Model.DueDate.HasValue
         && Model.DueDate.Value.Date < DateTime.Today
@@ -52,8 +54,14 @@
                 }
                 <div class="habit-counter">
                     <span class="counter-up">@Model.CounterUp</span>
-                    @if (Model.Up == true && Model.Down == true) { <text> / </text> }
-                    @if (Model.Down == true) { <span class="counter-down">@Model.CounterDown</span> }
+                    @if (Model.Up == true && Model.Down == true)
+                    {
+                        <text> / </text>
+                    }
+                    @if (Model.Down == true)
+                    {
+                        <span class="counter-down">@Model.CounterDown</span>
+                    }
                 </div>
                 @if (Model.Down == true)
                 {

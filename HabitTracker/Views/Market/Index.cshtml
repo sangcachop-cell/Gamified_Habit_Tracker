@@ -5,306 +5,722 @@
 
     string SlotIcon(string slot) => slot switch
     {
-        "weapon"        => "⚔️",
-        "armor"         => "🛡️",
-        "head"          => "🪖",
-        "shield"        => "🔰",
-        "back"          => "🌊",
-        "eyewear"       => "👓",
+        "weapon" => "⚔️",
+        "armor" => "🛡️",
+        "head" => "🪖",
+        "shield" => "🔰",
+        "back" => "🌊",
+        "eyewear" => "👓",
         "headAccessory" => "🎀",
-        "body"          => "👘",
-        _               => "📦"
+        "body" => "👘",
+        _ => "📦"
     };
 
-    var classes  = new[] { "warrior", "mage", "rogue", "healer" };
+    var classes = new[] { "warrior", "mage", "rogue", "healer" };
     var classIcons = new Dictionary<string, string>
     {
         ["warrior"] = "⚔️",
-        ["mage"]    = "🧙",
-        ["rogue"]   = "🗡️",
-        ["healer"]  = "💊"
+        ["mage"] = "🧙",
+        ["rogue"] = "🗡️",
+        ["healer"] = "💊"
     };
 }
 
+<style>
+    .market-page {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 34px 18px 50px;
+    }
+
+    .market-hero {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 28px 32px;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .06);
+    }
+
+    .market-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .market-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        background: #f5f3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .market-title {
+        font-size: 2.4rem;
+        font-weight: 850;
+        margin: 0;
+        color: #111827;
+    }
+
+    .market-subtitle {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .wallet-box {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .wallet-pill {
+        min-width: 132px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-align: center;
+        border: 1px solid;
+    }
+
+    .wallet-gold {
+        background: #fff7e6;
+        border-color: #fed7aa;
+        color: #b45309;
+    }
+
+    .wallet-gem {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .market-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 14px;
+        margin-top: 28px;
+    }
+
+        .market-tabs .nav-link {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #475569;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 750;
+        }
+
+            .market-tabs .nav-link.active {
+                background: #f5f3ff;
+                color: #6d28d9;
+                border-color: #c4b5fd;
+                box-shadow: inset 0 -3px 0 #8b5cf6;
+            }
+
+    .filter-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 18px;
+        margin-top: 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        background: #fbfdff;
+    }
+
+    .class-filter {
+        border-radius: 11px !important;
+        padding: 10px 18px !important;
+        font-weight: 700;
+        border: 1px solid #dbe3ef !important;
+        background: #fff !important;
+        color: #475569 !important;
+    }
+
+        .class-filter.active,
+        .class-filter.btn-primary {
+            background: #f3edff !important;
+            color: #6d28d9 !important;
+            border-color: #c4b5fd !important;
+        }
+
+    .gear-class-section {
+        margin-top: 26px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.55rem;
+        font-weight: 850;
+        color: #111827;
+        margin-bottom: 12px;
+    }
+
+    .slot-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #334155;
+        font-size: 1.08rem;
+        font-weight: 800;
+        margin: 18px 0 12px;
+    }
+
+    .market-card {
+        position: relative;
+        min-height: 210px;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+        transition: .18s ease;
+        overflow: hidden;
+    }
+
+        .market-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, .09);
+            border-color: #c4b5fd !important;
+        }
+
+        .market-card.owned-card {
+            border-color: #86efac !important;
+            background: #fbfffd !important;
+        }
+
+    .item-tier {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 9px;
+        border-radius: 8px;
+        font-size: .76rem;
+        font-weight: 850;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .market-img-wrap {
+        height: 92px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 12px;
+    }
+
+    .market-img {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        display: block;
+        image-rendering: pixelated;
+    }
+
+    .item-name {
+        min-height: 30px;
+        font-size: .84rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-top: 4px;
+    }
+
+    .stat-row {
+        min-height: 32px;
+        font-size: .82rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+
+    .price-btn {
+        width: 100%;
+        border-radius: 10px !important;
+        font-weight: 850 !important;
+        padding: 8px 10px !important;
+    }
+
+    .owned-badge {
+        display: block;
+        width: 100%;
+        border-radius: 10px;
+        padding: 9px 10px;
+        font-weight: 850;
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .wrong-badge {
+        display: block;
+        width: 100%;
+        border-radius: 10px;
+        padding: 9px 10px;
+        font-weight: 850;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .shop-info-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-top: 26px;
+    }
+
+    .shop-info-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 16px;
+        background: #fff;
+        color: #475569;
+    }
+
+        .shop-info-card strong {
+            display: block;
+            color: #334155;
+            margin-bottom: 3px;
+        }
+
+    .gem-card,
+    .armoire-card {
+        background: #fff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 22px !important;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .06);
+    }
+
+    @@media (max-width: 768px) {
+        .market-hero {
+            padding: 22px 18px;
+        }
+
+        .market-title {
+            font-size: 2rem;
+        }
+
+        .shop-info-row {
+            grid-template-columns: 1fr;
+        }
+
+        .wallet-box {
+            justify-content: flex-start;
+            margin-top: 16px;
+        }
+    }
+</style>
+
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
-<div class="container-fluid py-4" style="max-width:1200px;">
+<div class="market-page">
+    <div class="market-hero">
 
-    <!-- Header -->
-    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3">
-            <h2 class="mb-0">🏪 Market</h2>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-warning text-dark fs-6">💰 @u.Gold.ToString("F1") GP</span>
-            <span class="badge bg-info text-dark fs-6">💎 @u.Gems Gems</span>
-        </div>
-    </div>
-
-    <!-- Tabs: Gear / Gem Shop / Armoire / Quest Shop -->
-    <ul class="nav nav-tabs mb-4" id="marketTab" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-gear" type="button">⚔️ Gear</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gems" type="button">💎 Gem Shop</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-armoire" type="button">🎁 Armoire</button>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/QuestShop">📜 Quest Shop</a>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-
-        <!-- ── GEAR TAB ───────────────────────────────────────────────────── -->
-        <div class="tab-pane fade show active" id="tab-gear">
-
-            <!-- Class filter pills -->
-            <div class="d-flex flex-wrap gap-2 mb-4">
-                <button class="btn btn-sm btn-primary class-filter active" data-class="all">All</button>
-                @foreach (var cls in classes)
-                {
-                    bool isUserClass = u.Class == cls;
-                    <button class="btn btn-sm @(isUserClass ? "btn-warning" : "btn-outline-secondary") class-filter"
-                            data-class="@cls">
-                        @classIcons.GetValueOrDefault(cls) @char.ToUpper(cls[0])@cls[1..]
-                        @if (isUserClass) { <span class="badge bg-dark ms-1">you</span> }
-                    </button>
-                }
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="market-title-wrap">
+                <div class="market-icon">🏪</div>
+                <div>
+                    <h1 class="market-title">Market</h1>
+                    <p class="market-subtitle">Buy powerful gear and upgrade your hero.</p>
+                </div>
             </div>
 
-            @foreach (var classEntry in Model.ByClassAndSlot)
-            {
-                <div class="gear-class-section" data-class="@classEntry.Key">
-                    <h5 class="text-secondary mb-2">
-                        @classIcons.GetValueOrDefault(classEntry.Key, "📦")
-                        @char.ToUpper(classEntry.Key[0])@classEntry.Key[1..]
-                    </h5>
-                    @foreach (var slotEntry in classEntry.Value)
-                    {
-                        <h6 class="text-muted ms-2 mt-3">@SlotIcon(slotEntry.Key) @char.ToUpper(slotEntry.Key[0])@slotEntry.Key[1..]</h6>
-                        <div class="row g-3 mb-3">
-                            @foreach (var gear in slotEntry.Value)
-                            {
-                                bool owned   = Model.OwnedKeys.Contains(gear.Key);
-                                bool canAfford = u.Gold >= gear.GoldCost;
-                                bool classOk = gear.GearClass == "all" || gear.GearClass == "special" || gear.GearClass == u.Class;
-                                <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                                    <div class="card h-100 bg-dark border-@(owned ? "success" : "secondary") p-2 text-center">
-                                        <img src="@gear.ShopImagePath" alt="@gear.Name"
-                                             style="width:48px;height:48px;object-fit:contain;margin:auto;"
-                                             onerror="this.style.display='none'">
-                                        <div class="fw-bold small mt-1">@gear.Name</div>
-                                        <div class="text-muted" style="font-size:.7rem;">
-                                            @if (gear.STR > 0) { <span class="text-danger me-1">STR+@gear.STR</span> }
-                                            @if (gear.CON > 0) { <span class="text-success me-1">CON+@gear.CON</span> }
-                                            @if (gear.INT > 0) { <span class="text-info me-1">INT+@gear.INT</span> }
-                                            @if (gear.PER > 0) { <span class="text-warning me-1">PER+@gear.PER</span> }
-                                            @if (gear.TwoHanded) { <span class="text-secondary">2H</span> }
-                                        </div>
-                                        @if (owned)
-                                        {
-                                            <span class="badge bg-success mt-2">✓ Owned</span>
-                                        }
-                                        else if (!classOk)
-                                        {
-                                            <span class="badge bg-secondary mt-2">Wrong class</span>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-sm @(canAfford ? "btn-outline-warning" : "btn-secondary") mt-2"
-                                                    onclick="buyGear('@gear.Key', this)"
-                                                    @(!canAfford ? "disabled" : "")>
-                                                @gear.GoldCost GP
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    <hr class="border-secondary">
-                </div>
-            }
+            <div class="wallet-box">
+                <div class="wallet-pill wallet-gold">🪙 @u.Gold.ToString("F1") GP</div>
+                <div class="wallet-pill wallet-gem">💎 @u.Gems Gems</div>
+            </div>
         </div>
 
-        <!-- ── GEM SHOP TAB ───────────────────────────────────────────────── -->
-        <div class="tab-pane fade" id="tab-gems">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card bg-dark border-info p-4 text-center">
-                        <div style="font-size:3rem;">💎</div>
-                        <h4 class="mt-2">Gem Shop</h4>
-                        <p class="text-muted">Convert gold into gems. Gems unlock special items, Rebirth, and class changes.</p>
-                        <hr class="border-secondary">
-                        <div class="mb-3">
-                            <span class="text-warning fs-5">💰 @u.Gold.ToString("F1") GP</span>
-                            <span class="mx-2 text-muted">→</span>
-                            <span class="text-info fs-5">💎 @u.Gems Gems</span>
-                        </div>
-                        <div class="card bg-secondary bg-opacity-25 border-info p-3 mb-3">
-                            <div class="fw-bold">1 Gem</div>
-                            <div class="text-muted small">Costs 25 GP</div>
-                            <button class="btn btn-info mt-2 @(u.Gold < 25 ? "disabled" : "")"
-                                    onclick="buyGem(this)" @(u.Gold < 25 ? "disabled" : "")>
-                                Buy 1 Gem — 25 GP
+        <ul class="nav market-tabs" id="marketTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-gear" type="button">⚔️ Gear</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gems" type="button">💎 Gem Shop</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-armoire" type="button">🎁 Armoire</button>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/QuestShop">📜 Quest Shop</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active" id="tab-gear">
+
+                <div class="filter-panel">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn class-filter active" data-class="all">All</button>
+
+                        @foreach (var cls in classes)
+                        {
+                            bool isUserClass = u.Class == cls;
+
+                            <button class="btn class-filter @(isUserClass ? "active" : "")"
+                                    data-class="@cls">
+                                @classIcons.GetValueOrDefault(cls) @char.ToUpper(cls[0])@cls[1..]
+                                @if (isUserClass)
+                                {
+                                    <span class="badge bg-light text-dark ms-1">you</span>
+                                }
                             </button>
-                        </div>
-                        <p class="text-muted small">
-                            Gems unlock: Rebirth (Phase 4.3) · Class Change (future) · Cosmetics (future)
-                        </p>
+                        }
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ── ARMOIRE TAB ────────────────────────────────────────────────── -->
-        <div class="tab-pane fade" id="tab-armoire">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card bg-dark border-warning p-4 text-center">
-                        <div style="font-size:3rem;">🎁</div>
-                        <h4 class="mt-2">Enchanted Armoire</h4>
-                        <p class="text-muted">
-                            A mysterious chest filled with wonders. Each pull costs <strong>100 GP</strong>
-                            and awards a random reward.
-                        </p>
-                        <hr class="border-secondary">
-                        <div class="row text-center mb-3">
-                            <div class="col-4">
-                                <div style="font-size:1.5rem;">⚔️</div>
-                                <div class="small text-muted">60% Gear</div>
-                            </div>
-                            <div class="col-4">
-                                <div style="font-size:1.5rem;">🍖</div>
-                                <div class="small text-muted">20% Food</div>
-                            </div>
-                            <div class="col-4">
-                                <div style="font-size:1.5rem;">⚡</div>
-                                <div class="small text-muted">20% XP</div>
-                            </div>
+                @foreach (var classEntry in Model.ByClassAndSlot)
+                {
+                    <div class="gear-class-section" data-class="@classEntry.Key">
+                        <div class="section-title">
+                            <span>@classIcons.GetValueOrDefault(classEntry.Key, "📦")</span>
+                            <span>@char.ToUpper(classEntry.Key[0])@classEntry.Key[1..]</span>
                         </div>
-                        <button id="btn-armoire" class="btn btn-warning btn-lg @(u.Gold < 100 ? "disabled" : "")"
-                                onclick="pullArmoire(this)" @(u.Gold < 100 ? "disabled" : "")>
-                            🎁 Pull from Armoire — 100 GP
-                        </button>
-                        @if (u.Gold < 100)
-                        {
-                            <p class="text-danger small mt-2">Need 100 GP (you have @u.Gold.ToString("F1"))</p>
-                        }
 
-                        <!-- Armoire pool preview -->
-                        @if (Model.ArmoireItems.Any())
+                        @foreach (var slotEntry in classEntry.Value)
                         {
-                            <hr class="border-secondary mt-4">
-                            <p class="text-muted small">Possible gear rewards:</p>
-                            <div class="d-flex flex-wrap justify-content-center gap-2">
-                                @foreach (var ag in Model.ArmoireItems)
+                            <div class="slot-title">
+                                <span>@SlotIcon(slotEntry.Key)</span>
+                                <span>@char.ToUpper(slotEntry.Key[0])@slotEntry.Key[1..]</span>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                @foreach (var gear in slotEntry.Value)
                                 {
-                                    <img src="@ag.ShopImagePath" alt="@ag.Name" title="@ag.Name"
-                                         style="width:36px;height:36px;object-fit:contain;"
-                                         onerror="this.style.display='none'">
+                                    bool owned = Model.OwnedKeys.Contains(gear.Key);
+                                    bool canAfford = u.Gold >= gear.GoldCost;
+                                    bool classOk = gear.GearClass == "all" || gear.GearClass == "special" || gear.GearClass == u.Class;
+
+                                    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                                        <div class="card h-100 p-2 text-center market-card @(owned ? "owned-card" : "")">
+                                            <span class="item-tier">T@gear.Tier</span>
+
+                                            <div class="market-img-wrap">
+                                                <img src="@gear.ShopImagePath"
+                                                     alt="@gear.Name"
+                                                     class="market-img"
+                                                     data-key="@gear.Key"
+                                                     data-slot="@gear.Slot"
+                                                     onerror="fixGearImg(this)" />
+                                            </div>
+
+                                            <div class="item-name">@gear.Name</div>
+
+                                            <div class="stat-row">
+                                                @if (gear.STR > 0)
+                                                {
+                                                    <span class="text-danger">STR +@gear.STR</span>
+                                                }
+                                                @if (gear.CON > 0)
+                                                {
+                                                    <span class="text-success">CON +@gear.CON</span>
+                                                }
+                                                @if (gear.INT > 0)
+                                                {
+                                                    <span class="text-primary">INT +@gear.INT</span>
+                                                }
+                                                @if (gear.PER > 0)
+                                                {
+                                                    <span class="text-warning">PER +@gear.PER</span>
+                                                }
+                                                @if (gear.TwoHanded)
+                                                {
+                                                    <span class="text-secondary">2H</span>
+                                                }
+                                            </div>
+
+                                            <div class="mt-auto pt-2">
+                                                @if (owned)
+                                                {
+                                                    <span class="owned-badge">✓ Owned</span>
+                                                }
+                                                else if (!classOk)
+                                                {
+                                                    <span class="wrong-badge">Wrong class</span>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn @(canAfford ? "btn-outline-warning" : "btn-secondary") price-btn"
+                                                            onclick="buyGear('@gear.Key', this)"
+                                                            @(!canAfford ? "disabled" : "")>
+                                                        🪙 @gear.GoldCost GP
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
                                 }
                             </div>
                         }
                     </div>
+                }
+
+                <div class="shop-info-row">
+                    <div class="shop-info-card">
+                        <strong>🛡️ Right Gear</strong>
+                        Some items are class restricted.
+                    </div>
+                    <div class="shop-info-card">
+                        <strong>⚖️ Compare Stats</strong>
+                        Choose items that fit your build.
+                    </div>
+                    <div class="shop-info-card">
+                        <strong>🔄 Refresh</strong>
+                        Prices and items may change later.
+                    </div>
+                    <div class="shop-info-card">
+                        <strong>💰 Save Gold</strong>
+                        Buy only useful upgrades.
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </div><!-- tab-content -->
+            <div class="tab-pane fade" id="tab-gems">
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-6">
+                        <div class="card gem-card p-4 text-center">
+                            <div style="font-size:3rem;">💎</div>
+                            <h4 class="mt-2">Gem Shop</h4>
+                            <p class="text-muted">Convert gold into gems. Gems unlock special items, Rebirth, and class changes.</p>
+
+                            <hr>
+
+                            <div class="mb-3">
+                                <span class="text-warning fs-5">💰 @u.Gold.ToString("F1") GP</span>
+                                <span class="mx-2 text-muted">→</span>
+                                <span class="text-info fs-5">💎 @u.Gems Gems</span>
+                            </div>
+
+                            <div class="card bg-light border-0 p-3 mb-3">
+                                <div class="fw-bold">1 Gem</div>
+                                <div class="text-muted small">Costs 25 GP</div>
+
+                                <button class="btn btn-info mt-2 @(u.Gold < 25 ? "disabled" : "")"
+                                        onclick="buyGem(this)"
+                                        @(u.Gold < 25 ? "disabled" : "")>
+                                    Buy 1 Gem — 25 GP
+                                </button>
+                            </div>
+
+                            <p class="text-muted small">
+                                Gems unlock: Rebirth · Class Change · Cosmetics
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab-armoire">
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-6">
+                        <div class="card armoire-card p-4 text-center">
+                            <div style="font-size:3rem;">🎁</div>
+                            <h4 class="mt-2">Enchanted Armoire</h4>
+
+                            <p class="text-muted">
+                                A mysterious chest filled with wonders. Each pull costs <strong>100 GP</strong>
+                                and awards a random reward.
+                            </p>
+
+                            <hr>
+
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <div style="font-size:1.5rem;">⚔️</div>
+                                    <div class="small text-muted">60% Gear</div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="font-size:1.5rem;">🍖</div>
+                                    <div class="small text-muted">20% Food</div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="font-size:1.5rem;">⚡</div>
+                                    <div class="small text-muted">20% XP</div>
+                                </div>
+                            </div>
+
+                            <button id="btn-armoire"
+                                    class="btn btn-warning btn-lg @(u.Gold < 100 ? "disabled" : "")"
+                                    onclick="pullArmoire(this)"
+                                    @(u.Gold < 100 ? "disabled" : "")>
+                                🎁 Pull from Armoire — 100 GP
+                            </button>
+
+                            @if (u.Gold < 100)
+                            {
+                                <p class="text-danger small mt-2">
+                                    Need 100 GP. You have @u.Gold.ToString("F1")
+                                </p>
+                            }
+
+                            @if (Model.ArmoireItems.Any())
+                            {
+                                <hr class="mt-4">
+                                <p class="text-muted small">Possible gear rewards:</p>
+
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    @foreach (var ag in Model.ArmoireItems)
+                                    {
+                                        <img src="@ag.ShopImagePath"
+                                             alt="@ag.Name"
+                                             title="@ag.Name"
+                                             style="width:40px;height:40px;object-fit:contain;image-rendering:pixelated;"
+                                             data-key="@ag.Key"
+                                             data-slot="@ag.Slot"
+                                             onerror="fixGearImg(this)" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-<script>
-function token() { return document.querySelector('input[name="__RequestVerificationToken"]').value; }
+    <script>
+        function token() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        }
 
-// ── Class filter pills ──────────────────────────────────────────────────
-document.querySelectorAll('.class-filter').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.querySelectorAll('.class-filter').forEach(b => b.classList.remove('active','btn-primary'));
-        this.classList.add('active', 'btn-primary');
-        const cls = this.dataset.class;
-        document.querySelectorAll('.gear-class-section').forEach(sec => {
-            sec.style.display = (cls === 'all' || sec.dataset.class === cls) ? '' : 'none';
+        document.querySelectorAll('.class-filter').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.class-filter').forEach(b => {
+                    b.classList.remove('active', 'btn-primary');
+                });
+
+                this.classList.add('active', 'btn-primary');
+
+                const cls = this.dataset.class;
+
+                document.querySelectorAll('.gear-class-section').forEach(sec => {
+                    sec.style.display = (cls === 'all' || sec.dataset.class === cls) ? '' : 'none';
+                });
+            });
         });
-    });
-});
 
-// ── Buy gear ────────────────────────────────────────────────────────────
-function buyGear(key, btn) {
-    btn.disabled = true;
-    fetch('/Market/Buy?key=' + encodeURIComponent(key), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '__RequestVerificationToken=' + encodeURIComponent(token())
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) {
-            showToast('⚔️', 'Purchased!', 'Added to inventory', 'toast-gold', 2500);
-            refreshHud();
-            // Replace button with "Owned" badge
-            btn.outerHTML = '<span class="badge bg-success mt-2">✓ Owned</span>';
-        } else {
-            showToast('🚫', 'Cannot Buy', d.error, 'toast-hp', 3000);
-            btn.disabled = false;
+        function buyGear(key, btn) {
+            btn.disabled = true;
+
+            fetch('/Market/Buy?key=' + encodeURIComponent(key), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('⚔️', 'Purchased!', 'Added to inventory', 'toast-gold', 2500);
+                    refreshHud();
+                    btn.outerHTML = '<span class="owned-badge">✓ Owned</span>';
+                } else {
+                    showToast('🚫', 'Cannot Buy', d.error, 'toast-hp', 3000);
+                    btn.disabled = false;
+                }
+            });
         }
-    });
-}
 
-// ── Buy gem ─────────────────────────────────────────────────────────────
-function buyGem(btn) {
-    btn.disabled = true;
-    fetch('/Economy/BuyGem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '__RequestVerificationToken=' + encodeURIComponent(token())
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) {
-            showToast('💎', 'Gem purchased!', 'You now have ' + d.newGems + ' gems', 'toast-gold', 3000);
-            refreshHud();
-            btn.disabled = false;
-        } else {
-            showToast('🚫', 'Cannot Buy', d.error, 'toast-hp', 3000);
-            btn.disabled = false;
+        function buyGem(btn) {
+            btn.disabled = true;
+
+            fetch('/Economy/BuyGem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('💎', 'Gem purchased!', 'You now have ' + d.newGems + ' gems', 'toast-gold', 3000);
+                    refreshHud();
+                    btn.disabled = false;
+                } else {
+                    showToast('🚫', 'Cannot Buy', d.error, 'toast-hp', 3000);
+                    btn.disabled = false;
+                }
+            });
         }
-    });
-}
 
-// ── Armoire pull ─────────────────────────────────────────────────────────
-function pullArmoire(btn) {
-    btn.disabled = true;
-    btn.textContent = '✨ Opening...';
-    fetch('/Market/PullArmoire', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '__RequestVerificationToken=' + encodeURIComponent(token())
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) {
-            if (d.rewardType === 'gear') {
-                var gearIconHtml = d.gearImgPath ? '<img src="' + d.gearImgPath + '" style="width:36px;height:36px;object-fit:contain;" onerror="this.replaceWith(document.createTextNode(\'⚔️\'))">' : '⚔️';
-                showToast(gearIconHtml, 'Armoire!', 'You found: ' + d.gearName, 'toast-drop', 5000);
-            } else if (d.rewardType === 'food') {
-                var foodIconHtml = d.foodIcon ? '<img src="' + d.foodIcon + '" style="width:36px;height:36px;object-fit:contain;">' : '🍖';
-                showToast(foodIconHtml, 'Armoire!', 'You found: ' + d.foodName, 'toast-drop', 4000);
-            } else {
-                showToast('⚡', 'Armoire!', 'You gained ' + d.xpGained + ' XP!', 'toast-xp', 4000);
+        function fixGearImg(img) {
+            const key = img.dataset.key;
+            const slot = img.dataset.slot;
+
+            const paths = [
+                `/fe/gear/${slot}/${key}.png`,
+                `/fe/gear/${slot}/shop/shop_${key}.png`,
+                `/fe/gear/armoire/${key}.png`,
+                `/fe/gear/armoire/broad_${key}.png`,
+                `/fe/gear/armor/broad_${key}.png`,
+                `/fe/gear/armor/${key}.png`,
+                `/fe/gear/weapon/${key}.png`,
+                `/fe/gear/head/${key}.png`,
+                `/fe/gear/shield/${key}.png`,
+                `/fe/gear/back/${key}.png`
+            ];
+
+            let index = Number(img.dataset.tryIndex || 0);
+
+            if (index >= paths.length) {
+                img.style.display = "none";
+                return;
             }
-            refreshHud();
-        } else {
-            showToast('🚫', 'Armoire failed', d.error, 'toast-hp', 3000);
+
+            img.dataset.tryIndex = index + 1;
+            img.src = paths[index];
         }
-        btn.textContent = '🎁 Pull from Armoire — 100 GP';
-        btn.disabled = false;
-    });
-}
-</script>
+
+        function pullArmoire(btn) {
+            btn.disabled = true;
+            btn.textContent = '✨ Opening...';
+
+            fetch('/Market/PullArmoire', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    if (d.rewardType === 'gear') {
+                        showToast('⚔️', 'Armoire!', 'You found: ' + d.gearName, 'toast-drop', 5000);
+                    } else if (d.rewardType === 'food') {
+                        showToast('🍖', 'Armoire!', 'You found: ' + d.foodName, 'toast-drop', 4000);
+                    } else {
+                        showToast('⚡', 'Armoire!', 'You gained ' + d.xpGained + ' XP!', 'toast-xp', 4000);
+                    }
+
+                    refreshHud();
+                } else {
+                    showToast('🚫', 'Armoire failed', d.error, 'toast-hp', 3000);
+                }
+
+                btn.textContent = '🎁 Pull from Armoire — 100 GP';
+                btn.disabled = false;
+            });
+        }
+    </script>
 }

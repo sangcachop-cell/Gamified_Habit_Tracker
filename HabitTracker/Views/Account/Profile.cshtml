@@ -1,230 +1,226 @@
 ﻿@model HabitTracker.Models.User
 @{
     ViewData["Title"] = "Hồ sơ — " + Model.Username;
+    int xpInLevel = Model.XP % 100;
 }
+
 <style>
     :root {
-        --ink: #0a0a12;
-        --paper: #f5f3ef;
-        --violet: #5c3dde;
-        --gold: #f0b429;
-        --rose: #e8436a;
-        --teal: #00b89c;
-        --soft: #edeaf5
+        --profile-bg: #f8fafc;
+        --profile-card: #ffffff;
+        --profile-border: #e5e7eb;
+        --profile-text: #0f172a;
+        --profile-muted: #64748b;
+        --profile-purple: #7c3aed;
+        --profile-purple-soft: #f5f3ff;
+        --profile-green: #10b981;
+        --profile-red: #f43f5e;
+        --profile-blue: #2563eb;
+        --profile-gold: #f59e0b;
     }
 
     body {
-        background: var(--paper);
-        font-family: "DM Sans",sans-serif
+        background: var(--profile-bg);
+        font-family: "Nunito", sans-serif;
     }
 
-    h1, h2, h3, h4 {
-        font-family: "Syne",sans-serif
+    .profile-page {
+        max-width: 1320px;
+        margin: 22px auto;
+        padding: 0 16px 40px;
     }
-    /* hero */
+
     .profile-hero {
-        background: var(--ink);
-        border-radius: 20px;
-        padding: 36px;
-        color: white;
-        margin-bottom: 28px;
         position: relative;
-        overflow: hidden
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 34px;
+        color: white;
+        margin-bottom: 24px;
+        background: radial-gradient(circle at 18% 55%, rgba(124, 58, 237, .65), transparent 32%), radial-gradient(circle at 85% 20%, rgba(245, 158, 11, .30), transparent 30%), linear-gradient(135deg, #070714, #17102d 55%, #1f1608);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .18);
     }
 
-        .profile-hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 20% 60%,rgba(92,61,222,.5),transparent 55%),radial-gradient(ellipse at 80% 30%,rgba(240,180,41,.2),transparent 55%);
-            pointer-events: none
-        }
-
-    .hero-inner {
+    .profile-hero-inner {
+        position: relative;
+        z-index: 2;
         display: flex;
         align-items: center;
         gap: 28px;
-        position: relative;
-        z-index: 2;
-        flex-wrap: wrap
+        flex-wrap: wrap;
     }
 
-    .hero-avatar {
-        width: 100px;
-        height: 100px;
+    .profile-avatar,
+    .profile-avatar-placeholder {
+        width: 118px;
+        height: 118px;
         border-radius: 50%;
+        border: 4px solid rgba(255,255,255,.35);
+        box-shadow: 0 16px 30px rgba(0,0,0,.25);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar {
         object-fit: cover;
-        border: 3px solid rgba(255,255,255,.25);
-        flex-shrink: 0
     }
 
-    .hero-avatar-placeholder {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
+    .profile-avatar-placeholder {
         background: rgba(255,255,255,.12);
-        border: 3px solid rgba(255,255,255,.25);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: "Syne",sans-serif;
-        font-weight: 800;
-        font-size: 2.5rem;
-        color: white;
-        flex-shrink: 0
+        font-size: 42px;
+        font-weight: 900;
     }
 
-    .hero-info h2 {
-        font-size: 1.7rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-        margin-bottom: 4px
+    .profile-name {
+        font-size: 34px;
+        font-weight: 900;
+        margin: 0;
     }
 
-    .hero-info p {
-        color: rgba(255,255,255,.6);
-        font-size: .9rem;
-        margin-bottom: 12px
+    .profile-email {
+        color: rgba(255,255,255,.72);
+        margin: 4px 0 14px;
+        font-weight: 700;
+    }
+
+    .profile-bio {
+        color: rgba(255,255,255,.82);
+        font-style: italic;
+        margin-bottom: 14px;
+        max-width: 720px;
     }
 
     .hero-stats {
         display: flex;
-        gap: 20px;
+        gap: 14px;
         flex-wrap: wrap;
-        margin-top: 4px
     }
 
-    .hstat {
+    .hero-stat {
+        min-width: 92px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.18);
         text-align: center;
-        background: rgba(255,255,255,.08);
-        border-radius: 10px;
-        padding: 10px 16px;
-        border: 1px solid rgba(255,255,255,.1)
+        backdrop-filter: blur(8px);
     }
 
-        .hstat .n {
-            font-family: "Syne",sans-serif;
-            font-weight: 800;
-            font-size: 1.4rem;
-            line-height: 1
+        .hero-stat .num {
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1;
         }
 
-        .hstat .l {
-            font-size: .72rem;
-            color: rgba(255,255,255,.5);
-            margin-top: 3px
+        .hero-stat .label {
+            color: rgba(255,255,255,.65);
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 700;
         }
 
     .social-row {
         display: flex;
-        gap: 8px;
-        margin-top: 12px
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
     }
 
-    .soc-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-radius: 50px;
-        background: rgba(255,255,255,.1);
-        border: 1px solid rgba(255,255,255,.15);
+    .social-btn {
         color: white;
         text-decoration: none;
-        font-size: .8rem;
-        font-weight: 500;
-        transition: background .2s
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.16);
+        font-weight: 800;
+        font-size: 13px;
     }
 
-        .soc-btn:hover {
-            background: rgba(255,255,255,.2);
-            color: white
-        }
-    /* layout */
     .profile-layout {
         display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 24px;
-        align-items: start
+        grid-template-columns: minmax(0, 2fr) 390px;
+        gap: 22px;
+        align-items: start;
     }
 
-    .glass-card {
-        background: white;
-        border-radius: 16px;
-        border: 1.5px solid rgba(0,0,0,.07);
-        padding: 24px;
-        margin-bottom: 20px
+    .profile-card {
+        background: var(--profile-card);
+        border: 1px solid var(--profile-border);
+        border-radius: 22px;
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .05);
     }
 
-        .glass-card:last-child {
-            margin-bottom: 0
-        }
-
-    .card-title {
-        font-size: 1rem;
-        font-weight: 700;
-        letter-spacing: -.3px;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--soft);
+    .profile-card-title {
         display: flex;
         align-items: center;
-        gap: 8px
+        gap: 10px;
+        font-size: 19px;
+        font-weight: 900;
+        color: var(--profile-text);
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ede9fe;
     }
-    /* form */
-    .form-row {
+
+    .form-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 18px;
     }
 
-    .form-field {
-        margin-bottom: 16px
+    .form-field label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: 800;
+        color: #475569;
+        font-size: 14px;
     }
 
-        .form-field label {
-            font-weight: 600;
-            font-size: .82rem;
-            color: #555;
-            display: block;
-            margin-bottom: 6px
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        border: 1px solid var(--profile-border);
+        border-radius: 14px;
+        padding: 12px 14px;
+        background: #fff;
+        color: var(--profile-text);
+        outline: none;
+        font-weight: 700;
+        transition: .15s ease;
+    }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 4px rgba(167,139,250,.14);
         }
 
-        .form-field input, .form-field textarea, .form-field select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid rgba(0,0,0,.1);
-            border-radius: 10px;
-            font-family: "DM Sans",sans-serif;
-            font-size: .92rem;
-            background: white;
-            outline: none;
-            transition: border-color .2s,box-shadow .2s
-        }
+    .form-field textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
 
-            .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
-                border-color: var(--violet);
-                box-shadow: 0 0 0 3px rgba(92,61,222,.08)
-            }
-
-        .form-field textarea {
-            resize: vertical;
-            min-height: 90px
-        }
-    /* avatar upload */
     .avatar-upload {
-        border: 2px dashed rgba(0,0,0,.12);
-        border-radius: 12px;
-        padding: 18px;
+        position: relative;
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 24px;
         text-align: center;
         cursor: pointer;
-        transition: all .2s;
-        position: relative
+        background: #f8fafc;
+        transition: .18s ease;
     }
 
         .avatar-upload:hover {
-            border-color: var(--violet);
-            background: rgba(92,61,222,.02)
+            border-color: #a78bfa;
+            background: #faf5ff;
         }
 
         .avatar-upload input[type=file] {
@@ -232,205 +228,247 @@
             inset: 0;
             opacity: 0;
             cursor: pointer;
-            width: 100%;
-            height: 100%
         }
 
-    .av-preview {
-        width: 72px;
-        height: 72px;
+    .avatar-preview {
+        width: 92px;
+        height: 92px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 8px;
-        display: block;
-        border: 2px solid rgba(0,0,0,.08)
+        border: 3px solid white;
+        box-shadow: 0 10px 22px rgba(15,23,42,.12);
+        margin-bottom: 10px;
     }
 
-    .avatar-upload p {
-        font-size: .82rem;
-        color: #aaa;
-        margin: 0
+    .avatar-note {
+        color: var(--profile-muted);
+        font-weight: 700;
+        margin: 0;
     }
-    /* buttons */
+
     .action-row {
         display: flex;
-        gap: 10px;
+        flex-wrap: wrap;
+        gap: 12px;
         margin-top: 4px;
-        flex-wrap: wrap
     }
 
-    .btn-save {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        background: var(--ink);
+    .btn-save-profile {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 28px;
         color: white;
-        padding: 11px 28px;
-        border-radius: 50px;
-        font-family: "Syne",sans-serif;
-        font-weight: 700;
-        font-size: .9rem;
-        border: none;
-        cursor: pointer;
-        transition: background .2s,transform .2s
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        font-weight: 900;
+        box-shadow: 0 10px 22px rgba(124,58,237,.25);
     }
 
-        .btn-save:hover {
-            background: var(--violet);
-            transform: translateY(-1px)
-        }
-
-    .btn-cancel {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        background: transparent;
-        color: var(--ink);
-        padding: 10px 22px;
-        border-radius: 50px;
-        font-weight: 500;
-        font-size: .9rem;
+    .btn-soft-profile {
         text-decoration: none;
-        border: 1.5px solid rgba(0,0,0,.12);
-        transition: all .2s
+        border: 1px solid var(--profile-border);
+        border-radius: 999px;
+        padding: 11px 22px;
+        color: var(--profile-text);
+        background: #fff;
+        font-weight: 800;
     }
 
-        .btn-cancel:hover {
-            border-color: var(--violet);
-            color: var(--violet)
-        }
-    /* right sidebar */
-    .stat-mini {
+    .sidebar-card {
+        position: static;
+    }
+
+    .xp-line {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .xp-bar {
+        height: 9px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .xp-fill {
+        height: 100%;
+        width: @xpInLevel %;
+        background: linear-gradient(90deg, var(--profile-purple), var(--profile-green));
+    }
+
+    .stat-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f5f5f5
+        padding: 13px 0;
+        border-bottom: 1px solid #f1f5f9;
     }
 
-        .stat-mini:last-child {
-            border: none
+        .stat-row:last-child {
+            border-bottom: none;
         }
 
-        .stat-mini .sk {
-            font-size: .85rem;
-            color: #888;
-            font-weight: 500
+    .stat-label {
+        color: var(--profile-muted);
+        font-weight: 800;
+    }
+
+    .stat-value {
+        color: var(--profile-text);
+        font-weight: 900;
+    }
+
+    .quick-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .quick-link {
+        text-decoration: none;
+        color: var(--profile-text);
+        background: var(--profile-purple-soft);
+        border: 1px solid #ede9fe;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 900;
+        transition: .15s ease;
+    }
+
+        .quick-link:hover {
+            transform: translateY(-1px);
+            background: #ede9fe;
+            color: var(--profile-purple);
         }
 
-        .stat-mini .sv {
-            font-family: "Syne",sans-serif;
-            font-weight: 700;
-            font-size: .95rem;
-            color: var(--ink)
-        }
-    /* badges */
     .badge-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin-top: 4px
     }
 
     .badge-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        background: var(--soft);
-        border-radius: 50px;
-        padding: 5px 12px;
-        font-size: .78rem;
-        font-weight: 600;
-        color: var(--violet)
-    }
-    /* xp bar */
-    .xp-bar-outer {
-        height: 7px;
-        background: #e8e8e8;
-        border-radius: 50px;
-        overflow: hidden;
-        margin: 6px 0 4px
+        background: var(--profile-purple-soft);
+        color: var(--profile-purple);
+        border: 1px solid #ede9fe;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-weight: 800;
+        font-size: 13px;
     }
 
-    .xp-bar-inner {
-        height: 100%;
-        background: linear-gradient(90deg,var(--violet),var(--teal));
-        border-radius: 50px
+    .alert-s,
+    .alert-e {
+        border-radius: 16px;
+        padding: 13px 16px;
+        margin-bottom: 16px;
+        font-weight: 800;
     }
-    /* alert */
+
     .alert-s {
-        background: #d4f5ef;
-        color: #006651;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-size: .88rem;
-        margin-bottom: 20px
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
     }
 
     .alert-e {
-        background: #fde8ed;
-        color: #c0392b;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-size: .88rem;
-        margin-bottom: 20px
+        background: #ffe4e6;
+        color: #be123c;
+        border: 1px solid #fecdd3;
     }
 
-    @@media(max-width:900px) {
+    @@media(max-width: 992px) {
         .profile-layout {
-            grid-template-columns: 1fr
+            grid-template-columns: 1fr;
         }
 
-        .form-row {
-            grid-template-columns: 1fr
+        .sidebar-card {
+            position: static;
+        }
+    }
+
+    @@media(max-width: 640px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-hero {
+            padding: 24px;
+        }
+
+        .profile-name {
+            font-size: 28px;
         }
     }
 </style>
 
-<div style="padding:8px 0 48px">
+<div class="profile-page">
 
     @if (TempData["Success"] != null)
     {
         <div class="alert-s">✅ @TempData["Success"]</div>
     }
+
     @if (TempData["Error"] != null)
     {
         <div class="alert-e">❌ @TempData["Error"]</div>
     }
 
-    <!-- Hero -->
     <div class="profile-hero">
-        <div class="hero-inner">
+        <div class="profile-hero-inner">
             @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
             {
-                <img src="@Model.Avatar" class="hero-avatar" alt="@Model.Username" />
+                <img src="@Model.Avatar" class="profile-avatar" alt="@Model.Username" />
             }
             else if (!string.IsNullOrEmpty(Model.Avatar))
             {
-                <img src="@Url.Content("~/images/" + Model.Avatar)" class="hero-avatar"
+                <img src="@Url.Content("~/images/" + Model.Avatar)"
+                     class="profile-avatar"
                      alt="@Model.Username"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                <div class="hero-avatar-placeholder" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
+                <div class="profile-avatar-placeholder" style="display:none">
+                    @Model.Username.Substring(0, 1).ToUpper()
+                </div>
             }
             else
             {
-                <div class="hero-avatar-placeholder">@Model.Username.Substring(0, 1).ToUpper()</div>
+                <div class="profile-avatar-placeholder">
+                    @Model.Username.Substring(0, 1).ToUpper()
+                </div>
             }
 
-            <div class="hero-info">
-                <h2>@Model.Username</h2>
-                <p>@Model.Email @(!string.IsNullOrEmpty(Model.Location) ? $"· 📍 {Model.Location}" : "")</p>
+            <div>
+                <h2 class="profile-name">@Model.Username</h2>
+                <div class="profile-email">
+                    @Model.Email @(!string.IsNullOrEmpty(Model.Location) ? $"· 📍 {Model.Location}" : "")
+                </div>
 
                 @if (!string.IsNullOrEmpty(Model.Bio))
                 {
-                    <p style="color:rgba(255,255,255,.75);font-style:italic;font-size:.88rem">"@Model.Bio"</p>
+                    <div class="profile-bio">"@Model.Bio"</div>
                 }
 
                 <div class="hero-stats">
-                    <div class="hstat"><div class="n">@Model.Level</div><div class="l">Level</div></div>
-                    <div class="hstat"><div class="n">@Model.XP.ToString("N0")</div><div class="l">Total XP</div></div>
-                    <div class="hstat"><div class="n">@Model.CurrentStreak🔥</div><div class="l">Streak</div></div>
-                    <div class="hstat"><div class="n">@(Model.UserQuests?.Count ?? 0)</div><div class="l">Quests</div></div>
+                    <div class="hero-stat">
+                        <div class="num">@Model.Level</div>
+                        <div class="label">Level</div>
+                    </div>
+
+                    <div class="hero-stat">
+                        <div class="num">@Model.XP.ToString("N0")</div>
+                        <div class="label">Total XP</div>
+                    </div>
+
+                    <div class="hero-stat">
+                        <div class="num">@Model.CurrentStreak 🔥</div>
+                        <div class="label">Streak</div>
+                    </div>
+
+                    <div class="hero-stat">
+                        <div class="num">@(Model.UserQuests?.Count ?? 0)</div>
+                        <div class="label">Quests</div>
+                    </div>
                 </div>
 
                 @if (!string.IsNullOrEmpty(Model.FacebookLink) || !string.IsNullOrEmpty(Model.InstagramLink) || !string.IsNullOrEmpty(Model.LinkedInLink))
@@ -438,15 +476,17 @@
                     <div class="social-row">
                         @if (!string.IsNullOrEmpty(Model.FacebookLink))
                         {
-                            <a href="@Model.FacebookLink" target="_blank" class="soc-btn">f Facebook</a>
+                            <a href="@Model.FacebookLink" target="_blank" class="social-btn">f Facebook</a>
                         }
+
                         @if (!string.IsNullOrEmpty(Model.InstagramLink))
                         {
-                            <a href="@Model.InstagramLink" target="_blank" class="soc-btn">📷 Instagram</a>
+                            <a href="@Model.InstagramLink" target="_blank" class="social-btn">📷 Instagram</a>
                         }
+
                         @if (!string.IsNullOrEmpty(Model.LinkedInLink))
                         {
-                            <a href="@Model.LinkedInLink" target="_blank" class="soc-btn">in LinkedIn</a>
+                            <a href="@Model.LinkedInLink" target="_blank" class="social-btn">in LinkedIn</a>
                         }
                     </div>
                 }
@@ -455,36 +495,34 @@
     </div>
 
     <div class="profile-layout">
-
-        <!-- LEFT: Edit Form -->
         <div>
             <form method="post" asp-action="Profile" enctype="multipart/form-data">
                 <input type="hidden" name="Id" value="@Model.Id" />
 
-                <!-- Basic Info -->
-                <div class="glass-card">
-                    <div class="card-title">👤 Thông tin cơ bản</div>
-                    <div class="form-row">
+                <div class="profile-card">
+                    <div class="profile-card-title">👤 Thông tin cơ bản</div>
+
+                    <div class="form-grid">
                         <div class="form-field">
                             <label>Username</label>
                             <input type="text" name="Username" value="@Model.Username" />
                         </div>
+
                         <div class="form-field">
                             <label>Email</label>
                             <input type="email" name="Email" value="@Model.Email" />
                         </div>
-                    </div>
-                    <div class="form-row">
+
                         <div class="form-field">
                             <label>Số điện thoại</label>
                             <input type="tel" name="PhoneNumber" value="@(Model.PhoneNumber ?? "")" />
                         </div>
+
                         <div class="form-field">
                             <label>Địa điểm</label>
                             <input type="text" name="Location" value="@(Model.Location ?? "")" placeholder="TP. Hồ Chí Minh..." />
                         </div>
-                    </div>
-                    <div class="form-row">
+
                         <div class="form-field">
                             <label>Giới tính</label>
                             <select name="Gender">
@@ -494,6 +532,7 @@
                                 <option value="Other" selected="@(Model.Gender == "Other" ? "selected" : null)">Khác</option>
                             </select>
                         </div>
+
                         <div class="form-field">
                             <label>Ngày sinh</label>
                             <input type="date" name="DateOfBirth"
@@ -502,120 +541,151 @@
                     </div>
                 </div>
 
-                <!-- Avatar -->
-                <div class="glass-card">
-                    <div class="card-title">🖼️ Ảnh đại diện</div>
+                <div class="profile-card">
+                    <div class="profile-card-title">🖼️ Ảnh đại diện</div>
+
                     <div class="avatar-upload" onclick="document.getElementById('avFile').click()">
                         @{
                             var avSrc = !string.IsNullOrEmpty(Model.Avatar)
                             ? (Model.Avatar.StartsWith("http") ? Model.Avatar : Url.Content("~/images/" + Model.Avatar))
                             : Url.Content("~/images/default.png");
                         }
-                        <img id="avPreview" src="@avSrc" class="av-preview"
+
+                        <img id="avPreview"
+                             src="@avSrc"
+                             class="avatar-preview"
                              onerror="this.src='@Url.Content("~/images/default.png")'" />
-                        <p>📷 Nhấn để chọn ảnh mới (JPG, PNG · tối đa 5MB)</p>
-                        <input type="file" id="avFile" name="AvatarFile" accept="image/*"
-                               style="display:none" onchange="previewAv(event)" />
+
+                        <p class="avatar-note">📷 Nhấn để chọn ảnh mới (JPG, PNG · tối đa 5MB)</p>
+
+                        <input type="file"
+                               id="avFile"
+                               name="AvatarFile"
+                               accept="image/*"
+                               style="display:none"
+                               onchange="previewAv(event)" />
                     </div>
                 </div>
 
-                <!-- Bio -->
-                <div class="glass-card">
-                    <div class="card-title">📝 Giới thiệu bản thân</div>
-                    <div class="form-field" style="margin:0">
+                <div class="profile-card">
+                    <div class="profile-card-title">📝 Giới thiệu bản thân</div>
+
+                    <div class="form-field">
                         <textarea name="Bio" placeholder="Kể về bản thân bạn...">@(Model.Bio ?? "")</textarea>
-                        <small style="color:#aaa;font-size:.78rem">Tối đa 500 ký tự</small>
+                        <small style="color:#64748b;font-weight:700;">Tối đa 500 ký tự</small>
                     </div>
                 </div>
 
-                <!-- Social -->
-                <div class="glass-card">
-                    <div class="card-title">🔗 Mạng xã hội</div>
+                <div class="profile-card">
+                    <div class="profile-card-title">🔗 Mạng xã hội</div>
+
                     <div class="form-field">
                         <label>Facebook</label>
                         <input type="url" name="FacebookLink" value="@(Model.FacebookLink ?? "")"
                                placeholder="https://facebook.com/yourprofile" />
                     </div>
+
                     <div class="form-field">
                         <label>Instagram</label>
                         <input type="url" name="InstagramLink" value="@(Model.InstagramLink ?? "")"
                                placeholder="https://instagram.com/yourprofile" />
                     </div>
-                    <div class="form-field" style="margin-bottom:0">
+
+                    <div class="form-field">
                         <label>LinkedIn</label>
                         <input type="url" name="LinkedInLink" value="@(Model.LinkedInLink ?? "")"
                                placeholder="https://linkedin.com/in/yourprofile" />
                     </div>
                 </div>
 
-                <!-- Actions -->
                 <div class="action-row">
-                    <button type="submit" class="btn-save">💾 Lưu thay đổi</button>
-                    <a href="/dashboard" class="btn-cancel">↩ Huỷ</a>
-                    <a href="javascript:history.back()" class="btn-cancel">← Quay lại</a>
+                    <button type="submit" class="btn-save-profile">💾 Lưu thay đổi</button>
+                    <a href="/dashboard" class="btn-soft-profile">↩ Huỷ</a>
+                    <a href="javascript:history.back()" class="btn-soft-profile">← Quay lại</a>
                 </div>
             </form>
         </div>
 
-        <!-- RIGHT: Stats Sidebar -->
         <div>
-            <!-- XP Progress -->
-            <div class="glass-card">
-                <div class="card-title">⚡ Tiến trình</div>
-                @{
-                    int xpInLevel = Model.XP % 100;
-                }
-                <div style="margin-bottom:12px">
-                    <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;margin-bottom:4px">
-                        <span>Level @Model.Level</span>
-                        <span style="color:var(--violet)">@xpInLevel / 100 XP</span>
-                    </div>
-                    <div class="xp-bar-outer">
-                        <div class="xp-bar-inner" style="width:@xpInLevel%"></div>
-                    </div>
-                    <div style="font-size:.75rem;color:#aaa">→ Level @(Model.Level + 1)</div>
+            <div class="profile-card sidebar-card">
+                <div class="profile-card-title">⚡ Tiến trình</div>
+
+                <div class="xp-line">
+                    <span>Level @Model.Level</span>
+                    <span style="color:var(--profile-purple)">@xpInLevel / 100 XP</span>
                 </div>
 
-                <div class="stat-mini"><span class="sk">🏆 Tổng XP</span><span class="sv" style="color:var(--violet)">@Model.XP.ToString("N0")</span></div>
-                <div class="stat-mini"><span class="sk">🔥 Streak hiện tại</span><span class="sv" style="color:var(--rose)">@Model.CurrentStreak ngày</span></div>
-                <div class="stat-mini"><span class="sk">🏅 Streak dài nhất</span><span class="sv">@Model.LongestStreak ngày</span></div>
-                <div class="stat-mini"><span class="sk">✅ Quests hoàn thành</span><span class="sv">@Model.TotalQuestsCompleted</span></div>
-                <div class="stat-mini"><span class="sk">📅 Tham gia từ</span><span class="sv">@Model.CreatedAt.ToString("MM/yyyy")</span></div>
+                <div class="xp-bar">
+                    <div class="xp-fill"></div>
+                </div>
 
-                <a href="/account/changepassword" style="display:flex;align-items:center;gap:8px;margin-top:16px;padding:11px 16px;background:var(--soft);border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">
+                <div style="font-size:13px;color:#94a3b8;font-weight:800;margin-bottom:14px;">
+                    → Level @(Model.Level + 1)
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">🏆 Tổng XP</span>
+                    <span class="stat-value" style="color:var(--profile-purple)">@Model.XP.ToString("N0")</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">🔥 Streak hiện tại</span>
+                    <span class="stat-value" style="color:var(--profile-red)">@Model.CurrentStreak ngày</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">🏅 Streak dài nhất</span>
+                    <span class="stat-value">@Model.LongestStreak ngày</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">✅ Quests hoàn thành</span>
+                    <span class="stat-value">@Model.TotalQuestsCompleted</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">📅 Tham gia từ</span>
+                    <span class="stat-value">@Model.CreatedAt.ToString("MM/yyyy")</span>
+                </div>
+
+                <a href="/account/changepassword" class="quick-link" style="display:block;margin-top:16px;">
                     🔐 Đổi mật khẩu
                 </a>
             </div>
 
-            <!-- Badges -->
             @if (Model.UserBadges != null && Model.UserBadges.Count > 0)
             {
-                <div class="glass-card">
-                    <div class="card-title" style="justify-content:space-between">
+                <div class="profile-card">
+                    <div class="profile-card-title" style="justify-content:space-between;">
                         <span>🏆 Badges (@Model.UserBadges.Count)</span>
-                        <a href="/Dashboard/Badges" style="font-size:.78rem;color:var(--violet);text-decoration:none;font-weight:600">Xem tất cả →</a>
+                        <a href="/Dashboard/Badges"
+                           style="font-size:13px;color:var(--profile-purple);text-decoration:none;font-weight:900;">
+                            Xem tất cả →
+                        </a>
                     </div>
+
                     <div class="badge-grid">
                         @foreach (var ub in Model.UserBadges.Take(9))
                         {
                             <div class="badge-chip">@(ub.Badge?.Icon ?? "🏅") @(ub.Badge?.Name ?? "Badge")</div>
                         }
+
                         @if (Model.UserBadges.Count > 9)
                         {
-                            <div class="badge-chip" style="background:#f0f0f0;color:#888">+@(Model.UserBadges.Count - 9)</div>
+                            <div class="badge-chip">+@(Model.UserBadges.Count - 9)</div>
                         }
                     </div>
                 </div>
             }
 
-            <!-- Quick Actions -->
-            <div class="glass-card">
-                <div class="card-title">⚡ Nhanh</div>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                    <a href="/task" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📋 Danh sách Quest</a>
-                    <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📊 Dashboard</a>
-                    <a href="/Dashboard/Statistics" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">📈 Thống kê</a>
-                    <a href="/account/leaderboard" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;transition:background .2s" onmouseover="this.style.background='#ddd8f5'" onmouseout="this.style.background='var(--soft)'">🏅 Leaderboard</a>
+            <div class="profile-card">
+                <div class="profile-card-title">⚡ Nhanh</div>
+
+                <div class="quick-list">
+                    <a href="/task" class="quick-link">📋 Danh sách Quest</a>
+                    <a href="/dashboard" class="quick-link">📊 Dashboard</a>
+                    <a href="/Dashboard/Statistics" class="quick-link">📈 Thống kê</a>
+                    <a href="/account/leaderboard" class="quick-link">🏅 Leaderboard</a>
                 </div>
             </div>
         </div>
@@ -625,9 +695,14 @@
 @section Scripts {
     <script>
         function previewAv(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
             const r = new FileReader();
-            r.onload = () => { document.getElementById('avPreview').src = r.result; };
-            r.readAsDataURL(e.target.files[0]);
+            r.onload = () => {
+                document.getElementById('avPreview').src = r.result;
+            };
+            r.readAsDataURL(file);
         }
     </script>
 }
