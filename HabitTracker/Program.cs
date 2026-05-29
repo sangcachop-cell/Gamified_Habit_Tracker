@@ -50,6 +50,12 @@ builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IEconomyService, EconomyService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<ISpellService, SpellService>();
+builder.Services.AddScoped<IStableService, StableService>();
+builder.Services.AddSingleton<IPetCatalogService, PetCatalogService>();
 
 // Logging
 builder.Services.AddLogging(config =>

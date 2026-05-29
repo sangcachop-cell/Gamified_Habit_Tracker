@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260528133454_AddPhase5StablePetMount")]
+    partial class AddPhase5StablePetMount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,9 +196,6 @@ namespace HabitTracker.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<bool>("IsDroppable")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -226,7 +226,6 @@ namespace HabitTracker.Migrations
                             Id = 1,
                             GoldValue = 1,
                             Icon = "🥩",
-                            IsDroppable = true,
                             Key = "food_Meat",
                             Name = "Meat",
                             Rarity = 0,
@@ -238,7 +237,6 @@ namespace HabitTracker.Migrations
                             Id = 2,
                             GoldValue = 1,
                             Icon = "🍓",
-                            IsDroppable = true,
                             Key = "food_Strawberry",
                             Name = "Strawberry",
                             Rarity = 0,
@@ -250,7 +248,6 @@ namespace HabitTracker.Migrations
                             Id = 3,
                             GoldValue = 1,
                             Icon = "🥔",
-                            IsDroppable = true,
                             Key = "food_Potato",
                             Name = "Potato",
                             Rarity = 0,
@@ -262,7 +259,6 @@ namespace HabitTracker.Migrations
                             Id = 4,
                             GoldValue = 1,
                             Icon = "🍫",
-                            IsDroppable = true,
                             Key = "food_Chocolate",
                             Name = "Chocolate",
                             Rarity = 0,
@@ -274,7 +270,6 @@ namespace HabitTracker.Migrations
                             Id = 5,
                             GoldValue = 1,
                             Icon = "🐟",
-                            IsDroppable = true,
                             Key = "food_Fish",
                             Name = "Fish",
                             Rarity = 0,
@@ -286,7 +281,6 @@ namespace HabitTracker.Migrations
                             Id = 6,
                             GoldValue = 1,
                             Icon = "🍯",
-                            IsDroppable = true,
                             Key = "food_Honey",
                             Name = "Honey",
                             Rarity = 0,
@@ -298,7 +292,6 @@ namespace HabitTracker.Migrations
                             Id = 22,
                             GoldValue = 1,
                             Icon = "🥛",
-                            IsDroppable = true,
                             Key = "food_Milk",
                             Name = "Milk",
                             Rarity = 0,
@@ -310,7 +303,6 @@ namespace HabitTracker.Migrations
                             Id = 23,
                             GoldValue = 1,
                             Icon = "🍖",
-                            IsDroppable = true,
                             Key = "food_RottenMeat",
                             Name = "Rotten Meat",
                             Rarity = 0,
@@ -322,7 +314,6 @@ namespace HabitTracker.Migrations
                             Id = 24,
                             GoldValue = 1,
                             Icon = "🍬",
-                            IsDroppable = true,
                             Key = "food_CottonCandyPink",
                             Name = "Cotton Candy Pink",
                             Rarity = 0,
@@ -334,7 +325,6 @@ namespace HabitTracker.Migrations
                             Id = 25,
                             GoldValue = 1,
                             Icon = "🍬",
-                            IsDroppable = true,
                             Key = "food_CottonCandyBlue",
                             Name = "Cotton Candy Blue",
                             Rarity = 0,
@@ -343,381 +333,9 @@ namespace HabitTracker.Migrations
                         },
                         new
                         {
-                            Id = 92,
-                            GoldValue = 0,
-                            Icon = "🪑",
-                            IsDroppable = false,
-                            Key = "food_Saddle",
-                            Name = "Saddle",
-                            Rarity = 0,
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 93,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Base",
-                            Name = "Cake (Base)",
-                            Rarity = 0,
-                            Target = "Base",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 94,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_CottonCandyBlue",
-                            Name = "Cake (Cotton Candy Blue)",
-                            Rarity = 0,
-                            Target = "CottonCandyBlue",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 95,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_CottonCandyPink",
-                            Name = "Cake (Cotton Candy Pink)",
-                            Rarity = 0,
-                            Target = "CottonCandyPink",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 96,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Desert",
-                            Name = "Cake (Desert)",
-                            Rarity = 0,
-                            Target = "Desert",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 97,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Golden",
-                            Name = "Cake (Golden)",
-                            Rarity = 0,
-                            Target = "Golden",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 98,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Red",
-                            Name = "Cake (Red)",
-                            Rarity = 0,
-                            Target = "Red",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 99,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Shade",
-                            Name = "Cake (Shade)",
-                            Rarity = 0,
-                            Target = "Shade",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 100,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Skeleton",
-                            Name = "Cake (Skeleton)",
-                            Rarity = 0,
-                            Target = "Skeleton",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 101,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_White",
-                            Name = "Cake (White)",
-                            Rarity = 0,
-                            Target = "White",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 102,
-                            GoldValue = 1,
-                            Icon = "🎂",
-                            IsDroppable = false,
-                            Key = "food_Cake_Zombie",
-                            Name = "Cake (Zombie)",
-                            Rarity = 0,
-                            Target = "Zombie",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 103,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Base",
-                            Name = "Candy (Base)",
-                            Rarity = 0,
-                            Target = "Base",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 104,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_CottonCandyBlue",
-                            Name = "Candy (Cotton Candy Blue)",
-                            Rarity = 0,
-                            Target = "CottonCandyBlue",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 105,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_CottonCandyPink",
-                            Name = "Candy (Cotton Candy Pink)",
-                            Rarity = 0,
-                            Target = "CottonCandyPink",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 106,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Desert",
-                            Name = "Candy (Desert)",
-                            Rarity = 0,
-                            Target = "Desert",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 107,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Golden",
-                            Name = "Candy (Golden)",
-                            Rarity = 0,
-                            Target = "Golden",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 108,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Red",
-                            Name = "Candy (Red)",
-                            Rarity = 0,
-                            Target = "Red",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 109,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Shade",
-                            Name = "Candy (Shade)",
-                            Rarity = 0,
-                            Target = "Shade",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 110,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Skeleton",
-                            Name = "Candy (Skeleton)",
-                            Rarity = 0,
-                            Target = "Skeleton",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 111,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_White",
-                            Name = "Candy (White)",
-                            Rarity = 0,
-                            Target = "White",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 112,
-                            GoldValue = 1,
-                            Icon = "🍭",
-                            IsDroppable = false,
-                            Key = "food_Candy_Zombie",
-                            Name = "Candy (Zombie)",
-                            Rarity = 0,
-                            Target = "Zombie",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 113,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Base",
-                            Name = "Pie (Base)",
-                            Rarity = 0,
-                            Target = "Base",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 114,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_CottonCandyBlue",
-                            Name = "Pie (Cotton Candy Blue)",
-                            Rarity = 0,
-                            Target = "CottonCandyBlue",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 115,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_CottonCandyPink",
-                            Name = "Pie (Cotton Candy Pink)",
-                            Rarity = 0,
-                            Target = "CottonCandyPink",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 116,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Desert",
-                            Name = "Pie (Desert)",
-                            Rarity = 0,
-                            Target = "Desert",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 117,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Golden",
-                            Name = "Pie (Golden)",
-                            Rarity = 0,
-                            Target = "Golden",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 118,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Red",
-                            Name = "Pie (Red)",
-                            Rarity = 0,
-                            Target = "Red",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 119,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Shade",
-                            Name = "Pie (Shade)",
-                            Rarity = 0,
-                            Target = "Shade",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 120,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Skeleton",
-                            Name = "Pie (Skeleton)",
-                            Rarity = 0,
-                            Target = "Skeleton",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 121,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_White",
-                            Name = "Pie (White)",
-                            Rarity = 0,
-                            Target = "White",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 122,
-                            GoldValue = 1,
-                            Icon = "🥧",
-                            IsDroppable = false,
-                            Key = "food_Pie_Zombie",
-                            Name = "Pie (Zombie)",
-                            Rarity = 0,
-                            Target = "Zombie",
-                            Type = 0
-                        },
-                        new
-                        {
                             Id = 7,
                             GoldValue = 3,
                             Icon = "🥚",
-                            IsDroppable = true,
                             Key = "egg_Wolf",
                             Name = "Wolf Egg",
                             Rarity = 0,
@@ -728,7 +346,6 @@ namespace HabitTracker.Migrations
                             Id = 8,
                             GoldValue = 3,
                             Icon = "🥚",
-                            IsDroppable = true,
                             Key = "egg_Bear",
                             Name = "Bear Egg",
                             Rarity = 0,
@@ -739,7 +356,6 @@ namespace HabitTracker.Migrations
                             Id = 9,
                             GoldValue = 3,
                             Icon = "🌵",
-                            IsDroppable = true,
                             Key = "egg_Cactus",
                             Name = "Cactus Egg",
                             Rarity = 0,
@@ -750,9 +366,18 @@ namespace HabitTracker.Migrations
                             Id = 10,
                             GoldValue = 3,
                             Icon = "🐉",
-                            IsDroppable = true,
                             Key = "egg_Dragon",
                             Name = "Dragon Egg",
+                            Rarity = 0,
+                            Type = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            GoldValue = 3,
+                            Icon = "🦎",
+                            Key = "egg_Axolotl",
+                            Name = "Axolotl Egg",
                             Rarity = 0,
                             Type = 1
                         },
@@ -761,7 +386,6 @@ namespace HabitTracker.Migrations
                             Id = 26,
                             GoldValue = 3,
                             Icon = "🥚",
-                            IsDroppable = true,
                             Key = "egg_TigerCub",
                             Name = "Tiger Cub Egg",
                             Rarity = 0,
@@ -772,7 +396,6 @@ namespace HabitTracker.Migrations
                             Id = 27,
                             GoldValue = 3,
                             Icon = "🥚",
-                            IsDroppable = true,
                             Key = "egg_PandaCub",
                             Name = "Panda Cub Egg",
                             Rarity = 0,
@@ -783,7 +406,6 @@ namespace HabitTracker.Migrations
                             Id = 28,
                             GoldValue = 3,
                             Icon = "🥚",
-                            IsDroppable = true,
                             Key = "egg_LionCub",
                             Name = "Lion Cub Egg",
                             Rarity = 0,
@@ -794,7 +416,6 @@ namespace HabitTracker.Migrations
                             Id = 29,
                             GoldValue = 3,
                             Icon = "🦊",
-                            IsDroppable = true,
                             Key = "egg_Fox",
                             Name = "Fox Egg",
                             Rarity = 0,
@@ -805,691 +426,8 @@ namespace HabitTracker.Migrations
                             Id = 30,
                             GoldValue = 3,
                             Icon = "🐷",
-                            IsDroppable = true,
                             Key = "egg_FlyingPig",
                             Name = "Flying Pig Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 11,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Axolotl",
-                            Name = "Axolotl Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 31,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Alligator",
-                            Name = "Alligator Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 32,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Alpaca",
-                            Name = "Alpaca Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 33,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Armadillo",
-                            Name = "Armadillo Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 34,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Badger",
-                            Name = "Badger Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 35,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Beetle",
-                            Name = "Beetle Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 36,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Bunny",
-                            Name = "Bunny Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 37,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Butterfly",
-                            Name = "Butterfly Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 38,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Cat",
-                            Name = "Cat Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 39,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Chameleon",
-                            Name = "Chameleon Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 40,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Cheetah",
-                            Name = "Cheetah Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 41,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Cow",
-                            Name = "Cow Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 42,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Crab",
-                            Name = "Crab Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 43,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Cuttlefish",
-                            Name = "Cuttlefish Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 44,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Deer",
-                            Name = "Deer Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 45,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Dog",
-                            Name = "Dog Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 46,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Dolphin",
-                            Name = "Dolphin Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 47,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Egg",
-                            Name = "Egg Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 48,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Falcon",
-                            Name = "Falcon Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 49,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Ferret",
-                            Name = "Ferret Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 50,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Frog",
-                            Name = "Frog Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 51,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Giraffe",
-                            Name = "Giraffe Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 52,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Gryphon",
-                            Name = "Gryphon Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 53,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_GuineaPig",
-                            Name = "Guinea Pig Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 54,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Hedgehog",
-                            Name = "Hedgehog Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 55,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Hippo",
-                            Name = "Hippo Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 56,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Horse",
-                            Name = "Horse Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 57,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Kangaroo",
-                            Name = "Kangaroo Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 58,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Monkey",
-                            Name = "Monkey Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 59,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Nudibranch",
-                            Name = "Nudibranch Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 60,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Octopus",
-                            Name = "Octopus Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 61,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Otter",
-                            Name = "Otter Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 62,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Owl",
-                            Name = "Owl Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 63,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Parrot",
-                            Name = "Parrot Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 64,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Peacock",
-                            Name = "Peacock Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 65,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Penguin",
-                            Name = "Penguin Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 66,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Platypus",
-                            Name = "Platypus Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 67,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_PolarBear",
-                            Name = "Polar Bear Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 68,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Pterodactyl",
-                            Name = "Pterodactyl Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 69,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Raccoon",
-                            Name = "Raccoon Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 70,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Rat",
-                            Name = "Rat Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 71,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Robot",
-                            Name = "Robot Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 72,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Rock",
-                            Name = "Rock Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 73,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Rooster",
-                            Name = "Rooster Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 74,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Sabretooth",
-                            Name = "Sabretooth Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 75,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Seahorse",
-                            Name = "Seahorse Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 76,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_SeaSerpent",
-                            Name = "Sea Serpent Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 77,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Sheep",
-                            Name = "Sheep Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 78,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Slime",
-                            Name = "Slime Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 79,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Sloth",
-                            Name = "Sloth Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 80,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Snail",
-                            Name = "Snail Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 81,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Snake",
-                            Name = "Snake Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 82,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Spider",
-                            Name = "Spider Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 83,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Squirrel",
-                            Name = "Squirrel Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 84,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Treeling",
-                            Name = "Treeling Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 85,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_TRex",
-                            Name = "T-Rex Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 86,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Triceratops",
-                            Name = "Triceratops Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 87,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Turtle",
-                            Name = "Turtle Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 88,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Unicorn",
-                            Name = "Unicorn Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 89,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Velociraptor",
-                            Name = "Velociraptor Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 90,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Whale",
-                            Name = "Whale Egg",
-                            Rarity = 0,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 91,
-                            GoldValue = 3,
-                            Icon = "🥚",
-                            IsDroppable = false,
-                            Key = "egg_Yarn",
-                            Name = "Yarn Egg",
                             Rarity = 0,
                             Type = 1
                         },
@@ -1498,7 +436,6 @@ namespace HabitTracker.Migrations
                             Id = 12,
                             GoldValue = 2,
                             Icon = "🧪",
-                            IsDroppable = true,
                             Key = "potion_Base",
                             Name = "Base Potion",
                             Rarity = 0,
@@ -1509,7 +446,6 @@ namespace HabitTracker.Migrations
                             Id = 13,
                             GoldValue = 2,
                             Icon = "🤍",
-                            IsDroppable = true,
                             Key = "potion_White",
                             Name = "White Potion",
                             Rarity = 0,
@@ -1520,7 +456,6 @@ namespace HabitTracker.Migrations
                             Id = 14,
                             GoldValue = 2,
                             Icon = "🏜️",
-                            IsDroppable = true,
                             Key = "potion_Desert",
                             Name = "Desert Potion",
                             Rarity = 0,
@@ -1531,7 +466,6 @@ namespace HabitTracker.Migrations
                             Id = 15,
                             GoldValue = 3,
                             Icon = "❤️",
-                            IsDroppable = true,
                             Key = "potion_Red",
                             Name = "Red Potion",
                             Rarity = 1,
@@ -1542,7 +476,6 @@ namespace HabitTracker.Migrations
                             Id = 16,
                             GoldValue = 3,
                             Icon = "🖤",
-                            IsDroppable = true,
                             Key = "potion_Shade",
                             Name = "Shade Potion",
                             Rarity = 1,
@@ -1553,7 +486,6 @@ namespace HabitTracker.Migrations
                             Id = 17,
                             GoldValue = 3,
                             Icon = "💀",
-                            IsDroppable = true,
                             Key = "potion_Skeleton",
                             Name = "Skeleton Potion",
                             Rarity = 1,
@@ -1564,7 +496,6 @@ namespace HabitTracker.Migrations
                             Id = 18,
                             GoldValue = 5,
                             Icon = "🧟",
-                            IsDroppable = true,
                             Key = "potion_Zombie",
                             Name = "Zombie Potion",
                             Rarity = 2,
@@ -1575,7 +506,6 @@ namespace HabitTracker.Migrations
                             Id = 19,
                             GoldValue = 5,
                             Icon = "🩷",
-                            IsDroppable = true,
                             Key = "potion_CottonCandyPink",
                             Name = "Cotton Candy Pink Potion",
                             Rarity = 2,
@@ -1586,7 +516,6 @@ namespace HabitTracker.Migrations
                             Id = 20,
                             GoldValue = 5,
                             Icon = "💙",
-                            IsDroppable = true,
                             Key = "potion_CottonCandyBlue",
                             Name = "Cotton Candy Blue Potion",
                             Rarity = 2,
@@ -1597,659 +526,9 @@ namespace HabitTracker.Migrations
                             Id = 21,
                             GoldValue = 10,
                             Icon = "✨",
-                            IsDroppable = true,
                             Key = "potion_Golden",
                             Name = "Golden Potion",
                             Rarity = 3,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 123,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Amber",
-                            Name = "Amber Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 124,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Aquatic",
-                            Name = "Aquatic Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 125,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Aurora",
-                            Name = "Aurora Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 126,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_AutumnLeaf",
-                            Name = "Autumn Leaf Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 127,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Balloon",
-                            Name = "Balloon Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 128,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_BirchBark",
-                            Name = "Birch Bark Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 129,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_BlackPearl",
-                            Name = "Black Pearl Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 130,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Bronze",
-                            Name = "Bronze Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 131,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Celestial",
-                            Name = "Celestial Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 132,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Cupid",
-                            Name = "Cupid Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 133,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Ember",
-                            Name = "Ember Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 134,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Fairy",
-                            Name = "Fairy Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 135,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Floral",
-                            Name = "Floral Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 136,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Fluorite",
-                            Name = "Fluorite Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 137,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Frost",
-                            Name = "Frost Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 138,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Ghost",
-                            Name = "Ghost Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 139,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Gingerbread",
-                            Name = "Gingerbread Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 140,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Glass",
-                            Name = "Glass Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 141,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Glow",
-                            Name = "Glow Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 142,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Holly",
-                            Name = "Holly Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 143,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_IcySnow",
-                            Name = "Icy Snow Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 144,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Jade",
-                            Name = "Jade Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 145,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Koi",
-                            Name = "Koi Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 146,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Moonglow",
-                            Name = "Moonglow Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 147,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_MossyStone",
-                            Name = "Mossy Stone Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 148,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Onyx",
-                            Name = "Onyx Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 149,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Opal",
-                            Name = "Opal Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 150,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Peppermint",
-                            Name = "Peppermint Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 151,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_PinkMarble",
-                            Name = "Pink Marble Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 152,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_PolkaDot",
-                            Name = "Polka Dot Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 153,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Porcelain",
-                            Name = "Porcelain Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 154,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Purple",
-                            Name = "Purple Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 155,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Rainbow",
-                            Name = "Rainbow Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 156,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_RoseGold",
-                            Name = "Rose Gold Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 157,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_RoseQuartz",
-                            Name = "Rose Quartz Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 158,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_RoyalPurple",
-                            Name = "Royal Purple Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 159,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Ruby",
-                            Name = "Ruby Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 160,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_SandSculpture",
-                            Name = "Sand Sculpture Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 161,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Shadow",
-                            Name = "Shadow Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 162,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Shimmer",
-                            Name = "Shimmer Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 163,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Silver",
-                            Name = "Silver Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 164,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_SolarSystem",
-                            Name = "Solar System Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 165,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Spooky",
-                            Name = "Spooky Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 166,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_StainedGlass",
-                            Name = "Stained Glass Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 167,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_StarryNight",
-                            Name = "Starry Night Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 168,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Sunset",
-                            Name = "Sunset Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 169,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Sunshine",
-                            Name = "Sunshine Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 170,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_TeaShop",
-                            Name = "Tea Shop Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 171,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Thunderstorm",
-                            Name = "Thunderstorm Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 172,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Turquoise",
-                            Name = "Turquoise Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 173,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Vampire",
-                            Name = "Vampire Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 174,
-                            GoldValue = 2,
-                            Icon = "🧪",
-                            IsDroppable = false,
-                            Key = "potion_Watery",
-                            Name = "Watery Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 175,
-                            GoldValue = 0,
-                            Icon = "🥦",
-                            IsDroppable = false,
-                            Key = "potion_Veggie",
-                            Name = "Veggie Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 176,
-                            GoldValue = 0,
-                            Icon = "🍰",
-                            IsDroppable = false,
-                            Key = "potion_Dessert",
-                            Name = "Dessert Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 177,
-                            GoldValue = 0,
-                            Icon = "🎮",
-                            IsDroppable = false,
-                            Key = "potion_VirtualPet",
-                            Name = "Virtual Pet Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 178,
-                            GoldValue = 0,
-                            Icon = "🍄",
-                            IsDroppable = false,
-                            Key = "potion_Fungi",
-                            Name = "Fungi Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 179,
-                            GoldValue = 0,
-                            Icon = "👾",
-                            IsDroppable = false,
-                            Key = "potion_Cryptid",
-                            Name = "Cryptid Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 180,
-                            GoldValue = 0,
-                            Icon = "👽",
-                            IsDroppable = false,
-                            Key = "potion_Alien",
-                            Name = "Alien Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 181,
-                            GoldValue = 0,
-                            Icon = "🤖",
-                            IsDroppable = false,
-                            Key = "potion_Windup",
-                            Name = "Windup Potion",
-                            Rarity = 2,
                             Type = 2
                         });
                 });

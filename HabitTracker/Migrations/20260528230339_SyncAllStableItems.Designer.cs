@@ -4,6 +4,7 @@ using HabitTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260528230339_SyncAllStableItems")]
+    partial class SyncAllStableItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2172,83 +2175,6 @@ namespace HabitTracker.Migrations
                             IsDroppable = false,
                             Key = "potion_Watery",
                             Name = "Watery Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 175,
-                            GoldValue = 0,
-                            Icon = "🥦",
-                            IsDroppable = false,
-                            Key = "potion_Veggie",
-                            Name = "Veggie Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 176,
-                            GoldValue = 0,
-                            Icon = "🍰",
-                            IsDroppable = false,
-                            Key = "potion_Dessert",
-                            Name = "Dessert Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 177,
-                            GoldValue = 0,
-                            Icon = "🎮",
-                            IsDroppable = false,
-                            Key = "potion_VirtualPet",
-                            Name = "Virtual Pet Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 178,
-                            GoldValue = 0,
-                            Icon = "🍄",
-                            IsDroppable = false,
-                            Key = "potion_Fungi",
-                            Name = "Fungi Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 179,
-                            GoldValue = 0,
-                            Icon = "👾",
-                            IsDroppable = false,
-                            Key = "potion_Cryptid",
-                            Name = "Cryptid Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 180,
-                            GoldValue = 0,
-                            Icon = "👽",
-                            IsDroppable = false,
-                            Key = "potion_Alien",
-                            Name = "Alien Potion",
-                            Rarity = 2,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 181,
-                            GoldValue = 0,
-                            Icon = "🤖",
-                            IsDroppable = false,
-                            Key = "potion_Windup",
-                            Name = "Windup Potion",
                             Rarity = 2,
                             Type = 2
                         });
