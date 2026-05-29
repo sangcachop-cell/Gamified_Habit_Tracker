@@ -71,12 +71,39 @@
                                 </a>
                             </li>
 
-                            <!-- 🔍 SEARCH BUTTON -->
-                            <li class="nav-item ms-3">
-                                <a class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
-                                   asp-controller="Task" asp-action="Search"
-                                   style="padding: 8px 15px; margin-top: 5px;">
-                                    🔍 Search Quests
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Economy" asp-action="Index">
+                                    🛡️ Economy
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Character" asp-action="Index">
+                                    ⚔️ Character
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Equipment" asp-action="Index">
+                                    🛡️ Equipment
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Market" asp-action="Index">
+                                    🏪 Market
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Inventory" asp-action="Index">
+                                    🎒 Inventory
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Stable" asp-action="Index">
+                                    🐾 Stable
                                 </a>
                             </li>
 
@@ -92,13 +119,35 @@
 
                         </ul>
 
-                        <!-- CENTER - QUICK STATS (Optional) -->
+                        <!-- CENTER - HUD BARS -->
                         @if (Context.Session.GetString("Username") != null)
                         {
-                            <div style="margin: 0 20px; display: flex; gap: 20px; align-items: center;">
-                                <small style="color: #666;">
-                                    <strong style="color: #667eea;">Level:</strong> <span id="navbar-level">-</span>
-                                </small>
+                            <div id="hud-bars" style="margin:0 16px;display:flex;gap:10px;align-items:center;flex-wrap:nowrap;">
+                                <div title="HP" style="display:flex;align-items:center;gap:4px;">
+                                    <span>❤️</span>
+                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
+                                        <div id="hud-hp-bar" style="height:100%;background:#e8436a;border-radius:4px;transition:width .3s;width:100%;"></div>
+                                    </div>
+                                    <small id="hud-hp-text" style="color:#e8436a;font-weight:700;font-size:.75rem;min-width:36px;"></small>
+                                </div>
+                                <div title="MP" style="display:flex;align-items:center;gap:4px;">
+                                    <span>💙</span>
+                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
+                                        <div id="hud-mana-bar" style="height:100%;background:#4a90d9;border-radius:4px;transition:width .3s;width:100%;"></div>
+                                    </div>
+                                    <small id="hud-mana-text" style="color:#4a90d9;font-weight:700;font-size:.75rem;min-width:36px;"></small>
+                                </div>
+                                <div title="Gold" style="display:flex;align-items:center;gap:3px;">
+                                    <span>🪙</span>
+                                    <small id="hud-gold-text" style="color:#f0b429;font-weight:700;font-size:.8rem;min-width:32px;">0</small>
+                                </div>
+                                <div title="Gems" style="display:flex;align-items:center;gap:3px;">
+                                    <span>💎</span>
+                                    <small id="hud-gems-text" style="color:#a78bfa;font-weight:700;font-size:.8rem;min-width:16px;">0</small>
+                                </div>
+                                <small style="color:#667eea;font-size:.75rem;font-weight:700;">Lv<span id="navbar-level">-</span></small>
+                                <small id="hud-sleep" style="display:none;" title="Rest mode active">🌙</small>
+                                <a id="hud-dead" href="/Economy" style="display:none;color:#e8436a;font-weight:700;font-size:.75rem;text-decoration:none;" title="You died! Click to revive.">💀 Dead!</a>
                             </div>
                         }
 
@@ -142,12 +191,6 @@
                                         <li>
                                             <a class="dropdown-item" asp-controller="Dashboard" asp-action="Statistics">
                                                 📈 Statistics
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Task" asp-action="Search">
-                                                🔍 Search Quests
                                             </a>
                                         </li>
 
@@ -225,6 +268,10 @@
         @if (TempData["ToastStreak"] != null)
         {
             <div id="toast-data-streak" data-value="@TempData["ToastStreak"]" style="display:none"></div>
+        }
+        @if (TempData["ToastRebirth"] != null)
+        {
+            <div id="toast-data-rebirth" data-value="@TempData["ToastRebirth"]" style="display:none"></div>
         }
     }
 
@@ -310,6 +357,12 @@
             color: #1a1a1a;
         }
 
+        .toast-gold  { background: linear-gradient(135deg, #f0b429, #f76b1c); }
+        .toast-hp    { background: linear-gradient(135deg, #e8436a, #c0392b); }
+        .toast-crit  { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #1a1a1a; }
+        .toast-drop  { background: linear-gradient(135deg, #7b2ff7, #4a90d9); }
+        .toast-death { background: linear-gradient(135deg, #1a1a2e, #c0392b); }
+
         .toast-icon {
             font-size: 2rem;
             line-height: 1;
@@ -381,16 +434,41 @@
             }, duration);
         }
 
+        function refreshHud() {
+            $.getJSON('/Economy/GetStats', function(s) {
+                if (!s) return;
+                document.getElementById('navbar-level').textContent    = s.level;
+                var hpPct   = s.maxHp   > 0 ? Math.round(s.hp   / s.maxHp   * 100) : 0;
+                var mpPct   = s.maxMana > 0 ? Math.round(s.mana / s.maxMana * 100) : 0;
+                document.getElementById('hud-hp-bar').style.width      = hpPct  + '%';
+                document.getElementById('hud-mana-bar').style.width    = mpPct  + '%';
+                document.getElementById('hud-hp-text').textContent     = Math.round(s.hp)   + '/' + s.maxHp;
+                document.getElementById('hud-mana-text').textContent   = Math.round(s.mana) + '/' + s.maxMana;
+                document.getElementById('hud-gold-text').textContent   = Math.round(s.gold * 10) / 10;
+                document.getElementById('hud-gems-text').textContent   = s.gems ?? 0;
+                document.getElementById('hud-sleep').style.display     = s.isSleeping ? 'inline' : 'none';
+                document.getElementById('hud-dead').style.display      = s.isDead     ? 'inline' : 'none';
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             var xp     = document.getElementById('toast-data-xp');
             var badge  = document.getElementById('toast-data-badge');
             var level  = document.getElementById('toast-data-level');
             var streak = document.getElementById('toast-data-streak');
 
-            if (xp)     showToast('⚡', 'Nhận XP!',      xp.dataset.value,     'toast-xp',     3500);
-            if (streak) setTimeout(function(){ showToast('🔥', 'Streak!',       streak.dataset.value, 'toast-streak', 4000); }, 300);
-            if (badge)  setTimeout(function(){ showToast('🏅', 'Huy hiệu mới!', badge.dataset.value,  'toast-badge',  5000); }, 800);
-            if (level)  setTimeout(function(){ showToast('⬆️', 'Level Up!',     level.dataset.value,  'toast-level',  5000); }, 1400);
+            var rebirth = document.getElementById('toast-data-rebirth');
+
+            if (xp)      showToast('⚡', 'Nhận XP!',      xp.dataset.value,      'toast-xp',      3500);
+            if (streak)  setTimeout(function(){ showToast('🔥', 'Streak!',        streak.dataset.value,  'toast-streak',  4000); }, 300);
+            if (badge)   setTimeout(function(){ showToast('🏅', 'Huy hiệu mới!', badge.dataset.value,   'toast-badge',   5000); }, 800);
+            if (level)   setTimeout(function(){ showToast('⬆️', 'Level Up!',      level.dataset.value,   'toast-level',   5000); }, 1400);
+            if (rebirth) setTimeout(function(){ showToast('🔁', 'Reborn!',        rebirth.dataset.value, 'toast-rebirth', 5000); }, 300);
+
+            @if (Context.Session.GetString("Username") != null)
+            {
+                <text>refreshHud();</text>
+            }
         });
     </script>
 

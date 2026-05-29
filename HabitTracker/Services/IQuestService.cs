@@ -23,9 +23,19 @@ namespace HabitTracker.Services
         Task<List<string>> AwardBadgesAsync(User user, int oldXP);
 
         /// <summary>
-        /// Tính level dựa vào XP
+        /// Tính level dựa vào cumulative XP (Habitica quadratic formula).
         /// </summary>
-        int CalculateLevel(int xp);
+        int CalculateLevel(int cumulativeXp);
+
+        /// <summary>
+        /// XP required to advance FROM level N to N+1.
+        /// </summary>
+        int XpToNextLevel(int level);
+
+        /// <summary>
+        /// XP accumulated within the current level (for progress bar display).
+        /// </summary>
+        int XpWithinLevel(int cumulativeXp);
 
         /// <summary>
         /// Lấy danh sách quest đã hoàn thành hôm nay

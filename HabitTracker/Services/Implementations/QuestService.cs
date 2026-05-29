@@ -96,9 +96,50 @@ namespace HabitTracker.Services.Implementations
             return newBadgeNames;
         }
 
-        public int CalculateLevel(int xp)
+        /// <summary>
+        /// XP required to advance FROM level N to N+1 (Habitica quadratic formula).
+        /// </summary>
+        public int XpToNextLevel(int level)
         {
-            return (xp / AppConstants.XP_PER_LEVEL) + 1;
+            if (level < 1)  return 25;
+            if (level < 5)  return 25 * level;
+            if (level == 5) return 150;
+            // level > 5: quadratic, rounded to nearest 10
+            double raw = (level * level * 0.25) + (10.0 * level) + 139.75;
+            return (int)(Math.Round(raw / 10.0) * 10);
+        }
+
+        /// <summary>
+        /// Compute current level from cumulative XP using quadratic thresholds.
+        /// Max level capped at AppConstants.MAX_LEVEL.
+        /// </summary>
+        public int CalculateLevel(int cumulativeXp)
+        {
+            int level = 1, acc = 0;
+            while (level < AppConstants.MAX_LEVEL)
+            {
+                int needed = XpToNextLevel(level);
+                if (acc + needed > cumulativeXp) break;
+                acc += needed;
+                level++;
+            }
+            return level;
+        }
+
+        /// <summary>
+        /// XP accumulated within the current level (for progress bar).
+        /// </summary>
+        public int XpWithinLevel(int cumulativeXp)
+        {
+            int level = 1, acc = 0;
+            while (level < AppConstants.MAX_LEVEL)
+            {
+                int needed = XpToNextLevel(level);
+                if (acc + needed > cumulativeXp) break;
+                acc += needed;
+                level++;
+            }
+            return cumulativeXp - acc;
         }
 
         public async Task<List<int>> GetCompletedTodayAsync(int userId)
