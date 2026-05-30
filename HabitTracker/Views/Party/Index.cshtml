@@ -1,0 +1,672 @@
+@model HabitTracker.Models.ViewModels.PartyViewModel
+@{
+    ViewData["Title"] = Model.Party != null ? Model.Party.Name : "Party";
+    var currentUserId = Context.Session.GetInt32("UserId") ?? 0;
+    var isLeader = Model.IsLeader;
+    var inParty = Model.Party != null;
+}
+
+@if (!inParty)
+{
+    @* ── NO PARTY: create form + pending invites ───────────────────────── *@
+    <div class="container py-4" style="max-width:600px;">
+
+        @if (Model.PendingInvites.Any())
+        {
+            <div class="alert alert-info mb-4">
+                <div class="fw-semibold mb-2">🛡️ Party Invitations</div>
+                @foreach (var inv in Model.PendingInvites)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span>
+                            <strong>@inv.Party?.Name</strong> — invited by
+                            <strong>@inv.Inviter?.Username</strong>
+                        </span>
+                        <form asp-action="AcceptInvite" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inviteId" value="@inv.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                        </form>
+                        <form asp-action="DeclineInvite" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inviteId" value="@inv.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Decline</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-center mb-5">
+            <div style="font-size:4rem;">🛡️</div>
+            <h5 class="fw-bold mt-2">You're not in a party</h5>
+            <p class="text-muted small">Create one or wait for an invitation.</p>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title fw-bold mb-3">Create a Party</h6>
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="input-group">
+                        <input type="text" name="name" class="form-control"
+                               maxlength="100" placeholder="Party name..." required />
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @* ── IN PARTY ──────────────────────────────────────────────────────── *@
+    <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+    <div class="container-fluid px-3 py-3" style="height: calc(100vh - 80px);">
+        <div class="row h-100 g-0" style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+
+            @* ── LEFT: Party info + members ─────────────────────────────── *@
+            <div class="col-12 col-md-4 col-lg-3 border-end d-flex flex-column bg-white position-relative" style="min-height:0;">
+
+                @* Header *@
+                <div class="p-3 border-bottom">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <div>
+                            <div class="fw-bold">🛡️ @Model.Party!.Name</div>
+                            <div class="text-muted" style="font-size:11px;">
+                                @Model.Members.Count member@(Model.Members.Count != 1 ? "s" : "")
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="leaveParty()">Leave</button>
+                    </div>
+                </div>
+
+                @* Invite (leader only) *@
+                @if (isLeader)
+                {
+                    <div class="px-3 py-2 border-bottom">
+                        <div class="text-muted small fw-semibold mb-1">➕ Invite Member</div>
+                        <div class="position-relative">
+                            <input type="text" id="inviteSearch" class="form-control form-control-sm"
+                                   placeholder="Search by username or email" autocomplete="off"
+                                   oninput="debouncePartyInviteSearch()" />
+                            <div id="inviteResults" class="list-group position-absolute w-100 shadow-sm"
+                                 style="z-index:100;max-height:200px;overflow-y:auto;top:100%;"></div>
+                        </div>
+                        <div id="inviteSelected" class="d-none mt-1">
+                            <div class="d-flex align-items-center gap-2 p-1 border rounded bg-light">
+                                <img id="inviteSelAvatar" src="" width="26" height="26"
+                                     class="rounded-circle flex-shrink-0" style="object-fit:cover;"
+                                     onerror="this.src='/images/default.png'" />
+                                <span id="inviteSelName" class="small fw-semibold flex-grow-1"></span>
+                                <button class="btn btn-sm btn-outline-secondary py-0" onclick="clearPartyInviteSelection()">✕</button>
+                                <button class="btn btn-sm btn-outline-primary py-0" id="inviteSendBtn" onclick="sendPartyInvite()">Invite</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* Members list *@
+                <div class="overflow-auto flex-grow-1 p-2" id="membersList" style="min-height:0;">
+                    @foreach (var entry in Model.Members)
+                    {
+                        var avatarSrc = string.IsNullOrEmpty(entry.User.Avatar) || entry.User.Avatar == "default.png"
+                            ? "/images/default.png" : "/uploads/" + entry.User.Avatar;
+                        <div class="d-flex align-items-center gap-2 p-2 rounded mb-1">
+                            <img src="@avatarSrc" class="rounded-circle flex-shrink-0"
+                                 width="36" height="36" style="object-fit:cover;"
+                                 onerror="this.src='/images/default.png'" />
+                            <div class="flex-grow-1 overflow-hidden">
+                                <a href="/Friend/ViewProfile/@entry.User.Id"
+                                   class="small fw-semibold text-decoration-none text-dark">
+                                    @entry.User.Username
+                                </a>
+                                <div class="text-muted" style="font-size:10px;">
+                                    Lv @entry.User.Level
+                                    @if (!string.IsNullOrEmpty(entry.User.Class))
+                                    {
+                                        <span>• @entry.User.Class</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <span class="badge @(entry.Member.Role == "Leader" ? "bg-warning text-dark" : "bg-secondary")"
+                                      style="font-size:9px;">@entry.Member.Role</span>
+                                @if (isLeader && entry.User.Id != currentUserId)
+                                {
+                                    <button class="btn btn-sm p-0 lh-1 border-0 text-danger"
+                                            onclick="kickMember(@entry.User.Id)"
+                                            style="font-size:11px;">Kick</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* ── QUEST PANEL + PENDING INVITES — absolutely pinned to bottom *@
+                <div id="questPanel" class="bg-white border-top"
+                     style="position:absolute;bottom:0;left:0;right:0;z-index:2;max-height:65%;overflow-y:auto;">
+
+                @if (isLeader && Model.PendingInvites.Any())
+                {
+                    <div class="px-3 py-2 border-bottom">
+                        <div class="text-muted small mb-1">Pending Invites (@Model.PendingInvites.Count)</div>
+                        @foreach (var inv in Model.PendingInvites)
+                        {
+                            <div class="small text-muted px-1">⏳ @inv.Invitee?.Username</div>
+                        }
+                    </div>
+                }
+
+                <div class="p-2">
+                @{
+                    var qs = Model.QuestStatus;
+                    bool hasActiveQuest = qs is not null && qs.Status != "None";
+                }
+
+                @if (!hasActiveQuest)
+                {
+                    @if (isLeader)
+                    {
+                        @* Leader: show start button if owns scrolls *@
+                        @if (Model.OwnedScrolls.Any())
+                        {
+                            <div class="mb-1 fw-semibold small">⚔️ Start a Quest</div>
+                            <select id="questScrollSelect" class="form-select form-select-sm mb-2">
+                                @foreach (var scroll in Model.OwnedScrolls.DistinctBy(s => s.Key))
+                                {
+                                    var questKey = scroll.Key.Replace("quest_", "");
+                                    <option value="@questKey">@scroll.Name</option>
+                                }
+                            </select>
+                            <button class="btn btn-sm btn-warning w-100" onclick="inviteToQuest()">Invite Party</button>
+                        }
+                        else
+                        {
+                            <div class="text-muted text-center small py-2">
+                                No quest scrolls owned.<br>
+                                <a href="/QuestShop" class="small">Visit Quest Shop →</a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted text-center small py-2">
+                            Only the party leader can start a quest.
+                        </div>
+                    }
+                }
+                else if (qs!.Status == "Pending")
+                {
+                    @if (qs.QuestKey is not null)
+                    {
+                        var scrollImg = $"/images/habitica/quests/scrolls/inventory_quest_scroll_{qs.QuestKey}.png";
+                        <div class="text-center mb-2">
+                            <img src="@scrollImg"
+                                 onerror="this.src='/images/habitica/quests/scrolls/inventory_quest_scroll_armadillo.png'"
+                                 style="max-width:80px;max-height:80px;object-fit:contain;" />
+                        </div>
+                    }
+                    <div class="fw-semibold small mb-2">⏳ @qs.QuestName</div>
+                    <div class="d-flex flex-column gap-1 mb-2" style="font-size:.72rem;">
+                        @foreach (var m in qs.Members)
+                        {
+                            string icon = m.Response == "accepted" ? "✅" : m.Response == "rejected" ? "❌" : "❓";
+                            <div>@icon @m.UserName</div>
+                        }
+                    </div>
+                    @if (currentUserId != qs.LeaderUserId)
+                    {
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-success flex-grow-1" onclick="questAction('/PartyQuest/Accept')">Accept</button>
+                            <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="questAction('/PartyQuest/Reject')">Reject</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-primary flex-grow-1" onclick="questAction('/PartyQuest/ForceStart')">Force Start</button>
+                            <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="questAction('/PartyQuest/Cancel')">Cancel</button>
+                        </div>
+                    }
+                }
+                else if (qs!.Status == "Active")
+                {
+                    @* Boss / scroll avatar *@
+                    @if (qs.QuestKey is not null)
+                    {
+                        var bossImg    = $"/images/habitica/quests/bosses/quest_{qs.QuestKey}.png";
+                        var scrollImg  = $"/images/habitica/quests/scrolls/inventory_quest_scroll_{qs.QuestKey}.png";
+                        var fallback   = qs.IsBossQuest ? "/images/habitica/quests/bosses/quest_TEMPLATE_FOR_MISSING_IMAGE.png"
+                                                        : "/images/habitica/quests/scrolls/inventory_quest_scroll_armadillo.png";
+                        var displaySrc = qs.IsBossQuest ? bossImg : scrollImg;
+                        <div class="text-center mb-2">
+                            <img src="@displaySrc"
+                                 onerror="this.src='@fallback'"
+                                 style="max-width:100%;max-height:110px;object-fit:contain;" />
+                        </div>
+                    }
+
+                    <div class="fw-semibold small mb-1">⚔️ @qs.QuestName</div>
+                    <div style="font-size:.65rem; color:#aaa;" class="mb-1">by @qs.LeaderName</div>
+
+                    @if (qs.IsBossQuest && qs.BossHpMax.HasValue)
+                    {
+                        double hpPct = qs.BossHpMax > 0 ? Math.Max(0, qs.BossHpRemaining!.Value / qs.BossHpMax.Value * 100) : 0;
+                        <div class="mb-1">
+                            <div class="d-flex justify-content-between" style="font-size:.65rem;">
+                                <span>HP</span><span>@((int)qs.BossHpRemaining!.Value) / @((int)qs.BossHpMax.Value)</span>
+                            </div>
+                            <div class="progress" style="height:8px;">
+                                <div class="progress-bar bg-danger" style="width:@hpPct.ToString("0.#")%;"></div>
+                            </div>
+                        </div>
+                        @if (qs.RageMax.HasValue)
+                        {
+                            double ragePct = qs.RageMax > 0 ? Math.Min(100, qs.RageCurrent!.Value / qs.RageMax.Value * 100) : 0;
+                            <div class="mb-1">
+                                <div class="d-flex justify-content-between" style="font-size:.65rem;">
+                                    <span>⚠️ Rage</span><span>@qs.RageCurrent!.Value.ToString("0") / @qs.RageMax.Value.ToString("0")</span>
+                                </div>
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar bg-warning" style="width:@ragePct.ToString("0.#")%;"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (!qs.IsBossQuest && qs.CollectRequired is not null)
+                    {
+                        @foreach (var kv in qs.CollectRequired)
+                        {
+                            int got  = qs.CollectProgress?.GetValueOrDefault(kv.Key, 0) ?? 0;
+                            double pct = kv.Value > 0 ? Math.Min(100.0, got * 100.0 / kv.Value) : 0;
+                            <div class="mb-1">
+                                <div class="d-flex justify-content-between" style="font-size:.65rem;">
+                                    <span>@kv.Key</span><span>@got / @kv.Value</span>
+                                </div>
+                                <div class="progress" style="height:6px;">
+                                    <div class="progress-bar bg-success" style="width:@pct.ToString("0.#")%;"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (currentUserId == qs.LeaderUserId)
+                    {
+                        <button class="btn btn-sm btn-outline-danger w-100 mt-1" onclick="questAction('/PartyQuest/Abort')">Abort Quest</button>
+                    }
+                }
+                </div>@* /inner p-2 *@
+                </div>@* /questPanel *@
+            </div>
+
+            @* ── RIGHT: Party chat ────────────────────────────────────── *@
+            <div class="col-12 col-md-8 col-lg-9 d-flex flex-column bg-white" style="min-height:0;">
+
+                <div class="p-3 border-bottom bg-light">
+                    <span class="fw-semibold">Party Chat</span>
+                </div>
+
+                <div class="overflow-auto flex-grow-1 p-3" id="chatArea">
+                    @if (Model.HasMore)
+                    {
+                        <div class="text-center mb-3">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="loadMore()">Load older messages</button>
+                        </div>
+                    }
+
+                    @foreach (var entry in Model.Messages)
+                    {
+                        if (entry.IsSystem)
+                        {
+                            <div class="text-center text-muted mb-2" id="msg-@entry.Message.Id"
+                                 style="font-size:12px;">
+                                <span class="badge bg-light text-secondary border px-3 py-1"
+                                      style="font-weight:400;">
+                                    @Html.Raw(entry.RenderedBody)
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            var avatarSrc = string.IsNullOrEmpty(entry.Message.Author?.Avatar) || entry.Message.Author.Avatar == "default.png"
+                                ? "/images/default.png" : "/uploads/" + entry.Message.Author.Avatar;
+                            var isOwn = entry.Message.AuthorId == currentUserId;
+                            <div class="d-flex gap-2 mb-3 @(isOwn ? "flex-row-reverse" : "")"
+                                 id="msg-@entry.Message.Id">
+                                <img src="@avatarSrc" class="rounded-circle flex-shrink-0"
+                                     width="32" height="32" style="object-fit:cover;margin-top:2px;"
+                                     onerror="this.src='/images/default.png'" />
+                                <div style="max-width:70%;">
+                                    <div class="d-flex align-items-center gap-1 @(isOwn ? "flex-row-reverse" : "") mb-1">
+                                        <a href="/Friend/ViewProfile/@entry.Message.AuthorId"
+                                           class="small fw-semibold text-decoration-none text-dark">
+                                            @entry.Message.Author?.Username
+                                        </a>
+                                        <span class="text-muted" style="font-size:11px;">
+                                            @entry.Message.SentAt.ToLocalTime().ToString("g")
+                                        </span>
+                                    </div>
+                                    <div class="rounded p-2 @(isOwn ? "bg-primary text-white" : "bg-light")"
+                                         style="word-break:break-word;font-size:14px;">
+                                        @Html.Raw(entry.RenderedBody)
+                                    </div>
+                                    <div class="d-flex gap-2 mt-1 @(isOwn ? "flex-row-reverse" : "")">
+                                        <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                                                onclick="likeMsg(@entry.Message.Id, this)"
+                                                style="font-size:12px; color: @(entry.LikedByMe ? "#dc3545" : "#6c757d")">
+                                            ❤️ <span class="like-count">@entry.LikeCount</span>
+                                        </button>
+                                        @if (isOwn || isLeader)
+                                        {
+                                            <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                                                    onclick="deleteMsg(@entry.Message.Id)"
+                                                    style="font-size:11px;">🗑️</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (!Model.Messages.Any())
+                    {
+                        <div class="text-center text-muted py-5">
+                            <div style="font-size:2rem;">🛡️</div>
+                            <p class="small mt-1">No messages yet. Say something!</p>
+                        </div>
+                    }
+                </div>
+
+                <div class="p-3 border-top bg-white">
+                    <div class="input-group">
+                        <textarea id="msgInput" class="form-control" rows="1"
+                                  placeholder="Message party... (type @@username to mention)"
+                                  style="resize:none;" maxlength="2000"
+                                  onkeydown="handleKey(event)"></textarea>
+                        <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+const CURRENT_USER_ID = @currentUserId;
+const IS_LEADER = @(isLeader ? "true" : "false");
+const IN_PARTY  = @(inParty ? "true" : "false");
+const _token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+
+let currentPage = @(Model.Page);
+
+if (IN_PARTY) scrollToBottom();
+
+function scrollToBottom() {
+    const area = document.getElementById('chatArea');
+    if (area) area.scrollTop = area.scrollHeight;
+}
+
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+async function sendMsg() {
+    const input = document.getElementById('msgInput');
+    const body = input.value.trim();
+    if (!body) return;
+    input.value = '';
+
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    fd.append('body', body);
+    const res = await fetch('/Party/SendMessage', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.success) { showToast('❌', 'Error', data.error ?? 'Failed.', 'danger'); return; }
+    appendMessage(data, true);
+    scrollToBottom();
+}
+
+function appendMessage(d, isOwn) {
+    const area = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.id = `msg-${d.messageId}`;
+    div.className = `d-flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`;
+    div.innerHTML = `
+        <img src="${d.authorAvatar}" class="rounded-circle flex-shrink-0" width="32" height="32"
+             style="object-fit:cover;margin-top:2px;" onerror="this.src='/images/default.png'" />
+        <div style="max-width:70%;">
+            <div class="d-flex align-items-center gap-1 ${isOwn ? 'flex-row-reverse' : ''} mb-1">
+                <span class="small fw-semibold">${d.authorName}</span>
+                <span class="text-muted" style="font-size:11px;">${d.sentAt}</span>
+            </div>
+            <div class="rounded p-2 ${isOwn ? 'bg-primary text-white' : 'bg-light'}"
+                 style="word-break:break-word;font-size:14px;">${d.body}</div>
+            <div class="d-flex gap-2 mt-1 ${isOwn ? 'flex-row-reverse' : ''}">
+                <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                        onclick="likeMsg(${d.messageId}, this)"
+                        style="font-size:12px;color:#6c757d;">❤️ <span class="like-count">0</span></button>
+                ${isOwn || IS_LEADER ? `<button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                        onclick="deleteMsg(${d.messageId})" style="font-size:11px;">🗑️</button>` : ''}
+            </div>
+        </div>`;
+    area.appendChild(div);
+}
+
+async function likeMsg(msgId, btn) {
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Party/LikeMessage/${msgId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        btn.style.color = data.liked ? '#dc3545' : '#6c757d';
+        btn.querySelector('.like-count').textContent = data.count;
+    }
+}
+
+async function deleteMsg(msgId) {
+    if (!confirm('Delete this message?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Party/DeleteMessage/${msgId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        const el = document.getElementById(`msg-${msgId}`);
+        if (el) el.remove();
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+function adjustMembersListPadding() {
+    const panel = document.getElementById('questPanel');
+    const list  = document.getElementById('membersList');
+    if (panel && list) list.style.paddingBottom = (panel.offsetHeight + 4) + 'px';
+}
+window.addEventListener('load', adjustMembersListPadding);
+window.addEventListener('resize', adjustMembersListPadding);
+
+async function leaveParty() {
+    if (!confirm('Leave this party?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch('/Party/Leave', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        showToast('👋', 'Left', 'You left the party.', 'info');
+        setTimeout(() => location.reload(), 800);
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+let _partyInviteUserId = null;
+let _partyInviteTimer = null;
+
+function debouncePartyInviteSearch() {
+    clearTimeout(_partyInviteTimer);
+    _partyInviteTimer = setTimeout(runPartyInviteSearch, 300);
+}
+
+async function runPartyInviteSearch() {
+    const q = document.getElementById('inviteSearch').value.trim();
+    const results = document.getElementById('inviteResults');
+    if (q.length < 2) { results.innerHTML = ''; return; }
+    const res = await fetch(`/Party/SearchInvitable?q=${encodeURIComponent(q)}`);
+    const users = await res.json();
+    results.innerHTML = '';
+    if (!users.length) {
+        results.innerHTML = '<div class="list-group-item text-muted small">No users found</div>';
+        return;
+    }
+    users.forEach(u => {
+        const avatar = u.avatar && u.avatar !== 'default.png' ? `/uploads/${u.avatar}` : '/images/default.png';
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'list-group-item list-group-item-action d-flex align-items-center gap-2 py-1';
+        item.innerHTML = `<img src="${avatar}" width="26" height="26" class="rounded-circle flex-shrink-0"
+            style="object-fit:cover;" onerror="this.src='/images/default.png'" />
+            <span class="small">${u.username} <span class="text-muted">Lv ${u.level}</span></span>`;
+        item.onclick = () => selectPartyInviteUser(u);
+        results.appendChild(item);
+    });
+}
+
+function selectPartyInviteUser(u) {
+    _partyInviteUserId = u.id;
+    document.getElementById('inviteResults').innerHTML = '';
+    document.getElementById('inviteSearch').value = '';
+    const avatar = u.avatar && u.avatar !== 'default.png' ? `/uploads/${u.avatar}` : '/images/default.png';
+    document.getElementById('inviteSelAvatar').src = avatar;
+    document.getElementById('inviteSelName').textContent = u.username + ' (Lv ' + u.level + ')';
+    document.getElementById('inviteSelected').classList.remove('d-none');
+}
+
+function clearPartyInviteSelection() {
+    _partyInviteUserId = null;
+    document.getElementById('inviteSelected').classList.add('d-none');
+}
+
+async function sendPartyInvite() {
+    if (!_partyInviteUserId) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    fd.append('targetUserId', _partyInviteUserId);
+    const res = await fetch('/Party/Invite', { method: 'POST', body: fd });
+    const data = await res.json();
+    const name = document.getElementById('inviteSelName').textContent;
+    showToast(data.success ? '🛡️' : '❌', data.success ? 'Invited!' : 'Error',
+              data.success ? ('Invite sent to ' + name + '.') : (data.error ?? 'Failed.'),
+              data.success ? 'success' : 'danger');
+    if (data.success) clearPartyInviteSelection();
+}
+
+async function kickMember(memberId) {
+    if (!confirm('Kick this member?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Party/Kick/${memberId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        showToast('👢', 'Kicked', 'Member removed.', 'warning');
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+async function loadMore() {
+    currentPage++;
+    const res = await fetch(`/Party/Messages?page=${currentPage}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const area = document.getElementById('chatArea');
+    const oldScrollHeight = area.scrollHeight;
+    const frag = document.createDocumentFragment();
+    data.messages.reverse().forEach(d => {
+        const div = document.createElement('div');
+        div.id = `msg-${d.id}`;
+        if (d.isSystem) {
+            div.className = 'text-center text-muted mb-2';
+            div.style.fontSize = '12px';
+            div.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1" style="font-weight:400;">${d.body}</span>`;
+            frag.appendChild(div);
+            return;
+        }
+        const isOwn = d.authorId === CURRENT_USER_ID;
+        div.className = `d-flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`;
+        div.innerHTML = `
+            <img src="${d.authorAvatar}" class="rounded-circle flex-shrink-0" width="32" height="32"
+                 style="object-fit:cover;margin-top:2px;" onerror="this.src='/images/default.png'" />
+            <div style="max-width:70%;">
+                <div class="d-flex align-items-center gap-1 ${isOwn ? 'flex-row-reverse' : ''} mb-1">
+                    <span class="small fw-semibold">${d.authorName}</span>
+                    <span class="text-muted" style="font-size:11px;">${d.sentAt}</span>
+                </div>
+                <div class="rounded p-2 ${isOwn ? 'bg-primary text-white' : 'bg-light'}"
+                     style="word-break:break-word;font-size:14px;">${d.body}</div>
+                <div class="d-flex gap-2 mt-1 ${isOwn ? 'flex-row-reverse' : ''}">
+                    <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                            onclick="likeMsg(${d.id}, this)"
+                            style="font-size:12px;color:${d.likedByMe ? '#dc3545' : '#6c757d'};">
+                        ❤️ <span class="like-count">${d.likeCount}</span></button>
+                    ${isOwn || IS_LEADER ? `<button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                        onclick="deleteMsg(${d.id})" style="font-size:11px;">🗑️</button>` : ''}
+                </div>
+            </div>`;
+        frag.appendChild(div);
+    });
+    const firstMsg = area.querySelector('[id^="msg-"]');
+    if (firstMsg) area.insertBefore(frag, firstMsg);
+    else area.appendChild(frag);
+    area.scrollTop = area.scrollHeight - oldScrollHeight;
+    if (!data.hasMore) {
+        const loadBtn = area.querySelector('button[onclick="loadMore()"]');
+        if (loadBtn) loadBtn.closest('div')?.remove();
+    }
+}
+
+// ── Quest functions ──────────────────────────────────────────────────────────
+
+async function inviteToQuest() {
+    const sel = document.getElementById('questScrollSelect');
+    if (!sel) return;
+    const key = sel.value;
+    if (!confirm(`Start quest with scroll: ${sel.options[sel.selectedIndex].text}?`)) return;
+    const res  = await fetch('/PartyQuest/Invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questKey: key })
+    });
+    const data = await res.json();
+    if (data.success) location.reload();
+    else showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+}
+
+async function questAction(url) {
+    const res  = await fetch(url, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) location.reload();
+    else showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+}
+
+// Poll quest status every 30s when tab is visible
+let questPollTimer = null;
+function startQuestPoll() {
+    questPollTimer = setInterval(async () => {
+        if (document.hidden) return;
+        try {
+            const res  = await fetch('/PartyQuest/Status');
+            const data = await res.json();
+            if (data && data.status !== 'None') {
+                // Simple approach: reload if quest data changed
+                // (full AJAX panel update would require DiffDOM — skip for now)
+            }
+        } catch {}
+    }, 30000);
+}
+if (IN_PARTY) startQuestPoll();
+</script>
+}

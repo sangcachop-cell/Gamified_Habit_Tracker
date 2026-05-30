@@ -1,0 +1,519 @@
+@model HabitTracker.Models.ViewModels.GuildViewModel
+@{
+    ViewData["Title"] = Model.Guild.Name;
+    var currentUserId = Context.Session.GetInt32("UserId") ?? 0;
+    var isLeader  = Model.MyRole == "Leader";
+    var isManager = Model.MyRole == "Manager";
+    var canModerate = isLeader || isManager;
+}
+
+<div class="container-fluid px-3 py-3" style="height: calc(100vh - 80px);">
+    <div class="row h-100 g-0" style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+
+        @* ── LEFT: Member list ───────────────────────────────────────── *@
+        <div class="col-12 col-md-3 border-end d-flex flex-column bg-white" style="min-height:0;">
+            <div class="p-3 border-bottom">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    @if (!string.IsNullOrEmpty(Model.Guild.Logo))
+                    {
+                        <img src="@Model.Guild.Logo" width="32" height="32" class="rounded"
+                             onerror="this.src='/images/default.png'" />
+                    }
+                    else
+                    {
+                        <span style="font-size:1.4rem;">⚔️</span>
+                    }
+                    <div>
+                        <div class="fw-bold small">@Model.Guild.Name</div>
+                        <span class="badge @(Model.Guild.Privacy == "public" ? "bg-success" : "bg-secondary")"
+                              style="font-size:10px;">@Model.Guild.Privacy</span>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Guild.Summary))
+                {
+                    <p class="text-muted mb-0" style="font-size:11px;">@Model.Guild.Summary</p>
+                }
+            </div>
+
+            @* Action buttons *@
+            <div class="px-3 py-2 border-bottom d-flex flex-wrap gap-1">
+                @if (!Model.IsMember && Model.Guild.Privacy == "public")
+                {
+                    <button class="btn btn-success btn-sm"
+                            onclick="joinGuild(@Model.Guild.Id, this)">Join Guild</button>
+                }
+                @if (Model.IsMember)
+                {
+                    @if (isLeader || isManager)
+                    {
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="showInviteModal()">Invite</button>
+                    }
+                    <button class="btn btn-outline-danger btn-sm"
+                            onclick="leaveGuild(@Model.Guild.Id)">Leave</button>
+                }
+                <a href="/Guild" class="btn btn-outline-secondary btn-sm">Back</a>
+            </div>
+
+            @* Members *@
+            <div class="overflow-auto flex-grow-1 p-2">
+                <div class="text-muted small px-1 mb-1">@Model.Members.Count member@(Model.Members.Count != 1 ? "s" : "")</div>
+                @foreach (var entry in Model.Members)
+                {
+                    var avatarSrc = string.IsNullOrEmpty(entry.User.Avatar) || entry.User.Avatar == "default.png"
+                        ? "/images/default.png" : "/uploads/" + entry.User.Avatar;
+                    <div class="d-flex align-items-center gap-2 p-2 rounded hover-bg mb-1"
+                         style="transition:background 0.1s;">
+                        <img src="@avatarSrc" class="rounded-circle flex-shrink-0"
+                             width="32" height="32" style="object-fit:cover;"
+                             onerror="this.src='/images/default.png'" />
+                        <div class="flex-grow-1 overflow-hidden">
+                            <a href="/Friend/ViewProfile/@entry.User.Id"
+                               class="small fw-semibold text-decoration-none text-dark">
+                                @entry.User.Username
+                            </a>
+                            <div>
+                                <span class="badge @(entry.Member.Role == "Leader" ? "bg-warning text-dark" : entry.Member.Role == "Manager" ? "bg-info text-dark" : "bg-secondary")"
+                                      style="font-size:9px;" id="role-badge-@entry.User.Id">
+                                    @entry.Member.Role
+                                </span>
+                            </div>
+                        </div>
+                        @if (canModerate && entry.User.Id != currentUserId)
+                        {
+                            <div class="dropdown flex-shrink-0">
+                                <button class="btn btn-sm btn-light p-1 lh-1" data-bs-toggle="dropdown">⋮</button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (isLeader && entry.Member.Role == "Member")
+                                    {
+                                        <li><button class="dropdown-item small"
+                                            onclick="promoteManager(@Model.Guild.Id, @entry.User.Id, this)">Promote to Manager</button></li>
+                                    }
+                                    @if (isLeader && entry.Member.Role == "Manager")
+                                    {
+                                        <li><button class="dropdown-item small"
+                                            onclick="demoteManager(@Model.Guild.Id, @entry.User.Id, this)">Demote to Member</button></li>
+                                    }
+                                    @if (entry.Member.Role != "Leader")
+                                    {
+                                        <li><button class="dropdown-item small text-danger"
+                                            onclick="kickMember(@Model.Guild.Id, @entry.User.Id, this)">Kick</button></li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ── RIGHT: Chat ──────────────────────────────────────────────── *@
+        <div class="col-12 col-md-9 d-flex flex-column bg-white" style="min-height:0;">
+
+            @* Chat header *@
+            <div class="p-3 border-bottom bg-light d-flex align-items-center">
+                <span class="fw-semibold">Guild Chat</span>
+                @if (Model.MyRole != null)
+                {
+                    <span class="ms-2 badge @(Model.MyRole == "Leader" ? "bg-warning text-dark" : Model.MyRole == "Manager" ? "bg-info text-dark" : "bg-secondary")"
+                          style="font-size:10px;">@Model.MyRole</span>
+                }
+            </div>
+
+            @* Messages *@
+            <div class="overflow-auto flex-grow-1 p-3" id="chatArea">
+                @if (Model.HasMore)
+                {
+                    <div class="text-center mb-3">
+                        <button class="btn btn-sm btn-outline-secondary"
+                                onclick="loadMore()">Load older messages</button>
+                    </div>
+                }
+
+                @foreach (var entry in Model.Messages)
+                {
+                    var avatarSrc = string.IsNullOrEmpty(entry.Message.Author?.Avatar) || entry.Message.Author.Avatar == "default.png"
+                        ? "/images/default.png" : "/uploads/" + entry.Message.Author.Avatar;
+                    var isOwn = entry.Message.AuthorId == currentUserId;
+                    <div class="d-flex gap-2 mb-3 @(isOwn ? "flex-row-reverse" : "")"
+                         id="msg-@entry.Message.Id">
+                        <img src="@avatarSrc" class="rounded-circle flex-shrink-0"
+                             width="32" height="32" style="object-fit:cover;margin-top:2px;"
+                             onerror="this.src='/images/default.png'" />
+                        <div style="max-width:70%;">
+                            <div class="d-flex align-items-center gap-1 @(isOwn ? "flex-row-reverse" : "") mb-1">
+                                <a href="/Friend/ViewProfile/@entry.Message.AuthorId"
+                                   class="small fw-semibold text-decoration-none text-dark">
+                                    @entry.Message.Author?.Username
+                                </a>
+                                <span class="text-muted" style="font-size:11px;">
+                                    @entry.Message.SentAt.ToLocalTime().ToString("g")
+                                </span>
+                            </div>
+                            <div class="rounded p-2 @(isOwn ? "bg-primary text-white" : "bg-light")"
+                                 style="word-break:break-word;font-size:14px;">
+                                @Html.Raw(entry.RenderedBody)
+                            </div>
+                            <div class="d-flex gap-2 mt-1 @(isOwn ? "flex-row-reverse" : "")">
+                                <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                                        onclick="likeMsg(@entry.Message.Id, this)"
+                                        style="font-size:12px; color: @(entry.LikedByMe ? "#dc3545" : "#6c757d")">
+                                    ❤️ <span class="like-count">@entry.LikeCount</span>
+                                </button>
+                                @if (isOwn || canModerate)
+                                {
+                                    <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                                            onclick="deleteMsg(@entry.Message.Id)"
+                                            style="font-size:11px;">🗑️</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.Messages.Any())
+                {
+                    <div class="text-center text-muted py-5">
+                        <div style="font-size:2rem;">⚔️</div>
+                        <p class="small mt-1">No messages yet. Say hello!</p>
+                    </div>
+                }
+            </div>
+
+            @* Compose *@
+            @if (Model.IsMember)
+            {
+                <div class="p-3 border-top bg-white">
+                    <div class="input-group">
+                        <textarea id="msgInput" class="form-control" rows="1"
+                                  placeholder="Message guild... (type @@username to mention)"
+                                  style="resize:none;" maxlength="2000"
+                                  onkeydown="handleKey(event)"></textarea>
+                        <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="p-3 border-top text-center text-muted small">
+                    @if (Model.Guild.Privacy == "public")
+                    {
+                        <span>Join this guild to participate in chat.</span>
+                    }
+                    else
+                    {
+                        <span>This is a private guild.</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@* ── Invite modal ──────────────────────────────────────────────────────── *@
+<div class="modal fade" id="inviteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Invite to Guild</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="inviteSearch" class="form-control mb-2"
+                       placeholder="Search by username or email" autocomplete="off"
+                       oninput="debounceInviteSearch()" />
+                <div id="inviteResults" class="list-group" style="max-height:200px;overflow-y:auto;"></div>
+                <div id="inviteSelected" class="mt-2 d-none">
+                    <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                        <img id="inviteSelAvatar" src="" width="32" height="32"
+                             class="rounded-circle" style="object-fit:cover;"
+                             onerror="this.src='/images/default.png'" />
+                        <span id="inviteSelName" class="small fw-semibold flex-grow-1"></span>
+                        <button type="button" class="btn-close btn-sm" onclick="clearInviteSelection()"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-sm" id="inviteSendBtn" disabled onclick="sendInvite()">Send Invite</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const GUILD_ID = @Model.Guild.Id;
+const CURRENT_USER_ID = @currentUserId;
+const _token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+
+let currentPage = @Model.Page;
+const canModerate = @(canModerate ? "true" : "false");
+
+function scrollToBottom() {
+    const area = document.getElementById('chatArea');
+    area.scrollTop = area.scrollHeight;
+}
+scrollToBottom();
+
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+async function sendMsg() {
+    const input = document.getElementById('msgInput');
+    const body = input.value.trim();
+    if (!body) return;
+    input.value = '';
+
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    fd.append('body', body);
+    const res = await fetch(`/Guild/SendMessage/${GUILD_ID}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.success) { showToast('❌', 'Error', data.error ?? 'Failed.', 'danger'); return; }
+    appendMessage(data, true);
+    scrollToBottom();
+}
+
+function appendMessage(d, isOwn) {
+    const area = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.id = `msg-${d.messageId}`;
+    div.className = `d-flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`;
+    div.innerHTML = `
+        <img src="${d.authorAvatar}" class="rounded-circle flex-shrink-0" width="32" height="32"
+             style="object-fit:cover;margin-top:2px;" onerror="this.src='/images/default.png'" />
+        <div style="max-width:70%;">
+            <div class="d-flex align-items-center gap-1 ${isOwn ? 'flex-row-reverse' : ''} mb-1">
+                <span class="small fw-semibold">${d.authorName}</span>
+                <span class="text-muted" style="font-size:11px;">${d.sentAt}</span>
+            </div>
+            <div class="rounded p-2 ${isOwn ? 'bg-primary text-white' : 'bg-light'}"
+                 style="word-break:break-word;font-size:14px;">${d.body}</div>
+            <div class="d-flex gap-2 mt-1 ${isOwn ? 'flex-row-reverse' : ''}">
+                <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                        onclick="likeMsg(${d.messageId}, this)"
+                        style="font-size:12px;color:#6c757d;">❤️ <span class="like-count">0</span></button>
+                ${isOwn || canModerate ? `<button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                        onclick="deleteMsg(${d.messageId})" style="font-size:11px;">🗑️</button>` : ''}
+            </div>
+        </div>`;
+    area.appendChild(div);
+}
+
+async function likeMsg(msgId, btn) {
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/LikeMessage/${msgId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        btn.style.color = data.liked ? '#dc3545' : '#6c757d';
+        btn.querySelector('.like-count').textContent = data.count;
+    }
+}
+
+async function deleteMsg(msgId) {
+    if (!confirm('Delete this message?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/DeleteMessage/${msgId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        const el = document.getElementById(`msg-${msgId}`);
+        if (el) el.remove();
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+async function joinGuild(guildId, btn) {
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Join/${guildId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        showToast('⚔️', 'Joined!', 'You are now a member.', 'success');
+        setTimeout(() => location.reload(), 800);
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+        btn.disabled = false;
+    }
+}
+
+async function leaveGuild(guildId) {
+    if (!confirm('Leave this guild?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Leave/${guildId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        showToast('👋', 'Left', 'You left the guild.', 'info');
+        setTimeout(() => window.location.href = '/Guild', 800);
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+function showInviteModal() {
+    clearInviteSelection();
+    document.getElementById('inviteSearch').value = '';
+    document.getElementById('inviteResults').innerHTML = '';
+    new bootstrap.Modal(document.getElementById('inviteModal')).show();
+}
+
+let _inviteUserId = null;
+let _inviteSearchTimer = null;
+
+function debounceInviteSearch() {
+    clearTimeout(_inviteSearchTimer);
+    _inviteSearchTimer = setTimeout(runInviteSearch, 300);
+}
+
+async function runInviteSearch() {
+    const q = document.getElementById('inviteSearch').value.trim();
+    const results = document.getElementById('inviteResults');
+    if (q.length < 2) { results.innerHTML = ''; return; }
+    const res = await fetch(`/Guild/SearchInvitable?guildId=${GUILD_ID}&q=${encodeURIComponent(q)}`);
+    const users = await res.json();
+    results.innerHTML = '';
+    if (!users.length) {
+        results.innerHTML = '<div class="list-group-item text-muted small">No users found</div>';
+        return;
+    }
+    users.forEach(u => {
+        const avatar = u.avatar && u.avatar !== 'default.png' ? `/uploads/${u.avatar}` : '/images/default.png';
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'list-group-item list-group-item-action d-flex align-items-center gap-2 py-1';
+        item.innerHTML = `<img src="${avatar}" width="28" height="28" class="rounded-circle flex-shrink-0"
+            style="object-fit:cover;" onerror="this.src='/images/default.png'" />
+            <span class="small">${u.username} <span class="text-muted">Lv ${u.level}</span></span>`;
+        item.onclick = () => selectInviteUser(u);
+        results.appendChild(item);
+    });
+}
+
+function selectInviteUser(u) {
+    _inviteUserId = u.id;
+    document.getElementById('inviteResults').innerHTML = '';
+    document.getElementById('inviteSearch').value = '';
+    const avatar = u.avatar && u.avatar !== 'default.png' ? `/uploads/${u.avatar}` : '/images/default.png';
+    document.getElementById('inviteSelAvatar').src = avatar;
+    document.getElementById('inviteSelName').textContent = u.username + ' (Lv ' + u.level + ')';
+    document.getElementById('inviteSelected').classList.remove('d-none');
+    document.getElementById('inviteSendBtn').disabled = false;
+}
+
+function clearInviteSelection() {
+    _inviteUserId = null;
+    document.getElementById('inviteSelected').classList.add('d-none');
+    document.getElementById('inviteSendBtn').disabled = true;
+}
+
+async function sendInvite() {
+    if (!_inviteUserId) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    fd.append('targetUserId', _inviteUserId);
+    const res = await fetch(`/Guild/Invite/${GUILD_ID}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    const name = document.getElementById('inviteSelName').textContent;
+    showToast(data.success ? '⚔️' : '❌', data.success ? 'Invited!' : 'Error',
+              data.success ? ('Invite sent to ' + name + '.') : (data.error ?? 'Failed.'),
+              data.success ? 'success' : 'danger');
+    if (data.success) bootstrap.Modal.getInstance(document.getElementById('inviteModal')).hide();
+}
+
+async function kickMember(guildId, memberId, btn) {
+    if (!confirm('Kick this member?')) return;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Kick/${guildId}/${memberId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        showToast('👢', 'Kicked', 'Member removed.', 'warning');
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+async function promoteManager(guildId, memberId, btn) {
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Promote/${guildId}/${memberId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        const badge = document.getElementById(`role-badge-${memberId}`);
+        if (badge) { badge.className = 'badge bg-info text-dark'; badge.textContent = 'Manager'; }
+        showToast('⭐', 'Promoted', 'Member is now a manager.', 'success');
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+async function demoteManager(guildId, memberId, btn) {
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Demote/${guildId}/${memberId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        const badge = document.getElementById(`role-badge-${memberId}`);
+        if (badge) { badge.className = 'badge bg-secondary'; badge.textContent = 'Member'; }
+        showToast('📉', 'Demoted', 'Manager reverted to member.', 'info');
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+    }
+}
+
+async function loadMore() {
+    currentPage++;
+    const res = await fetch(`/Guild/Messages/${GUILD_ID}?page=${currentPage}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const area = document.getElementById('chatArea');
+    const oldScrollHeight = area.scrollHeight;
+    const frag = document.createDocumentFragment();
+    data.messages.reverse().forEach(d => {
+        const isOwn = d.authorId === CURRENT_USER_ID;
+        const div = document.createElement('div');
+        div.id = `msg-${d.id}`;
+        div.className = `d-flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`;
+        div.innerHTML = `
+            <img src="${d.authorAvatar}" class="rounded-circle flex-shrink-0" width="32" height="32"
+                 style="object-fit:cover;margin-top:2px;" onerror="this.src='/images/default.png'" />
+            <div style="max-width:70%;">
+                <div class="d-flex align-items-center gap-1 ${isOwn ? 'flex-row-reverse' : ''} mb-1">
+                    <span class="small fw-semibold">${d.authorName}</span>
+                    <span class="text-muted" style="font-size:11px;">${d.sentAt}</span>
+                </div>
+                <div class="rounded p-2 ${isOwn ? 'bg-primary text-white' : 'bg-light'}"
+                     style="word-break:break-word;font-size:14px;">${d.body}</div>
+                <div class="d-flex gap-2 mt-1 ${isOwn ? 'flex-row-reverse' : ''}">
+                    <button class="btn btn-sm p-0 lh-1 border-0 bg-transparent like-btn"
+                            onclick="likeMsg(${d.id}, this)"
+                            style="font-size:12px;color:${d.likedByMe ? '#dc3545' : '#6c757d'};">
+                        ❤️ <span class="like-count">${d.likeCount}</span></button>
+                    ${isOwn || canModerate ? `<button class="btn btn-sm p-0 lh-1 border-0 bg-transparent text-muted"
+                        onclick="deleteMsg(${d.id})" style="font-size:11px;">🗑️</button>` : ''}
+                </div>
+            </div>`;
+        frag.appendChild(div);
+    });
+    // Insert before first existing message
+    const firstMsg = area.querySelector('[id^="msg-"]');
+    if (firstMsg) area.insertBefore(frag, firstMsg);
+    else area.appendChild(frag);
+    // Preserve scroll position
+    area.scrollTop = area.scrollHeight - oldScrollHeight;
+
+    if (!data.hasMore) {
+        const loadBtn = area.querySelector('button[onclick="loadMore()"]');
+        if (loadBtn) loadBtn.closest('div')?.remove();
+    }
+}
+</script>
+}
