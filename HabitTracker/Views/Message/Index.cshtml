@@ -1,0 +1,402 @@
+@model HabitTracker.Models.ViewModels.InboxViewModel
+@{
+    ViewData["Title"] = "Messages";
+    var currentUserId = Context.Session.GetInt32("UserId") ?? 0;
+    var active = Model.ActiveConversation;
+    var antiforgery = Html.AntiForgeryToken();
+}
+
+<div class="container-fluid px-3 py-3" style="height: calc(100vh - 80px);">
+    <div class="row h-100 g-0" style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+
+        @* ── LEFT: Conversation list ─────────────────────────────── *@
+        <div class="col-12 col-md-4 col-lg-3 border-end d-flex flex-column bg-white" style="min-height:0;">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">Messages</h6>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newMsgModal">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+            </div>
+
+            <div class="overflow-auto flex-grow-1">
+                @if (!Model.Conversations.Any())
+                {
+                    <p class="text-muted text-center p-4 small">No conversations yet.</p>
+                }
+                @foreach (var conv in Model.Conversations)
+                {
+                    var isActive = Model.ActiveConversationUserId == conv.OtherUser.Id;
+                    var avatarSrc = string.IsNullOrEmpty(conv.OtherUser.Avatar) || conv.OtherUser.Avatar == "default.png"
+                        ? "/images/default.png"
+                        : "/uploads/" + conv.OtherUser.Avatar;
+                    <a href="/Message?otherId=@conv.OtherUser.Id"
+                       class="d-flex align-items-center p-3 text-decoration-none border-bottom @(isActive ? "bg-primary bg-opacity-10" : "")">
+                        <div class="position-relative me-2 flex-shrink-0">
+                            <img src="@avatarSrc" class="rounded-circle" width="40" height="40"
+                                 style="object-fit:cover;" onerror="this.src='/images/default.png'">
+                            @if (conv.UnreadCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:10px;">
+                                    @conv.UnreadCount
+                                </span>
+                            }
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="fw-semibold small text-dark">@conv.OtherUser.Username</div>
+                            <div class="text-muted small text-truncate" style="max-width:160px;">
+                                @(conv.LastMessage.Body.Length > 40 ? conv.LastMessage.Body[..40] + "…" : conv.LastMessage.Body)
+                            </div>
+                        </div>
+                        <div class="text-muted small ms-1 flex-shrink-0">
+                            @conv.LastMessage.SentAt.ToLocalTime().ToString("MM/dd")
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+
+        @* ── RIGHT: Message thread ───────────────────────────────── *@
+        <div class="col-12 col-md-8 col-lg-9 d-flex flex-column bg-white" style="min-height:0;">
+            @if (active == null)
+            {
+                <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                    <div class="text-center">
+                        <div style="font-size:3rem;">✉️</div>
+                        <p class="mt-2">Select a conversation or start a new one.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newMsgModal">
+                            New Message
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                var other = active.OtherUser;
+                var otherAvatar = string.IsNullOrEmpty(other.Avatar) || other.Avatar == "default.png"
+                    ? "/images/default.png"
+                    : "/uploads/" + other.Avatar;
+
+                @* Header *@
+                <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="@otherAvatar" class="rounded-circle" width="36" height="36"
+                             style="object-fit:cover;" onerror="this.src='/images/default.png'">
+                        <div>
+                            <a href="/Friend/ViewProfile/@other.Id" class="fw-bold text-decoration-none text-dark">
+                                @other.Username
+                            </a>
+                            <div class="text-muted small">Lv @other.Level • @other.Class?.ToUpper()</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/Friend/ViewProfile/@other.Id" class="btn btn-sm btn-outline-secondary">View Profile</a>
+                        <button class="btn btn-sm @(active.IsBlocked ? "btn-warning" : "btn-outline-secondary")"
+                                id="blockBtn" onclick="toggleBlock(@other.Id)">
+                            @(active.IsBlocked ? "Unblock" : "Block")
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
+                            Report
+                        </button>
+                    </div>
+                </div>
+
+                @* Messages *@
+                <div class="flex-grow-1 overflow-auto p-3" id="msgList" style="min-height:0;">
+                    @if (active.Page > 0 || active.HasMore)
+                    {
+                        <div class="text-center mb-3">
+                            @if (active.HasMore)
+                            {
+                                <a href="/Message?otherId=@other.Id&page=@(active.Page + 1)" class="btn btn-sm btn-outline-secondary">
+                                    Load older
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    @if (!active.Messages.Any())
+                    {
+                        <p class="text-muted text-center small">No messages yet. Say hello!</p>
+                    }
+
+                    @foreach (var entry in active.Messages)
+                    {
+                        var msg   = entry.Message;
+                        var isMine = msg.SenderId == currentUserId;
+                        <div class="d-flex mb-2 @(isMine ? "flex-row-reverse" : "")" id="msg-@msg.Id">
+                            <div class="@(isMine ? "ms-2" : "me-2") flex-shrink-0">
+                                <img src="@(isMine ? ("/uploads/" + (Context.Session.GetString("Avatar") ?? "default.png")) : otherAvatar)"
+                                     class="rounded-circle" width="28" height="28"
+                                     style="object-fit:cover;" onerror="this.src='/images/default.png'">
+                            </div>
+                            <div style="max-width:65%;">
+                                <div class="px-3 py-2 rounded-3 @(isMine ? "bg-primary text-white" : "bg-light text-dark")"
+                                     style="word-wrap:break-word; white-space:pre-wrap;">@msg.Body</div>
+                                <div class="d-flex align-items-center gap-2 mt-1 @(isMine ? "justify-content-end" : "")">
+                                    <span class="text-muted" style="font-size:11px;">@msg.SentAt.ToLocalTime().ToString("g")</span>
+                                    <button class="btn btn-link btn-sm p-0 text-muted like-btn"
+                                            style="font-size:12px;" data-msg-id="@msg.Id"
+                                            onclick="toggleLike(@msg.Id, this)">
+                                        @(entry.LikedByMe ? "❤️" : "🤍") <span class="like-count">@entry.LikeCount</span>
+                                    </button>
+                                    @if (!isMine)
+                                    {
+                                        <button class="btn btn-link btn-sm p-0 text-muted"
+                                                style="font-size:11px;"
+                                                onclick="reportMessage(@msg.Id, @other.Id)">Flag</button>
+                                    }
+                                    @if (isMine)
+                                    {
+                                        <button class="btn btn-link btn-sm p-0 text-muted"
+                                                style="font-size:11px;"
+                                                onclick="deleteMessage(@msg.Id)">Delete</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* Compose (disabled if blocked) *@
+                @if (active.IsBlockedBy)
+                {
+                    <div class="p-3 border-top text-muted text-center small">
+                        This user has blocked you. You cannot send messages.
+                    </div>
+                }
+                else if (active.IsBlocked)
+                {
+                    <div class="p-3 border-top text-muted text-center small">
+                        You have blocked this user. Unblock to send messages.
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 border-top">
+                        <form id="sendForm" class="d-flex gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="receiverId" value="@other.Id">
+                            <textarea class="form-control" name="body" id="msgBody" rows="1"
+                                      placeholder="Write a message… (Shift+Enter for new line)"
+                                      style="resize:none; max-height:120px;" required></textarea>
+                            <button type="submit" class="btn btn-primary align-self-end px-3">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+
+                @* Report modal *@
+                <div class="modal fade" id="reportModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Report @other.Username</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                @Html.AntiForgeryToken()
+                                <textarea class="form-control" id="reportReason" rows="4"
+                                          placeholder="Describe the issue…" maxlength="500"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button class="btn btn-danger" onclick="submitReport(@other.Id, null)">Submit Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@* New message modal *@
+<div class="modal fade" id="newMsgModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" id="newMsgUsername" placeholder="Enter username">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" id="newMsgBody" rows="4" placeholder="Write your message…"></textarea>
+                </div>
+                <div id="newMsgError" class="text-danger small d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="sendNewMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Scroll thread to bottom on load
+document.addEventListener('DOMContentLoaded', function () {
+    const list = document.getElementById('msgList');
+    if (list) list.scrollTop = list.scrollHeight;
+});
+
+// ── Send message via AJAX ──
+document.getElementById('sendForm')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const body    = document.getElementById('msgBody').value.trim();
+    if (!body) return;
+    const token   = this.querySelector('[name=__RequestVerificationToken]').value;
+    const receiver = this.querySelector('[name=receiverId]').value;
+
+    const res  = await fetch('/Message/Send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `receiverId=${receiver}&body=${encodeURIComponent(body)}&__RequestVerificationToken=${encodeURIComponent(token)}`
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.error); return; }
+
+    document.getElementById('msgBody').value = '';
+    appendMessage(data, true);
+});
+
+// Auto-grow textarea
+document.getElementById('msgBody')?.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+function appendMessage(data, isMine) {
+    const list = document.getElementById('msgList');
+    const div  = document.createElement('div');
+    div.id = 'msg-' + data.messageId;
+    div.className = 'd-flex mb-2 ' + (isMine ? 'flex-row-reverse' : '');
+    div.innerHTML = `
+        <div class="${isMine ? 'ms-2' : 'me-2'} flex-shrink-0">
+            <img src="${isMine ? document.querySelector('#msgList img:last-of-type')?.src ?? '' : ''}"
+                 class="rounded-circle" width="28" height="28" style="object-fit:cover;">
+        </div>
+        <div style="max-width:65%;">
+            <div class="px-3 py-2 rounded-3 ${isMine ? 'bg-primary text-white' : 'bg-light text-dark'}"
+                 style="word-wrap:break-word; white-space:pre-wrap;">${escHtml(data.body)}</div>
+            <div class="d-flex align-items-center gap-2 mt-1 ${isMine ? 'justify-content-end' : ''}">
+                <span class="text-muted" style="font-size:11px;">${data.sentAt}</span>
+                <button class="btn btn-link btn-sm p-0 text-muted like-btn" style="font-size:12px;"
+                        onclick="toggleLike(${data.messageId}, this)">🤍 <span class="like-count">0</span></button>
+                ${isMine ? `<button class="btn btn-link btn-sm p-0 text-muted" style="font-size:11px;" onclick="deleteMessage(${data.messageId})">Delete</button>` : ''}
+            </div>
+        </div>`;
+    list.appendChild(div);
+    list.scrollTop = list.scrollHeight;
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toggle like ──
+async function toggleLike(msgId, btn) {
+    const token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    const res   = await fetch('/Message/Like/' + msgId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token)
+    });
+    const data  = await res.json();
+    if (!data.success) return;
+    btn.innerHTML = (data.liked ? '❤️' : '🤍') + ' <span class="like-count">' + data.count + '</span>';
+}
+
+// ── Delete message ──
+async function deleteMessage(msgId) {
+    if (!confirm('Delete this message?')) return;
+    const token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    const res   = await fetch('/Message/Delete/' + msgId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token)
+    });
+    const data  = await res.json();
+    if (data.success) document.getElementById('msg-' + msgId)?.remove();
+    else alert(data.error);
+}
+
+// ── Block/Unblock ──
+async function toggleBlock(userId) {
+    const token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    const res   = await fetch('/Message/Block/' + userId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token)
+    });
+    const data  = await res.json();
+    if (data.success) {
+        document.getElementById('blockBtn').textContent = data.blocked ? 'Unblock' : 'Block';
+        document.getElementById('blockBtn').className = data.blocked
+            ? 'btn btn-sm btn-warning' : 'btn btn-sm btn-outline-secondary';
+    }
+}
+
+// ── Report user ──
+async function submitReport(userId, messageId) {
+    const reason = document.getElementById('reportReason').value.trim();
+    if (!reason) { alert('Please enter a reason.'); return; }
+    const token  = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    const body   = `reportedUserId=${userId}&reason=${encodeURIComponent(reason)}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                 + (messageId ? `&reportedMessageId=${messageId}` : '');
+    const res    = await fetch('/Message/Report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+    });
+    const data   = await res.json();
+    if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('reportModal'))?.hide();
+        alert('Report submitted. Thank you.');
+    } else alert(data.error);
+}
+
+function reportMessage(msgId, userId) {
+    document.getElementById('reportReason').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+    document.querySelector('#reportModal .btn-danger').onclick = () => submitReport(userId, msgId);
+    modal.show();
+}
+
+// ── New message to user by username ──
+async function sendNewMessage() {
+    const username = document.getElementById('newMsgUsername').value.trim();
+    const body     = document.getElementById('newMsgBody').value.trim();
+    const err      = document.getElementById('newMsgError');
+    err.classList.add('d-none');
+    if (!username || !body) { err.textContent = 'Both fields required.'; err.classList.remove('d-none'); return; }
+
+    // Lookup user by username then send
+    const lookup = await fetch('/Friend/FindByUsername?username=' + encodeURIComponent(username));
+    if (!lookup.ok) { err.textContent = 'User not found.'; err.classList.remove('d-none'); return; }
+    const user = await lookup.json();
+    if (!user.id) { err.textContent = 'User not found.'; err.classList.remove('d-none'); return; }
+
+    const token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    const res   = await fetch('/Message/Send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `receiverId=${user.id}&body=${encodeURIComponent(body)}&__RequestVerificationToken=${encodeURIComponent(token)}`
+    });
+    const data  = await res.json();
+    if (data.success) {
+        window.location.href = '/Message?otherId=' + user.id;
+    } else {
+        err.textContent = data.error;
+        err.classList.remove('d-none');
+    }
+}
+</script>
+}
