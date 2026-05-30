@@ -11,15 +11,18 @@ namespace HabitTracker.Services.Implementations
         private readonly AppDbContext _context;
         private readonly IQuestService _questService;
         private readonly IEconomyService _economyService;
+        private readonly IBossQuestService _bossQuestService;
         private readonly ILogger<TaskService> _logger;
 
         public TaskService(AppDbContext context, IQuestService questService,
-                           IEconomyService economyService, ILogger<TaskService> logger)
+                           IEconomyService economyService, IBossQuestService bossQuestService,
+                           ILogger<TaskService> logger)
         {
-            _context        = context;
-            _questService   = questService;
-            _economyService = economyService;
-            _logger         = logger;
+            _context          = context;
+            _questService     = questService;
+            _economyService   = economyService;
+            _bossQuestService = bossQuestService;
+            _logger           = logger;
         }
 
         // ===== READ =====
@@ -257,6 +260,13 @@ namespace HabitTracker.Services.Implementations
             if (task.Type != TaskType.Reward)
             {
                 economy = await _economyService.ApplyTaskScoreEconomyAsync(user, task, delta, isUp);
+
+                // Boss quest damage
+                if (isUp && Math.Abs(delta) > 0)
+                {
+                    double critMult = economy?.IsCrit == true ? AppConstants.CRIT_MULT : 1.0;
+                    await _bossQuestService.ApplyTaskDamageAsync(userId, Math.Abs(delta), task.Type, critMult);
+                }
             }
 
             int xpGained = economy?.XpGained ?? 0;
@@ -416,6 +426,7 @@ namespace HabitTracker.Services.Implementations
 
                                 double cronDelta = Math.Pow(AppConstants.TaskValueLimits.DECAY, task.Value) * -1;
                                 await _economyService.ApplyCronDamageAsync(user, task, cronDelta);
+                                await _bossQuestService.ApplyMissedDailyRageAsync(userId, Math.Abs(cronDelta), AppConstants.PriorityMultipliers.Get(task.Priority));
                             }
                         }
                         else if (task.IsCompleted)

@@ -90,7 +90,7 @@ namespace HabitTracker.Controllers
 
             if (target == null) return NotFound();
 
-            // Trạng thái quan hệ bạn bè
+            // Friendship status
             var relation = await _context.Friendships
                 .FirstOrDefaultAsync(f =>
                     (f.RequesterId == userId && f.ReceiverId == id) ||
@@ -98,6 +98,29 @@ namespace HabitTracker.Controllers
 
             ViewBag.Relation = relation;
             ViewBag.CurrentUserId = userId;
+
+            // Equipped gear thumbnails (weapon, armor, head, shield)
+            var equippedKeys = new[] { target.EquippedWeapon, target.EquippedArmor, target.EquippedHead, target.EquippedShield }
+                .Where(k => !string.IsNullOrEmpty(k))
+                .Cast<string>()
+                .ToList();
+
+            var gearItems = equippedKeys.Count > 0
+                ? await _context.GearItems.AsNoTracking()
+                    .Where(g => equippedKeys.Contains(g.Key))
+                    .ToListAsync()
+                : new();
+
+            ViewBag.EquippedGear = gearItems;
+
+            // Block status (does viewer block target?)
+            var isBlocked  = await _context.UserBlocks.AsNoTracking()
+                .AnyAsync(b => b.BlockerId == userId && b.BlockedId == id);
+            var isBlockedBy = await _context.UserBlocks.AsNoTracking()
+                .AnyAsync(b => b.BlockerId == id && b.BlockedId == userId);
+
+            ViewBag.IsBlocked   = isBlocked;
+            ViewBag.IsBlockedBy = isBlockedBy;
 
             return View(target);
         }
@@ -185,6 +208,23 @@ namespace HabitTracker.Controllers
 
             TempData["Success"] = "Đã huỷ kết bạn.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET /Friend/FindByUsername?username=X — used by message compose
+        [HttpGet]
+        public async Task<IActionResult> FindByUsername(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return NotFound();
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Username.ToLower() == username.ToLower() && !u.IsAdmin)
+                .Select(u => new { u.Id, u.Username, u.Avatar })
+                .FirstOrDefaultAsync();
+
+            if (user == null) return NotFound();
+            return Json(user);
         }
 
         private int? GetUserId() =>

@@ -252,6 +252,12 @@ namespace HabitTracker.Controllers
                 .OrderBy(s => s)
                 .ToList();
 
+            var bgDir      = Path.Combine(root, "images", "habitica", "backgrounds");
+            var backgrounds = Directory.EnumerateFiles(bgDir, "background_*.png")
+                .Select(f => After(Path.GetFileNameWithoutExtension(f), "background_"))
+                .OrderBy(b => b)
+                .ToList();
+
             var vm = new CustomizeViewModel
             {
                 User              = user,
@@ -262,9 +268,25 @@ namespace HabitTracker.Controllers
                 HairBeardCount    = hairBeardCount,
                 HairMustacheCount = hairMustacheCount,
                 ShirtStyles       = shirtStyles,
+                Backgrounds       = backgrounds,
             };
 
             return View(vm);
+        }
+
+        // POST /Character/SetBackground
+        [HttpPost("SetBackground")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetBackground([FromForm] string? key)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false });
+            var user = await _context.Users.FindAsync(userId.Value);
+            if (user == null) return Json(new { success = false });
+            user.Background = string.IsNullOrWhiteSpace(key) ? null : key;
+            user.UpdatedAt  = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
         }
 
         // POST /Character/SaveAppearance

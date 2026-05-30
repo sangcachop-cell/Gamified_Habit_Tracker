@@ -19,7 +19,7 @@ namespace HabitTracker.Services.Implementations
             "Cuttlefish", "Deer", "Dog", "Dolphin", "Egg", "Falcon", "Ferret",
             "Frog", "Giraffe", "Gryphon", "GuineaPig", "Hedgehog", "Hippo",
             "Horse", "Kangaroo", "Monkey", "Nudibranch", "Octopus", "Otter",
-            "Owl", "Parrot", "Peacock", "Penguin", "Platypus", "PolarBear",
+            "Owl", "Parrot", "Peacock", "Penguin", "Platypus",
             "Pterodactyl", "Raccoon", "Rat", "Robot", "Rock", "Rooster",
             "Sabretooth", "Seahorse", "SeaSerpent", "Sheep", "Slime", "Sloth",
             "Snail", "Snake", "Spider", "Squirrel", "Treeling", "TRex",
@@ -40,7 +40,7 @@ namespace HabitTracker.Services.Implementations
             "Floral", "Fluorite", "Frost", "Ghost", "Gingerbread", "Glass",
             "Glow", "Holly", "IcySnow", "Jade", "Koi", "Moonglow", "MossyStone",
             "Onyx", "Opal", "Peppermint", "PinkMarble", "PolkaDot", "Porcelain",
-            "Purple", "Rainbow", "RoseGold", "RoseQuartz", "RoyalPurple", "Ruby",
+            "Rainbow", "RoseGold", "RoseQuartz", "RoyalPurple", "Ruby",
             "SandSculpture", "Shadow", "Shimmer", "Silver", "SolarSystem",
             "Spooky", "StainedGlass", "StarryNight", "Sunset", "Sunshine",
             "Thunderstorm", "Turquoise", "Vampire", "Watery"
@@ -110,10 +110,7 @@ namespace HabitTracker.Services.Implementations
 
             // Rare / subscriber
             MakeSpecial("Dragon",     "Hydra",        canMount: false),
-            MakeSpecial("Wolf",       "Cerberus",     canMount: false),
             MakeSpecial("Jackalope",  "RoyalPurple",  canMount: true),
-            MakeSpecial("Gryphon",    "Gryphatrice",  canMount: true),
-            MakeSpecial("Gryphatrice","Jubilant",     canMount: false),
         };
 
         // ── Instance members ─────────────────────────────────────────────────

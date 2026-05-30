@@ -76,7 +76,7 @@
                                     <img src="@item.ImagePath" alt="@item.Name"
                                          style="width:56px;height:56px;object-fit:contain;margin:auto;"
                                          onerror="this.outerHTML='<div style=\'font-size:2.5rem;\'>@item.Icon</div>'">
-                                    <div class="fw-bold mt-1">@item.Name</div>
+                                    <div class="fw-bold mt-1 text-white">@item.Name</div>
                                     <div class="text-muted small">
                                         <span class="badge bg-secondary">×<span class="qty-badge">@inv.Quantity</span></span>
                                     </div>
@@ -127,7 +127,7 @@
                                     <img src="@gear.ShopImagePath" alt="@gear.Name"
                                          style="width:48px;height:48px;object-fit:contain;margin:auto;"
                                          onerror="this.style.display='none'">
-                                    <div class="fw-bold small mt-1">@gear.Name</div>
+                                    <div class="fw-bold small mt-1 text-white">@gear.Name</div>
                                     <div class="text-muted" style="font-size:.72rem;">
                                         @if (gear.STR > 0) { <span class="me-1 text-danger">STR+@gear.STR</span> }
                                         @if (gear.CON > 0) { <span class="me-1 text-success">CON+@gear.CON</span> }

@@ -272,5 +272,45 @@ namespace HabitTracker.Controllers
 
             return View(stats);
         }
+
+        // GET /Admin/Reports
+        public async Task<IActionResult> Reports(bool showResolved = false)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var reports = await _context.Reports
+                .AsNoTracking()
+                .Where(r => showResolved ? r.IsResolved : !r.IsResolved)
+                .Include(r => r.Reporter)
+                .Include(r => r.ReportedUser)
+                .Include(r => r.ReportedMessage)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.ShowResolved = showResolved;
+            return View(reports);
+        }
+
+        // POST /Admin/ResolveReport/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResolveReport(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var report = await _context.Reports.FindAsync(id);
+            if (report == null) return NotFound();
+
+            var adminId = HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+            report.IsResolved        = true;
+            report.ResolvedAt        = DateTime.UtcNow;
+            report.ResolvedByAdminId = adminId;
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Report resolved.";
+            return RedirectToAction(nameof(Reports));
+        }
     }
 }

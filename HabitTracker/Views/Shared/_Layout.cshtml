@@ -9,6 +9,12 @@
          || action == "Profile"
          || action == "EditProfile"
          || action == "ChangePassword");
+
+    bool isSocialActive = controller == "Friend"
+        || controller == "Message"
+        || controller == "Guild"
+        || controller == "Party"
+        || (controller == "Account" && action == "Leaderboard");
 }
 
 <!DOCTYPE html>
@@ -59,22 +65,48 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Leaderboard">
-                                    🏆 Leaderboard
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle @(isSocialActive ? "active" : "")"
+                                   href="#" data-bs-toggle="dropdown">
+                                    👥 Social
+                                    <span id="msg-badge" class="badge rounded-pill bg-danger d-none ms-1"
+                                          style="font-size:10px;vertical-align:middle;"></span>
                                 </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Friend" asp-action="Index">
-                                    👥 Bạn bè
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Economy" asp-action="Index">
-                                    🛡️ Economy
-                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item @(controller == "Account" && action == "Leaderboard" ? "active" : "")"
+                                           asp-controller="Account" asp-action="Leaderboard">
+                                            🏆 Leaderboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(controller == "Friend" ? "active" : "")"
+                                           asp-controller="Friend" asp-action="Index">
+                                            👥 Friends
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(controller == "Message" ? "active" : "")"
+                                           asp-controller="Message" asp-action="Index">
+                                            ✉️ Messages
+                                            <span id="msg-badge-dd" class="badge rounded-pill bg-danger d-none ms-1"
+                                                  style="font-size:10px;"></span>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item @(controller == "Guild" ? "active" : "")"
+                                           asp-controller="Guild" asp-action="Index">
+                                            ⚔️ Guilds
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(controller == "Party" ? "active" : "")"
+                                           asp-controller="Party" asp-action="Index">
+                                            🛡️ Party
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
 
                             <li class="nav-item">
@@ -153,6 +185,26 @@
 
                         <!-- RIGHT USER MENU -->
                         <ul class="navbar-nav align-items-center">
+
+                            @* Notification bell *@
+                            @if (Context.Session.GetString("Username") != null)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link position-relative px-2" href="#"
+                                       data-bs-toggle="dropdown" id="notifBell" title="Notifications">
+                                        🔔
+                                        <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+                                              style="font-size:10px;"></span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" id="notif-dropdown" style="min-width:320px;max-height:400px;overflow-y:auto;">
+                                        <li class="dropdown-header d-flex justify-content-between">
+                                            <span>Notifications</span>
+                                            <a href="#" class="small" onclick="markAllRead(event)">Mark all read</a>
+                                        </li>
+                                        <li><div id="notif-list" class="px-2 py-1 text-muted small">Loading…</div></li>
+                                    </ul>
+                                </li>
+                            }
 
                             @if (Context.Session.GetString("Username") != null)
                             {
@@ -287,7 +339,7 @@
     {
         <footer class="border-top mt-5">
             <div class="container text-center py-3 text-muted">
-                © 2026 - HabitTracker 🚀 | v1.0 | 5 Features
+                © 2026 - HabitTracker 🚀 | v1.0
             </div>
         </footer>
     }
@@ -362,6 +414,10 @@
         .toast-crit  { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #1a1a1a; }
         .toast-drop  { background: linear-gradient(135deg, #7b2ff7, #4a90d9); }
         .toast-death { background: linear-gradient(135deg, #1a1a2e, #c0392b); }
+        .success     { background: linear-gradient(135deg, #11998e, #38ef7d); color: #1a1a1a; }
+        .danger      { background: linear-gradient(135deg, #e8436a, #c0392b); }
+        .info        { background: linear-gradient(135deg, #4a90d9, #667eea); }
+        .warning     { background: linear-gradient(135deg, #f0b429, #f76b1c); color: #1a1a1a; }
 
         .toast-icon {
             font-size: 2rem;
@@ -449,6 +505,42 @@
                 document.getElementById('hud-sleep').style.display     = s.isSleeping ? 'inline' : 'none';
                 document.getElementById('hud-dead').style.display      = s.isDead     ? 'inline' : 'none';
             });
+            // Message unread badge
+            fetch('/Message/UnreadCount').then(r => r.json()).then(d => {
+                var b  = document.getElementById('msg-badge');
+                var bd = document.getElementById('msg-badge-dd');
+                var show = d.count > 0;
+                if (b)  { b.textContent  = d.count; b.classList.toggle('d-none',  !show); }
+                if (bd) { bd.textContent = d.count; bd.classList.toggle('d-none', !show); }
+            }).catch(() => {});
+            // Notification unread badge
+            fetch('/api/notification/unread-count').then(r => r.json()).then(d => {
+                var b = document.getElementById('notif-badge');
+                if (b) { b.textContent = d.count ?? d; b.classList.toggle('d-none', !((d.count ?? d) > 0)); }
+            }).catch(() => {});
+        }
+
+        // Load notifications into dropdown
+        document.getElementById('notifBell')?.addEventListener('show.bs.dropdown', function () {
+            fetch('/api/notification?limit=8').then(r => r.json()).then(items => {
+                var list = document.getElementById('notif-list');
+                if (!list) return;
+                if (!items || items.length === 0) { list.textContent = 'No notifications.'; return; }
+                list.innerHTML = items.map(n =>
+                    `<div class="py-2 border-bottom" style="font-size:.82rem;">
+                        <div>${n.icon || 'ℹ️'} <strong>${n.title}</strong></div>
+                        ${n.message ? `<div class="text-muted">${n.message}</div>` : ''}
+                        ${n.link ? `<a href="${n.link}" class="small">View →</a>` : ''}
+                     </div>`
+                ).join('');
+            }).catch(() => { const l = document.getElementById('notif-list'); if(l) l.textContent='Failed to load.'; });
+        });
+
+        async function markAllRead(e) {
+            e.preventDefault();
+            await fetch('/api/notification/read-all', { method: 'PUT' });
+            var b = document.getElementById('notif-badge');
+            if (b) { b.textContent = '0'; b.classList.add('d-none'); }
         }
 
         document.addEventListener('DOMContentLoaded', function () {

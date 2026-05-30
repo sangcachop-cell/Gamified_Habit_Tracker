@@ -142,6 +142,8 @@ namespace HabitTracker.Services.Implementations
             }
 
             user.ActivePetKey = string.IsNullOrEmpty(petKey) ? null : petKey;
+            if (!string.IsNullOrEmpty(petKey))
+                user.ActiveMountKey = null;
             await _context.SaveChangesAsync();
 
             return new StableResult { Success = true, NewActivePetKey = user.ActivePetKey };
@@ -160,6 +162,8 @@ namespace HabitTracker.Services.Implementations
             }
 
             user.ActiveMountKey = string.IsNullOrEmpty(mountKey) ? null : mountKey;
+            if (!string.IsNullOrEmpty(mountKey))
+                user.ActivePetKey = null;
             await _context.SaveChangesAsync();
 
             return new StableResult { Success = true, NewActiveMountKey = user.ActiveMountKey };
@@ -203,35 +207,31 @@ namespace HabitTracker.Services.Implementations
             string? activePetKey   = user.ActivePetKey;
             string? activeMountKey = user.ActiveMountKey;
 
-            static IReadOnlyList<PetSlotEntry> MergeSlots(
-                IReadOnlyList<PetSlotEntry> slots,
-                HashSet<string> petSet,
-                HashSet<string> mountSet,
-                Dictionary<string, int> feeding,
-                string? activePet,
-                string? activeMount)
-            {
-                return slots.Select(s => s with
-                {
-                    IsOwned       = petSet.Contains(s.PetKey) || mountSet.Contains(s.PetKey),
-                    IsMount       = mountSet.Contains(s.PetKey),
-                    FeedingPoints = feeding.GetValueOrDefault(s.PetKey, 0),
-                    IsActivePet   = s.PetKey == activePet,
-                    IsActiveMount = s.PetKey == activeMount
-                }).ToList().AsReadOnly();
-            }
-
             var petsGrid = _catalog.GetAnimalGroups()
                 .Select(g => g with
                 {
-                    Slots = MergeSlots(g.Slots, ownedPetSet, ownedMountSet, feedingMap, activePetKey, activeMountKey)
+                    Slots = g.Slots.Select(s => s with
+                    {
+                        IsOwned       = ownedPetSet.Contains(s.PetKey) || ownedMountSet.Contains(s.PetKey),
+                        IsMount       = ownedMountSet.Contains(s.PetKey),
+                        FeedingPoints = feedingMap.GetValueOrDefault(s.PetKey, 0),
+                        IsActivePet   = s.PetKey == activePetKey,
+                        IsActiveMount = false
+                    }).ToList().AsReadOnly()
                 })
                 .ToList();
 
             var mountsGrid = _catalog.GetAnimalGroupsForMounts()
                 .Select(g => g with
                 {
-                    Slots = MergeSlots(g.Slots, ownedPetSet, ownedMountSet, feedingMap, activePetKey, activeMountKey)
+                    Slots = g.Slots.Select(s => s with
+                    {
+                        IsOwned       = ownedMountSet.Contains(s.PetKey),
+                        IsMount       = ownedMountSet.Contains(s.PetKey),
+                        FeedingPoints = feedingMap.GetValueOrDefault(s.PetKey, 0),
+                        IsActivePet   = false,
+                        IsActiveMount = s.PetKey == activeMountKey
+                    }).ToList().AsReadOnly()
                 })
                 .ToList();
 

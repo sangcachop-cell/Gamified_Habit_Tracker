@@ -29,10 +29,13 @@
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear  = FindGear(eqArmorKey);
-    var headGear   = FindGear(eqHeadKey);
-    var shieldGear = FindGear(eqShieldKey);
-    var weaponGear = FindGear(eqWeaponKey);
+    var armorGear         = FindGear(eqArmorKey);
+    var headGear          = FindGear(eqHeadKey);
+    var shieldGear        = FindGear(eqShieldKey);
+    var weaponGear        = FindGear(eqWeaponKey);
+    var backGear          = FindGear(u.EquippedBack);
+    var eyewearGear       = FindGear(u.EquippedEyewear);
+    var headAccessoryGear = FindGear(u.EquippedHeadAccessory);
     bool wep2H     = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
@@ -54,12 +57,6 @@
                     🌟 Select Your Class
                 </a>
             }
-            @if (!string.IsNullOrEmpty(u.Class) && u.Level >= 11)
-            {
-                <a href="/Character/Spells" class="btn btn-primary btn-sm">
-                    ✨ Cast Spells
-                </a>
-            }
             @if (u.Level >= 10)
             {
                 <a href="/Character/Rebirth" class="btn btn-outline-danger btn-sm">
@@ -73,12 +70,18 @@
     <div class="d-flex gap-4 mb-4 align-items-center">
 
         <!-- Avatar (layer stack) -->
-        <div style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; flex-shrink:0; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible;">
+        <div style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; flex-shrink:0; background:rgba(255,255,255,0.04); border-radius:8px; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
             <div style="position:relative; margin-left:24px; width:90px; height:90px;">
                 @if (isMounted)
                 {
                     <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
                          style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                }
+                @if (backGear != null)
+                {
+                    <img src="@backGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                 }
                 <img src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
                      style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
@@ -106,10 +109,22 @@
                     <img src="/images/habitica/customize/beards/hair_beard_@(u.HairBeard)_@(u.HairColor).png"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
                 }
+                @if (eyewearGear != null)
+                {
+                    <img src="@eyewearGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                }
                 @if (headGear != null)
                 {
                     <img src="@headGear.GetWornImagePath(bodyType)"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (headAccessoryGear != null)
+                {
+                    <img src="@headAccessoryGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                 }
                 @if (shieldGear != null && !wep2H)
                 {
@@ -129,7 +144,7 @@
                 @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
                 {
                     <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                         style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
+                         style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
                 }
             </div>
         </div>

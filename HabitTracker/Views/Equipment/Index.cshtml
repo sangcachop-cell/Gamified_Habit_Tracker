@@ -4,7 +4,7 @@
     var u  = Model.User;
     var es = Model.Stats;
 
-    var primarySlots = new[] { "weapon", "armor", "head", "shield" };
+    var primarySlots = new[] { "weapon", "armor", "head", "shield", "back", "eyewear", "headAccessory" };
 
     string SlotIcon(string slot) => slot switch
     {
@@ -30,10 +30,13 @@
             equippedGear[slot] = null;
     }
 
-    var armorGear   = equippedGear.GetValueOrDefault("armor");
-    var headGear    = equippedGear.GetValueOrDefault("head");
-    var shieldGear  = equippedGear.GetValueOrDefault("shield");
-    var weaponGear  = equippedGear.GetValueOrDefault("weapon");
+    var armorGear         = equippedGear.GetValueOrDefault("armor");
+    var headGear          = equippedGear.GetValueOrDefault("head");
+    var shieldGear        = equippedGear.GetValueOrDefault("shield");
+    var weaponGear        = equippedGear.GetValueOrDefault("weapon");
+    var backGear          = equippedGear.GetValueOrDefault("back");
+    var eyewearGear       = equippedGear.GetValueOrDefault("eyewear");
+    var headAccessoryGear = equippedGear.GetValueOrDefault("headAccessory");
     bool weaponIs2H = weaponGear?.TwoHanded ?? false;
     string bodyType = u.BodyType ?? "broad";
     bool isMounted  = !string.IsNullOrEmpty(u.ActiveMountKey);
@@ -144,14 +147,18 @@
         <div class="col-md-3 d-flex flex-column align-items-center">
             <div class="small fw-semibold text-muted mb-2">PREVIEW</div>
             <div id="avatar-preview"
-                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible;">
-                <!-- Layer order: mount-body → skin → shirt → armor → bangs → hair → mustache → beard → head → shield → weapon → mount-head / pet -->
+                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
+                <!-- Layer order: mount-body → back → skin → shirt → armor → bangs → hair → mustache → beard → eyewear → head → headAccessory → shield → weapon → mount-head / pet -->
                 <div style="position:relative; margin-left:24px; width:90px; height:90px;">
                     @if (isMounted)
                     {
                         <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
                              style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
                     }
+                    <img id="layer-back"
+                         src="@(backGear != null ? backGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(backGear == null ? "display:none;" : "")"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                     <img id="layer-skin"
                          src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
@@ -173,9 +180,17 @@
                     <img id="layer-beard"
                          src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
+                    <img id="layer-eyewear"
+                         src="@(eyewearGear != null ? eyewearGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(eyewearGear == null ? "display:none;" : "")"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                     <img id="layer-head"
                          src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
+                    <img id="layer-headAccessory"
+                         src="@(headAccessoryGear != null ? headAccessoryGear.GetWornImagePath(bodyType) : "")"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headAccessoryGear == null ? "display:none;" : "")"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                     <img id="layer-shield"
                          src="@(shieldGear != null && !weaponIs2H ? shieldGear.GetWornImagePath(bodyType) : "")"
                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || weaponIs2H ? "display:none;" : "")" />
@@ -190,7 +205,7 @@
                     @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
                     {
                         <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                             style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
+                             style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
                     }
                 </div>
             </div>

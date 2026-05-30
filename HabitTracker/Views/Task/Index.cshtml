@@ -144,6 +144,34 @@
 
     .clear-todos-link { font-size: .75rem; color: #aaa; text-decoration: none; margin-top: 8px; display: block; text-align: center; }
     .clear-todos-link:hover { color: var(--rose); }
+
+    /* ── Skills bar ────────────────────────────────── */
+    .skills-bar {
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+    .skill-btn {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 10px 14px;
+        text-align: center;
+        background: #fafafa;
+        transition: border-color .15s, box-shadow .15s, background .15s;
+        min-width: 90px;
+        user-select: none;
+    }
+    .skill-btn:hover:not(.skill-disabled) { border-color: #6c757d; background: #f3f0ff; }
+    .skill-btn.skill-active { border-color: var(--violet); box-shadow: 0 0 10px rgba(92,61,222,.35); background: #ede8ff; }
+    .skill-btn.skill-casting { opacity: .6; pointer-events: none; }
+    .skill-btn.skill-disabled { opacity: .45; cursor: not-allowed; }
+    .skill-name { font-size: .73rem; font-weight: 700; color: var(--ink); margin-top: 4px; line-height: 1.2; }
+    .skill-cost { font-size: .7rem; color: #5090d3; margin-top: 2px; }
+    .skill-targeting .task-card { cursor: crosshair !important; outline: 2px dashed var(--violet); outline-offset: 2px; }
+    .skill-targeting .task-card * { pointer-events: none; }
 </style>
 
 <div class="board-header">
@@ -160,6 +188,49 @@
 
 <!-- Hidden CSRF token for AJAX posts -->
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+@if (Model.CanUseSkills && Model.Skills.Any())
+{
+    var userMana    = (int)(Model.User!.Mana);
+    var maxMana     = Model.EffectiveStats!.MaxMana;
+    var manaPct     = maxMana > 0 ? Math.Min(100, userMana * 100 / maxMana) : 0;
+    <div class="skills-bar" id="skillsBar">
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+            <div class="fw-semibold" style="font-size:.85rem;color:var(--violet);">✨ Skills</div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="mana-text text-muted small">💧 @userMana / @maxMana MP</span>
+                <div class="progress" style="width:90px;height:6px;" title="Mana">
+                    <div class="progress-bar" id="skillManaBar"
+                         style="width:@manaPct%;background:var(--violet);"></div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @foreach (var skill in Model.Skills)
+            {
+                bool canCast = Model.User!.Mana >= skill.ManaCost;
+                <div class="skill-btn @(!canCast ? "skill-disabled" : "")"
+                     id="skill-@skill.Key"
+                     data-key="@skill.Key"
+                     data-targets-task="@skill.TargetsTask.ToString().ToLower()"
+                     data-mana="@skill.ManaCost"
+                     data-name="@skill.Name"
+                     onclick="activateSkill(this)"
+                     title="@skill.Description&#10;Cost: @skill.ManaCost MP">
+                    <img src="/images/habitica/skills/shop_@(skill.Key).png" width="40" height="40"
+                         onerror="this.src='/images/habitica/skills/shop_special_fall2015Healer.png'"
+                         alt="@skill.Name" />
+                    <div class="skill-name">@skill.Name</div>
+                    <div class="skill-cost">💧@skill.ManaCost</div>
+                </div>
+            }
+        </div>
+        <div id="skillTargetHint" class="d-none mt-2 small">
+            <span class="text-primary fw-semibold">🎯 Click any task to apply the spell</span>
+            <button class="btn btn-sm btn-link p-0 ms-2 text-muted" style="font-size:.8rem;" onclick="deactivateSkill()">Cancel (ESC)</button>
+        </div>
+    </div>
+}
 
 <div class="task-board">
 
@@ -359,6 +430,122 @@
                 else               $row.removeClass('done');
             }
         });
+    });
+
+    // ── SKILLS ──────────────────────────────────────────────────────────────
+
+    var activeSkill  = null;
+@if (Model.CanUseSkills && Model.Skills.Any())
+{
+    <text>
+    var currentMana  = @((int)(Model.User!.Mana));
+    var maxManaVal   = @(Model.EffectiveStats!.MaxMana);
+    </text>
+}
+else
+{
+    <text>
+    var currentMana  = 0;
+    var maxManaVal   = 30;
+    </text>
+}
+
+    function activateSkill(el) {
+        if (el.classList.contains('skill-disabled') || el.classList.contains('skill-casting')) return;
+        var key = el.dataset.key;
+        if (activeSkill === key) { deactivateSkill(); return; }
+
+        document.querySelectorAll('.skill-btn').forEach(function(b) { b.classList.remove('skill-active'); });
+        el.classList.add('skill-active');
+        activeSkill = key;
+
+        if (el.dataset.targetsTask !== 'true') {
+            castSkill(key, null);
+        } else {
+            document.body.classList.add('skill-targeting');
+            var hint = document.getElementById('skillTargetHint');
+            if (hint) hint.classList.remove('d-none');
+        }
+    }
+
+    function deactivateSkill() {
+        activeSkill = null;
+        document.querySelectorAll('.skill-btn').forEach(function(b) { b.classList.remove('skill-active'); });
+        document.body.classList.remove('skill-targeting');
+        var hint = document.getElementById('skillTargetHint');
+        if (hint) hint.classList.add('d-none');
+    }
+
+    // Intercept task-card clicks during skill targeting
+    $(document).on('click', '.task-card', function(e) {
+        if (!activeSkill) return;
+        var skillEl = document.getElementById('skill-' + activeSkill);
+        if (!skillEl || skillEl.dataset.targetsTask !== 'true') return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        var taskId = this.id.replace('task-', '');
+        castSkill(activeSkill, taskId);
+    });
+
+    async function castSkill(key, taskId) {
+        var skillEl = document.getElementById('skill-' + key);
+        if (skillEl) skillEl.classList.add('skill-casting');
+        deactivateSkill();
+
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', token);
+        fd.append('spellKey', key);
+        if (taskId) fd.append('taskId', taskId);
+
+        try {
+            var res  = await fetch('/Task/CastSpell', { method: 'POST', body: fd });
+            var d    = await res.json();
+            var name = skillEl ? skillEl.dataset.name : key;
+
+            if (d.success) {
+                currentMana = d.newMana;
+                maxManaVal  = d.maxMana;
+                updateSkillManaDisplay();
+                updateSkillDisabledStates();
+
+                var msg = (d.data && d.data.toastMessage) ? d.data.toastMessage : (name + ' cast!');
+                showToast('✨', name, msg, 'info', 4500);
+
+                if (d.data && d.data.xpGained > 0)
+                    setTimeout(function(){ showToast('⚡', 'XP!', '+' + d.data.xpGained + ' XP', 'toast-xp', 3000); }, 600);
+
+                if (taskId && d.data && d.data.taskValueDelta !== undefined)
+                    updateCardColor(taskId, parseFloat(d.data.taskValueDelta));
+
+                if (typeof refreshHud === 'function') refreshHud();
+            } else {
+                showToast('❌', 'Spell Failed', d.error || 'Not enough mana?', 'danger', 4000);
+            }
+        } catch(err) {
+            showToast('❌', 'Spell Failed', 'Request error.', 'danger', 4000);
+        }
+
+        if (skillEl) skillEl.classList.remove('skill-casting');
+    }
+
+    function updateSkillManaDisplay() {
+        var pct = maxManaVal > 0 ? Math.min(100, currentMana * 100 / maxManaVal) : 0;
+        var bar = document.getElementById('skillManaBar');
+        if (bar) bar.style.width = pct + '%';
+        var txt = document.querySelector('#skillsBar .mana-text');
+        if (txt) txt.textContent = '💧 ' + currentMana + ' / ' + maxManaVal + ' MP';
+    }
+
+    function updateSkillDisabledStates() {
+        document.querySelectorAll('.skill-btn').forEach(function(btn) {
+            var cost = parseInt(btn.dataset.mana) || 0;
+            if (currentMana < cost) btn.classList.add('skill-disabled');
+            else btn.classList.remove('skill-disabled');
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && activeSkill) deactivateSkill();
     });
 </script>
 }

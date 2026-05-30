@@ -13,94 +13,157 @@
              .Where(i => i.GameItem?.AnimalKey != null)
              .ToDictionary(i => i.GameItemId, i => i.GameItem!.AnimalKey!));
 
-    var potionColorMap = System.Text.Json.JsonSerializer.Serialize(
-        Model.PotionsInInventory
-             .Where(i => i.GameItem?.PotionColorKey != null)
-             .ToDictionary(i => i.GameItemId, i => i.GameItem!.PotionColorKey!));
-
-    // Quest egg IDs for hatch-tab potion gating
     var questEggIds = System.Text.Json.JsonSerializer.Serialize(
         Model.EggsInInventory
              .Where(i => i.GameItem?.IsDroppable == false)
              .Select(i => i.GameItemId)
              .ToHashSet());
 
-    // Drop potion IDs for hatch-tab potion gating
     var dropPotionIds = System.Text.Json.JsonSerializer.Serialize(
         Model.PotionsInInventory
              .Where(i => i.GameItem?.IsDroppable == true)
              .Select(i => i.GameItemId)
              .ToHashSet());
 
-    // Pet data map for offcanvas panel
     var petDataMap = System.Text.Json.JsonSerializer.Serialize(
         Model.OwnedPets.ToDictionary(
             p => p.PetKey,
             p => new { feedingPoints = p.FeedingPoints, isActive = p.PetKey == u.ActivePetKey, colorName = p.ColorName }));
 
-    // Food inventory for offcanvas panel
-    var foodItems = System.Text.Json.JsonSerializer.Serialize(
-        Model.FoodInInventory.Select(f => new {
-            id       = f.GameItemId,
-            name     = f.GameItem?.Name ?? "",
-            icon     = f.GameItem?.Icon ?? "",
-            qty      = f.Quantity,
-            target   = f.GameItem?.Target ?? ""
-        }).ToList());
+    string CategoryLabel(PetCategory cat) => cat switch {
+        PetCategory.Drop    => "standard",
+        PetCategory.Premium => "premium",
+        PetCategory.Quest   => "quest",
+        PetCategory.Wacky   => "wacky",
+        PetCategory.Special => "special",
+        _ => ""
+    };
+    string BadgeColor(PetCategory cat) => cat switch {
+        PetCategory.Drop    => "bg-primary",
+        PetCategory.Premium => "bg-warning text-dark",
+        PetCategory.Quest   => "bg-success",
+        PetCategory.Wacky   => "bg-danger",
+        PetCategory.Special => "bg-secondary",
+        _ => "bg-secondary"
+    };
 }
 
-<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+<style>
+    .feed-targeting .pet-slot.slot-owned:not(.slot-is-mount) {
+        cursor: crosshair;
+        outline: 2px dashed #fd7e14;
+        outline-offset: 2px;
+    }
+    .feed-targeting .pet-slot.slot-owned:not(.slot-is-mount):hover {
+        outline-color: #e55a00;
+        background: rgba(253,126,20,.12);
+    }
+    .food-select-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 4px 6px;
+        min-width: 52px;
+        line-height: 1.2;
+    }
+    .food-select-btn.active {
+        background: #fd7e14;
+        border-color: #fd7e14;
+        color: #fff;
+    }
+    .owned-pet-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px;
+        border: 2px solid #6c757d;
+        border-radius: 8px;
+        background: rgba(255,255,255,.9);
+        cursor: pointer;
+        width: 80px;
+        text-align: center;
+        position: relative;
+    }
+    .owned-pet-card:hover { border-color: #0d6efd; background: rgba(13,110,253,.06); }
+    .owned-pet-card.is-active { border-color: #198754 !important; box-shadow: 0 0 0 2px rgba(25,135,84,.35); }
+    .owned-pet-card .card-progress {
+        width: 100%;
+        height: 4px;
+        background: #dee2e6;
+        border-radius: 2px;
+        margin-top: 4px;
+    }
+    .owned-pet-card .card-progress > div {
+        height: 100%;
+        background: #ffc107;
+        border-radius: 2px;
+        transition: width .3s;
+    }
+    .owned-pet-card .card-label {
+        font-size: .6rem;
+        color: #6c757d;
+        margin-top: 2px;
+        word-break: break-all;
+        line-height: 1.2;
+    }
+    .owned-mount-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px;
+        border: 2px solid #6c757d;
+        border-radius: 8px;
+        background: rgba(255,255,255,.9);
+        cursor: pointer;
+        width: 80px;
+        text-align: center;
+        position: relative;
+    }
+    .owned-mount-card:hover { border-color: #fd7e14; background: rgba(253,126,20,.06); }
+    .owned-mount-card.is-active { border-color: #198754 !important; box-shadow: 0 0 0 2px rgba(25,135,84,.35); }
+    .owned-mount-card .card-label {
+        font-size: .6rem;
+        color: #6c757d;
+        margin-top: 4px;
+        word-break: break-all;
+        line-height: 1.2;
+    }
+</style>
 
-<!-- Pet action offcanvas panel -->
-<div class="offcanvas offcanvas-bottom" tabindex="-1" id="petOffcanvas" style="height:auto;max-height:50vh;">
-    <div class="offcanvas-header py-2">
-        <h6 class="offcanvas-title mb-0" id="petOffcanvasLabel">Pet</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body pt-0 pb-3">
-        <div class="d-flex gap-3 align-items-start flex-wrap">
-            <img id="oc-pet-img" src="" width="64" height="64" style="image-rendering:pixelated;border-radius:6px;background:rgba(0,0,0,.04);" />
-            <div class="flex-grow-1" style="min-width:200px;">
-                <div class="fw-semibold" id="oc-pet-name"></div>
-                <div class="text-muted small mb-1" id="oc-pet-color"></div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <div class="progress flex-grow-1" style="height:8px;">
-                        <div class="progress-bar bg-warning" id="oc-progress-bar" style="width:0%"></div>
-                    </div>
-                    <span class="small text-muted" id="oc-progress-label">0/50</span>
-                </div>
-                <div class="d-flex gap-2 flex-wrap">
-                    <select class="form-select form-select-sm" style="max-width:180px;font-size:.75rem;" id="oc-food-sel"></select>
-                    <button class="btn btn-warning btn-sm" onclick="feedFromPanel()">🍖 Feed</button>
-                    <button class="btn btn-outline-success btn-sm" id="oc-active-btn" onclick="toggleActivePetFromPanel()"></button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
 <div class="container-fluid py-4" style="max-width:1200px;">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h2 class="mb-0">🐾 Stable</h2>
         <div class="text-muted small">
-            @Model.OwnedPets.Count / @Model.TotalPetsInCatalog pets &nbsp;·&nbsp;
+            @Model.CollectedPetsCount / @Model.TotalPetsInCatalog pets &nbsp;·&nbsp;
             @Model.OwnedMounts.Count / @Model.TotalMountsInCatalog mounts
         </div>
     </div>
 
     <ul class="nav nav-tabs mb-4" id="stableTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-pets-btn" data-bs-toggle="tab" data-bs-target="#tab-pets" type="button">
-                🐾 Pets <span class="badge bg-secondary ms-1">@Model.OwnedPets.Count / @Model.TotalPetsInCatalog</span>
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-my-pets" type="button">
+                🐾 My Pets <span class="badge bg-secondary ms-1">@Model.OwnedPets.Count</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-mounts-btn" data-bs-toggle="tab" data-bs-target="#tab-mounts" type="button">
-                🐴 Mounts <span class="badge bg-secondary ms-1">@Model.OwnedMounts.Count / @Model.TotalMountsInCatalog</span>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-my-mounts" type="button">
+                🐴 My Mounts <span class="badge bg-secondary ms-1">@Model.OwnedMounts.Count</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-hatch-btn" data-bs-toggle="tab" data-bs-target="#tab-hatch" type="button">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pet-collection" type="button">
+                📖 Pet Collection <span class="badge bg-secondary ms-1">@Model.CollectedPetsCount / @Model.TotalPetsInCatalog</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mount-collection" type="button">
+                📖 Mount Collection <span class="badge bg-secondary ms-1">@Model.OwnedMounts.Count / @Model.TotalMountsInCatalog</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hatch" type="button">
                 🥚 Hatch
             </button>
         </li>
@@ -108,37 +171,140 @@
 
     <div class="tab-content" id="stableTabContent">
 
-        <!-- ═══════════════════════════════════════════════════════════ PETS TAB -->
-        <div class="tab-pane fade show active" id="tab-pets" role="tabpanel">
-            @{
-                string CategoryLabel(PetCategory cat) => cat switch {
-                    PetCategory.Drop    => "standard",
-                    PetCategory.Premium => "premium",
-                    PetCategory.Quest   => "quest",
-                    PetCategory.Wacky   => "wacky",
-                    PetCategory.Special => "special",
-                    _ => ""
-                };
-                string BadgeColor(PetCategory cat) => cat switch {
-                    PetCategory.Drop    => "bg-primary",
-                    PetCategory.Premium => "bg-warning text-dark",
-                    PetCategory.Quest   => "bg-success",
-                    PetCategory.Wacky   => "bg-danger",
-                    PetCategory.Special => "bg-secondary",
-                    _ => "bg-secondary"
-                };
+        <!-- ═══════════════════════════════════════════ MY PETS TAB -->
+        <div class="tab-pane fade show active" id="tab-my-pets" role="tabpanel">
+
+            <!-- Food bar -->
+            <div id="food-bar" class="mb-3 p-2 rounded" style="background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08);">
+                <div class="d-flex align-items-center gap-1 flex-wrap" id="food-bar-inner">
+                    <span class="text-muted small fw-semibold me-1" style="white-space:nowrap;">🍖 Feed:</span>
+                    @if (Model.FoodInInventory.Any())
+                    {
+                        @foreach (var f in Model.FoodInInventory)
+                        {
+                            <button type="button"
+                                    class="food-select-btn btn btn-sm btn-outline-secondary"
+                                    data-food-id="@f.GameItemId"
+                                    data-food-color="@(f.GameItem?.Target ?? "")"
+                                    onclick="selectFood(this)"
+                                    title="@(f.GameItem?.Name) ×@f.Quantity">
+                                <img src="@f.GameItem?.ImagePath" width="28" height="28"
+                                     style="image-rendering:pixelated;" onerror="this.style.opacity='.3'" />
+                                <span style="font-size:.65rem;">×<span class="food-qty">@f.Quantity</span></span>
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted small" id="no-food-msg">No food — complete tasks to earn drops</span>
+                    }
+                    <button id="cancel-feed-btn" class="btn btn-sm btn-outline-danger ms-auto"
+                            style="display:none;" onclick="cancelFeed()">✕ Cancel</button>
+                </div>
+                <div id="feed-hint" class="text-warning small mt-1" style="display:none;">
+                    Click a pet below to feed it
+                </div>
+            </div>
+
+            <!-- Active pet banner -->
+            @if (!string.IsNullOrEmpty(u.ActivePetKey))
+            {
+                <div class="d-flex align-items-center gap-3 p-2 mb-3 rounded" style="background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.3);">
+                    <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png" width="36" height="36" style="image-rendering:pixelated;" onerror="this.style.display='none'" />
+                    <div class="flex-grow-1 small">
+                        <span class="fw-semibold">Active pet:</span> @u.ActivePetKey
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="setActivePet('')">✕ Unequip</button>
+                </div>
             }
 
+            <div class="text-muted small mb-3">Select food above → click pet to feed. Click pet without food → make active/unequip.</div>
+
+            @if (!Model.OwnedPets.Any())
+            {
+                <div class="text-muted text-center py-5">
+                    <div style="font-size:3rem;">🐾</div>
+                    <p class="mt-2">No pets yet. Hatch eggs or complete quests!</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2" id="owned-pets-grid">
+                    @foreach (var pet in Model.OwnedPets.OrderBy(p => p.PetKey))
+                    {
+                        bool isActive = pet.PetKey == u.ActivePetKey;
+                        int pct = pet.FeedingPoints * 2;
+                        <div class="owned-pet-card @(isActive ? "is-active" : "")"
+                             data-petkey="@pet.PetKey"
+                             title="@pet.PetKey (@pet.FeedingPoints/50)@(isActive ? " ★ active" : "")">
+                            @if (isActive) { <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div> }
+                            <img src="/images/habitica/stable/pets/Pet-@(pet.PetKey).png"
+                                 width="48" height="48"
+                                 style="image-rendering:pixelated;"
+                                 onerror="this.style.opacity='.2'" />
+                            <div class="card-progress"><div style="width:@pct%"></div></div>
+                            <div class="card-label">@pet.FeedingPoints/50</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ═══════════════════════════════════════════ MY MOUNTS TAB -->
+        <div class="tab-pane fade" id="tab-my-mounts" role="tabpanel">
+
+            @if (!string.IsNullOrEmpty(u.ActiveMountKey))
+            {
+                <div class="d-flex align-items-center gap-3 p-2 mb-3 rounded" style="background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.3);">
+                    <img src="/images/habitica/stable/mounts/icon/Mount_Icon_@(u.ActiveMountKey).png" width="36" height="36" style="image-rendering:pixelated;" onerror="this.style.display='none'" />
+                    <div class="flex-grow-1 small">
+                        <span class="fw-semibold">Currently riding:</span> @u.ActiveMountKey
+                    </div>
+                    <button class="btn btn-outline-warning btn-sm" onclick="setActiveMount('')">🏠 Dismount</button>
+                </div>
+            }
+
+            <div class="text-muted small mb-3">Click mount to ride. Click active mount to dismount.</div>
+
+            @if (!Model.OwnedMounts.Any())
+            {
+                <div class="text-muted text-center py-5">
+                    <div style="font-size:3rem;">🐴</div>
+                    <p class="mt-2">No mounts yet. Feed a pet to 50 pts to evolve it!</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2" id="owned-mounts-grid">
+                    @foreach (var mount in Model.OwnedMounts.OrderBy(p => p.PetKey))
+                    {
+                        bool isActive = mount.PetKey == u.ActiveMountKey;
+                        string iconPath = $"/images/habitica/stable/mounts/icon/Mount_Icon_{mount.PetKey}.png";
+                        string fallbackPath = $"/images/habitica/stable/pets/Pet-{mount.PetKey}.png";
+                        <div class="owned-mount-card @(isActive ? "is-active" : "")"
+                             data-mountkey="@mount.PetKey"
+                             title="@mount.PetKey@(isActive ? " ★ riding" : "")">
+                            @if (isActive) { <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div> }
+                            <img src="@iconPath" width="48" height="48"
+                                 style="image-rendering:pixelated;"
+                                 onerror="this.src='@fallbackPath';this.onerror=null;" />
+                            <div class="card-label">@mount.PetKey.Split('-')[0]</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ═══════════════════════════════════════════ PET COLLECTION TAB -->
+        <div class="tab-pane fade" id="tab-pet-collection" role="tabpanel">
+            <div class="text-muted small mb-3">Full pet catalog — @Model.CollectedPetsCount / @Model.TotalPetsInCatalog collected.</div>
             @foreach (var group in Model.PetsGrid)
             {
                 int ownedCount = group.Slots.Count(s => s.IsOwned);
                 string eggImgPath = $"/images/habitica/stable/eggs/Pet_Egg_{group.AnimalKey}.png";
-
                 <div class="animal-section mb-3">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <img src="@eggImgPath" width="24" height="24"
-                             style="image-rendering:pixelated;"
-                             onerror="this.style.display='none'" />
+                        <img src="@eggImgPath" width="24" height="24" style="image-rendering:pixelated;" onerror="this.style.display='none'" />
                         <span class="fw-semibold small">@group.DisplayName</span>
                         <span class="badge @BadgeColor(group.Category)" style="font-size:.6rem;">@CategoryLabel(group.Category)</span>
                         <span class="text-muted" style="font-size:.65rem;">@ownedCount / @group.Slots.Count</span>
@@ -150,26 +316,17 @@
                                                slot.IsOwned   ? "slot-owned"    : "slot-unowned";
                             string activeClass = slot.IsActivePet ? "slot-active-pet" : "";
                             int progressPct = slot.FeedingPoints * 2;
-
                             <div class="pet-slot @slotClass @activeClass"
                                  data-petkey="@slot.PetKey"
-                                 title="@slot.ColorDisplayName@(slot.IsOwned ? $" ({slot.FeedingPoints}/50)" : "")"
-                                 @(slot.IsOwned && !slot.IsMount ? $"onclick=\"openPetPanel('{slot.PetKey}')\"" : "")>
+                                 title="@slot.ColorDisplayName@(slot.IsOwned && !slot.IsMount ? $" ({slot.FeedingPoints}/50)" : "")">
                                 <img src="@slot.PetImagePath" width="48" height="48"
-                                     style="image-rendering:pixelated;"
-                                     onerror="this.style.opacity='.1'" />
+                                     style="image-rendering:pixelated;" onerror="this.style.opacity='.1'" />
                                 @if (slot.IsOwned && !slot.IsMount)
                                 {
                                     <div class="slot-progress"><div style="width:@progressPct%"></div></div>
                                 }
-                                @if (slot.IsActivePet)
-                                {
-                                    <div class="slot-badge">★</div>
-                                }
-                                @if (slot.IsMount)
-                                {
-                                    <div class="slot-badge mount-badge" title="Evolved to mount">🐴</div>
-                                }
+                                @if (slot.IsActivePet) { <div class="slot-badge">★</div> }
+                                @if (slot.IsMount) { <div class="slot-badge mount-badge" title="Evolved to mount">🐴</div> }
                             </div>
                         }
                     </div>
@@ -177,12 +334,12 @@
             }
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════════ MOUNTS TAB -->
-        <div class="tab-pane fade" id="tab-mounts" role="tabpanel">
+        <!-- ═══════════════════════════════════════════ MOUNT COLLECTION TAB -->
+        <div class="tab-pane fade" id="tab-mount-collection" role="tabpanel">
+            <div class="text-muted small mb-3">Full mount catalog — @Model.OwnedMounts.Count / @Model.TotalMountsInCatalog collected.</div>
             @foreach (var group in Model.MountsGrid)
             {
                 int ownedCount = group.Slots.Count(s => s.IsOwned);
-
                 <div class="animal-section mb-3">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <span class="fw-semibold small">@group.DisplayName</span>
@@ -194,50 +351,32 @@
                             string slotClass = slot.IsOwned ? "slot-owned" : "slot-unowned";
                             string activeClass = slot.IsActiveMount ? "slot-active-mount" : "";
                             string imgSrc = slot.MountIconPath ?? slot.PetImagePath;
-
                             <div class="pet-slot @slotClass @activeClass"
                                  data-mountkey="@slot.PetKey"
-                                 title="@slot.ColorDisplayName"
-                                 @(slot.IsOwned ? $"onclick=\"setActiveMount('{slot.PetKey}', this)\"" : "")>
+                                 title="@slot.ColorDisplayName">
                                 <img src="@imgSrc" width="48" height="48"
                                      style="image-rendering:pixelated;"
                                      onerror="this.src='@slot.PetImagePath';this.onerror=null;" />
-                                @if (slot.IsActiveMount)
-                                {
-                                    <div class="slot-badge">★</div>
-                                }
+                                @if (slot.IsActiveMount) { <div class="slot-badge">★</div> }
                             </div>
                         }
                     </div>
                 </div>
             }
-            @if (!Model.OwnedMounts.Any())
-            {
-                <div class="text-muted text-center py-4">
-                    <div style="font-size:2rem;">🐴</div>
-                    <p class="mt-2 small">No mounts yet. Feed a pet to 50 pts to evolve it!</p>
-                </div>
-            }
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════════ HATCH TAB -->
+        <!-- ═══════════════════════════════════════════ HATCH TAB -->
         <div class="tab-pane fade" id="tab-hatch" role="tabpanel">
             @if (!Model.EggsInInventory.Any() || !Model.PotionsInInventory.Any())
             {
                 <div class="text-muted text-center py-5">
                     <div style="font-size:3rem;">🧪</div>
                     @if (!Model.EggsInInventory.Any() && !Model.PotionsInInventory.Any())
-                    {
-                        <p>No eggs or potions in inventory. Complete tasks to earn drops!</p>
-                    }
+                    { <p>No eggs or potions in inventory. Complete tasks to earn drops!</p> }
                     else if (!Model.EggsInInventory.Any())
-                    {
-                        <p>No eggs in inventory.</p>
-                    }
+                    { <p>No eggs in inventory.</p> }
                     else
-                    {
-                        <p>No potions in inventory.</p>
-                    }
+                    { <p>No potions in inventory.</p> }
                 </div>
             }
             else
@@ -246,7 +385,6 @@
                     <div class="col-md-9 col-lg-7">
                         <div class="card p-4">
                             <h5 class="mb-3">🥚 Hatch a Pet</h5>
-
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold">Select Egg</label>
                                 <div class="d-flex flex-wrap gap-2" id="egg-grid">
@@ -260,19 +398,15 @@
                                                 data-isquest="@(isQuest ? "true" : "false")"
                                                 onclick="selectEgg(this)"
                                                 title="@inv.GameItem?.Name ×@inv.Quantity@(isQuest ? " (quest)" : "")">
-                                            <img src="@inv.GameItem?.ImagePath" width="40" height="40"
-                                                 style="image-rendering:pixelated;" /><br/>
+                                            <img src="@inv.GameItem?.ImagePath" width="40" height="40" style="image-rendering:pixelated;" /><br/>
                                             <span style="font-size:.65rem;">×@inv.Quantity</span>
                                         </button>
                                     }
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold">Select Potion
-                                    <span id="potion-hint" class="text-warning ms-2" style="font-size:.7rem;display:none;">
-                                        Quest eggs use standard potions only
-                                    </span>
+                                    <span id="potion-hint" class="text-warning ms-2" style="font-size:.7rem;display:none;">Quest eggs use standard potions only</span>
                                 </label>
                                 <div class="d-flex flex-wrap gap-2" id="potion-grid">
                                     @foreach (var inv in Model.PotionsInInventory)
@@ -286,18 +420,15 @@
                                                 onclick="selectPotion(this)"
                                                 title="@inv.GameItem?.Name ×@inv.Quantity">
                                             <img src="@inv.GameItem?.ImagePath" width="40" height="40"
-                                                 style="image-rendering:pixelated;"
-                                                 onerror="this.style.opacity='.3'" /><br/>
+                                                 style="image-rendering:pixelated;" onerror="this.style.opacity='.3'" /><br/>
                                             <span style="font-size:.65rem;">×@inv.Quantity</span>
                                         </button>
                                     }
                                 </div>
                             </div>
-
                             <div class="text-center mb-3" id="hatch-preview" style="min-height:80px;">
                                 <span class="text-muted small">Select egg + potion to preview</span>
                             </div>
-
                             <button id="hatch-btn" class="btn btn-primary w-100" disabled onclick="doHatch()">
                                 🥚 Hatch!
                             </button>
@@ -318,212 +449,122 @@
     const questEggIds   = @Html.Raw(questEggIds);
     const dropPotionIds = @Html.Raw(dropPotionIds);
     const petDataMap    = @Html.Raw(petDataMap);
-    const foodItems     = @Html.Raw(foodItems);
 
-    let selectedEggId      = null;
-    let selectedPotionId   = null;
-    let selectedEggAnimal  = null;
+    let selectedEggId       = null;
+    let selectedPotionId    = null;
+    let selectedEggAnimal   = null;
     let selectedPotionColor = null;
-    let currentPanelPetKey = null;
+    let selectedFoodId      = null;
+    let selectedFoodColor   = null;
 
-    // ── Hatch tab ──────────────────────────────────────────────────────────
+    // ── Food selection ────────────────────────────────────────────────────
 
-    function selectEgg(btn) {
-        document.querySelectorAll('.hatch-egg-btn').forEach(b => {
-            b.classList.remove('btn-primary', 'active');
+    function selectFood(btn) {
+        var foodId = parseInt(btn.dataset.foodId);
+        if (selectedFoodId === foodId) { cancelFeed(); return; }
+        document.querySelectorAll('.food-select-btn').forEach(b => {
+            b.classList.remove('active', 'btn-warning');
             b.classList.add('btn-outline-secondary');
         });
         btn.classList.remove('btn-outline-secondary');
-        btn.classList.add('btn-primary', 'active');
-        selectedEggId    = parseInt(btn.dataset.id);
-        selectedEggAnimal = btn.dataset.animal;
-
-        // Gate non-drop potions when quest egg selected
-        const isQuest = btn.dataset.isquest === 'true';
-        document.getElementById('potion-hint').style.display = isQuest ? 'inline' : 'none';
-        document.querySelectorAll('.hatch-potion-btn').forEach(b => {
-            const isAllowed = !isQuest || b.dataset.isdrop === 'true';
-            b.disabled = !isAllowed;
-            b.classList.toggle('opacity-50', !isAllowed);
-            // Deselect if now disabled
-            if (!isAllowed && b.classList.contains('active')) {
-                b.classList.remove('btn-primary', 'active');
-                b.classList.add('btn-outline-secondary');
-                selectedPotionId    = null;
-                selectedPotionColor = null;
-            }
-        });
-
-        updateHatchPreview();
+        btn.classList.add('active', 'btn-warning');
+        selectedFoodId    = foodId;
+        selectedFoodColor = btn.dataset.foodColor;
+        document.getElementById('cancel-feed-btn').style.display = '';
+        document.getElementById('feed-hint').style.display = '';
+        document.getElementById('tab-my-pets').classList.add('feed-targeting');
     }
 
-    function selectPotion(btn) {
-        if (btn.disabled) return;
-        document.querySelectorAll('.hatch-potion-btn').forEach(b => {
-            b.classList.remove('btn-primary', 'active');
+    function cancelFeed() {
+        selectedFoodId = null; selectedFoodColor = null;
+        document.querySelectorAll('.food-select-btn').forEach(b => {
+            b.classList.remove('active', 'btn-warning');
             b.classList.add('btn-outline-secondary');
         });
-        btn.classList.remove('btn-outline-secondary');
-        btn.classList.add('btn-primary', 'active');
-        selectedPotionId    = parseInt(btn.dataset.id);
-        selectedPotionColor = btn.dataset.color;
-        updateHatchPreview();
+        document.getElementById('cancel-feed-btn').style.display = 'none';
+        document.getElementById('feed-hint').style.display = 'none';
+        document.getElementById('tab-my-pets').classList.remove('feed-targeting');
     }
 
-    function updateHatchPreview() {
-        const preview  = document.getElementById('hatch-preview');
-        const hatchBtn = document.getElementById('hatch-btn');
-        if (!selectedEggAnimal || !selectedPotionColor) {
-            preview.innerHTML = '<span class="text-muted small">Select egg + potion to preview</span>';
-            hatchBtn.disabled = true;
-            return;
-        }
-        const petKey  = `${selectedEggAnimal}-${selectedPotionColor}`;
-        const imgPath = `/images/habitica/stable/pets/Pet-${petKey}.png`;
-        const alreadyOwned = ownedPetKeys.includes(petKey);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectedFoodId !== null) cancelFeed(); });
 
-        preview.innerHTML = `
-            <img src="${imgPath}" width="64" height="64" style="image-rendering:pixelated;"
-                 onerror="this.style.opacity='.2'" />
-            <div class="small mt-1">${selectedEggAnimal} (${selectedPotionColor})</div>
-            ${alreadyOwned ? '<div class="badge bg-secondary mt-1">Already hatched</div>' : ''}
-        `;
-        hatchBtn.disabled = alreadyOwned;
-    }
+    // ── My Pets click delegation ──────────────────────────────────────────
 
-    async function doHatch() {
-        if (!selectedEggId || !selectedPotionId) return;
-        const btn = document.getElementById('hatch-btn');
-        btn.disabled = true;
-        btn.textContent = 'Hatching…';
-
-        const r = await fetch('/Stable/Hatch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `eggGameItemId=${selectedEggId}&potionGameItemId=${selectedPotionId}&__RequestVerificationToken=${encodeURIComponent(csrf())}`
-        });
-        const d = await r.json();
-        if (d.success) {
-            const imgHtml = `<img src="${d.petImagePath}" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode('🥚'))">`;
-            showToast(imgHtml, 'Pet Hatched!', `${d.petName} is now yours!`, 'toast-drop', 5000);
-            setTimeout(() => location.reload(), 1500);
+    document.getElementById('tab-my-pets').addEventListener('click', function(e) {
+        var card = e.target.closest('.owned-pet-card');
+        if (!card) return;
+        var petKey = card.dataset.petkey;
+        if (!petKey) return;
+        if (selectedFoodId !== null) {
+            doFeed(petKey, selectedFoodId);
         } else {
-            showToast('❌', 'Hatch Failed', d.error || 'Unknown error', 'toast-hp', 3000);
-            btn.disabled = false;
-            btn.textContent = '🥚 Hatch!';
+            var data = petDataMap[petKey];
+            setActivePet((data && data.isActive) ? '' : petKey);
         }
-    }
+    });
 
-    // ── Pet offcanvas panel ────────────────────────────────────────────────
+    // ── My Mounts click delegation ────────────────────────────────────────
 
-    function openPetPanel(petKey) {
-        currentPanelPetKey = petKey;
-        const data = petDataMap[petKey];
-        if (!data) return;
+    document.getElementById('tab-my-mounts').addEventListener('click', function(e) {
+        var card = e.target.closest('.owned-mount-card');
+        if (!card) return;
+        var mountKey = card.dataset.mountkey;
+        if (!mountKey) return;
+        setActiveMount(card.classList.contains('is-active') ? '' : mountKey);
+    });
 
-        document.getElementById('petOffcanvasLabel').textContent = petKey;
-        document.getElementById('oc-pet-img').src = `/images/habitica/stable/pets/Pet-${petKey}.png`;
-        document.getElementById('oc-pet-name').textContent = petKey.split('-')[0];
-        document.getElementById('oc-pet-color').textContent = petKey.split('-').slice(1).join(' ');
+    // ── Feed ──────────────────────────────────────────────────────────────
 
-        const pts = data.feedingPoints;
-        document.getElementById('oc-progress-bar').style.width = `${pts * 2}%`;
-        document.getElementById('oc-progress-label').textContent = `${pts}/50`;
-
-        // Populate food select
-        const sel = document.getElementById('oc-food-sel');
-        sel.innerHTML = '';
-        if (foodItems.length === 0) {
-            sel.innerHTML = '<option disabled>No food</option>';
-        } else {
-            foodItems.forEach(f => {
-                const preferred = f.target === data.colorName;
-                const opt = document.createElement('option');
-                opt.value = f.id;
-                opt.textContent = `${f.icon} ${f.name} ×${f.qty}${preferred ? ' ★' : ''}`;
-                sel.appendChild(opt);
-            });
-        }
-
-        const activeBtn = document.getElementById('oc-active-btn');
-        if (data.isActive) {
-            activeBtn.textContent = '★ Unequip';
-            activeBtn.className = 'btn btn-outline-secondary btn-sm';
-        } else {
-            activeBtn.textContent = '☆ Make Active';
-            activeBtn.className = 'btn btn-outline-success btn-sm';
-        }
-
-        const oc = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('petOffcanvas'));
-        oc.show();
-    }
-
-    function feedFromPanel() {
-        if (!currentPanelPetKey) return;
-        const foodId = parseInt(document.getElementById('oc-food-sel').value);
-        if (isNaN(foodId)) return;
-
+    function doFeed(petKey, foodId) {
         fetch('/Stable/Feed', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `petKey=${encodeURIComponent(currentPanelPetKey)}&foodGameItemId=${foodId}&__RequestVerificationToken=${encodeURIComponent(csrf())}`
+            body: 'petKey=' + encodeURIComponent(petKey) + '&foodGameItemId=' + foodId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
         })
-        .then(r => r.json())
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(d => {
-            if (!d.success) {
-                showToast('❌', 'Feed Failed', d.error || 'Unknown error', 'toast-hp', 3000);
-                return;
-            }
+            if (!d.success) { showToast('❌', 'Feed Failed', d.error || 'Unknown error', 'toast-hp', 3000); return; }
             if (d.evolved) {
-                const imgHtml = d.mountIconPath
-                    ? `<img src="${d.mountIconPath}" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode('🐴'))">`
+                var imgHtml = d.mountIconPath
+                    ? '<img src="' + d.mountIconPath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🐴\'))">'
                     : '🐴';
-                showToast(imgHtml, 'Mount Raised!', `${currentPanelPetKey} evolved!`, 'toast-level', 5000);
+                showToast(imgHtml, 'Mount Raised!', petKey + ' evolved!', 'toast-level', 5000);
                 setTimeout(() => location.reload(), 1800);
             } else {
-                showToast('🍖', 'Fed!', `${currentPanelPetKey}: ${d.newFeedingPoints}/50 pts`, 'toast-xp', 2500);
+                showToast('🍖', 'Fed!', petKey + ': ' + d.newFeedingPoints + '/50 pts', 'toast-xp', 2500);
 
-                // Update progress bar in offcanvas
-                document.getElementById('oc-progress-bar').style.width = `${d.newFeedingPoints * 2}%`;
-                document.getElementById('oc-progress-label').textContent = `${d.newFeedingPoints}/50`;
-
-                // Update progress bar on the grid slot
-                const slot = document.querySelector(`.pet-slot[data-petkey="${currentPanelPetKey}"] .slot-progress > div`);
-                if (slot) slot.style.width = `${d.newFeedingPoints * 2}%`;
-
-                // Update petDataMap in memory
-                if (petDataMap[currentPanelPetKey]) petDataMap[currentPanelPetKey].feedingPoints = d.newFeedingPoints;
-
-                // Update food quantities
-                updateFoodQty(d.foodGameItemId, d.newFoodQuantity);
+                // Update card progress bar and label
+                var card = document.querySelector('.owned-pet-card[data-petkey="' + petKey + '"]');
+                if (card) {
+                    var bar = card.querySelector('.card-progress > div');
+                    if (bar) bar.style.width = (d.newFeedingPoints * 2) + '%';
+                    var lbl = card.querySelector('.card-label');
+                    if (lbl) lbl.textContent = d.newFeedingPoints + '/50';
+                    card.title = card.title.replace(/\d+\/50/, d.newFeedingPoints + '/50');
+                }
+                // Update petDataMap
+                if (petDataMap[petKey]) petDataMap[petKey].feedingPoints = d.newFeedingPoints;
+                updateFoodQtyBar(foodId, d.newFoodQuantity);
             }
-        });
+        })
+        .catch(function(err) { showToast('❌', 'Feed Error', err.message || 'Unknown error', 'toast-hp', 3000); });
     }
 
-    function updateFoodQty(foodId, newQty) {
-        const idx = foodItems.findIndex(f => f.id === foodId);
-        if (idx < 0) return;
+    function updateFoodQtyBar(foodId, newQty) {
+        var btn = document.querySelector('.food-select-btn[data-food-id="' + foodId + '"]');
+        if (!btn) return;
         if (newQty <= 0) {
-            foodItems.splice(idx, 1);
+            btn.remove();
+            cancelFeed();
+            if (document.querySelectorAll('.food-select-btn').length === 0) {
+                var msg = document.createElement('span');
+                msg.className = 'text-muted small'; msg.id = 'no-food-msg';
+                msg.textContent = 'No food — complete tasks to earn drops';
+                document.getElementById('food-bar-inner').appendChild(msg);
+            }
         } else {
-            foodItems[idx] = { ...foodItems[idx], qty: newQty };
+            btn.querySelector('.food-qty').textContent = newQty;
         }
-        // Refresh offcanvas select if it's showing this food
-        const sel = document.getElementById('oc-food-sel');
-        const opt = sel.querySelector(`option[value="${foodId}"]`);
-        if (!opt) return;
-        if (newQty <= 0) {
-            opt.remove();
-        } else {
-            opt.textContent = opt.textContent.replace(/×\d+/, `×${newQty}`);
-        }
-    }
-
-    function toggleActivePetFromPanel() {
-        if (!currentPanelPetKey) return;
-        const data = petDataMap[currentPanelPetKey];
-        const newKey = data?.isActive ? '' : currentPanelPetKey;
-        setActivePet(newKey);
     }
 
     // ── Active pet / mount ────────────────────────────────────────────────
@@ -532,38 +573,93 @@
         fetch('/Stable/SetActivePet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `petKey=${encodeURIComponent(petKey)}&__RequestVerificationToken=${encodeURIComponent(csrf())}`
+            body: 'petKey=' + encodeURIComponent(petKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
         })
         .then(r => r.json())
         .then(d => {
             if (d.success) {
-                const label = petKey ? `${petKey} is your companion!` : 'Pet unequipped.';
-                showToast('🐾', 'Active Pet', label, 'toast-xp', 2500);
+                showToast('🐾', 'Active Pet', petKey ? (petKey + ' is your companion!') : 'Pet unequipped.', 'toast-xp', 2500);
                 setTimeout(() => location.reload(), 800);
-            } else {
-                showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000);
-            }
+            } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
         });
     }
 
-    function setActiveMount(mountKey, slotEl) {
-        // If clicking active mount, dismount
-        const isActive = slotEl && slotEl.classList.contains('slot-active-mount');
-        const newKey = isActive ? '' : mountKey;
-
+    function setActiveMount(mountKey) {
         fetch('/Stable/SetActiveMount', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `mountKey=${encodeURIComponent(newKey)}&__RequestVerificationToken=${encodeURIComponent(csrf())}`
+            body: 'mountKey=' + encodeURIComponent(mountKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
         })
         .then(r => r.json())
         .then(d => {
             if (d.success) {
-                const label = newKey ? `Now riding ${newKey}!` : 'Dismounted.';
-                showToast('🐴', 'Mount', label, 'toast-xp', 2500);
+                showToast('🐴', 'Mount', mountKey ? ('Now riding ' + mountKey + '!') : 'Dismounted.', 'toast-xp', 2500);
                 setTimeout(() => location.reload(), 800);
+            } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
+        });
+    }
+
+    // ── Hatch tab ─────────────────────────────────────────────────────────
+
+    function selectEgg(btn) {
+        document.querySelectorAll('.hatch-egg-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
+        btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
+        selectedEggId = parseInt(btn.dataset.id); selectedEggAnimal = btn.dataset.animal;
+        var isQuest = btn.dataset.isquest === 'true';
+        document.getElementById('potion-hint').style.display = isQuest ? 'inline' : 'none';
+        document.querySelectorAll('.hatch-potion-btn').forEach(b => {
+            var ok = !isQuest || b.dataset.isdrop === 'true';
+            b.disabled = !ok; b.classList.toggle('opacity-50', !ok);
+            if (!ok && b.classList.contains('active')) {
+                b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary');
+                selectedPotionId = null; selectedPotionColor = null;
+            }
+        });
+        updateHatchPreview();
+    }
+
+    function selectPotion(btn) {
+        if (btn.disabled) return;
+        document.querySelectorAll('.hatch-potion-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
+        btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
+        selectedPotionId = parseInt(btn.dataset.id); selectedPotionColor = btn.dataset.color;
+        updateHatchPreview();
+    }
+
+    function updateHatchPreview() {
+        var preview = document.getElementById('hatch-preview');
+        var hatchBtn = document.getElementById('hatch-btn');
+        if (!selectedEggAnimal || !selectedPotionColor) {
+            preview.innerHTML = '<span class="text-muted small">Select egg + potion to preview</span>';
+            hatchBtn.disabled = true; return;
+        }
+        var petKey = selectedEggAnimal + '-' + selectedPotionColor;
+        var alreadyOwned = ownedPetKeys.includes(petKey);
+        preview.innerHTML =
+            '<img src="/images/habitica/stable/pets/Pet-' + petKey + '.png" width="64" height="64" style="image-rendering:pixelated;" onerror="this.style.opacity=\'.2\'" />' +
+            '<div class="small mt-1">' + selectedEggAnimal + ' (' + selectedPotionColor + ')</div>' +
+            (alreadyOwned ? '<div class="badge bg-secondary mt-1">Already hatched</div>' : '');
+        hatchBtn.disabled = alreadyOwned;
+    }
+
+    function doHatch() {
+        if (!selectedEggId || !selectedPotionId) return;
+        var btn = document.getElementById('hatch-btn');
+        btn.disabled = true; btn.textContent = 'Hatching…';
+        fetch('/Stable/Hatch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'eggGameItemId=' + selectedEggId + '&potionGameItemId=' + selectedPotionId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                var imgHtml = '<img src="' + d.petImagePath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🥚\'))">';
+                showToast(imgHtml, 'Pet Hatched!', d.petName + ' is now yours!', 'toast-drop', 5000);
+                setTimeout(() => location.reload(), 1500);
             } else {
-                showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000);
+                showToast('❌', 'Hatch Failed', d.error || 'Unknown error', 'toast-hp', 3000);
+                btn.disabled = false; btn.textContent = '🥚 Hatch!';
             }
         });
     }

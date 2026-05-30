@@ -16,5 +16,8 @@ namespace HabitTracker.Models.ViewModels
 
         public int TotalPetsInCatalog    { get; set; }
         public int TotalMountsInCatalog  { get; set; }
+
+        // Pets collected = pets still in pet form + pets that evolved to mounts
+        public int CollectedPetsCount => OwnedPets.Count + OwnedMounts.Count;
     }
 }

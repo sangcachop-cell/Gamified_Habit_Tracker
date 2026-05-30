@@ -9,6 +9,7 @@ namespace HabitTracker.Models.ViewModels
         public int  HairBangsCount     { get; set; } = 4;
         public int  HairBeardCount     { get; set; } = 3;
         public int  HairMustacheCount  { get; set; } = 2;
-        public List<string> ShirtStyles { get; set; } = new();
+        public List<string> ShirtStyles  { get; set; } = new();
+        public List<string> Backgrounds  { get; set; } = new();
     }
 }

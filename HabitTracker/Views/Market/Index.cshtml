@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <!-- Tabs: Gear / Gem Shop / Armoire / Quest Shop -->
+    <!-- Tabs: Gear / Gem Shop / Armoire / Inn / Quest Shop -->
     <ul class="nav nav-tabs mb-4" id="marketTab" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-gear" type="button">⚔️ Gear</button>
@@ -51,6 +51,9 @@
         </li>
         <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-armoire" type="button">🎁 Armoire</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inn" type="button">🏨 Inn</button>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/QuestShop">📜 Quest Shop</a>
@@ -97,7 +100,7 @@
                                         <img src="@gear.ShopImagePath" alt="@gear.Name"
                                              style="width:48px;height:48px;object-fit:contain;margin:auto;"
                                              onerror="this.style.display='none'">
-                                        <div class="fw-bold small mt-1">@gear.Name</div>
+                                        <div class="fw-bold small mt-1 text-white">@gear.Name</div>
                                         <div class="text-muted" style="font-size:.7rem;">
                                             @if (gear.STR > 0) { <span class="text-danger me-1">STR+@gear.STR</span> }
                                             @if (gear.CON > 0) { <span class="text-success me-1">CON+@gear.CON</span> }
@@ -141,16 +144,17 @@
                         <p class="text-muted">Convert gold into gems. Gems unlock special items, Rebirth, and class changes.</p>
                         <hr class="border-secondary">
                         <div class="mb-3">
-                            <span class="text-warning fs-5">💰 @u.Gold.ToString("F1") GP</span>
+                            <span class="text-warning fs-5" id="gem-shop-gold">💰 @u.Gold.ToString("F1") GP</span>
                             <span class="mx-2 text-muted">→</span>
-                            <span class="text-info fs-5">💎 @u.Gems Gems</span>
+                            <span class="text-info fs-5" id="gem-shop-gems">💎 @u.Gems Gems</span>
                         </div>
                         <div class="card bg-secondary bg-opacity-25 border-info p-3 mb-3">
                             <div class="fw-bold">1 Gem</div>
-                            <div class="text-muted small">Costs 25 GP</div>
-                            <button class="btn btn-info mt-2 @(u.Gold < 25 ? "disabled" : "")"
-                                    onclick="buyGem(this)" @(u.Gold < 25 ? "disabled" : "")>
-                                Buy 1 Gem — 25 GP
+                            <div class="text-muted small">Costs 100 GP</div>
+                            <button class="btn btn-info mt-2 @(u.Gold < 100 ? "disabled" : "")"
+                                    id="buyGemBtn"
+                                    onclick="buyGem(this)" @(u.Gold < 100 ? "disabled" : "")>
+                                Buy 1 Gem — 100 GP
                             </button>
                         </div>
                         <p class="text-muted small">
@@ -215,6 +219,62 @@
             </div>
         </div>
 
+        <!-- ── INN TAB ────────────────────────────────────────────────────── -->
+        @{
+            bool isDead    = u.HP <= 0;
+            bool canPotion = !isDead && u.HP < HabitTracker.Constants.AppConstants.MAX_HP
+                                     && u.Gold >= HabitTracker.Constants.AppConstants.HEALTH_POTION_COST;
+        }
+        <div class="tab-pane fade" id="tab-inn">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card bg-dark border-secondary p-4 text-center">
+                        <div style="font-size:3rem;">🏨</div>
+                        <h4 class="mt-2">The Inn</h4>
+                        <p class="text-muted">Rest and recover between adventures.</p>
+                        <hr class="border-secondary">
+
+                        @if (isDead)
+                        {
+                            <div class="alert alert-danger small mb-3">
+                                💀 You have died — revive from the Economy page before using potions.
+                            </div>
+                        }
+
+                        @if (u.IsSleeping)
+                        {
+                            <div class="alert alert-warning small mb-3">
+                                🌙 Rest mode active — cron will not deal HP damage while you sleep.
+                            </div>
+                        }
+
+                        <div class="card bg-secondary bg-opacity-25 border-secondary p-3 mb-3 text-start">
+                            <div class="fw-bold mb-1">🧪 Health Potion</div>
+                            <div class="text-muted small mb-2">
+                                +@((int)HabitTracker.Constants.AppConstants.HEALTH_POTION_HEAL) HP · Costs @((int)HabitTracker.Constants.AppConstants.HEALTH_POTION_COST) GP
+                                <span class="ms-2 text-warning">HP: @Math.Round(u.HP, 1) / @((int)HabitTracker.Constants.AppConstants.MAX_HP)</span>
+                            </div>
+                            <button id="inn-btn-potion"
+                                    class="btn btn-sm @(canPotion ? "btn-success" : "btn-secondary") w-100"
+                                    @(canPotion ? "" : "disabled")
+                                    title="@(isDead ? "Revive first" : u.HP >= HabitTracker.Constants.AppConstants.MAX_HP ? "HP is full" : u.Gold < HabitTracker.Constants.AppConstants.HEALTH_POTION_COST ? $"Need {(int)HabitTracker.Constants.AppConstants.HEALTH_POTION_COST} GP" : "")">
+                                🧪 Buy Potion — @((int)HabitTracker.Constants.AppConstants.HEALTH_POTION_COST) GP
+                            </button>
+                        </div>
+
+                        <div class="card bg-secondary bg-opacity-25 border-secondary p-3 text-start">
+                            <div class="fw-bold mb-1">🌙 Rest Mode</div>
+                            <div class="text-muted small mb-2">Pause cron HP damage while you're away.</div>
+                            <button id="inn-btn-sleep"
+                                    class="btn btn-sm @(u.IsSleeping ? "btn-warning" : "btn-outline-secondary") w-100">
+                                @(u.IsSleeping ? "☀️ Wake Up" : "🌙 Enter Rest Mode")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div><!-- tab-content -->
 </div>
 
@@ -269,7 +329,12 @@ function buyGem(btn) {
         if (d.success) {
             showToast('💎', 'Gem purchased!', 'You now have ' + d.newGems + ' gems', 'toast-gold', 3000);
             refreshHud();
-            btn.disabled = false;
+            const goldEl = document.getElementById('gem-shop-gold');
+            const gemsEl = document.getElementById('gem-shop-gems');
+            if (goldEl) goldEl.textContent = '💰 ' + (Math.round(d.newGold * 10) / 10).toFixed(1) + ' GP';
+            if (gemsEl) gemsEl.textContent = '💎 ' + d.newGems + ' Gems';
+            const buyBtn = document.getElementById('buyGemBtn');
+            if (buyBtn) buyBtn.disabled = d.newGold < 100;
         } else {
             showToast('🚫', 'Cannot Buy', d.error, 'toast-hp', 3000);
             btn.disabled = false;
@@ -306,5 +371,42 @@ function pullArmoire(btn) {
         btn.disabled = false;
     });
 }
+
+// ── Inn: Health Potion ────────────────────────────────────────────────────
+document.getElementById('inn-btn-potion')?.addEventListener('click', function() {
+    this.disabled = true;
+    fetch('/Economy/BuyPotion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token())
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            showToast('🧪', 'Potion Used!', '+@((int)HabitTracker.Constants.AppConstants.HEALTH_POTION_HEAL) HP restored', 'toast-xp', 3000);
+            refreshHud();
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            showToast('🚫', 'Cannot Use', d.error, 'toast-hp', 3000);
+            this.disabled = false;
+        }
+    });
+});
+
+// ── Inn: Rest Mode ────────────────────────────────────────────────────────
+document.getElementById('inn-btn-sleep')?.addEventListener('click', function() {
+    fetch('/Economy/ToggleSleep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token())
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            refreshHud();
+            setTimeout(() => location.reload(), 400);
+        }
+    });
+});
 </script>
 }

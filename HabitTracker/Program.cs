@@ -56,6 +56,10 @@ builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<ISpellService, SpellService>();
 builder.Services.AddScoped<IStableService, StableService>();
 builder.Services.AddSingleton<IPetCatalogService, PetCatalogService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IGuildService, GuildService>();
+builder.Services.AddScoped<IPartyService, PartyService>();
+builder.Services.AddScoped<IBossQuestService, BossQuestService>();
 
 // Logging
 builder.Services.AddLogging(config =>

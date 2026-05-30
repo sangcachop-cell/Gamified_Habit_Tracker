@@ -1,5 +1,6 @@
 ﻿// Data/AppDbContext.cs
 using HabitTracker.Constants;
+using HabitTracker.Data.Seeds;
 using HabitTracker.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,29 @@ namespace HabitTracker.Data
 
         // Stable System (Phase 5)
         public DbSet<UserPet> UserPets { get; set; }
+
+        // Social System (Phase 6)
+        public DbSet<Message>     Messages     { get; set; }
+        public DbSet<MessageLike> MessageLikes { get; set; }
+        public DbSet<UserBlock>   UserBlocks   { get; set; }
+        public DbSet<Report>      Reports      { get; set; }
+
+        // Guilds & Parties (Phase 7)
+        public DbSet<Guild>            Guilds            { get; set; }
+        public DbSet<GuildMember>      GuildMembers      { get; set; }
+        public DbSet<GuildMessage>     GuildMessages     { get; set; }
+        public DbSet<GuildMessageLike> GuildMessageLikes { get; set; }
+        public DbSet<GuildInvite>      GuildInvites      { get; set; }
+        public DbSet<Party>            Parties           { get; set; }
+        public DbSet<PartyMember>      PartyMembers      { get; set; }
+        public DbSet<PartyMessage>     PartyMessages     { get; set; }
+        public DbSet<PartyMessageLike> PartyMessageLikes { get; set; }
+        public DbSet<PartyInvite>      PartyInvites      { get; set; }
+
+        // Boss Quests (Phase 8)
+        public DbSet<BossQuest>        BossQuests        { get; set; }
+        public DbSet<PartyQuest>       PartyQuests       { get; set; }
+        public DbSet<PartyQuestMember> PartyQuestMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -163,6 +187,84 @@ namespace HabitTracker.Data
             // Index for pets vs mounts tab query
             modelBuilder.Entity<UserPet>()
                 .HasIndex(p => new { p.UserId, p.IsMount });
+
+            // ===== SOCIAL SYSTEM (Phase 6) =====
+
+            // Message → Sender (Restrict: deleting a user must not cascade-delete messages)
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Message → Receiver (Restrict)
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes for inbox queries
+            modelBuilder.Entity<Message>()
+                .HasIndex(m => new { m.SenderId, m.ReceiverId });
+
+            modelBuilder.Entity<Message>()
+                .HasIndex(m => new { m.ReceiverId, m.IsRead });
+
+            // MessageLike — composite PK
+            modelBuilder.Entity<MessageLike>()
+                .HasKey(l => new { l.MessageId, l.LikerUserId });
+
+            modelBuilder.Entity<MessageLike>()
+                .HasOne(l => l.Message)
+                .WithMany(m => m.Likes)
+                .HasForeignKey(l => l.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MessageLike>()
+                .HasOne(l => l.LikerUser)
+                .WithMany()
+                .HasForeignKey(l => l.LikerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // UserBlock — unique (BlockerId, BlockedId)
+            modelBuilder.Entity<UserBlock>()
+                .HasIndex(b => new { b.BlockerId, b.BlockedId })
+                .IsUnique();
+
+            modelBuilder.Entity<UserBlock>()
+                .HasOne(b => b.Blocker)
+                .WithMany()
+                .HasForeignKey(b => b.BlockerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserBlock>()
+                .HasOne(b => b.Blocked)
+                .WithMany()
+                .HasForeignKey(b => b.BlockedId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Report → Reporter
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.Reporter)
+                .WithMany()
+                .HasForeignKey(r => r.ReporterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Report → ReportedUser
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.ReportedUser)
+                .WithMany()
+                .HasForeignKey(r => r.ReportedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Report → ReportedMessage (nullable, SetNull if message deleted)
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.ReportedMessage)
+                .WithMany()
+                .HasForeignKey(r => r.ReportedMessageId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // ===== GEAR ITEM SEED DATA — Habitica-accurate (85 class + 108 special items) =====
             // Source: habitica-develop/website/common/script/content/gear/sets/
@@ -1074,8 +1176,364 @@ namespace HabitTracker.Data
                 new GameItem { Id = 178, Key = "potion_Fungi",       Name = "Fungi Potion",         Icon = "🍄", Type = ItemType.HatchingPotion, Rarity = ItemRarity.Rare, GoldValue = 0, IsDroppable = false },
                 new GameItem { Id = 179, Key = "potion_Cryptid",     Name = "Cryptid Potion",       Icon = "👾", Type = ItemType.HatchingPotion, Rarity = ItemRarity.Rare, GoldValue = 0, IsDroppable = false },
                 new GameItem { Id = 180, Key = "potion_Alien",       Name = "Alien Potion",         Icon = "👽", Type = ItemType.HatchingPotion, Rarity = ItemRarity.Rare, GoldValue = 0, IsDroppable = false },
-                new GameItem { Id = 181, Key = "potion_Windup",      Name = "Windup Potion",        Icon = "🤖", Type = ItemType.HatchingPotion, Rarity = ItemRarity.Rare, GoldValue = 0, IsDroppable = false }
+                new GameItem { Id = 181, Key = "potion_Windup",      Name = "Windup Potion",        Icon = "🤖", Type = ItemType.HatchingPotion, Rarity = ItemRarity.Rare, GoldValue = 0, IsDroppable = false },
+
+                // ── QUEST SCROLLS (Phase 8, IDs 182-296) ── IsDroppable = false
+                // Pet quests (182-241)
+                new GameItem { Id=182, Key="quest_alligator",        Name="The Insta-Gator",                Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=183, Key="quest_alpaca",           Name="The Overpacked Alpaca",          Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=184, Key="quest_armadillo",        Name="The Indulgent Armadillo",        Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=185, Key="quest_axolotl",          Name="The Magical Axolotl",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=186, Key="quest_badger",           Name="Stop Badgering Me!",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=187, Key="quest_beetle",           Name="The CRITICAL BUG",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=188, Key="quest_bunny",            Name="The Killer Bunny",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=189, Key="quest_butterfly",        Name="Bye, Bye, Butterfry",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=190, Key="quest_cat",              Name="A Purrplexing Predicament",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=191, Key="quest_chameleon",        Name="The Chaotic Chameleon",          Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=192, Key="quest_cheetah",          Name="Such a Cheetah",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=193, Key="quest_cow",              Name="The Mootant Cow",                Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=194, Key="quest_crab",             Name="The Fiddling Crab",              Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=195, Key="quest_dilatory_derby",   Name="The Dilatory Derby",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=196, Key="quest_dog",              Name="Triple Dog Dare!",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=197, Key="quest_dolphin",          Name="The Dolphin of Doubt",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=198, Key="quest_falcon",           Name="The Birds of Preycrastination",  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=199, Key="quest_ferret",           Name="The Nefarious Ferret",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=200, Key="quest_frog",             Name="Swamp of the Clutter Frog",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=201, Key="quest_ghost_stag",       Name="The Spirit of Spring",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=202, Key="quest_giraffe",          Name="The Gear-affe",                  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=203, Key="quest_gryphon",          Name="The Fiery Gryphon",              Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=204, Key="quest_guineapig",        Name="The Guinea Pig Gang",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=205, Key="quest_harpy",            Name="Help! Harpy!",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=206, Key="quest_hedgehog",         Name="The Hedgebeast",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=207, Key="quest_hippo",            Name="What a Hippo-Crite",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=208, Key="quest_horse",            Name="Ride the Night-Mare",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=209, Key="quest_kangaroo",         Name="Kangaroo Catastrophe",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=210, Key="quest_kraken",           Name="The Kraken of Inkomplete",       Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=211, Key="quest_monkey",           Name="Monstrous Mandrill",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=212, Key="quest_nudibranch",       Name="Infestation of the NowDo Nudibranchs",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4, IsDroppable=false },
+                new GameItem { Id=213, Key="quest_octopus",          Name="The Call of Octothulu",          Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=214, Key="quest_otter",            Name="The Perfidious Plotter!",        Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=215, Key="quest_owl",              Name="The Night-Owl",                  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=216, Key="quest_peacock",          Name="The Push-and-Pull Peacock",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=217, Key="quest_penguin",          Name="The Fowl Frost",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=218, Key="quest_platypus",         Name="The Perfectionist Platypus",     Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=219, Key="quest_pterodactyl",      Name="The Pterror-dactyl",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=220, Key="quest_raccoon",          Name="Raccoon Tycoon",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=221, Key="quest_rat",              Name="The Rat King",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=222, Key="quest_rock",             Name="Escape the Cave Creature",       Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=223, Key="quest_rooster",          Name="Rooster Rampage",                Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=224, Key="quest_sabretooth",       Name="The Sabre Cat",                  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=225, Key="quest_seaserpent",       Name="Sea Serpent Strike!",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=226, Key="quest_sheep",            Name="The Thunder Ram",                Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=227, Key="quest_slime",            Name="The Jelly Regent",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=228, Key="quest_sloth",            Name="The Somnolent Sloth",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=229, Key="quest_snail",            Name="The Snail of Drudgery Sludge",   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=230, Key="quest_snake",            Name="The Serpent of Distraction",     Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=231, Key="quest_spider",           Name="The Icy Arachnid",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=232, Key="quest_squirrel",         Name="The Sneaky Squirrel",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=233, Key="quest_treeling",         Name="The Tangle Tree",                Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=234, Key="quest_trex",             Name="King of the Dinosaurs",          Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=235, Key="quest_trex_undead",      Name="The Dinosaur Unearthed",         Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=236, Key="quest_triceratops",      Name="The Trampling Triceratops",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=237, Key="quest_turtle",           Name="Guide the Turtle",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=238, Key="quest_unicorn",          Name="Convincing the Unicorn Queen",   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=239, Key="quest_velociraptor",     Name="The Veloci-Rapper",              Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=240, Key="quest_whale",            Name="Wail of the Whale",              Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=241, Key="quest_yarn",             Name="A Tangled Yarn",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                // Potion boss (242-247)
+                new GameItem { Id=242, Key="quest_amber",            Name="The Amber Alliance",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=243, Key="quest_blackPearl",       Name="A Startling Starry Idea",        Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=244, Key="quest_bronze",           Name="Brazen Beetle Battle",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=245, Key="quest_fluorite",         Name="A Bright Fluorite Fright",       Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=246, Key="quest_jade",             Name="A Jaded Jinx",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=247, Key="quest_pinkMarble",       Name="Calm the Corrupted Cupid",       Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                // Potion collection (248-253)
+                new GameItem { Id=248, Key="quest_onyx",             Name="The Onyx Odyssey",               Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=249, Key="quest_ruby",             Name="Ruby Rapport",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=250, Key="quest_silver",           Name="The Silver Solution",            Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=251, Key="quest_stone",            Name="A Maze of Moss",                 Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=252, Key="quest_turquoise",        Name="Turquoise Treasure Toil",        Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=253, Key="quest_opal",             Name="The Legend of the Obscure Opals",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                // Seasonal (254-260)
+                new GameItem { Id=254, Key="quest_evilsanta",        Name="Trapper Santa",                  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=255, Key="quest_evilsanta2",       Name="Find the Cub",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=256, Key="quest_egg",              Name="Egg Hunt",                       Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=1,   IsDroppable=false },
+                new GameItem { Id=257, Key="quest_waffle",           Name="Waffling with the Fool",         Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=258, Key="quest_virtualpet",       Name="Virtual Mayhem with the April Fool",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4, IsDroppable=false },
+                new GameItem { Id=259, Key="quest_fungi",            Name="The Moody Mushroom",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=260, Key="quest_alien",            Name="Invasion of the Motivation Snatchers",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4, IsDroppable=false },
+                // Series (261-275)
+                new GameItem { Id=261, Key="quest_atom1",            Name="Attack of the Mundane, Part 1",  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=262, Key="quest_atom2",            Name="Attack of the Mundane, Part 2",  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=263, Key="quest_atom3",            Name="Attack of the Mundane, Part 3",  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=264, Key="quest_goldenknight1",    Name="The Golden Knight, Part 1",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=265, Key="quest_goldenknight2",    Name="The Golden Knight, Part 2",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=266, Key="quest_goldenknight3",    Name="The Golden Knight, Part 3",      Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=267, Key="quest_moon1",            Name="Lunar Battle, Part 1",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=268, Key="quest_moon2",            Name="Lunar Battle, Part 2",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=269, Key="quest_moon3",            Name="Lunar Battle, Part 3",           Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=270, Key="quest_moonstone1",       Name="Recidivate, Part 1",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=271, Key="quest_moonstone2",       Name="Recidivate, Part 2",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=272, Key="quest_moonstone3",       Name="Recidivate, Part 3",             Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=273, Key="quest_vice1",            Name="Vice, Part 1",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=274, Key="quest_vice2",            Name="Vice, Part 2",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                new GameItem { Id=275, Key="quest_vice3",            Name="Vice, Part 3",                   Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common, GoldValue=4,   IsDroppable=false },
+                // Masterclasser (276-291)
+                new GameItem { Id=276, Key="quest_dilatoryDistress1",  Name="Dilatory Distress, Part 1",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=200,  IsDroppable=false },
+                new GameItem { Id=277, Key="quest_dilatoryDistress2",  Name="Dilatory Distress, Part 2",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=300,  IsDroppable=false },
+                new GameItem { Id=278, Key="quest_dilatoryDistress3",  Name="Dilatory Distress, Part 3",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=400,  IsDroppable=false },
+                new GameItem { Id=279, Key="quest_mayhemMistiflying1", Name="Mayhem in Mistiflying, Part 1",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=200,  IsDroppable=false },
+                new GameItem { Id=280, Key="quest_mayhemMistiflying2", Name="Mayhem in Mistiflying, Part 2",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=300,  IsDroppable=false },
+                new GameItem { Id=281, Key="quest_mayhemMistiflying3", Name="Mayhem in Mistiflying, Part 3",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=400,  IsDroppable=false },
+                new GameItem { Id=282, Key="quest_stoikalmCalamity1",  Name="Stoïkalm Calamity, Part 1",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=200,  IsDroppable=false },
+                new GameItem { Id=283, Key="quest_stoikalmCalamity2",  Name="Stoïkalm Calamity, Part 2",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=300,  IsDroppable=false },
+                new GameItem { Id=284, Key="quest_stoikalmCalamity3",  Name="Stoïkalm Calamity, Part 3",    Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=400,  IsDroppable=false },
+                new GameItem { Id=285, Key="quest_taskwoodsTerror1",   Name="Terror in the Taskwoods, Part 1",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=200,IsDroppable=false },
+                new GameItem { Id=286, Key="quest_taskwoodsTerror2",   Name="Terror in the Taskwoods, Part 2",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=300,IsDroppable=false },
+                new GameItem { Id=287, Key="quest_taskwoodsTerror3",   Name="Terror in the Taskwoods, Part 3",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=400,IsDroppable=false },
+                new GameItem { Id=288, Key="quest_lostMasterclasser1", Name="Mystery of the Masterclassers, Part 1",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=400, IsDroppable=false },
+                new GameItem { Id=289, Key="quest_lostMasterclasser2", Name="Mystery of the Masterclassers, Part 2",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=500, IsDroppable=false },
+                new GameItem { Id=290, Key="quest_lostMasterclasser3", Name="Mystery of the Masterclassers, Part 3",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=600, IsDroppable=false },
+                new GameItem { Id=291, Key="quest_lostMasterclasser4", Name="Mystery of the Masterclassers, Part 4",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Rare, GoldValue=700, IsDroppable=false },
+                // Time travel (292-294) — not purchasable
+                new GameItem { Id=292, Key="quest_robot",            Name="Mysterious Mechanical Marvels!", Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.VeryRare, GoldValue=0,IsDroppable=false },
+                new GameItem { Id=293, Key="quest_solarSystem",      Name="A Voyage of Cosmic Concentration",Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.VeryRare, GoldValue=0,IsDroppable=false },
+                new GameItem { Id=294, Key="quest_windup",           Name="A Whirl with a Wind-Up Warrior",  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.VeryRare, GoldValue=0,IsDroppable=false },
+                // Generic (295-296)
+                new GameItem { Id=295, Key="quest_basilist",         Name="The Basi-List",                  Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Uncommon, GoldValue=100, IsDroppable=false },
+                new GameItem { Id=296, Key="quest_dustbunnies",      Name="The Feral Dust Bunnies",         Icon="📜", Type=ItemType.QuestScroll, Rarity=ItemRarity.Common,   GoldValue=1,   IsDroppable=false }
             );
+
+            // ===== GUILDS & PARTIES (Phase 7) =====
+
+            // Guild → Leader (Restrict)
+            modelBuilder.Entity<Guild>()
+                .HasOne(g => g.Leader)
+                .WithMany()
+                .HasForeignKey(g => g.LeaderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Guild name unique
+            modelBuilder.Entity<Guild>()
+                .HasIndex(g => g.Name)
+                .IsUnique();
+
+            // GuildMember → Guild (Cascade)
+            modelBuilder.Entity<GuildMember>()
+                .HasOne(m => m.Guild)
+                .WithMany(g => g.Members)
+                .HasForeignKey(m => m.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // GuildMember → User (Restrict)
+            modelBuilder.Entity<GuildMember>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One membership per (guild, user)
+            modelBuilder.Entity<GuildMember>()
+                .HasIndex(m => new { m.GuildId, m.UserId })
+                .IsUnique();
+
+            // GuildMessage → Guild (Cascade)
+            modelBuilder.Entity<GuildMessage>()
+                .HasOne(m => m.Guild)
+                .WithMany(g => g.Messages)
+                .HasForeignKey(m => m.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // GuildMessage → Author (Restrict)
+            modelBuilder.Entity<GuildMessage>()
+                .HasOne(m => m.Author)
+                .WithMany()
+                .HasForeignKey(m => m.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for chat pagination
+            modelBuilder.Entity<GuildMessage>()
+                .HasIndex(m => new { m.GuildId, m.SentAt });
+
+            // GuildMessageLike composite PK
+            modelBuilder.Entity<GuildMessageLike>()
+                .HasKey(l => new { l.GuildMessageId, l.LikerUserId });
+
+            modelBuilder.Entity<GuildMessageLike>()
+                .HasOne(l => l.GuildMessage)
+                .WithMany(m => m.Likes)
+                .HasForeignKey(l => l.GuildMessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GuildMessageLike>()
+                .HasOne(l => l.LikerUser)
+                .WithMany()
+                .HasForeignKey(l => l.LikerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // GuildInvite → Guild (Cascade)
+            modelBuilder.Entity<GuildInvite>()
+                .HasOne(i => i.Guild)
+                .WithMany(g => g.Invites)
+                .HasForeignKey(i => i.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // GuildInvite → Inviter (Restrict)
+            modelBuilder.Entity<GuildInvite>()
+                .HasOne(i => i.Inviter)
+                .WithMany()
+                .HasForeignKey(i => i.InviterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // GuildInvite → Invitee (Restrict)
+            modelBuilder.Entity<GuildInvite>()
+                .HasOne(i => i.Invitee)
+                .WithMany()
+                .HasForeignKey(i => i.InviteeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for pending invite lookup
+            modelBuilder.Entity<GuildInvite>()
+                .HasIndex(i => new { i.GuildId, i.InviteeId });
+
+            // ── PARTY ────────────────────────────────────────────────────────────────
+
+            // Party → Leader (Restrict)
+            modelBuilder.Entity<Party>()
+                .HasOne(p => p.Leader)
+                .WithMany()
+                .HasForeignKey(p => p.LeaderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PartyMember → Party (Cascade)
+            modelBuilder.Entity<PartyMember>()
+                .HasOne(m => m.Party)
+                .WithMany(p => p.Members)
+                .HasForeignKey(m => m.PartyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PartyMember → User (Restrict)
+            modelBuilder.Entity<PartyMember>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One membership per (party, user)
+            modelBuilder.Entity<PartyMember>()
+                .HasIndex(m => new { m.PartyId, m.UserId })
+                .IsUnique();
+
+            // Enforce 1 party per user globally (unique index on UserId in PartyMembers)
+            modelBuilder.Entity<PartyMember>()
+                .HasIndex(m => m.UserId)
+                .IsUnique();
+
+            // PartyMessage → Party (Cascade)
+            modelBuilder.Entity<PartyMessage>()
+                .HasOne(m => m.Party)
+                .WithMany(p => p.Messages)
+                .HasForeignKey(m => m.PartyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PartyMessage → Author (Restrict)
+            modelBuilder.Entity<PartyMessage>()
+                .HasOne(m => m.Author)
+                .WithMany()
+                .HasForeignKey(m => m.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for chat pagination
+            modelBuilder.Entity<PartyMessage>()
+                .HasIndex(m => new { m.PartyId, m.SentAt });
+
+            // PartyMessageLike composite PK
+            modelBuilder.Entity<PartyMessageLike>()
+                .HasKey(l => new { l.PartyMessageId, l.LikerUserId });
+
+            modelBuilder.Entity<PartyMessageLike>()
+                .HasOne(l => l.PartyMessage)
+                .WithMany(m => m.Likes)
+                .HasForeignKey(l => l.PartyMessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PartyMessageLike>()
+                .HasOne(l => l.LikerUser)
+                .WithMany()
+                .HasForeignKey(l => l.LikerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PartyInvite → Party (Cascade)
+            modelBuilder.Entity<PartyInvite>()
+                .HasOne(i => i.Party)
+                .WithMany(p => p.Invites)
+                .HasForeignKey(i => i.PartyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PartyInvite → Inviter (Restrict)
+            modelBuilder.Entity<PartyInvite>()
+                .HasOne(i => i.Inviter)
+                .WithMany()
+                .HasForeignKey(i => i.InviterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PartyInvite → Invitee (Restrict)
+            modelBuilder.Entity<PartyInvite>()
+                .HasOne(i => i.Invitee)
+                .WithMany()
+                .HasForeignKey(i => i.InviteeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for pending invite lookup
+            modelBuilder.Entity<PartyInvite>()
+                .HasIndex(i => new { i.PartyId, i.InviteeId });
+
+            // ── BOSS QUESTS (Phase 8) ────────────────────────────────────────────────
+            modelBuilder.Entity<BossQuest>()
+                .HasIndex(b => b.Key)
+                .IsUnique();
+            modelBuilder.Entity<BossQuest>()
+                .HasData(BossQuestSeed.GetAll());
+
+            // PartyQuest → Party (Cascade)
+            modelBuilder.Entity<PartyQuest>()
+                .HasOne(pq => pq.Party)
+                .WithMany()
+                .HasForeignKey(pq => pq.PartyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PartyQuest → BossQuest (Restrict)
+            modelBuilder.Entity<PartyQuest>()
+                .HasOne(pq => pq.BossQuest)
+                .WithMany()
+                .HasForeignKey(pq => pq.BossQuestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PartyQuest → Leader (Restrict)
+            modelBuilder.Entity<PartyQuest>()
+                .HasOne(pq => pq.Leader)
+                .WithMany()
+                .HasForeignKey(pq => pq.LeaderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PartyQuestMember → PartyQuest (Cascade)
+            modelBuilder.Entity<PartyQuestMember>()
+                .HasOne(m => m.PartyQuest)
+                .WithMany(pq => pq.Members)
+                .HasForeignKey(m => m.PartyQuestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PartyQuestMember → User (Restrict)
+            modelBuilder.Entity<PartyQuestMember>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One membership per (partyQuest, user)
+            modelBuilder.Entity<PartyQuestMember>()
+                .HasIndex(m => new { m.PartyQuestId, m.UserId })
+                .IsUnique();
         }
     }
 }

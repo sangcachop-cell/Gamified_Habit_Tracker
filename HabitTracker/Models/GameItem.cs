@@ -42,6 +42,7 @@ namespace HabitTracker.Models
             ItemType.Food           => $"/images/habitica/stable/food/Pet_Food_{FoodKey()}.png",
             ItemType.Egg            => $"/images/habitica/stable/eggs/Pet_Egg_{EggKey()}.png",
             ItemType.HatchingPotion => $"/images/habitica/stable/potions/Pet_HatchingPotion_{PotionKey()}.png",
+            ItemType.QuestScroll    => $"/images/habitica/quests/scrolls/inventory_quest_scroll_{Key.Replace("quest_", "")}.png",
             _                      => string.Empty
         };
 

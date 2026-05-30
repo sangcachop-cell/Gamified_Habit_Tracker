@@ -1,11 +1,9 @@
 ﻿using HabitTracker.Constants;
 using HabitTracker.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;
@@ -15,27 +13,32 @@ public class NotificationController : ControllerBase
         _notificationService = notificationService;
     }
 
+    private int? GetUserId() => HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+
     [HttpGet]
     public async Task<IActionResult> GetNotifications(int limit = 20)
     {
-        var userId = int.Parse(HttpContext.Session.GetString(AppConstants.SESSION_USER_ID) ?? "0");
-        var notifications = await _notificationService.GetNotificationsAsync(userId, limit);
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+        var notifications = await _notificationService.GetNotificationsAsync(userId.Value, limit);
         return Ok(notifications);
     }
 
     [HttpGet("unread")]
     public async Task<IActionResult> GetUnread()
     {
-        var userId = int.Parse(HttpContext.Session.GetString(AppConstants.SESSION_USER_ID) ?? "0");
-        var notifications = await _notificationService.GetUnreadNotificationsAsync(userId);
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+        var notifications = await _notificationService.GetUnreadNotificationsAsync(userId.Value);
         return Ok(notifications);
     }
 
     [HttpGet("unread-count")]
     public async Task<IActionResult> GetUnreadCount()
     {
-        var userId = int.Parse(HttpContext.Session.GetString(AppConstants.SESSION_USER_ID) ?? "0");
-        var count = await _notificationService.GetUnreadCountAsync(userId);
+        var userId = GetUserId();
+        if (userId == null) return Ok(new { count = 0 });
+        var count = await _notificationService.GetUnreadCountAsync(userId.Value);
         return Ok(new { count });
     }
 
@@ -50,8 +53,9 @@ public class NotificationController : ControllerBase
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead()
     {
-        var userId = int.Parse(HttpContext.Session.GetString(AppConstants.SESSION_USER_ID) ?? "0");
-        await _notificationService.MarkAllAsReadAsync(userId);
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+        await _notificationService.MarkAllAsReadAsync(userId.Value);
         return NoContent();
     }
 

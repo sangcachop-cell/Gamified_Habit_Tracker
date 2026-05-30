@@ -9,10 +9,13 @@
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear  = FindGear(u.EquippedArmor);
-    var headGear   = FindGear(u.EquippedHead);
-    var shieldGear = FindGear(u.EquippedShield);
-    var weaponGear = FindGear(u.EquippedWeapon);
+    var armorGear         = FindGear(u.EquippedArmor);
+    var headGear          = FindGear(u.EquippedHead);
+    var shieldGear        = FindGear(u.EquippedShield);
+    var weaponGear        = FindGear(u.EquippedWeapon);
+    var backGear          = FindGear(u.EquippedBack);
+    var eyewearGear       = FindGear(u.EquippedEyewear);
+    var headAccessoryGear = FindGear(u.EquippedHeadAccessory);
     bool wep2H     = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
@@ -52,6 +55,9 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hair" type="button">💇 Hair</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-background" type="button">🌄 Background</button>
                 </li>
             </ul>
 
@@ -223,6 +229,33 @@
                     </div>
 
                 </div><!-- /tab-hair -->
+
+                <!-- ===== BACKGROUND TAB ===== -->
+                <div class="tab-pane fade" id="tab-background">
+                    <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
+                        <div class="card-body py-3">
+                            <div class="small fw-semibold text-muted mb-2">BACKGROUND</div>
+                            <div class="d-flex flex-wrap gap-1">
+                                <div class="bg-thumb-wrap" style="cursor:pointer;" onclick="setBackground('')">
+                                    <div style="width:60px;height:40px;border-radius:4px;background:#1e1e2e;border:2px solid @(string.IsNullOrEmpty(u.Background) ? "#4a90d9" : "transparent");display:flex;align-items:center;justify-content:center;">
+                                        <span class="text-muted small">None</span>
+                                    </div>
+                                </div>
+                                @foreach (var bg in Model.Backgrounds)
+                                {
+                                    <img src="/images/habitica/backgrounds/background_@(bg).png"
+                                         width="60" height="40"
+                                         class="bg-opt"
+                                         data-key="@bg"
+                                         title="@bg.Replace("_", " ")"
+                                         style="object-fit:cover;cursor:pointer;border-radius:4px;border:2px solid @(u.Background == bg ? "#4a90d9" : "transparent");"
+                                         onclick="setBackground('@bg')" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /tab-background -->
+
             </div><!-- /tab-content -->
         </div><!-- /col-md-8 -->
 
@@ -236,14 +269,18 @@
                         <!-- Avatar Stack -->
                         <div class="d-flex justify-content-center mb-4">
                             <div id="avatar-preview"
-                                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible;">
-                                <!-- Layer order: mount-body → skin → shirt → bangs → base → mustache → beard → gear → mount-head / pet -->
+                                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
+                                <!-- Layer order: mount-body → back → skin → shirt → bangs → base → mustache → beard → eyewear → gear → headAccessory → mount-head / pet -->
                                 <div style="position:relative; margin-left:24px; width:90px; height:90px;">
                                     @if (isMounted)
                                     {
                                         <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
                                              style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
                                     }
+                                    <img id="layer-back-gear"
+                                         src="@(backGear != null ? backGear.GetWornImagePath(bodyType) : "")"
+                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(backGear == null ? "display:none;" : "")"
+                                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                                     <img id="layer-skin"
                                          src="/images/habitica/customize/skin/skin_@(u.SkinColor).png"
                                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
@@ -262,12 +299,20 @@
                                     <img id="layer-beard"
                                          src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
                                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
+                                    <img id="layer-eyewear-gear"
+                                         src="@(eyewearGear != null ? eyewearGear.GetWornImagePath(bodyType) : "")"
+                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(eyewearGear == null ? "display:none;" : "")"
+                                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                                     <img id="layer-armor-gear"
                                          src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
                                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
                                     <img id="layer-head-gear"
                                          src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
                                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
+                                    <img id="layer-headaccessory-gear"
+                                         src="@(headAccessoryGear != null ? headAccessoryGear.GetWornImagePath(bodyType) : "")"
+                                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headAccessoryGear == null ? "display:none;" : "")"
+                                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                                     <img id="layer-shield-gear"
                                          src="@(shieldGear != null && !wep2H ? shieldGear.GetWornImagePath(bodyType) : "")"
                                          style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || wep2H ? "display:none;" : "")" />
@@ -282,7 +327,7 @@
                                     @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
                                     {
                                         <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                                             style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
+                                             style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
                                     }
                                 </div>
                             </div>
@@ -462,6 +507,27 @@
         }
         highlightSwatch('.mustache-opt', style, 'style');
         updatePreview();
+    };
+
+    window.setBackground = function (key) {
+        var el = document.getElementById('avatar-preview');
+        if (key) {
+            el.style.backgroundImage = "url('/images/habitica/backgrounds/background_" + key + ".png')";
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center top';
+        } else {
+            el.style.backgroundImage = '';
+        }
+        $('.bg-opt').css('border-color', 'transparent');
+        if (key) {
+            $('.bg-opt[data-key="' + key + '"]').css('border-color', '#4a90d9');
+        }
+        var csrf = document.querySelector('[name="__RequestVerificationToken"]')?.value ?? '';
+        fetch('/Character/SetBackground', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'key=' + encodeURIComponent(key || '') + '&__RequestVerificationToken=' + encodeURIComponent(csrf)
+        });
     };
 
 })();

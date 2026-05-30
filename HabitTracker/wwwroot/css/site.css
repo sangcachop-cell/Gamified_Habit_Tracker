@@ -1,3 +1,9 @@
+/* ===== MENTIONS ===== */
+.mention { color: #4a90d9; font-weight: 600; text-decoration: none; }
+.mention:hover { text-decoration: underline; }
+.bg-primary .mention,
+.text-white .mention { color: #bde0ff; }
+
 /* ===== RESET ===== */
 html, body {
     height: 100%;

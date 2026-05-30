@@ -1,13 +1,274 @@
+@model HabitTracker.Models.ViewModels.QuestShopViewModel
+@using HabitTracker.Models
 @{
     ViewData["Title"] = "Quest Shop";
+
+    var tabs = new (string Key, string Label)[]
+    {
+        ("pet",             "Pet Quests"),
+        ("hatchingPotion",  "Potion Quests"),
+        ("unlockable",      "Series"),
+        ("gold",            "Masterclasser"),
+        ("seasonal",        "Seasonal"),
+        ("timeTravelers",   "Time Travel"),
+    };
+
+    bool IsLocked(BossQuest q) =>
+        Model.UserLevel < q.LevelRequired ||
+        (q.PrerequisiteQuestKey is not null && !Model.CompletedQuestKeys.Contains(q.PrerequisiteQuestKey));
+
+    string RarityBadge(BossQuest q) => q.GoldCost switch
+    {
+        0   => "<span class=\"badge bg-purple\">Time Travel</span>",
+        >= 200 => "<span class=\"badge bg-warning text-dark\">Masterclasser</span>",
+        _ => ""
+    };
 }
 
-<div class="container py-5 text-center" style="max-width:600px;">
-    <div style="font-size:4rem;">📜</div>
-    <h2 class="mt-3">Quest Shop</h2>
-    <p class="text-muted mt-2">
-        Quest scrolls and party quests arrive in <strong>Phase 8</strong>.<br>
-        Check back after Guilds &amp; Parties are unlocked!
-    </p>
-    <a href="/Market" class="btn btn-outline-primary mt-3">← Back to Market</a>
+<div class="container-fluid py-4" style="max-width:1400px;">
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <h2 class="mb-0">⚔️ Quest Shop</h2>
+        <span class="badge bg-info text-dark fs-6" id="gems-badge">
+            💎 @Model.UserGems
+        </span>
+        <span class="badge bg-warning text-dark fs-6" id="gold-badge">
+            <img src="/images/habitica/stable/ui/Gold_Coin.png" width="18" onerror="this.style.display='none'"> @Model.UserGold GP
+        </span>
+        <a href="/Market" class="ms-auto btn btn-outline-secondary btn-sm">← Market</a>
+    </div>
+    <div class="alert alert-info d-flex align-items-center gap-2 py-2 mb-4" style="font-size:.85rem;">
+        <span>After buying a scroll, go to your <a href="/Party" class="alert-link fw-semibold">Party page</a> to start the quest (party leader only).</span>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="questTabs">
+        @foreach (var (key, label) in tabs)
+        {
+            var quests = Model.Quests.Where(q => q.Category == key).ToList();
+            if (quests.Count == 0) continue;
+            <li class="nav-item">
+                <button class="nav-link @(key == "pet" ? "active" : "")"
+                        data-bs-toggle="tab" data-bs-target="#tab-@key">
+                    @label <span class="badge bg-secondary">@quests.Count</span>
+                </button>
+            </li>
+        }
+        @{
+            var otherKeys = tabs.Select(t => t.Key).ToHashSet();
+            var otherQuests = Model.Quests.Where(q => !otherKeys.Contains(q.Category)).ToList();
+        }
+        @if (otherQuests.Count > 0)
+        {
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-other">
+                    Other <span class="badge bg-secondary">@otherQuests.Count</span>
+                </button>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content" id="questTabsContent">
+        @foreach (var (key, label) in tabs)
+        {
+            var quests = Model.Quests.Where(q => q.Category == key).ToList();
+            if (quests.Count == 0) continue;
+
+            <!-- Group series quests by Group field -->
+            var groups = quests
+                .GroupBy(q => q.Group ?? q.Key)
+                .OrderBy(g => g.Min(q => q.LevelRequired))
+                .ThenBy(g => g.First().Text)
+                .ToList();
+
+            <div class="tab-pane fade @(key == "pet" ? "show active" : "")" id="tab-@key">
+                <div class="row g-3">
+                    @foreach (var group in groups)
+                    {
+                        foreach (var quest in group.OrderBy(q => q.LevelRequired).ThenBy(q => q.Text))
+                        {
+                            bool locked       = IsLocked(quest);
+                            bool owned        = Model.OwnedScrolls.TryGetValue(quest.Key, out int qty) && qty > 0;
+                            bool canAffordGem = Model.UserGems >= quest.GemCost;
+                            bool canAffordGold= quest.GoldCost == 0 || Model.UserGold >= quest.GoldCost;
+                            bool tooExpensive = quest.GemCost > 0 && !locked && !(canAffordGem && canAffordGold);
+
+                            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                                <div class="card h-100 quest-card @(locked ? "opacity-50" : "")" style="border-radius:12px; overflow:hidden;">
+                                    <!-- Boss art -->
+                                    <div class="text-center pt-3 px-2" style="background:#1a1a2e; min-height:80px;">
+                                        <img src="@quest.BossImagePath"
+                                             onerror="this.src='/images/habitica/quests/bosses/quest_armadillo.png'; this.onerror=null;"
+                                             style="max-height:72px; object-fit:contain;"
+                                             alt="@quest.Text">
+                                    </div>
+
+                                    <div class="card-body p-2 d-flex flex-column" style="background:#16213e; color:#e0e0e0;">
+                                        <!-- Quest name -->
+                                        <div class="fw-semibold text-center mb-1" style="font-size:.75rem; line-height:1.2;">
+                                            @quest.Text
+                                        </div>
+
+                                        <!-- Boss / Collection info -->
+                                        @if (quest.IsBossQuest && quest.BossHp.HasValue)
+                                        {
+                                            <div class="text-center mb-1" style="font-size:.65rem; color:#aaa;">
+                                                HP @((int)quest.BossHp) · STR @quest.BossStr.ToString("0.#")
+                                                @if (quest.RageValue.HasValue)
+                                                {
+                                                    <span class="text-warning"> · ⚠️@((int)quest.RageValue)</span>
+                                                }
+                                            </div>
+                                        }
+                                        else if (!quest.IsBossQuest)
+                                        {
+                                            <div class="text-center mb-1" style="font-size:.65rem; color:#aaa;">Collection Quest</div>
+                                        }
+
+                                        <!-- Drop description -->
+                                        <div class="text-center mb-1 px-1" style="font-size:.6rem; color:#7ec8e3; line-height:1.3;">
+                                            🎁 @quest.DropDescription
+                                        </div>
+
+                                        <!-- Level req -->
+                                        @if (quest.LevelRequired > 0)
+                                        {
+                                            <div class="text-center mb-1">
+                                                <span class="badge @(Model.UserLevel >= quest.LevelRequired ? "bg-success" : "bg-danger")" style="font-size:.6rem;">
+                                                    Lv @quest.LevelRequired
+                                                </span>
+                                            </div>
+                                        }
+
+                                        <!-- Prereq lock -->
+                                        @if (quest.PrerequisiteQuestKey is not null && !Model.CompletedQuestKeys.Contains(quest.PrerequisiteQuestKey))
+                                        {
+                                            <div class="text-center text-warning mb-1" style="font-size:.65rem;">🔒 Prereq required</div>
+                                        }
+
+                                        <!-- Scroll thumbnail -->
+                                        <div class="text-center my-1">
+                                            <img src="@(locked ? quest.ScrollLockedImagePath : quest.ScrollImagePath)"
+                                                 onerror="this.style.display='none'"
+                                                 style="height:32px; object-fit:contain;" alt="scroll">
+                                        </div>
+
+                                        <div class="mt-auto">
+                                            @if (owned)
+                                            {
+                                                <div class="text-center mb-1">
+                                                    <span class="badge bg-success" style="font-size:.65rem;">Owned ×@qty</span>
+                                                </div>
+                                            }
+
+                                            @if (quest.GemCost <= 0)
+                                            {
+                                                <button class="btn btn-secondary btn-sm w-100" disabled style="font-size:.7rem;">Time Travel</button>
+                                            }
+                                            else if (locked)
+                                            {
+                                                <button class="btn btn-secondary btn-sm w-100" disabled style="font-size:.7rem;">🔒 Locked</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn @(tooExpensive ? "btn-outline-secondary" : "btn-info text-dark") btn-sm w-100 buy-scroll-btn"
+                                                        data-quest-key="@quest.Key"
+                                                        data-gem-cost="@quest.GemCost"
+                                                        data-gold-cost="@quest.GoldCost"
+                                                        @(tooExpensive ? "disabled" : "")
+                                                        style="font-size:.7rem; white-space:normal;">
+                                                    💎 @quest.GemCost@(quest.GoldCost > 0 ? $" + {quest.GoldCost} GP" : "")
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        @if (otherQuests.Count > 0)
+        {
+            <div class="tab-pane fade" id="tab-other">
+                <div class="row g-3">
+                    @foreach (var quest in otherQuests)
+                    {
+                        bool locked        = IsLocked(quest);
+                        bool owned         = Model.OwnedScrolls.TryGetValue(quest.Key, out int qty2) && qty2 > 0;
+                        bool tooExpensive2 = quest.GemCost > 0 && !locked &&
+                                             (Model.UserGems < quest.GemCost || (quest.GoldCost > 0 && Model.UserGold < quest.GoldCost));
+                        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                            <div class="card h-100 quest-card @(locked ? "opacity-50" : "")" style="border-radius:12px; overflow:hidden;">
+                                <div class="text-center pt-3 px-2" style="background:#1a1a2e; min-height:80px;">
+                                    <img src="@quest.BossImagePath" onerror="this.style.display='none'" style="max-height:72px; object-fit:contain;" alt="@quest.Text">
+                                </div>
+                                <div class="card-body p-2 d-flex flex-column" style="background:#16213e; color:#e0e0e0;">
+                                    <div class="fw-semibold text-center mb-1" style="font-size:.75rem;">@quest.Text</div>
+                                    <div class="text-center mb-1 px-1" style="font-size:.6rem; color:#7ec8e3;">🎁 @quest.DropDescription</div>
+                                    <div class="mt-auto">
+                                        @if (owned) { <div class="text-center mb-1"><span class="badge bg-success" style="font-size:.65rem;">Owned ×@qty2</span></div> }
+                                        @if (quest.GemCost <= 0 || locked)
+                                        {
+                                            <button class="btn btn-secondary btn-sm w-100" disabled style="font-size:.7rem;">@(locked ? "🔒 Locked" : "N/A")</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn @(tooExpensive2 ? "btn-outline-secondary" : "btn-info text-dark") btn-sm w-100 buy-scroll-btn"
+                                                    data-quest-key="@quest.Key"
+                                                    data-gem-cost="@quest.GemCost"
+                                                    data-gold-cost="@quest.GoldCost"
+                                                    @(tooExpensive2 ? "disabled" : "") style="font-size:.7rem; white-space:normal;">
+                                                💎 @quest.GemCost@(quest.GoldCost > 0 ? $" + {quest.GoldCost} GP" : "")
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.buy-scroll-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const key      = this.dataset.questKey;
+        const gemCost  = parseInt(this.dataset.gemCost);
+        const goldCost = parseInt(this.dataset.goldCost) || 0;
+        const costLabel = goldCost > 0 ? `💎 ${gemCost} + ${goldCost} GP` : `💎 ${gemCost}`;
+        if (!confirm(`Buy scroll for ${costLabel}?`)) return;
+
+        this.disabled = true;
+        this.textContent = '...';
+
+        const res = await fetch('/QuestShop/Buy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questKey: key })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            const gemsBadge = document.getElementById('gems-badge');
+            if (gemsBadge) gemsBadge.textContent = '💎 ' + data.newGems;
+            const goldBadge = document.getElementById('gold-badge');
+            if (goldBadge && goldCost > 0) goldBadge.textContent = data.newGold + ' GP';
+            showToast('⚔️', 'Scroll Purchased!',
+                'Go to your <a href="/Party" class="text-white fw-semibold">Party page</a> to start the quest.',
+                'success', 5000);
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showToast('❌', 'Purchase Failed', data.error || 'Purchase failed.', 'danger');
+            this.disabled = false;
+            this.textContent = costLabel;
+        }
+    });
+});
+</script>
+}
