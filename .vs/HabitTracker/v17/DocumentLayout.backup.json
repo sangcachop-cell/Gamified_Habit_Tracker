@@ -232,8 +232,7 @@
               "RelativeToolTip": "HabitTracker\\Services\\Implementations\\PetCatalogService.cs",
               "ViewState": "AgIAAEMBAAAAAAAAAAAswD8BAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-29T17:37:09.458Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T17:37:09.458Z"
             },
             {
               "$type": "Document",
@@ -245,8 +244,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Character\\Index.cshtml",
               "ViewState": "AgIAAPYAAAAAAAAAAAAYwBEBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:56:24.795Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:56:24.795Z"
             },
             {
               "$type": "Document",
@@ -258,8 +256,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Character\\Customize.cshtml",
               "ViewState": "AgIAAMQCAAAAAAAAAAAwwOQCAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:56:14.083Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:56:14.083Z"
             },
             {
               "$type": "Document",
@@ -271,8 +268,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Equipment\\Index.cshtml",
               "ViewState": "AgIAANMDAAAAAAAAAAAwwPMDAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:57:46.668Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:57:46.668Z"
             },
             {
               "$type": "Document",
@@ -284,8 +280,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Inventory\\Index.cshtml",
               "ViewState": "AgIAANMBAAAAAAAAAAAowOYBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:58:49.564Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:58:49.564Z"
             },
             {
               "$type": "Document",
@@ -297,8 +292,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Account\\Profile.cshtml",
               "ViewState": "AgIAAAIBAAAAAAAAAAAYwBUBAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:48:12.427Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:48:12.427Z"
             },
             {
               "$type": "Document",
@@ -308,7 +302,7 @@
               "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\ChangePassword.cshtml",
               "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\ChangePassword.cshtml",
               "RelativeToolTip": "HabitTracker\\Views\\Account\\ChangePassword.cshtml",
-              "ViewState": "AgIAAGEBAAAAAAAAAAAowIMBAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAGMBAAAAAAAAAAAwwIMBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-05-29T08:47:09.036Z",
               "EditorCaption": ""
@@ -327,8 +321,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Badges.cshtml",
               "ViewState": "AgIAADQBAAAAAAAAAAAwwFQBAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:57:04.986Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:57:04.986Z"
             },
             {
               "$type": "Document",
@@ -340,8 +333,7 @@
               "RelativeToolTip": "HabitTracker\\Models\\UserPet.cs",
               "ViewState": "AgIAACIAAAAAAAAAAAAwwDQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-29T19:20:03.302Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T19:20:03.302Z"
             },
             {
               "$type": "Document",
@@ -353,8 +345,7 @@
               "RelativeToolTip": "HabitTracker\\Controllers\\CharacterController.cs",
               "ViewState": "AgIAANkAAAAAAAAAAADwv/QAAABXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-29T19:27:39.623Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T19:27:39.623Z"
             },
             {
               "$type": "Document",
@@ -366,8 +357,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAGQAAAAAAAAAAAAuwHIAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:37:18.024Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:37:18.024Z"
             },
             {
               "$type": "Document",
@@ -379,8 +369,7 @@
               "RelativeToolTip": "HabitTracker\\Views\\Character\\Spells.cshtml",
               "ViewState": "AgIAAOUAAAAAAAAAAAAowAcBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-29T08:56:51.175Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T08:56:51.175Z"
             },
             {
               "$type": "Document",
@@ -392,8 +381,7 @@
               "RelativeToolTip": "HabitTracker\\Models\\GameItem.cs",
               "ViewState": "AgIAACQAAAAAAAAAAAAowEYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-29T19:20:51.365Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T19:20:51.365Z"
             },
             {
               "$type": "Document",
@@ -441,8 +429,7 @@
               "RelativeToolTip": "HabitTracker\\Models\\GearItem.cs",
               "ViewState": "AgIAACcAAAAAAAAAAAAswEYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-29T16:27:14.129Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-29T16:27:14.129Z"
             },
             {
               "$type": "Document",

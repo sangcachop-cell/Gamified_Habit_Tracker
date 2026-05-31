@@ -99,6 +99,2406 @@ namespace HabitTracker.Migrations
                         });
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.BossQuest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("BossDef")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("BossHp")
+                        .HasColumnType("float");
+
+                    b.Property<double>("BossStr")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CollectJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Completion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DropExp")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DropGold")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DropItemsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GemCost")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoldCost")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Group")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsBossQuest")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("LevelRequired")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("PrerequisiteQuestKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RageEffect")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<double?>("RageHealing")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("RageMpDrain")
+                        .HasColumnType("float");
+
+                    b.Property<string>("RageName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<double?>("RageProgressDrain")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("RageValue")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("BossQuests");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BossDef = 1.0,
+                            BossHp = 1100.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 725,
+                            DropGold = 73,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Alligator\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "alligator",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Insta-Gator"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 900,
+                            DropGold = 90,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Alpaca\",\"count\":3}]",
+                            GemCost = 7,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "alpaca",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Alpaca Rage",
+                            RageValue = 50.0,
+                            Text = "The Overpacked Alpaca"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Armadillo\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "armadillo",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Indulgent Armadillo"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Axolotl\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "axolotl",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Axolotl Rage",
+                            RageValue = 50.0,
+                            Text = "The Magical Axolotl"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Badger\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "badger",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Stop Badgering Me!"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Beetle\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "beetle",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The CRITICAL BUG"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Bunny\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "bunny",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Killer Bunny"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Butterfly\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "butterfly",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Bye, Bye, Butterfry"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Cat\",\"count\":3}]",
+                            GemCost = 7,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "cat",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageMpDrain = 0.33000000000000002,
+                            RageName = "Cat Rage",
+                            RageValue = 50.0,
+                            Text = "A Purrplexing Predicament"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 250,
+                            DropGold = 35,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Chameleon\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "chameleon",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Chaotic Chameleon"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Cheetah\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "cheetah",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Such a Cheetah"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Cow\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "cow",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Mootant Cow"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 900,
+                            DropGold = 90,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Crab\",\"count\":3}]",
+                            GemCost = 9,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "crab",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageMpDrain = 0.33000000000000002,
+                            RageName = "Crab Rage",
+                            RageValue = 50.0,
+                            Text = "The Fiddling Crab"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Seahorse\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "dilatory_derby",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Dilatory Derby"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Dog\",\"count\":3}]",
+                            GemCost = 7,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "dog",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageMpDrain = 0.29999999999999999,
+                            RageName = "Dog Rage",
+                            RageValue = 50.0,
+                            Text = "Triple Dog Dare!"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.25,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 110,
+                            DropGold = 22,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Dolphin\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "dolphin",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Dolphin of Doubt"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            BossDef = 1.0,
+                            BossHp = 700.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 425,
+                            DropGold = 49,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Falcon\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "falcon",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Birds of Preycrastination"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Ferret\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "ferret",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Nefarious Ferret"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Frog\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "frog",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Swamp of the Clutter Frog"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 80,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Deer\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "ghost_stag",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Spirit of Spring"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            BossDef = 1.0,
+                            BossHp = 700.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 450,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Giraffe\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "giraffe",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Gear-affe"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Gryphon\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "gryphon",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Fiery Gryphon"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"GuineaPig\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "guineapig",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Guinea Pig Gang"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Parrot\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "harpy",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Help! Harpy!"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.25,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 30,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Hedgehog\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "hedgehog",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Hedgebeast"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Hippo\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "hippo",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "What a Hippo-Crite"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Horse\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "horse",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Ride the Night-Mare"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            BossDef = 1.0,
+                            BossHp = 700.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 425,
+                            DropGold = 49,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Kangaroo\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "kangaroo",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Kangaroo Catastrophe"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Cuttlefish\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "kraken",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Kraken of Inkomplete"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Monkey\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "monkey",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Monstrous Mandrill and the Mischief Monkeys"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Nudibranch\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "nudibranch",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Infestation of the NowDo Nudibranchs"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 80,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Octopus\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "octopus",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Call of Octothulu"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 900,
+                            DropGold = 90,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Otter\",\"count\":3}]",
+                            GemCost = 9,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "otter",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Otter Rage",
+                            RageValue = 50.0,
+                            Text = "The Perfidious Plotter!"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Owl\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "owl",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Night-Owl"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Peacock\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "peacock",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Push-and-Pull Peacock"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Penguin\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "penguin",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Fowl Frost"
+                        },
+                        new
+                        {
+                            Id = 37,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 1000,
+                            DropGold = 100,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Platypus\",\"count\":3}]",
+                            GemCost = 7,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "platypus",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageMpDrain = 0.33000000000000002,
+                            RageName = "Platypus Rage",
+                            RageValue = 50.0,
+                            Text = "The Perfectionist Platypus"
+                        },
+                        new
+                        {
+                            Id = 38,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 67,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Pterodactyl\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "pterodactyl",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Pterror-dactyl"
+                        },
+                        new
+                        {
+                            Id = 39,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 600,
+                            DropGold = 70,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Raccoon\",\"count\":3}]",
+                            GemCost = 7,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "raccoon",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Raccoon Rage",
+                            RageValue = 50.0,
+                            Text = "Raccoon Tycoon"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 80,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Rat\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "rat",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Rat King"
+                        },
+                        new
+                        {
+                            Id = 41,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Rock\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "rock",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Escape the Cave Creature"
+                        },
+                        new
+                        {
+                            Id = 42,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Rooster\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "rooster",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Rooster Rampage"
+                        },
+                        new
+                        {
+                            Id = 43,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 67,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Sabretooth\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "sabretooth",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Sabre Cat"
+                        },
+                        new
+                        {
+                            Id = 44,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 80,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"SeaSerpent\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "seaserpent",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Danger in the Depths: Sea Serpent Strike!"
+                        },
+                        new
+                        {
+                            Id = 45,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Sheep\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "sheep",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Thunder Ram"
+                        },
+                        new
+                        {
+                            Id = 46,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Slime\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "slime",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Jelly Regent"
+                        },
+                        new
+                        {
+                            Id = 47,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Sloth\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "sloth",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Somnolent Sloth"
+                        },
+                        new
+                        {
+                            Id = 48,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Snail\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "snail",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Snail of Drudgery Sludge"
+                        },
+                        new
+                        {
+                            Id = 49,
+                            BossDef = 1.0,
+                            BossHp = 1100.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 725,
+                            DropGold = 73,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Snake\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "snake",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Serpent of Distraction"
+                        },
+                        new
+                        {
+                            Id = 50,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 31,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Spider\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "spider",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Icy Arachnid"
+                        },
+                        new
+                        {
+                            Id = 51,
+                            BossDef = 1.0,
+                            BossHp = 700.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 425,
+                            DropGold = 49,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Squirrel\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "squirrel",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Sneaky Squirrel"
+                        },
+                        new
+                        {
+                            Id = 52,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Treeling\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "treeling",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Tangle Tree"
+                        },
+                        new
+                        {
+                            Id = 53,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"TRex\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "trex",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "King of the Dinosaurs"
+                        },
+                        new
+                        {
+                            Id = 54,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 55,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"TRex\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "trex_undead",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "TRex Undead Rage",
+                            RageValue = 50.0,
+                            Text = "The Dinosaur Unearthed"
+                        },
+                        new
+                        {
+                            Id = 55,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 80,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Triceratops\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "triceratops",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Trampling Triceratops"
+                        },
+                        new
+                        {
+                            Id = 56,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Turtle\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "turtle",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Guide the Turtle"
+                        },
+                        new
+                        {
+                            Id = 57,
+                            BossDef = 1.0,
+                            BossHp = 600.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 43,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Unicorn\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "unicorn",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Convincing the Unicorn Queen"
+                        },
+                        new
+                        {
+                            Id = 58,
+                            BossDef = 1.0,
+                            BossHp = 900.0,
+                            BossStr = 2.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 575,
+                            DropGold = 63,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Velociraptor\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "velociraptor",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Veloci-Rapper"
+                        },
+                        new
+                        {
+                            Id = 59,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Whale\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "whale",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Wail of the Whale"
+                        },
+                        new
+                        {
+                            Id = 60,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.5,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Yarn\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "yarn",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Tangled Yarn"
+                        },
+                        new
+                        {
+                            Id = 61,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.25,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Amber\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "amber",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Amber Alliance"
+                        },
+                        new
+                        {
+                            Id = 62,
+                            BossDef = 1.0,
+                            BossHp = 725.0,
+                            BossStr = 1.75,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 450,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"BlackPearl\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "blackPearl",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Startling Starry Idea"
+                        },
+                        new
+                        {
+                            Id = 63,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 575,
+                            DropGold = 63,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Bronze\",\"count\":3}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "bronze",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Brazen Beetle Battle"
+                        },
+                        new
+                        {
+                            Id = 64,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 750,
+                            DropGold = 70,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Fluorite\",\"count\":3}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "fluorite",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Bright Fluorite Fright"
+                        },
+                        new
+                        {
+                            Id = 65,
+                            BossDef = 1.0,
+                            BossHp = 400.0,
+                            BossStr = 1.25,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 400,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Jade\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "jade",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Jaded Jinx"
+                        },
+                        new
+                        {
+                            Id = 66,
+                            BossDef = 1.0,
+                            BossHp = 1200.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 800,
+                            DropGold = 75,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"PinkMarble\",\"count\":3}]",
+                            GemCost = 9,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "pinkMarble",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageName = "Marble Rage",
+                            RageProgressDrain = 0.5,
+                            RageValue = 50.0,
+                            Text = "Calm the Corrupted Cupid"
+                        },
+                        new
+                        {
+                            Id = 67,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"onyxStone\":25,\"plutoRune\":10,\"leoRune\":10}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Onyx\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "onyx",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Onyx Odyssey"
+                        },
+                        new
+                        {
+                            Id = 68,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"rubyGem\":25,\"venusRune\":10,\"aquariusRune\":10}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Ruby\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "ruby",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Ruby Rapport"
+                        },
+                        new
+                        {
+                            Id = 69,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"silverIngot\":20,\"moonRune\":15,\"cancerRune\":15}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Silver\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "silver",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Silver Solution"
+                        },
+                        new
+                        {
+                            Id = 70,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"mossyStone\":25,\"marsRune\":10,\"capricornRune\":10}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"MossyStone\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "stone",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Maze of Moss"
+                        },
+                        new
+                        {
+                            Id = 71,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"turquoiseGem\":25,\"sagittariusRune\":10,\"neptuneRune\":10}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Turquoise\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "turquoise",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Turquoise Treasure Toil"
+                        },
+                        new
+                        {
+                            Id = 72,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "hatchingPotion",
+                            CollectJson = "{\"opalGem\":25,\"libraRune\":10,\"mercuryRune\":10}",
+                            Completion = "",
+                            DropExp = 350,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Opal\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "opal",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Legend of the Obscure Opals"
+                        },
+                        new
+                        {
+                            Id = 73,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.0,
+                            Category = "pet",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 20,
+                            DropItemsJson = "[{\"type\":\"mounts\",\"key\":\"BearCub-Polar\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "evilsanta",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Trapper Santa"
+                        },
+                        new
+                        {
+                            Id = 74,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "pet",
+                            CollectJson = "{\"tracks\":20,\"branches\":10}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 20,
+                            DropItemsJson = "[{\"type\":\"pets\",\"key\":\"BearCub-Polar\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "evilsanta2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Find the Cub"
+                        },
+                        new
+                        {
+                            Id = 75,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "pet",
+                            CollectJson = "{\"plainEgg\":40}",
+                            Completion = "",
+                            DropExp = 0,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Egg\",\"count\":10}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "egg",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Egg Hunt"
+                        },
+                        new
+                        {
+                            Id = 76,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Dessert\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "waffle",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageName = "Waffle Rage",
+                            RageProgressDrain = 0.5,
+                            RageValue = 50.0,
+                            Text = "Waffling with the Fool: Disaster Breakfast!"
+                        },
+                        new
+                        {
+                            Id = 77,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"VirtualPet\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "virtualpet",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageName = "VirtualPet Rage",
+                            RageProgressDrain = 0.5,
+                            RageValue = 50.0,
+                            Text = "Virtual Mayhem with the April Fool: The Beepening"
+                        },
+                        new
+                        {
+                            Id = 78,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Fungi\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "fungi",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageMpDrain = 0.33000000000000002,
+                            RageName = "Fungi Rage",
+                            RageValue = 50.0,
+                            Text = "The Moody Mushroom"
+                        },
+                        new
+                        {
+                            Id = 79,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 2.0,
+                            Category = "hatchingPotion",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Alien\",\"count\":3}]",
+                            GemCost = 5,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "alien",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Alien Rage",
+                            RageValue = 50.0,
+                            Text = "Invasion of the Motivation Snatchers"
+                        },
+                        new
+                        {
+                            Id = 80,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            CollectJson = "{\"soapBars\":20}",
+                            Completion = "",
+                            DropExp = 50,
+                            DropGold = 7,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"atom2\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupAtom",
+                            IsBossQuest = false,
+                            Key = "atom1",
+                            LevelRequired = 15,
+                            Notes = "",
+                            Text = "Attack of the Mundane, Part 1: Dish Disaster!"
+                        },
+                        new
+                        {
+                            Id = 81,
+                            BossDef = 1.0,
+                            BossHp = 300.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 20,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"atom3\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupAtom",
+                            IsBossQuest = true,
+                            Key = "atom2",
+                            LevelRequired = 15,
+                            Notes = "",
+                            PrerequisiteQuestKey = "atom1",
+                            Text = "Attack of the Mundane, Part 2: The SnackLess Monster"
+                        },
+                        new
+                        {
+                            Id = 82,
+                            BossDef = 1.0,
+                            BossHp = 800.0,
+                            BossStr = 1.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 125,
+                            DropGold = 25,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Base\",\"count\":2}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            Group = "questGroupAtom",
+                            IsBossQuest = true,
+                            Key = "atom3",
+                            LevelRequired = 15,
+                            Notes = "",
+                            PrerequisiteQuestKey = "atom2",
+                            Text = "Attack of the Mundane, Part 3: The Laundromancer"
+                        },
+                        new
+                        {
+                            Id = 83,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            CollectJson = "{\"testimony\":60}",
+                            Completion = "",
+                            DropExp = 120,
+                            DropGold = 15,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"goldenknight2\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupGoldenknight",
+                            IsBossQuest = false,
+                            Key = "goldenknight1",
+                            LevelRequired = 40,
+                            Notes = "",
+                            Text = "The Golden Knight, Part 1: A Stern Talking-To"
+                        },
+                        new
+                        {
+                            Id = 84,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 3.0,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 750,
+                            DropGold = 75,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"goldenknight3\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            Group = "questGroupGoldenknight",
+                            IsBossQuest = true,
+                            Key = "goldenknight2",
+                            LevelRequired = 40,
+                            Notes = "",
+                            PrerequisiteQuestKey = "goldenknight1",
+                            Text = "The Golden Knight, Part 2: Gold Knight"
+                        },
+                        new
+                        {
+                            Id = 85,
+                            BossDef = 1.0,
+                            BossHp = 1700.0,
+                            BossStr = 3.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 1500,
+                            DropGold = 900,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"Honey\",\"count\":3},{\"type\":\"hatchingPotions\",\"key\":\"Golden\",\"count\":2}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            Group = "questGroupGoldenknight",
+                            IsBossQuest = true,
+                            Key = "goldenknight3",
+                            LevelRequired = 40,
+                            Notes = "",
+                            PrerequisiteQuestKey = "goldenknight2",
+                            Text = "The Golden Knight, Part 3: The Iron Knight"
+                        },
+                        new
+                        {
+                            Id = 86,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            CollectJson = "{\"shard\":20}",
+                            Completion = "",
+                            DropExp = 50,
+                            DropGold = 7,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"head_special_lunarWarriorHelm\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupMoon",
+                            IsBossQuest = false,
+                            Key = "moon1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Lunar Battle, Part 1: Find the Mysterious Shards"
+                        },
+                        new
+                        {
+                            Id = 87,
+                            BossDef = 1.0,
+                            BossHp = 100.0,
+                            BossStr = 1.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 275,
+                            DropGold = 37,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"armor_special_lunarWarriorArmor\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupMoon",
+                            IsBossQuest = true,
+                            Key = "moon2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "moon1",
+                            Text = "Lunar Battle, Part 2: Stop the Overshadowing Stress"
+                        },
+                        new
+                        {
+                            Id = 88,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 67,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"weapon_special_lunarScythe\",\"count\":1}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            Group = "questGroupMoon",
+                            IsBossQuest = true,
+                            Key = "moon3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "moon2",
+                            Text = "Lunar Battle, Part 3: The Monstrous Moon"
+                        },
+                        new
+                        {
+                            Id = 89,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            CollectJson = "{\"moonstone\":100}",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"moonstone2\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupMoonstone",
+                            IsBossQuest = false,
+                            Key = "moonstone1",
+                            LevelRequired = 60,
+                            Notes = "",
+                            Text = "Recidivate, Part 1: The Moonstone Chain"
+                        },
+                        new
+                        {
+                            Id = 90,
+                            BossDef = 1.0,
+                            BossHp = 1500.0,
+                            BossStr = 3.0,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 1000,
+                            DropGold = 500,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"moonstone3\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            Group = "questGroupMoonstone",
+                            IsBossQuest = true,
+                            Key = "moonstone2",
+                            LevelRequired = 60,
+                            Notes = "",
+                            PrerequisiteQuestKey = "moonstone1",
+                            Text = "Recidivate, Part 2: Recidivate the Necromancer"
+                        },
+                        new
+                        {
+                            Id = 91,
+                            BossDef = 1.0,
+                            BossHp = 2000.0,
+                            BossStr = 3.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 1500,
+                            DropGold = 900,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Zombie\",\"count\":3},{\"type\":\"food\",\"key\":\"RottenMeat\",\"count\":5}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            Group = "questGroupMoonstone",
+                            IsBossQuest = true,
+                            Key = "moonstone3",
+                            LevelRequired = 60,
+                            Notes = "",
+                            PrerequisiteQuestKey = "moonstone2",
+                            Text = "Recidivate, Part 3: Recidivate Transformed"
+                        },
+                        new
+                        {
+                            Id = 92,
+                            BossDef = 1.0,
+                            BossHp = 750.0,
+                            BossStr = 1.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 100,
+                            DropGold = 20,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"vice2\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 6,
+                            GoldCost = 0,
+                            Group = "questGroupVice",
+                            IsBossQuest = true,
+                            Key = "vice1",
+                            LevelRequired = 30,
+                            Notes = "",
+                            Text = "Vice, Part 1: Free Yourself of the Dragon's Influence"
+                        },
+                        new
+                        {
+                            Id = 93,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "unlockable",
+                            CollectJson = "{\"lightCrystal\":30}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 20,
+                            DropItemsJson = "[{\"type\":\"quests\",\"key\":\"vice3\",\"count\":1,\"onlyOwner\":true}]",
+                            GemCost = 4,
+                            GoldCost = 0,
+                            Group = "questGroupVice",
+                            IsBossQuest = false,
+                            Key = "vice2",
+                            LevelRequired = 30,
+                            Notes = "",
+                            PrerequisiteQuestKey = "vice1",
+                            Text = "Vice, Part 2: Find the Lair of the Wyrm"
+                        },
+                        new
+                        {
+                            Id = 94,
+                            BossDef = 1.0,
+                            BossHp = 1500.0,
+                            BossStr = 3.0,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 1000,
+                            DropGold = 100,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Dragon\",\"count\":2},{\"type\":\"hatchingPotions\",\"key\":\"Shade\",\"count\":2}]",
+                            GemCost = 8,
+                            GoldCost = 0,
+                            Group = "questGroupVice",
+                            IsBossQuest = true,
+                            Key = "vice3",
+                            LevelRequired = 30,
+                            Notes = "",
+                            PrerequisiteQuestKey = "vice2",
+                            Text = "Vice, Part 3: Vice Awakens"
+                        },
+                        new
+                        {
+                            Id = 95,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            CollectJson = "{\"fireCoral\":20,\"blueFins\":20}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"armor_special_finnedOceanicArmor\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 200,
+                            Group = "questGroupDilatoryDistress",
+                            IsBossQuest = false,
+                            Key = "dilatoryDistress1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Dilatory Distress, Part 1: Message in a Bottle"
+                        },
+                        new
+                        {
+                            Id = 96,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Skeleton\",\"count\":1},{\"type\":\"gear\",\"key\":\"head_special_fireCoralCirclet\",\"count\":1}]",
+                            GemCost = 5,
+                            GoldCost = 300,
+                            Group = "questGroupDilatoryDistress",
+                            IsBossQuest = true,
+                            Key = "dilatoryDistress2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "dilatoryDistress1",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Distress Rage",
+                            RageValue = 50.0,
+                            Text = "Dilatory Distress, Part 2: Creatures of the Crevasse"
+                        },
+                        new
+                        {
+                            Id = 97,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"Fish\",\"count\":3},{\"type\":\"gear\",\"key\":\"weapon_special_tridentOfCrashingTides\",\"count\":1}]",
+                            GemCost = 6,
+                            GoldCost = 400,
+                            Group = "questGroupDilatoryDistress",
+                            IsBossQuest = true,
+                            Key = "dilatoryDistress3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "dilatoryDistress2",
+                            Text = "Dilatory Distress, Part 3: Not a Mere Maid"
+                        },
+                        new
+                        {
+                            Id = 98,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Skeleton\",\"count\":1},{\"type\":\"gear\",\"key\":\"armor_special_roguishRainbowMessengerRobes\",\"count\":1}]",
+                            GemCost = 5,
+                            GoldCost = 200,
+                            Group = "questGroupMayhemMistiflying",
+                            IsBossQuest = true,
+                            Key = "mayhemMistiflying1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Mistiflying Rage",
+                            RageValue = 50.0,
+                            Text = "Mayhem in Mistiflying, Part 1: In Which Mistiflying Experiences a Dreadful Bother"
+                        },
+                        new
+                        {
+                            Id = 99,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            CollectJson = "{\"mistifly1\":25,\"mistifly2\":15,\"mistifly3\":10}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"head_special_roguishRainbowMessengerHood\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 300,
+                            Group = "questGroupMayhemMistiflying",
+                            IsBossQuest = false,
+                            Key = "mayhemMistiflying2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "mayhemMistiflying1",
+                            Text = "Mayhem in Mistiflying, Part 2: In Which the Wind Worsens"
+                        },
+                        new
+                        {
+                            Id = 100,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"CottonCandyPink\",\"count\":3},{\"type\":\"gear\",\"key\":\"weapon_special_roguishRainbowMessage\",\"count\":1}]",
+                            GemCost = 6,
+                            GoldCost = 400,
+                            Group = "questGroupMayhemMistiflying",
+                            IsBossQuest = true,
+                            Key = "mayhemMistiflying3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "mayhemMistiflying2",
+                            Text = "Mayhem in Mistiflying, Part 3: In Which a Mailman is Extremely Rude"
+                        },
+                        new
+                        {
+                            Id = 101,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Skeleton\",\"count\":1},{\"type\":\"gear\",\"key\":\"armor_special_mammothRiderArmor\",\"count\":1}]",
+                            GemCost = 5,
+                            GoldCost = 200,
+                            Group = "questGroupStoikalmCalamity",
+                            IsBossQuest = true,
+                            Key = "stoikalmCalamity1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Stoikalm Rage",
+                            RageValue = 50.0,
+                            Text = "Stoïkalm Calamity, Part 1: Earthen Enemies"
+                        },
+                        new
+                        {
+                            Id = 102,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            CollectJson = "{\"icicleCoin\":40}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"head_special_mammothRiderHelm\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 300,
+                            Group = "questGroupStoikalmCalamity",
+                            IsBossQuest = false,
+                            Key = "stoikalmCalamity2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "stoikalmCalamity1",
+                            Text = "Stoïkalm Calamity, Part 2: Seek the Icicle Caverns"
+                        },
+                        new
+                        {
+                            Id = 103,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"CottonCandyBlue\",\"count\":3},{\"type\":\"gear\",\"key\":\"weapon_special_mammothRiderSpear\",\"count\":1}]",
+                            GemCost = 6,
+                            GoldCost = 400,
+                            Group = "questGroupStoikalmCalamity",
+                            IsBossQuest = true,
+                            Key = "stoikalmCalamity3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "stoikalmCalamity2",
+                            Text = "Stoïkalm Calamity, Part 3: Icicle Drake Quake"
+                        },
+                        new
+                        {
+                            Id = 104,
+                            BossDef = 1.0,
+                            BossHp = 500.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Skeleton\",\"count\":1},{\"type\":\"gear\",\"key\":\"head_special_pyromancersTurban\",\"count\":1}]",
+                            GemCost = 5,
+                            GoldCost = 200,
+                            Group = "questGroupTaskwoodsTerror",
+                            IsBossQuest = true,
+                            Key = "taskwoodsTerror1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Taskwoods Rage",
+                            RageValue = 50.0,
+                            Text = "Terror in the Taskwoods, Part 1: The Blaze in the Taskwoods"
+                        },
+                        new
+                        {
+                            Id = 105,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            CollectJson = "{\"pixie\":25,\"brownie\":15,\"dryad\":10}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"armor_special_pyromancersRobes\",\"count\":1}]",
+                            GemCost = 4,
+                            GoldCost = 300,
+                            Group = "questGroupTaskwoodsTerror",
+                            IsBossQuest = false,
+                            Key = "taskwoodsTerror2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "taskwoodsTerror1",
+                            Text = "Terror in the Taskwoods, Part 2: Finding the Flourishing Fairies"
+                        },
+                        new
+                        {
+                            Id = 106,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 2.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 650,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"Strawberry\",\"count\":3},{\"type\":\"gear\",\"key\":\"weapon_special_taskwoodsLantern\",\"count\":1}]",
+                            GemCost = 6,
+                            GoldCost = 400,
+                            Group = "questGroupTaskwoodsTerror",
+                            IsBossQuest = true,
+                            Key = "taskwoodsTerror3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "taskwoodsTerror2",
+                            Text = "Terror in the Taskwoods, Part 3: Jacko of the Lantern"
+                        },
+                        new
+                        {
+                            Id = 107,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "gold",
+                            CollectJson = "{\"ancientTome\":40,\"forbiddenTome\":40,\"hiddenTome\":40}",
+                            Completion = "",
+                            DropExp = 200,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"Meat\",\"count\":3},{\"type\":\"food\",\"key\":\"Milk\",\"count\":3}]",
+                            GemCost = 4,
+                            GoldCost = 400,
+                            Group = "questGroupLostMasterclasser",
+                            IsBossQuest = false,
+                            Key = "lostMasterclasser1",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Mystery of the Masterclassers, Part 1: Read Between the Lines"
+                        },
+                        new
+                        {
+                            Id = 108,
+                            BossDef = 1.0,
+                            BossHp = 1500.0,
+                            BossStr = 2.5,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 1500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"food\",\"key\":\"Chocolate\",\"count\":3},{\"type\":\"gear\",\"key\":\"eyewear_special_aetherMask\",\"count\":1}]",
+                            GemCost = 8,
+                            GoldCost = 500,
+                            Group = "questGroupLostMasterclasser",
+                            IsBossQuest = true,
+                            Key = "lostMasterclasser2",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "lostMasterclasser1",
+                            Text = "The Mystery of the Masterclassers, Part 2: Assembling the a'Voidant"
+                        },
+                        new
+                        {
+                            Id = 109,
+                            BossDef = 1.0,
+                            BossHp = 2000.0,
+                            BossStr = 3.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 2000,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Golden\",\"count\":1},{\"type\":\"hatchingPotions\",\"key\":\"Shade\",\"count\":1}]",
+                            GemCost = 9,
+                            GoldCost = 600,
+                            Group = "questGroupLostMasterclasser",
+                            IsBossQuest = true,
+                            Key = "lostMasterclasser3",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "lostMasterclasser2",
+                            RageHealing = 0.29999999999999999,
+                            RageName = "Masterclasser Rage",
+                            RageValue = 25.0,
+                            Text = "The Mystery of the Masterclassers, Part 3: City in the Sands"
+                        },
+                        new
+                        {
+                            Id = 110,
+                            BossDef = 1.0,
+                            BossHp = 3000.0,
+                            BossStr = 4.0,
+                            Category = "gold",
+                            Completion = "",
+                            DropExp = 3500,
+                            DropGold = 0,
+                            DropItemsJson = "[{\"type\":\"gear\",\"key\":\"back_special_aetherCloak\",\"count\":1},{\"type\":\"gear\",\"key\":\"weapon_special_aetherCrystals\",\"count\":1}]",
+                            GemCost = 11,
+                            GoldCost = 700,
+                            Group = "questGroupLostMasterclasser",
+                            IsBossQuest = true,
+                            Key = "lostMasterclasser4",
+                            LevelRequired = 0,
+                            Notes = "",
+                            PrerequisiteQuestKey = "lostMasterclasser3",
+                            RageEffect = "Full Mana Drain",
+                            RageMpDrain = 1.0,
+                            RageName = "Masterclasser Rage",
+                            RageValue = 15.0,
+                            Text = "The Mystery of the Masterclassers, Part 4: The Lost Masterclasser"
+                        },
+                        new
+                        {
+                            Id = 111,
+                            BossDef = 1.0,
+                            BossStr = 1.0,
+                            Category = "timeTravelers",
+                            CollectJson = "{\"bolt\":15,\"gear\":10,\"spring\":10}",
+                            Completion = "",
+                            DropExp = 75,
+                            DropGold = 40,
+                            DropItemsJson = "[{\"type\":\"eggs\",\"key\":\"Robot\",\"count\":3}]",
+                            GemCost = 0,
+                            GoldCost = 0,
+                            IsBossQuest = false,
+                            Key = "robot",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "Mysterious Mechanical Marvels!"
+                        },
+                        new
+                        {
+                            Id = 112,
+                            BossDef = 1.0,
+                            BossHp = 1500.0,
+                            BossStr = 2.5,
+                            Category = "timeTravelers",
+                            Completion = "",
+                            DropExp = 900,
+                            DropGold = 90,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"SolarSystem\",\"count\":3}]",
+                            GemCost = 0,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "solarSystem",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Voyage of Cosmic Concentration"
+                        },
+                        new
+                        {
+                            Id = 113,
+                            BossDef = 1.0,
+                            BossHp = 1000.0,
+                            BossStr = 1.0,
+                            Category = "timeTravelers",
+                            Completion = "",
+                            DropExp = 425,
+                            DropGold = 50,
+                            DropItemsJson = "[{\"type\":\"hatchingPotions\",\"key\":\"Windup\",\"count\":3}]",
+                            GemCost = 0,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "windup",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "A Whirl with a Wind-Up Warrior"
+                        },
+                        new
+                        {
+                            Id = 114,
+                            BossDef = 1.0,
+                            BossHp = 100.0,
+                            BossStr = 0.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 42,
+                            DropGold = 8,
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "basilist",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Basi-List"
+                        },
+                        new
+                        {
+                            Id = 115,
+                            BossDef = 1.0,
+                            BossHp = 100.0,
+                            BossStr = 0.5,
+                            Category = "unlockable",
+                            Completion = "",
+                            DropExp = 42,
+                            DropGold = 8,
+                            GemCost = 4,
+                            GoldCost = 0,
+                            IsBossQuest = true,
+                            Key = "dustbunnies",
+                            LevelRequired = 0,
+                            Notes = "",
+                            Text = "The Feral Dust Bunnies"
+                        });
+                });
+
             modelBuilder.Entity("HabitTracker.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -2251,6 +4651,1271 @@ namespace HabitTracker.Migrations
                             Name = "Windup Potion",
                             Rarity = 2,
                             Type = 2
+                        },
+                        new
+                        {
+                            Id = 182,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_alligator",
+                            Name = "The Insta-Gator",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 183,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_alpaca",
+                            Name = "The Overpacked Alpaca",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 184,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_armadillo",
+                            Name = "The Indulgent Armadillo",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 185,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_axolotl",
+                            Name = "The Magical Axolotl",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 186,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_badger",
+                            Name = "Stop Badgering Me!",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 187,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_beetle",
+                            Name = "The CRITICAL BUG",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 188,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_bunny",
+                            Name = "The Killer Bunny",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 189,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_butterfly",
+                            Name = "Bye, Bye, Butterfry",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 190,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_cat",
+                            Name = "A Purrplexing Predicament",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 191,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_chameleon",
+                            Name = "The Chaotic Chameleon",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 192,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_cheetah",
+                            Name = "Such a Cheetah",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 193,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_cow",
+                            Name = "The Mootant Cow",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 194,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_crab",
+                            Name = "The Fiddling Crab",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 195,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dilatory_derby",
+                            Name = "The Dilatory Derby",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 196,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dog",
+                            Name = "Triple Dog Dare!",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 197,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dolphin",
+                            Name = "The Dolphin of Doubt",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 198,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_falcon",
+                            Name = "The Birds of Preycrastination",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 199,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_ferret",
+                            Name = "The Nefarious Ferret",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 200,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_frog",
+                            Name = "Swamp of the Clutter Frog",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 201,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_ghost_stag",
+                            Name = "The Spirit of Spring",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 202,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_giraffe",
+                            Name = "The Gear-affe",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 203,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_gryphon",
+                            Name = "The Fiery Gryphon",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 204,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_guineapig",
+                            Name = "The Guinea Pig Gang",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 205,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_harpy",
+                            Name = "Help! Harpy!",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 206,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_hedgehog",
+                            Name = "The Hedgebeast",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 207,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_hippo",
+                            Name = "What a Hippo-Crite",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 208,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_horse",
+                            Name = "Ride the Night-Mare",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 209,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_kangaroo",
+                            Name = "Kangaroo Catastrophe",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 210,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_kraken",
+                            Name = "The Kraken of Inkomplete",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 211,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_monkey",
+                            Name = "Monstrous Mandrill",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 212,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_nudibranch",
+                            Name = "Infestation of the NowDo Nudibranchs",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 213,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_octopus",
+                            Name = "The Call of Octothulu",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 214,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_otter",
+                            Name = "The Perfidious Plotter!",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 215,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_owl",
+                            Name = "The Night-Owl",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 216,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_peacock",
+                            Name = "The Push-and-Pull Peacock",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 217,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_penguin",
+                            Name = "The Fowl Frost",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 218,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_platypus",
+                            Name = "The Perfectionist Platypus",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 219,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_pterodactyl",
+                            Name = "The Pterror-dactyl",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 220,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_raccoon",
+                            Name = "Raccoon Tycoon",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 221,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_rat",
+                            Name = "The Rat King",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 222,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_rock",
+                            Name = "Escape the Cave Creature",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 223,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_rooster",
+                            Name = "Rooster Rampage",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 224,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_sabretooth",
+                            Name = "The Sabre Cat",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 225,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_seaserpent",
+                            Name = "Sea Serpent Strike!",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 226,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_sheep",
+                            Name = "The Thunder Ram",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 227,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_slime",
+                            Name = "The Jelly Regent",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 228,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_sloth",
+                            Name = "The Somnolent Sloth",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 229,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_snail",
+                            Name = "The Snail of Drudgery Sludge",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 230,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_snake",
+                            Name = "The Serpent of Distraction",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 231,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_spider",
+                            Name = "The Icy Arachnid",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 232,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_squirrel",
+                            Name = "The Sneaky Squirrel",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 233,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_treeling",
+                            Name = "The Tangle Tree",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 234,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_trex",
+                            Name = "King of the Dinosaurs",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 235,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_trex_undead",
+                            Name = "The Dinosaur Unearthed",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 236,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_triceratops",
+                            Name = "The Trampling Triceratops",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 237,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_turtle",
+                            Name = "Guide the Turtle",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 238,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_unicorn",
+                            Name = "Convincing the Unicorn Queen",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 239,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_velociraptor",
+                            Name = "The Veloci-Rapper",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 240,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_whale",
+                            Name = "Wail of the Whale",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 241,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_yarn",
+                            Name = "A Tangled Yarn",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 242,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_amber",
+                            Name = "The Amber Alliance",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 243,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_blackPearl",
+                            Name = "A Startling Starry Idea",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 244,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_bronze",
+                            Name = "Brazen Beetle Battle",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 245,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_fluorite",
+                            Name = "A Bright Fluorite Fright",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 246,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_jade",
+                            Name = "A Jaded Jinx",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 247,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_pinkMarble",
+                            Name = "Calm the Corrupted Cupid",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 248,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_onyx",
+                            Name = "The Onyx Odyssey",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 249,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_ruby",
+                            Name = "Ruby Rapport",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 250,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_silver",
+                            Name = "The Silver Solution",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 251,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_stone",
+                            Name = "A Maze of Moss",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 252,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_turquoise",
+                            Name = "Turquoise Treasure Toil",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 253,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_opal",
+                            Name = "The Legend of the Obscure Opals",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 254,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_evilsanta",
+                            Name = "Trapper Santa",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 255,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_evilsanta2",
+                            Name = "Find the Cub",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 256,
+                            GoldValue = 1,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_egg",
+                            Name = "Egg Hunt",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 257,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_waffle",
+                            Name = "Waffling with the Fool",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 258,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_virtualpet",
+                            Name = "Virtual Mayhem with the April Fool",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 259,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_fungi",
+                            Name = "The Moody Mushroom",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 260,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_alien",
+                            Name = "Invasion of the Motivation Snatchers",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 261,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_atom1",
+                            Name = "Attack of the Mundane, Part 1",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 262,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_atom2",
+                            Name = "Attack of the Mundane, Part 2",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 263,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_atom3",
+                            Name = "Attack of the Mundane, Part 3",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 264,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_goldenknight1",
+                            Name = "The Golden Knight, Part 1",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 265,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_goldenknight2",
+                            Name = "The Golden Knight, Part 2",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 266,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_goldenknight3",
+                            Name = "The Golden Knight, Part 3",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 267,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moon1",
+                            Name = "Lunar Battle, Part 1",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 268,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moon2",
+                            Name = "Lunar Battle, Part 2",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 269,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moon3",
+                            Name = "Lunar Battle, Part 3",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 270,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moonstone1",
+                            Name = "Recidivate, Part 1",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 271,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moonstone2",
+                            Name = "Recidivate, Part 2",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 272,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_moonstone3",
+                            Name = "Recidivate, Part 3",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 273,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_vice1",
+                            Name = "Vice, Part 1",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 274,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_vice2",
+                            Name = "Vice, Part 2",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 275,
+                            GoldValue = 4,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_vice3",
+                            Name = "Vice, Part 3",
+                            Rarity = 0,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 276,
+                            GoldValue = 200,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dilatoryDistress1",
+                            Name = "Dilatory Distress, Part 1",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 277,
+                            GoldValue = 300,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dilatoryDistress2",
+                            Name = "Dilatory Distress, Part 2",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 278,
+                            GoldValue = 400,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dilatoryDistress3",
+                            Name = "Dilatory Distress, Part 3",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 279,
+                            GoldValue = 200,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_mayhemMistiflying1",
+                            Name = "Mayhem in Mistiflying, Part 1",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 280,
+                            GoldValue = 300,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_mayhemMistiflying2",
+                            Name = "Mayhem in Mistiflying, Part 2",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 281,
+                            GoldValue = 400,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_mayhemMistiflying3",
+                            Name = "Mayhem in Mistiflying, Part 3",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 282,
+                            GoldValue = 200,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_stoikalmCalamity1",
+                            Name = "Stoïkalm Calamity, Part 1",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 283,
+                            GoldValue = 300,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_stoikalmCalamity2",
+                            Name = "Stoïkalm Calamity, Part 2",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 284,
+                            GoldValue = 400,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_stoikalmCalamity3",
+                            Name = "Stoïkalm Calamity, Part 3",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 285,
+                            GoldValue = 200,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_taskwoodsTerror1",
+                            Name = "Terror in the Taskwoods, Part 1",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 286,
+                            GoldValue = 300,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_taskwoodsTerror2",
+                            Name = "Terror in the Taskwoods, Part 2",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 287,
+                            GoldValue = 400,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_taskwoodsTerror3",
+                            Name = "Terror in the Taskwoods, Part 3",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 288,
+                            GoldValue = 400,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_lostMasterclasser1",
+                            Name = "Mystery of the Masterclassers, Part 1",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 289,
+                            GoldValue = 500,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_lostMasterclasser2",
+                            Name = "Mystery of the Masterclassers, Part 2",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 290,
+                            GoldValue = 600,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_lostMasterclasser3",
+                            Name = "Mystery of the Masterclassers, Part 3",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 291,
+                            GoldValue = 700,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_lostMasterclasser4",
+                            Name = "Mystery of the Masterclassers, Part 4",
+                            Rarity = 2,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 292,
+                            GoldValue = 0,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_robot",
+                            Name = "Mysterious Mechanical Marvels!",
+                            Rarity = 3,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 293,
+                            GoldValue = 0,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_solarSystem",
+                            Name = "A Voyage of Cosmic Concentration",
+                            Rarity = 3,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 294,
+                            GoldValue = 0,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_windup",
+                            Name = "A Whirl with a Wind-Up Warrior",
+                            Rarity = 3,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 295,
+                            GoldValue = 100,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_basilist",
+                            Name = "The Basi-List",
+                            Rarity = 1,
+                            Type = 3
+                        },
+                        new
+                        {
+                            Id = 296,
+                            GoldValue = 1,
+                            Icon = "📜",
+                            IsDroppable = false,
+                            Key = "quest_dustbunnies",
+                            Name = "The Feral Dust Bunnies",
+                            Rarity = 0,
+                            Type = 3
                         });
                 });
 
@@ -13522,6 +17187,175 @@ namespace HabitTracker.Migrations
                         });
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Guild", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("LeaderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Logo")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Privacy")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GuildId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InviteeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InviterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InviteeId");
+
+                    b.HasIndex("InviterId");
+
+                    b.HasIndex("GuildId", "InviteeId");
+
+                    b.ToTable("GuildInvites");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GuildId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("GuildId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("GuildId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("GuildId", "SentAt");
+
+                    b.ToTable("GuildMessages");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMessageLike", b =>
+                {
+                    b.Property<int>("GuildMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LikerUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("GuildMessageId", "LikerUserId");
+
+                    b.HasIndex("LikerUserId");
+
+                    b.ToTable("GuildMessageLikes");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.HabitTask", b =>
                 {
                     b.Property<int>("Id")
@@ -13630,6 +17464,67 @@ namespace HabitTracker.Migrations
                     b.ToTable("HabitTasks");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("DeletedByReceiver")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("DeletedBySender")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId", "IsRead");
+
+                    b.HasIndex("SenderId", "ReceiverId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.MessageLike", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LikerUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MessageId", "LikerUserId");
+
+                    b.HasIndex("LikerUserId");
+
+                    b.ToTable("MessageLikes");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -13677,6 +17572,236 @@ namespace HabitTracker.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Party", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LeaderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderId");
+
+                    b.ToTable("Parties");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InviteeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InviterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InviteeId");
+
+                    b.HasIndex("InviterId");
+
+                    b.HasIndex("PartyId", "InviteeId");
+
+                    b.ToTable("PartyInvites");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PartyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.HasIndex("PartyId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PartyMembers");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PartyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("PartyId", "SentAt");
+
+                    b.ToTable("PartyMessages");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMessageLike", b =>
+                {
+                    b.Property<int>("PartyMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LikerUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PartyMessageId", "LikerUserId");
+
+                    b.HasIndex("LikerUserId");
+
+                    b.ToTable("PartyMessageLikes");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyQuest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ActiveAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("BossHpRemaining")
+                        .HasColumnType("float");
+
+                    b.Property<int>("BossQuestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CollectProgressJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LeaderUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartyId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("RageMeter")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BossQuestId");
+
+                    b.HasIndex("LeaderUserId");
+
+                    b.HasIndex("PartyId");
+
+                    b.ToTable("PartyQuests");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyQuestMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PartyQuestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Response")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("TotalDamageDealt")
+                        .HasColumnType("float");
+
+                    b.Property<double>("TotalRageGiven")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PartyQuestId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PartyQuestMembers");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.Quest", b =>
@@ -13738,6 +17863,51 @@ namespace HabitTracker.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Quests");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Report", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ReportedMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReportedUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReporterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ResolvedByAdminId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportedMessageId");
+
+                    b.HasIndex("ReportedUserId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.TaskChecklistItem", b =>
@@ -13812,6 +17982,10 @@ namespace HabitTracker.Migrations
                     b.Property<string>("Avatar")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Background")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
@@ -14111,6 +18285,33 @@ namespace HabitTracker.Migrations
                     b.ToTable("UserBadges");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.UserBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlockedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BlockerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedId");
+
+                    b.HasIndex("BlockerId", "BlockedId")
+                        .IsUnique();
+
+                    b.ToTable("UserBlocks");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.UserGearItem", b =>
                 {
                     b.Property<int>("Id")
@@ -14296,6 +18497,101 @@ namespace HabitTracker.Migrations
                     b.Navigation("Requester");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Guild", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Leader")
+                        .WithMany()
+                        .HasForeignKey("LeaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Leader");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildInvite", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Guild", "Guild")
+                        .WithMany("Invites")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMember", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Guild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMessage", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.Guild", "Guild")
+                        .WithMany("Messages")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMessageLike", b =>
+                {
+                    b.HasOne("HabitTracker.Models.GuildMessage", "GuildMessage")
+                        .WithMany("Likes")
+                        .HasForeignKey("GuildMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "LikerUser")
+                        .WithMany()
+                        .HasForeignKey("LikerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GuildMessage");
+
+                    b.Navigation("LikerUser");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.HabitTask", b =>
                 {
                     b.HasOne("HabitTracker.Models.User", "User")
@@ -14305,6 +18601,44 @@ namespace HabitTracker.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Message", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.MessageLike", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "LikerUser")
+                        .WithMany()
+                        .HasForeignKey("LikerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.Message", "Message")
+                        .WithMany("Likes")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LikerUser");
+
+                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.Notification", b =>
@@ -14318,6 +18652,147 @@ namespace HabitTracker.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Party", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Leader")
+                        .WithMany()
+                        .HasForeignKey("LeaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Leader");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyInvite", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.Party", "Party")
+                        .WithMany("Invites")
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+
+                    b.Navigation("Party");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMember", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Party", "Party")
+                        .WithMany("Members")
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Party");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMessage", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.Party", "Party")
+                        .WithMany("Messages")
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Party");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMessageLike", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "LikerUser")
+                        .WithMany()
+                        .HasForeignKey("LikerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.PartyMessage", "PartyMessage")
+                        .WithMany("Likes")
+                        .HasForeignKey("PartyMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LikerUser");
+
+                    b.Navigation("PartyMessage");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyQuest", b =>
+                {
+                    b.HasOne("HabitTracker.Models.BossQuest", "BossQuest")
+                        .WithMany()
+                        .HasForeignKey("BossQuestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Leader")
+                        .WithMany()
+                        .HasForeignKey("LeaderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.Party", "Party")
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BossQuest");
+
+                    b.Navigation("Leader");
+
+                    b.Navigation("Party");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyQuestMember", b =>
+                {
+                    b.HasOne("HabitTracker.Models.PartyQuest", "PartyQuest")
+                        .WithMany("Members")
+                        .HasForeignKey("PartyQuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PartyQuest");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.Quest", b =>
                 {
                     b.HasOne("HabitTracker.Models.Category", "CustomCategory")
@@ -14325,6 +18800,32 @@ namespace HabitTracker.Migrations
                         .HasForeignKey("CategoryId");
 
                     b.Navigation("CustomCategory");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Report", b =>
+                {
+                    b.HasOne("HabitTracker.Models.Message", "ReportedMessage")
+                        .WithMany()
+                        .HasForeignKey("ReportedMessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("HabitTracker.Models.User", "ReportedUser")
+                        .WithMany()
+                        .HasForeignKey("ReportedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ReportedMessage");
+
+                    b.Navigation("ReportedUser");
+
+                    b.Navigation("Reporter");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.TaskChecklistItem", b =>
@@ -14374,6 +18875,25 @@ namespace HabitTracker.Migrations
                     b.Navigation("Badge");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.UserBlock", b =>
+                {
+                    b.HasOne("HabitTracker.Models.User", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HabitTracker.Models.User", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Blocker");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.UserGearItem", b =>
@@ -14470,11 +18990,49 @@ namespace HabitTracker.Migrations
                     b.Navigation("OwnedByUsers");
                 });
 
+            modelBuilder.Entity("HabitTracker.Models.Guild", b =>
+                {
+                    b.Navigation("Invites");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.GuildMessage", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
             modelBuilder.Entity("HabitTracker.Models.HabitTask", b =>
                 {
                     b.Navigation("ChecklistItems");
 
                     b.Navigation("TagAssignments");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Message", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.Party", b =>
+                {
+                    b.Navigation("Invites");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyMessage", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("HabitTracker.Models.PartyQuest", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("HabitTracker.Models.Quest", b =>

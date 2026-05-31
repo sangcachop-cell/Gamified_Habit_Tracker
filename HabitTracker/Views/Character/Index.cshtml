@@ -2,7 +2,7 @@
 @using HabitTracker.Constants
 @{
     ViewData["Title"] = "Character";
-    var u = Model.User;
+    var u  = Model.User;
     var es = Model.EffectiveStats;
     bool hasPoints = u.StatPoints > 0;
     double xpPct = Model.XpToNextLevel > 0
@@ -12,665 +12,317 @@
     string ClassLabel(string? cls) => cls switch
     {
         CharacterClass.Warrior => "⚔️ Warrior",
-        CharacterClass.Mage => "🔮 Mage",
-        CharacterClass.Rogue => "🗡️ Rogue",
-        CharacterClass.Healer => "💚 Healer",
-        _ => "No Class"
+        CharacterClass.Mage    => "🔮 Mage",
+        CharacterClass.Rogue   => "🗡️ Rogue",
+        CharacterClass.Healer  => "💚 Healer",
+        _                      => "No Class"
     };
 
-    string? eqArmorKey = u.EquippedArmor;
-    string? eqHeadKey = u.EquippedHead;
-    string? eqShieldKey = u.EquippedShield;
-    string? eqWeaponKey = u.EquippedWeapon;
-    string bodyType = u.BodyType ?? "broad";
+    // Resolve equipped gear for avatar layers
+    string? eqArmorKey   = u.EquippedArmor;
+    string? eqHeadKey    = u.EquippedHead;
+    string? eqShieldKey  = u.EquippedShield;
+    string? eqWeaponKey  = u.EquippedWeapon;
+    string bodyType      = u.BodyType ?? "broad";
 
     HabitTracker.Models.GearItem? FindGear(string? key) =>
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear = FindGear(eqArmorKey);
-    var headGear = FindGear(eqHeadKey);
-    var shieldGear = FindGear(eqShieldKey);
-    var weaponGear = FindGear(eqWeaponKey);
-    bool wep2H = weaponGear?.TwoHanded ?? false;
+    var armorGear         = FindGear(eqArmorKey);
+    var headGear          = FindGear(eqHeadKey);
+    var shieldGear        = FindGear(eqShieldKey);
+    var weaponGear        = FindGear(eqWeaponKey);
+    var backGear          = FindGear(u.EquippedBack);
+    var eyewearGear       = FindGear(u.EquippedEyewear);
+    var headAccessoryGear = FindGear(u.EquippedHeadAccessory);
+    bool wep2H     = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
 
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
-<style>
-    .character-page {
-        max-width: 1120px;
-        margin: 10px auto;
-        padding: 0 12px;
-    }
+<div class="container mt-4" style="max-width:860px;">
 
-    .character-shell {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 22px;
-        padding: 16px 22px;
-        box-shadow: 0 14px 35px rgba(15,23,42,.07);
-    }
-
-    .character-title-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 12px;
-    }
-
-    .character-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 28px;
-        font-weight: 900;
-        color: #111827;
-        margin: 0;
-    }
-
-    .character-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .hero-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 20px;
-        background: linear-gradient(135deg,#fff,#f8fafc);
-        padding: 14px 18px;
-        display: grid;
-        grid-template-columns: 210px 1fr;
-        gap: 18px;
-        align-items: center;
-        margin-bottom: 12px;
-    }
-
-    .avatar-stage {
-        position: relative;
-        width: 190px;
-        height: 165px;
-        border-radius: 22px;
-        background: radial-gradient(circle at center,rgba(139,92,246,.16),transparent 58%),linear-gradient(180deg,#faf5ff,#fff);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: visible;
-    }
-
-        .avatar-stage::before {
-            content: "";
-            position: absolute;
-            width: 125px;
-            height: 125px;
-            border-radius: 999px;
-            border: 4px solid rgba(139,92,246,.13);
-        }
-
-        .avatar-stage::after {
-            content: "";
-            position: absolute;
-            bottom: 20px;
-            width: 135px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(180deg,#bbf7d0,#86efac);
-            border: 4px solid #94a3b8;
-            box-shadow: 0 7px 16px rgba(15,23,42,.14);
-        }
-
-    .avatar-wrap {
-        position: relative;
-        z-index: 2;
-        width: 140px;
-        height: 140px;
-        transform: scale(1.13);
-        image-rendering: pixelated;
-    }
-
-    .avatar-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 90px;
-        height: 90px;
-        image-rendering: pixelated;
-    }
-
-    .class-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 7px 16px;
-        border-radius: 10px;
-        background: #6b7280;
-        color: #fff;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
-
-    .hero-level-line {
-        display: flex;
-        justify-content: space-between;
-        align-items: end;
-        gap: 14px;
-        margin-bottom: 7px;
-    }
-
-    .hero-level {
-        font-size: 21px;
-        font-weight: 900;
-        color: #111827;
-    }
-
-    .hero-xp {
-        color: #64748b;
-        font-weight: 800;
-    }
-
-    .xp-track {
-        height: 10px;
-        background: #e5e7eb;
-        border-radius: 999px;
-        overflow: hidden;
-        margin-bottom: 12px;
-    }
-
-    .xp-fill {
-        height: 100%;
-        width: @xpPct %;
-        background: linear-gradient(90deg,#fbbf24,#f59e0b);
-    }
-
-    .quick-stats {
-        display: grid;
-        grid-template-columns: repeat(3,1fr);
-        gap: 10px;
-    }
-
-    .quick-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 15px;
-        padding: 10px 14px;
-        min-height: 70px;
-        background: #fff;
-        box-shadow: 0 6px 18px rgba(15,23,42,.04);
-    }
-
-        .quick-card.hp {
-            background: linear-gradient(135deg,#fff1f2,#fff);
-        }
-
-        .quick-card.mana {
-            background: linear-gradient(135deg,#eff6ff,#fff);
-        }
-
-        .quick-card.gold {
-            background: linear-gradient(135deg,#fffbeb,#fff);
-        }
-
-    .quick-label {
-        font-weight: 900;
-        color: #111827;
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 7px;
-    }
-
-    .mini-bar {
-        height: 8px;
-        border-radius: 999px;
-        background: #e5e7eb;
-        overflow: hidden;
-    }
-
-    .mini-fill.hp {
-        width: 100%;
-        height: 100%;
-        background: #f43f5e;
-    }
-
-    .mini-fill.mana {
-        width: 100%;
-        height: 100%;
-        background: #2563eb;
-    }
-
-    .stat-alert {
-        border: 1px solid #bbf7d0;
-        background: linear-gradient(90deg,#d1fae5,#ecfdf5);
-        border-radius: 14px;
-        padding: 9px 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        color: #065f46;
-    }
-
-    .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(4,1fr);
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-
-        .stat-grid .card {
-            border-radius: 18px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 6px 18px rgba(15,23,42,.04);
-            min-height: 300px;
-            overflow: visible;
-        }
-
-        .stat-grid .card-body {
-            padding: 14px 18px !important;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .stat-grid h5,
-        .stat-grid h6 {
-            font-size: 15px !important;
-            margin-bottom: 6px !important;
-        }
-
-        .stat-grid .display-4,
-        .stat-grid .fs-1 {
-            font-size: 28px !important;
-        }
-
-        .stat-grid .btn {
-            padding: 6px 10px;
-            font-size: 14px;
-        }
-
-    .derived-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 12px 18px;
-        background: #fff;
-        margin-bottom: 10px;
-    }
-
-    .derived-title {
-        font-size: 18px;
-        font-weight: 900;
-        margin-bottom: 8px;
-        color: #111827;
-    }
-
-    .derived-grid {
-        display: grid;
-        grid-template-columns: repeat(3,1fr);
-        text-align: center;
-        gap: 10px;
-    }
-
-    .derived-item {
-        padding: 5px;
-        border-right: 1px solid #e5e7eb;
-    }
-
-        .derived-item:last-child {
-            border-right: none;
-        }
-
-    .derived-name {
-        font-weight: 900;
-        color: #111827;
-        margin-bottom: 2px;
-    }
-
-    .derived-value {
-        font-size: 19px;
-        font-weight: 900;
-        color: #111827;
-    }
-
-    .buff-card {
-        border: 1px solid #bae6fd;
-        background: linear-gradient(90deg,#e0f2fe,#eff6ff);
-        color: #075985;
-        border-radius: 15px;
-        padding: 10px 16px;
-        font-weight: 700;
-    }
-
-    @@media (max-width: 992px) {
-        .hero-card {
-            grid-template-columns: 1fr;
-        }
-
-        .avatar-stage {
-            margin: 0 auto;
-        }
-
-        .quick-stats,
-        .stat-grid,
-        .derived-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .character-shell {
-            padding: 16px;
-        }
-
-        .character-title-row {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .quick-stats,
-        .stat-grid,
-        .derived-grid {
-            grid-template-columns: 1fr;
-        }
-
-            .stat-grid .card {
-                max-height: none;
-            }
-    }
-</style>
-
-<div class="character-page">
-    <div class="character-shell">
-
-        <div class="character-title-row">
-            <h2 class="character-title">
-                <span>⚔️</span>
-                <span>Character Sheet</span>
-            </h2>
-
-            <div class="character-actions">
-                <a href="/Character/Customize" class="btn btn-outline-primary btn-sm">
-                    🎨 Customize
+    <!-- Header row -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">⚔️ Character Sheet</h2>
+        <div class="d-flex gap-2">
+            <a href="/Character/Customize" class="btn btn-outline-info btn-sm">
+                🎨 Customize
+            </a>
+            @if (Model.CanSelectClass)
+            {
+                <a href="/Character/SelectClass" class="btn btn-warning btn-sm">
+                    🌟 Select Your Class
                 </a>
+            }
+            @if (u.Level >= 10)
+            {
+                <a href="/Character/Rebirth" class="btn btn-outline-danger btn-sm">
+                    🔁 Rebirth
+                </a>
+            }
+        </div>
+    </div>
 
-                @if (Model.CanSelectClass)
+    <!-- Avatar + Class/Level row -->
+    <div class="d-flex gap-4 mb-4 align-items-center">
+
+        <!-- Avatar (layer stack) -->
+        <div style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; flex-shrink:0; background:rgba(255,255,255,0.04); border-radius:8px; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
+            <div style="position:relative; margin-left:24px; width:90px; height:90px;">
+                @if (isMounted)
                 {
-                    <a href="/Character/SelectClass" class="btn btn-warning btn-sm">
-                        🌟 Select Your Class
-                    </a>
+                    <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
+                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
                 }
-
-                @if (!string.IsNullOrEmpty(u.Class) && u.Level >= 11)
+                @if (backGear != null)
                 {
-                    <a href="/Character/Spells" class="btn btn-primary btn-sm">
-                        ✨ Cast Spells
-                    </a>
+                    <img src="@backGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
                 }
-
-                @if (u.Level >= 10)
+                <img src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
+                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                <img src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png"
+                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                @if (armorGear != null)
                 {
-                    <a href="/Character/Rebirth" class="btn btn-outline-danger btn-sm">
-                        🔁 Rebirth
-                    </a>
+                    <img src="@armorGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (u.HairBangs > 0)
+                {
+                    <img src="/images/habitica/customize/hair/hair_bangs_@(u.HairBangs)_@(u.HairColor).png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                <img src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png"
+                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                @if (u.HairMustache > 0)
+                {
+                    <img src="/images/habitica/customize/beards/hair_mustache_@(u.HairMustache)_@(u.HairColor).png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (u.HairBeard > 0)
+                {
+                    <img src="/images/habitica/customize/beards/hair_beard_@(u.HairBeard)_@(u.HairColor).png"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (eyewearGear != null)
+                {
+                    <img src="@eyewearGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                }
+                @if (headGear != null)
+                {
+                    <img src="@headGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (headAccessoryGear != null)
+                {
+                    <img src="@headAccessoryGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
+                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                }
+                @if (shieldGear != null && !wep2H)
+                {
+                    <img src="@shieldGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (weaponGear != null)
+                {
+                    <img src="@weaponGear.GetWornImagePath(bodyType)"
+                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                }
+                @if (isMounted)
+                {
+                    <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
+                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                }
+                @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
+                {
+                    <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
+                         style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
                 }
             </div>
         </div>
 
-        <div class="hero-card">
-            <div class="avatar-stage">
-                <div class="avatar-wrap" style="padding-top:@(isMounted ? "0" : "24")px;">
-                    <div style="position:relative; margin-left:24px; width:90px; height:90px;">
-                        @if (isMounted)
-                        {
-                            <img src="/fe/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
-                                 style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                        }
-
-                        <img src="/fe/customize/skin/skin_@(u.SkinColor ?? "915533").png" class="avatar-layer" />
-                        <img src="/fe/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png" class="avatar-layer" />
-
-                        @if (armorGear != null)
-                        {
-                            <img src="@armorGear.GetWornImagePath(bodyType)" class="avatar-layer" />
-                        }
-
-                        @if (u.HairBangs > 0)
-                        {
-                            <img src="/fe/customize/hair/hair_bangs_@(u.HairBangs)_@(u.HairColor).png" class="avatar-layer" />
-                        }
-
-                        <img src="/fe/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png" class="avatar-layer" />
-
-                        @if (u.HairMustache > 0)
-                        {
-                            <img src="/fe/customize/beards/hair_mustache_@(u.HairMustache)_@(u.HairColor).png" class="avatar-layer" />
-                        }
-
-                        @if (u.HairBeard > 0)
-                        {
-                            <img src="/fe/customize/beards/hair_beard_@(u.HairBeard)_@(u.HairColor).png" class="avatar-layer" />
-                        }
-
-                        @if (headGear != null)
-                        {
-                            <img src="@headGear.GetWornImagePath(bodyType)" class="avatar-layer" />
-                        }
-
-                        @if (shieldGear != null && !wep2H)
-                        {
-                            <img src="@shieldGear.GetWornImagePath(bodyType)" class="avatar-layer" />
-                        }
-
-                        @if (weaponGear != null)
-                        {
-                            <img src="@weaponGear.GetWornImagePath(bodyType)" class="avatar-layer" />
-                        }
-
-                        @if (isMounted)
-                        {
-                            <img src="/fe/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
-                                 style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                        }
-
-                        @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
-                        {
-                            <img src="/fe/stable/pets/Pet-@(u.ActivePetKey).png"
-                                 style="position:absolute;bottom:0;left:0;image-rendering:pixelated;" />
-                        }
-                    </div>
-                </div>
+        <!-- Class + Level card -->
+        <div class="flex-grow-1">
+    <div class="card p-3">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span class="badge fs-6 @(string.IsNullOrEmpty(u.Class) ? "bg-secondary" : "bg-primary") px-3 py-2">
+                    @ClassLabel(u.Class)
+                </span>
             </div>
-
-            <div class="hero-info">
-                <span class="class-badge">@ClassLabel(u.Class)</span>
-
-                <div class="hero-level-line">
-                    <div class="hero-level">
-                        Level @u.Level
-                        <span style="font-size:15px;color:#64748b;font-weight:700;">• Adventurer</span>
-                    </div>
-                    <div class="hero-xp">
-                        @Model.XpWithinLevel / @Model.XpToNextLevel XP
-                    </div>
+            <div class="col">
+                <div class="d-flex justify-content-between mb-1">
+                    <small class="text-muted">Level @u.Level</small>
+                    <small class="text-muted">@Model.XpWithinLevel / @Model.XpToNextLevel XP</small>
                 </div>
-
-                <div class="xp-track" title="XP Progress">
-                    <div class="xp-fill"></div>
-                </div>
-
-                <div class="quick-stats">
-                    <div class="quick-card hp">
-                        <div class="quick-label">
-                            <span>❤️ HP</span>
-                            <span>@es.MaxHP / @es.MaxHP</span>
-                        </div>
-                        <div class="mini-bar">
-                            <div class="mini-fill hp"></div>
-                        </div>
-                    </div>
-
-                    <div class="quick-card mana">
-                        <div class="quick-label">
-                            <span>💎 Mana</span>
-                            <span>@es.MaxMana / @es.MaxMana</span>
-                        </div>
-                        <div class="mini-bar">
-                            <div class="mini-fill mana"></div>
-                        </div>
-                    </div>
-
-                    <div class="quick-card gold">
-                        <div class="quick-label">
-                            <span>🪙 Gold</span>
-                            <span>@u.Gold.ToString("0.0")</span>
-                        </div>
-                        <div style="font-size:13px;color:#92400e;font-weight:700;">
-                            Current balance
-                        </div>
+                <div class="progress" style="height:10px;" title="XP Progress">
+                    <div class="progress-bar bg-warning"
+                         style="width:@xpPct%;"
+                         aria-valuenow="@Model.XpWithinLevel"
+                         aria-valuemin="0"
+                         aria-valuemax="@Model.XpToNextLevel">
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+        </div><!-- /flex-grow-1 -->
+    </div><!-- /d-flex avatar+level row -->
 
-        @if (u.StatPoints > 0)
-        {
-            <div class="stat-alert stat-points-alert" role="alert">
-                <span>✨ You have <strong id="stat-points-count">@u.StatPoints</strong> unallocated stat point@(u.StatPoints != 1 ? "s" : "")!</span>
-                <small>Click <strong>+</strong> on any stat below to allocate.</small>
-            </div>
-        }
-        else
-        {
-            <div class="stat-alert" style="background:#f8fafc;border-color:#e5e7eb;color:#64748b;">
-                <span>Stat points: <strong id="stat-points-count">0</strong></span>
-                <small>Earn 1 per level-up</small>
-            </div>
-        }
+    <!-- Stat Points banner -->
+    @if (u.StatPoints > 0)
+    {
+        <div class="alert alert-success d-flex align-items-center justify-content-between mb-4" role="alert">
+            <span>✨ You have <strong id="stat-points-count">@u.StatPoints</strong> unallocated stat point@(u.StatPoints != 1 ? "s" : "")!</span>
+            <small class="text-muted">Click <strong>+</strong> on any stat below to allocate.</small>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <small class="text-muted">Stat points: <span id="stat-points-count">0</span> (earn 1 per level-up)</small>
+        </div>
+    }
 
-        <div class="stat-grid">
-            <div>
-                @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
+    <!-- Stat cards grid -->
+    <div class="row g-3 mb-4">
+
+        @* STR *@
+        <div class="col-sm-6 col-lg-3">
+            @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
                 "STR", "⚔️", "Strength",
-                                "Boosts XP and melee damage",
-                                u.STR, es.GearSTR, es.ClassBonusSTR, es.LevelBonus, es.BuffSTR, es.STR,
-                                hasPoints))
-            </div>
-
-            <div>
-                @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                                "CON", "🛡️", "Constitution",
-                                "Reduces HP damage taken from missed dailies",
-                                u.CON, es.GearCON, es.ClassBonusCON, es.LevelBonus, es.BuffCON, es.CON,
-                                hasPoints))
-            </div>
-
-            <div>
-                @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                                "INT", "🔮", "Intelligence",
-                                "Boosts mana pool and XP gained",
-                                u.INT, es.GearINT, es.ClassBonusINT, es.LevelBonus, es.BuffINT, es.INT,
-                                hasPoints))
-            </div>
-
-            <div>
-                @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                                "PER", "👁️", "Perception",
-                                "Boosts gold earned and critical hit chance",
-                                u.PER, es.GearPER, es.ClassBonusPER, es.LevelBonus, es.BuffPER, es.PER,
-                                hasPoints))
-            </div>
+                "Boosts XP and melee damage",
+                u.STR, es.GearSTR, es.ClassBonusSTR, es.LevelBonus, es.BuffSTR, es.STR,
+                hasPoints))
         </div>
 
-        <div class="derived-card">
-            <div class="derived-title">Derived Stats</div>
-
-            <div class="derived-grid">
-                <div class="derived-item">
-                    <div class="derived-name">❤️ Max HP</div>
-                    <div class="derived-value">@es.MaxHP</div>
-                    <small class="text-muted">flat CON</small>
-                </div>
-
-                <div class="derived-item">
-                    <div class="derived-name">💙 Max Mana</div>
-                    <div class="derived-value">@es.MaxMana</div>
-                    <small class="text-muted">INT × 2 + 30</small>
-                </div>
-
-                <div class="derived-item">
-                    <div class="derived-name">📐 Level Bonus</div>
-                    <div class="derived-value">+@es.LevelBonus</div>
-                    <small class="text-muted">floor(level / 2)</small>
-                </div>
-            </div>
+        @* CON *@
+        <div class="col-sm-6 col-lg-3">
+            @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
+                "CON", "🛡️", "Constitution",
+                "Reduces HP damage taken from missed dailies",
+                u.CON, es.GearCON, es.ClassBonusCON, es.LevelBonus, es.BuffCON, es.CON,
+                hasPoints))
         </div>
 
-        @if (u.BuffExpiry.HasValue && u.BuffExpiry.Value > DateTime.UtcNow)
-                {
-        <div class="buff-card">
-            ✨ <strong>Active Buff</strong> — expires @u.BuffExpiry.Value.ToLocalTime().ToString("g")
-            <br />
-            STR +@u.BuffSTR &nbsp; CON +@u.BuffCON &nbsp; INT +@u.BuffINT &nbsp; PER +@u.BuffPER
+        @* INT *@
+        <div class="col-sm-6 col-lg-3">
+            @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
+                "INT", "🔮", "Intelligence",
+                "Boosts mana pool and XP gained",
+                u.INT, es.GearINT, es.ClassBonusINT, es.LevelBonus, es.BuffINT, es.INT,
+                hasPoints))
         </div>
-                }
+
+        @* PER *@
+        <div class="col-sm-6 col-lg-3">
+            @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
+                "PER", "👁️", "Perception",
+                "Boosts gold earned and critical hit chance",
+                u.PER, es.GearPER, es.ClassBonusPER, es.LevelBonus, es.BuffPER, es.PER,
+                hasPoints))
+        </div>
 
     </div>
+
+    <!-- Derived stats -->
+    <div class="card p-3 mb-4">
+        <h6 class="text-muted mb-3">Derived Stats</h6>
+        <div class="row text-center">
+            <div class="col-4">
+                <div class="fw-bold">❤️ Max HP</div>
+                <div>@es.MaxHP</div>
+                <small class="text-muted">flat (CON reduces dmg)</small>
+            </div>
+            <div class="col-4">
+                <div class="fw-bold">💙 Max Mana</div>
+                <div>@es.MaxMana</div>
+                <small class="text-muted">INT × 2 + 30</small>
+            </div>
+            <div class="col-4">
+                <div class="fw-bold">📐 Level Bonus</div>
+                <div>+@es.LevelBonus to all stats</div>
+                <small class="text-muted">floor(level / 2)</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active buffs -->
+    @if (u.BuffExpiry.HasValue && u.BuffExpiry.Value > DateTime.UtcNow)
+    {
+        <div class="alert alert-info mb-4">
+            ✨ <strong>Active Buff</strong> — expires @u.BuffExpiry.Value.ToLocalTime().ToString("g")
+            <br/>
+            STR +@u.BuffSTR &nbsp; CON +@u.BuffCON &nbsp; INT +@u.BuffINT &nbsp; PER +@u.BuffPER
+        </div>
+    }
+
 </div>
 
 @section Scripts {
-    <script>
-        (function () {
-            'use strict';
+<script>
+(function () {
+    'use strict';
 
-            const token = () => $('input[name="__RequestVerificationToken"]').first().val();
+    const token = () => $('input[name="__RequestVerificationToken"]').first().val();
 
-            $(document).on('click', '.btn-allocate', function () {
-                const stat = $(this).data('stat');
-                const btn  = $(this);
-                btn.prop('disabled', true);
+    // Stat allocate buttons
+    $(document).on('click', '.btn-allocate', function () {
+        const stat = $(this).data('stat');
+        const btn  = $(this);
+        btn.prop('disabled', true);
 
-                $.ajax({
-                    url: '/Character/AllocateStat?stat=' + stat,
-                    method: 'POST',
-                    data: { __RequestVerificationToken: token() },
-                    success: function (r) {
-                        if (!r.success) {
-                            showToast('❌', 'Error', r.error || 'Could not allocate.', 'toast-death', 3500);
-                            btn.prop('disabled', false);
-                            return;
-                        }
+        $.ajax({
+            url: '/Character/AllocateStat?stat=' + stat,
+            method: 'POST',
+            data: { __RequestVerificationToken: token() },
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Error', r.error || 'Could not allocate.', 'toast-death', 3500);
+                    btn.prop('disabled', false);
+                    return;
+                }
 
-                        const statLow = stat.toLowerCase();
+                // Update displayed values
+                const statLow = stat.toLowerCase();
+                $('#base-' + statLow).text(r['new' + stat]);
+                $('#total-' + statLow).text(r['new' + stat]
+                    + parseInt($('#gear-' + statLow).text() || '0')
+                    + parseInt($('#classbns-' + statLow).text() || '0')
+                    + parseInt($('#lvlbns-' + statLow).text() || '0')
+                    + parseInt($('#buff-' + statLow).text() || '0'));
 
-                        $('#base-' + statLow).text(r['new' + stat]);
-                        $('#total-' + statLow).text(r['new' + stat]
-                            + parseInt($('#gear-' + statLow).text() || '0')
-                            + parseInt($('#classbns-' + statLow).text() || '0')
-                            + parseInt($('#lvlbns-' + statLow).text() || '0')
-                            + parseInt($('#buff-' + statLow).text() || '0'));
+                const pts = r.newStatPoints;
+                $('#stat-points-count').text(pts);
 
-                        const pts = r.newStatPoints;
-                        $('#stat-points-count').text(pts);
+                // Disable all "+" buttons if points exhausted
+                if (pts <= 0) {
+                    $('.btn-allocate').prop('disabled', true);
+                    $('.stat-points-alert').hide();
+                } else {
+                    btn.prop('disabled', false);
+                }
 
-                        if (pts <= 0) {
-                            $('.btn-allocate').prop('disabled', true);
-                            $('.stat-points-alert').hide();
-                        } else {
-                            btn.prop('disabled', false);
-                        }
+                showToast('✨', stat + ' increased!',
+                    stat + ' is now ' + r['new' + stat] + '. (' + pts + ' points left)',
+                    'toast-xp', 2500);
 
-                        showToast('✨', stat + ' increased!',
-                            stat + ' is now ' + r['new' + stat] + '. (' + pts + ' points left)',
-                            'toast-xp', 2500);
-
-                        refreshHud();
-                    },
-                    error: function () {
-                        showToast('❌', 'Error', 'Request failed.', 'toast-death', 3500);
-                        btn.prop('disabled', false);
-                    }
-                });
-            });
-        })();
-    </script>
+                refreshHud();
+            },
+            error: function () {
+                showToast('❌', 'Error', 'Request failed.', 'toast-death', 3500);
+                btn.prop('disabled', false);
+            }
+        });
+    });
+})();
+</script>
 }

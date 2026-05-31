@@ -235,6 +235,10 @@ namespace HabitTracker.Models
         [StringLength(100)]
         public string? ActiveMountKey { get; set; }
 
+        // ===== BACKGROUND (Phase 9) =====
+        [StringLength(100)]
+        public string? Background { get; set; }
+
         // ===== RELATIONSHIPS =====
         public virtual List<Notification>? Notifications { get; set; }
         public virtual List<Category>? CreatedCategories { get; set; }

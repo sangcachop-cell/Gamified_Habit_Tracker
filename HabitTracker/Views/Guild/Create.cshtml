@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Create Guild";
+}
+
+<div class="container py-4" style="max-width:600px;">
+    <h4 class="fw-bold mb-4">⚔️ Create Guild</h4>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Guild Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" maxlength="100"
+                   placeholder="e.g. The Night Owls" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Short Summary</label>
+            <input type="text" name="summary" class="form-control" maxlength="200"
+                   placeholder="One-line tagline for discovery (optional)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control" rows="4" maxlength="500"
+                      placeholder="Tell people what your guild is about..."></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Privacy</label>
+            <div class="d-flex gap-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="privacy"
+                           id="privPublic" value="public" checked />
+                    <label class="form-check-label" for="privPublic">
+                        🌐 <strong>Public</strong> — anyone can join
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="privacy"
+                           id="privPrivate" value="private" />
+                    <label class="form-check-label" for="privPrivate">
+                        🔒 <strong>Private</strong> — invite only
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Create Guild</button>
+            <a href="/Guild" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

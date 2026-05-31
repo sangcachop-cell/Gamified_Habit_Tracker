@@ -1,13 +1,34 @@
 ﻿@model HabitTracker.Models.User
+@using HabitTracker.Models
 @{
     ViewData["Title"] = Model.Username + " — Profile";
-    var relation = ViewBag.Relation as HabitTracker.Models.Friendship;
-    int me = (int)(ViewBag.CurrentUserId ?? 0);
-    bool isFriend = relation?.Status == "Accepted";
-    bool iSent = relation?.Status == "Pending" && relation?.RequesterId == me;
-    bool theyS = relation?.Status == "Pending" && relation?.ReceiverId == me;
-    int xpInLv = Model.XP % 100;
-    var recentBadges = Model.UserBadges?.OrderByDescending(b => b.EarnedDate).Take(6).ToList() ?? new();
+    var relation    = ViewBag.Relation as HabitTracker.Models.Friendship;
+    int  me         = (int)(ViewBag.CurrentUserId ?? 0);
+    bool isFriend   = relation?.Status == "Accepted";
+    bool iSent      = relation?.Status == "Pending" && relation?.RequesterId == me;
+    bool theyS      = relation?.Status == "Pending" && relation?.ReceiverId == me;
+    int  xpInLv     = Model.XP % 100;
+    var  recentBadges = Model.UserBadges?.OrderByDescending(b => b.EarnedDate).Take(6).ToList() ?? new();
+    bool isBlocked  = (bool)(ViewBag.IsBlocked   ?? false);
+    bool isBlockedBy = (bool)(ViewBag.IsBlockedBy ?? false);
+    var  equippedGear = ViewBag.EquippedGear as List<GearItem> ?? new();
+
+    // Profile completeness
+    int completeness = 0;
+    if (!string.IsNullOrEmpty(Model.Bio))                      completeness += 20;
+    if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar != "default.png") completeness += 20;
+    if (!string.IsNullOrEmpty(Model.Location))                 completeness += 15;
+    if (!string.IsNullOrEmpty(Model.Class))                    completeness += 15;
+    if (!string.IsNullOrEmpty(Model.FacebookLink) || !string.IsNullOrEmpty(Model.InstagramLink) || !string.IsNullOrEmpty(Model.LinkedInLink)) completeness += 15;
+    if ((Model.UserBadges?.Count ?? 0) > 0)                   completeness += 15;
+
+    // Class display
+    var classEmoji = Model.Class switch { "warrior" => "⚔️", "mage" => "🧙", "rogue" => "🗡️", "healer" => "💚", _ => "" };
+    var className  = Model.Class switch { "warrior" => "Warrior", "mage" => "Mage", "rogue" => "Rogue", "healer" => "Healer", _ => "No class" };
+
+    // Active pet/mount image paths
+    string? petImgPath   = !string.IsNullOrEmpty(Model.ActivePetKey)   ? $"/images/habitica/stable/pets/Pet-{Model.ActivePetKey}.png"                            : null;
+    string? mountImgPath = !string.IsNullOrEmpty(Model.ActiveMountKey) ? $"/images/habitica/stable/mounts/icon/Mount_Icon_{Model.ActiveMountKey}.png" : null;
 }
 <style>
     :root {
@@ -381,9 +402,37 @@
                     <div class="hstat"><div class="n">@Model.XP.ToString("N0")</div><div class="l">XP</div></div>
                     <div class="hstat"><div class="n">@Model.CurrentStreak🔥</div><div class="l">Streak</div></div>
                     <div class="hstat"><div class="n">@Model.TotalQuestsCompleted</div><div class="l">Quests</div></div>
+                    @if (!string.IsNullOrEmpty(Model.Class))
+                    {
+                        <div class="hstat"><div class="n">@classEmoji</div><div class="l">@className</div></div>
+                    }
+                    @if (petImgPath != null)
+                    {
+                        <div class="hstat" title="Active pet: @Model.ActivePetKey">
+                            <img src="@petImgPath" height="32" onerror="this.style.display='none'">
+                            <div class="l">Pet</div>
+                        </div>
+                    }
+                    @if (mountImgPath != null)
+                    {
+                        <div class="hstat" title="Active mount: @Model.ActiveMountKey">
+                            <img src="@mountImgPath" height="32" onerror="this.style.display='none'">
+                            <div class="l">Mount</div>
+                        </div>
+                    }
                 </div>
 
-                <!-- Friend actions -->
+                @* Profile completeness bar *@
+                <div style="margin-top:12px;position:relative;z-index:2;">
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-bottom:4px;">
+                        Profile @completeness% complete
+                    </div>
+                    <div style="height:4px;background:rgba(255,255,255,.15);border-radius:50px;width:200px;">
+                        <div style="height:100%;width:@completeness%;background:linear-gradient(90deg,#5c3dde,#00b89c);border-radius:50px;"></div>
+                    </div>
+                </div>
+
+                <!-- Friend + social actions -->
                 <div class="friend-actions">
                     @if (isFriend)
                     {
@@ -395,7 +444,6 @@
                     }
                     else if (iSent)
                     {
-
                         <span class="btn-pending">⏳ Đã gửi lời mời</span>
                     }
                     else if (theyS)
@@ -407,9 +455,26 @@
                     }
                     else
                     {
-
                         <button class="btn-add" onclick="sendReq(@Model.Id,this)">+ Kết bạn</button>
                     }
+
+                    @* Message / Block / Report — only for other users *@
+                    @if (!isBlockedBy)
+                    {
+                        <a href="/Message?otherId=@Model.Id" class="btn-back" style="background:rgba(92,61,222,.4);">
+                            ✉️ Message
+                        </a>
+                    }
+                    @Html.AntiForgeryToken()
+                    <button id="blockBtn"
+                            class="btn-back @(isBlocked ? "text-warning" : "")"
+                            onclick="toggleBlock(@Model.Id)">
+                        @(isBlocked ? "🔓 Unblock" : "🚫 Block")
+                    </button>
+                    <button class="btn-back" style="color:#ff8fab;"
+                            data-bs-toggle="modal" data-bs-target="#reportUserModal">
+                        🚩 Report
+                    </button>
                 </div>
             </div>
         </div>
@@ -430,6 +495,27 @@
                         @if ((Model.UserBadges?.Count ?? 0) > 6)
                         {
                             <div class="badge-chip" style="background:#f0f0f0;color:#888">+@((Model.UserBadges!.Count) - 6) nữa</div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Equipped gear thumbnails *@
+            @if (equippedGear.Count > 0)
+            {
+                <div class="glass-card">
+                    <div class="card-title">⚔️ Equipped Gear</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        @foreach (var gear in equippedGear)
+                        {
+                            <div style="text-align:center;" title="@gear.Name">
+                                <img src="@gear.ShopImagePath" width="48" height="48"
+                                     style="border-radius:8px;border:1px solid #eee;"
+                                     onerror="this.src='/images/habitica/shop/shop_armoire.png'">
+                                <div style="font-size:.65rem;color:#888;margin-top:2px;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    @gear.Slot
+                                </div>
+                            </div>
                         }
                     </div>
                 </div>
@@ -500,6 +586,27 @@
     </div>
 </div>
 
+@* Report user modal *@
+<div class="modal fade" id="reportUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Report @Model.Username</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="reportReason" rows="4"
+                          placeholder="Describe the issue (required)" maxlength="500"></textarea>
+                <div id="reportErr" class="text-danger small mt-1 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" onclick="submitReport()">Submit Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         async function sendReq(uid, btn) {
@@ -509,6 +616,42 @@
             const d = await r.json();
             if (d.ok) { btn.textContent = '⏳ Đã gửi lời mời'; btn.className = 'btn-pending'; }
             else { btn.textContent = '+ Kết bạn'; btn.disabled = false; alert(d.msg); }
+        }
+
+        async function toggleBlock(userId) {
+            const token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+            const res   = await fetch('/Message/Block/' + userId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token)
+            });
+            const data  = await res.json();
+            if (data.success) {
+                const btn = document.getElementById('blockBtn');
+                btn.textContent = data.blocked ? '🔓 Unblock' : '🚫 Block';
+                btn.className   = data.blocked ? 'btn-back text-warning' : 'btn-back';
+            }
+        }
+
+        async function submitReport() {
+            const reason = document.getElementById('reportReason').value.trim();
+            const err    = document.getElementById('reportErr');
+            err.classList.add('d-none');
+            if (!reason) { err.textContent = 'Reason required.'; err.classList.remove('d-none'); return; }
+            const token  = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+            const res    = await fetch('/Message/Report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `reportedUserId=@Model.Id&reason=${encodeURIComponent(reason)}&__RequestVerificationToken=${encodeURIComponent(token)}`
+            });
+            const data   = await res.json();
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('reportUserModal'))?.hide();
+                alert('Report submitted. Thank you.');
+            } else {
+                err.textContent = data.error;
+                err.classList.remove('d-none');
+            }
         }
     </script>
 }

@@ -153,7 +153,7 @@
         // ===== ECONOMY (Phase 2) =====
         public const double MAX_HP             = 50.0;
         // ===== SHOP (Phase 4) =====
-        public const int    GEM_GOLD_COST           = 25;   // 25 GP = 1 Gem
+        public const int    GEM_GOLD_COST           = 100;  // 100 GP = 1 Gem
         public const int    ARMOIRE_COST            = 100;  // GP per pull
         public const double ARMOIRE_GEAR_THRESHOLD  = 0.6;  // [0, 0.6) → gear
         public const double ARMOIRE_FOOD_THRESHOLD  = 0.8;  // [0.6, 0.8) → food; else XP
@@ -211,7 +211,7 @@
         Yearly  = 3
     }
 
-    public enum ItemType   { Food = 0, Egg = 1, HatchingPotion = 2 }
+    public enum ItemType   { Food = 0, Egg = 1, HatchingPotion = 2, QuestScroll = 3 }
     public enum ItemRarity { Common = 0, Uncommon = 1, Rare = 2, VeryRare = 3 }
 
     // ===== CHARACTER SYSTEM (Phase 3) =====

@@ -1,0 +1,204 @@
+@model HabitTracker.Models.ViewModels.GuildIndexViewModel
+@{
+    ViewData["Title"] = "Guilds";
+}
+@Html.AntiForgeryToken()
+
+<div class="container py-4">
+
+    @* ── Pending invites strip ─────────────────────────────────────────── *@
+    @if (Model.PendingInvites.Any())
+    {
+        <div class="alert alert-info d-flex align-items-start gap-3 mb-4">
+            <div class="flex-shrink-0 fs-4">⚔️</div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold mb-2">Guild Invitations</div>
+                @foreach (var inv in Model.PendingInvites)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span><strong>@inv.Guild?.Name</strong> — invited by <strong>@inv.Inviter?.Username</strong></span>
+                        <form asp-action="AcceptInvite" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inviteId" value="@inv.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                        </form>
+                        <form asp-action="DeclineInvite" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inviteId" value="@inv.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Decline</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @* ── Header row ────────────────────────────────────────────────────── *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold">⚔️ Guilds</h4>
+        <a href="/Guild/Create" class="btn btn-primary btn-sm">+ Create Guild</a>
+    </div>
+
+    @* ── Tabs ──────────────────────────────────────────────────────────── *@
+    <ul class="nav nav-tabs mb-4" id="guildTabs">
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "discover" ? "active" : "")"
+               href="/Guild?tab=discover">Discover</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "my-guilds" ? "active" : "")"
+               href="/Guild?tab=my-guilds">
+                My Guilds
+                @if (Model.MyGuilds.Any())
+                {
+                    <span class="badge bg-secondary ms-1">@Model.MyGuilds.Count</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    @if (Model.ActiveTab == "discover")
+    {
+        @* ── Search bar ─────────────────────────────────────────────────── *@
+        <form method="get" action="/Guild" class="d-flex gap-2 mb-4">
+            <input type="hidden" name="tab" value="discover" />
+            <input type="text" name="search" value="@Model.Search"
+                   class="form-control" placeholder="Search guilds..." style="max-width:320px;" />
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <a href="/Guild?tab=discover" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+
+        @* ── Guild cards grid ────────────────────────────────────────────── *@
+        @if (!Model.PublicGuilds.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <div style="font-size:3rem;">⚔️</div>
+                <p class="mt-2">No public guilds found. <a href="/Guild/Create">Create one!</a></p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var card in Model.PublicGuilds)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    @if (!string.IsNullOrEmpty(card.Guild.Logo))
+                                    {
+                                        <img src="@card.Guild.Logo" width="40" height="40"
+                                             class="rounded" style="object-fit:cover;"
+                                             onerror="this.src='/images/default.png'" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                             style="width:40px;height:40px;font-size:1.2rem;">⚔️</div>
+                                    }
+                                    <div>
+                                        <div class="fw-semibold small">@card.Guild.Name</div>
+                                        <div class="text-muted" style="font-size:11px;">
+                                            👥 @card.MemberCount member@(card.MemberCount != 1 ? "s" : "")
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(card.Guild.Summary))
+                                {
+                                    <p class="small text-muted flex-grow-1 mb-2" style="font-size:12px;">
+                                        @(card.Guild.Summary.Length > 80 ? card.Guild.Summary[..80] + "…" : card.Guild.Summary)
+                                    </p>
+                                }
+                                else
+                                {
+                                    <div class="flex-grow-1"></div>
+                                }
+                                <div class="mt-auto d-flex gap-1">
+                                    <a href="/Guild/View/@card.Guild.Id" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+                                    @if (!card.IsMember)
+                                    {
+                                        <button class="btn btn-sm btn-success"
+                                                onclick="joinGuild(@card.Guild.Id, this)">Join</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success align-self-center px-2">Member</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        @* ── My Guilds tab ───────────────────────────────────────────────── *@
+        @if (!Model.MyGuilds.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <div style="font-size:3rem;">🏰</div>
+                <p class="mt-2">You haven't joined any guilds yet.</p>
+                <a href="/Guild?tab=discover" class="btn btn-primary btn-sm">Browse Guilds</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var card in Model.MyGuilds)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 shadow-sm border-primary border-opacity-25">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    @if (!string.IsNullOrEmpty(card.Guild.Logo))
+                                    {
+                                        <img src="@card.Guild.Logo" width="40" height="40"
+                                             class="rounded" style="object-fit:cover;"
+                                             onerror="this.src='/images/default.png'" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                             style="width:40px;height:40px;font-size:1.2rem;">⚔️</div>
+                                    }
+                                    <div>
+                                        <div class="fw-semibold small">@card.Guild.Name</div>
+                                        <span class="badge @(card.MyRole == "Leader" ? "bg-warning text-dark" : card.MyRole == "Manager" ? "bg-info text-dark" : "bg-secondary")"
+                                              style="font-size:10px;">@card.MyRole</span>
+                                    </div>
+                                </div>
+                                <a href="/Guild/View/@card.Guild.Id" class="btn btn-sm btn-primary mt-auto">Open</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+<script>
+const _token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+
+async function joinGuild(guildId, btn) {
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('__RequestVerificationToken', _token);
+    const res = await fetch(`/Guild/Join/${guildId}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        btn.outerHTML = '<span class="badge bg-success align-self-center px-2">Member</span>';
+        showToast('⚔️', 'Joined!', 'You are now a guild member.', 'success');
+    } else {
+        showToast('❌', 'Error', data.error ?? 'Failed.', 'danger');
+        btn.disabled = false;
+    }
+}
+</script>
+}

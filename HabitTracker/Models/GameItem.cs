@@ -20,7 +20,7 @@ namespace HabitTracker.Models
         [StringLength(10)]
         public string Icon { get; set; } = "📦";
 
-        public ItemType Type { get; set; }
+        public ItemType   Type   { get; set; }
         public ItemRarity Rarity { get; set; } = ItemRarity.Common;
 
         /// <summary>Gold returned when player sells this item. 0 = not sellable.</summary>
@@ -39,10 +39,11 @@ namespace HabitTracker.Models
         /// </summary>
         public string ImagePath => Type switch
         {
-            ItemType.Food => $"/fe/stable/food/Pet_Food_{FoodKey()}.png",
-            ItemType.Egg => $"/fe/stable/eggs/Pet_Egg_{EggKey()}.png",
-            ItemType.HatchingPotion => $"/fe/stable/potions/Pet_HatchingPotion_{PotionKey()}.png",
-            _ => string.Empty
+            ItemType.Food           => $"/images/habitica/stable/food/Pet_Food_{FoodKey()}.png",
+            ItemType.Egg            => $"/images/habitica/stable/eggs/Pet_Egg_{EggKey()}.png",
+            ItemType.HatchingPotion => $"/images/habitica/stable/potions/Pet_HatchingPotion_{PotionKey()}.png",
+            ItemType.QuestScroll    => $"/images/habitica/quests/scrolls/inventory_quest_scroll_{Key.Replace("quest_", "")}.png",
+            _                      => string.Empty
         };
 
         /// <summary>For Egg items: animal name used in PetKey (e.g. "BearCub", "Wolf"). Null for non-eggs.</summary>

@@ -1,20 +1,34 @@
 using HabitTracker.Constants;
+using HabitTracker.Data;
+using HabitTracker.Models;
 using HabitTracker.Models.ViewModels;
 using HabitTracker.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HabitTracker.Controllers
 {
     [Route("[controller]")]
     public class TaskController : Controller
     {
-        private readonly ITaskService _taskService;
+        private readonly ITaskService      _taskService;
+        private readonly ISpellService     _spellService;
+        private readonly ICharacterService _characterService;
+        private readonly AppDbContext      _context;
         private readonly ILogger<TaskController> _logger;
 
-        public TaskController(ITaskService taskService, ILogger<TaskController> logger)
+        public TaskController(
+            ITaskService taskService,
+            ISpellService spellService,
+            ICharacterService characterService,
+            AppDbContext context,
+            ILogger<TaskController> logger)
         {
-            _taskService = taskService;
-            _logger      = logger;
+            _taskService      = taskService;
+            _spellService     = spellService;
+            _characterService = characterService;
+            _context          = context;
+            _logger           = logger;
         }
 
         // ===== BOARD =====
@@ -29,6 +43,19 @@ namespace HabitTracker.Controllers
             await _taskService.RunCronAsync(userId.Value);
 
             var board = await _taskService.GetUserTasksAsync(userId.Value);
+
+            // Load user + skills for skills bar
+            var user = await _context.Users
+                .Include(u => u.OwnedGear!).ThenInclude(ug => ug.GearItem)
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user != null)
+            {
+                board.User          = user;
+                board.EffectiveStats = await _characterService.GetEffectiveStatsAsync(user);
+                board.Skills        = _spellService.GetSpellsForClass(user.Class ?? "");
+            }
+
             return View(board);
         }
 
@@ -204,6 +231,45 @@ namespace HabitTracker.Controllers
 
             await _taskService.ClearCompletedTodosAsync(userId.Value);
             return RedirectToAction(nameof(Index));
+        }
+
+        // ===== CAST SPELL (AJAX → JSON) =====
+
+        [HttpPost("CastSpell")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CastSpell(string spellKey, int? taskId = null)
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { success = false, error = "Not logged in." });
+
+            var (success, error, data) = await _spellService.CastAsync(userId.Value, spellKey, taskId);
+            if (!success)
+                return Json(new { success = false, error });
+
+            // Return updated user stats so the client can refresh the HUD
+            var user = await _context.Users
+                .Include(u => u.OwnedGear!).ThenInclude(ug => ug.GearItem)
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            int maxMana = 30;
+            if (user != null)
+            {
+                var es = await _characterService.GetEffectiveStatsAsync(user);
+                maxMana = es.MaxMana;
+            }
+
+            return Json(new
+            {
+                success  = true,
+                spellKey = spellKey,
+                newMana  = (int)(user?.Mana ?? 0),
+                maxMana  = maxMana,
+                newHP    = user?.HP ?? 0,
+                newGold  = user?.Gold ?? 0,
+                newXP    = user?.XP ?? 0,
+                data     = data
+            });
         }
 
         // ===== HELPERS =====

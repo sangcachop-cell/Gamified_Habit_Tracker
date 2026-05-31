@@ -19,7 +19,7 @@ namespace HabitTracker.Services.Implementations
             "Cuttlefish", "Deer", "Dog", "Dolphin", "Egg", "Falcon", "Ferret",
             "Frog", "Giraffe", "Gryphon", "GuineaPig", "Hedgehog", "Hippo",
             "Horse", "Kangaroo", "Monkey", "Nudibranch", "Octopus", "Otter",
-            "Owl", "Parrot", "Peacock", "Penguin", "Platypus", "PolarBear",
+            "Owl", "Parrot", "Peacock", "Penguin", "Platypus",
             "Pterodactyl", "Raccoon", "Rat", "Robot", "Rock", "Rooster",
             "Sabretooth", "Seahorse", "SeaSerpent", "Sheep", "Slime", "Sloth",
             "Snail", "Snake", "Spider", "Squirrel", "Treeling", "TRex",
@@ -110,10 +110,7 @@ namespace HabitTracker.Services.Implementations
 
             // Rare / subscriber
             MakeSpecial("Dragon",     "Hydra",        canMount: false),
-            MakeSpecial("Wolf",       "Cerberus",     canMount: false),
             MakeSpecial("Jackalope",  "RoyalPurple",  canMount: true),
-            MakeSpecial("Gryphon",    "Gryphatrice",  canMount: true),
-            MakeSpecial("Gryphatrice","Jubilant",     canMount: false),
         };
 
         // ── Instance members ─────────────────────────────────────────────────

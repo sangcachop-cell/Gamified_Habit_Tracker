@@ -1,397 +1,182 @@
 @model HabitTracker.Models.ViewModels.TaskBoardViewModel
 @using HabitTracker.Constants
-
 @{
     ViewData["Title"] = "My Tasks";
 }
 
 <style>
-    body {
-        background: #f8fafc !important;
+    :root {
+        --ink:    #0a0a12;
+        --paper:  #f5f3ef;
+        --violet: #5c3dde;
+        --gold:   #f0b429;
+        --rose:   #e8436a;
+        --teal:   #00b89c;
+        --soft:   #edeaf5;
     }
+
+    body { background: var(--paper); }
 
     .board-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
     }
 
-        .board-header h1 {
-            font-size: 2rem;
-            font-weight: 900;
-            color: #0f172a;
-            margin: 0;
-        }
+    .board-header h1 {
+        font-weight: 800;
+        font-size: 1.8rem;
+        color: var(--ink);
+    }
 
     .task-board {
         display: grid;
-        grid-template-columns: repeat(4, minmax(260px, 1fr));
-        gap: 18px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
         align-items: start;
     }
 
+    @@media (max-width: 1100px) { .task-board { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 600px)  { .task-board { grid-template-columns: 1fr; } }
+
     .board-col {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 22px;
-        padding: 18px;
-        min-height: 360px;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+        background: white;
+        border-radius: 16px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 16px;
+        min-height: 300px;
     }
 
     .col-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding-bottom: 14px;
-        margin-bottom: 16px;
-        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid rgba(0,0,0,.06);
     }
 
     .col-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--ink);
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 1.05rem;
-        font-weight: 900;
-        color: #0f172a;
     }
 
-    .col-icon {
-        width: 26px;
-        height: 26px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .95rem;
-        background: #f3f4f6;
-    }
-
-    .col-count {
-        background: #f3e8ff;
-        color: #6d28d9;
-        font-size: .78rem;
-        font-weight: 900;
-        padding: 3px 9px;
-        border-radius: 999px;
-    }
-
-        .col-count.urgent {
-            background: #fee2e2;
-            color: #ef4444;
-        }
+    .col-count { background: var(--soft); color: var(--violet); font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .col-count.urgent { background: #fde8ed; color: var(--rose); }
 
     .btn-add-task {
-        background: #6d28d9;
-        color: #ffffff !important;
-        border-radius: 12px;
-        padding: 8px 14px;
-        font-size: .85rem;
-        font-weight: 900;
+        background: var(--violet);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: .8rem;
+        font-weight: 600;
         text-decoration: none;
-        white-space: nowrap;
+        transition: opacity .15s;
     }
+    .btn-add-task:hover { opacity: .85; color: white; }
 
-        .btn-add-task:hover {
-            background: #5b21b6;
-        }
+    .empty-state { text-align: center; padding: 40px 20px; color: #aaa; font-size: .9rem; }
 
-    .empty-state {
-        min-height: 210px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: #9ca3af;
-        font-weight: 700;
-        line-height: 1.6;
-    }
-
-        .empty-state small {
-            font-weight: 600;
-            color: #9ca3af;
-        }
-
+    /* Task cards */
     .task-card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-left: 5px solid #10b981;
-        border-radius: 18px;
-        padding: 16px;
-        margin-bottom: 14px;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, .04);
-        transition: .18s ease;
-    }
-
-        .task-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 26px rgba(15, 23, 42, .08);
-        }
-
-    .val-blue {
-        border-left-color: #3b82f6;
-    }
-
-    .val-green {
-        border-left-color: #10b981;
-    }
-
-    .val-yellow {
-        border-left-color: #f59e0b;
-    }
-
-    .val-orange {
-        border-left-color: #f97316;
-    }
-
-    .val-red {
-        border-left-color: #ef4444;
-    }
-
-    .task-card-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 10px;
-    }
-
-    .task-text {
-        font-size: 1rem;
-        font-weight: 900;
-        color: #111827;
-        line-height: 1.4;
-        flex: 1;
-    }
-
-        .task-text.done {
-            text-decoration: line-through;
-            color: #9ca3af;
-        }
-
-    .task-actions {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-    }
-
-    .btn-task-icon {
-        width: 30px;
-        height: 30px;
-        border: none;
-        border-radius: 9px;
-        background: #f3f4f6;
-        color: #6b7280;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .85rem;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-        .btn-task-icon:hover {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-    .priority-badge {
-        font-size: .72rem;
-        font-weight: 900;
-        padding: 4px 9px;
-        border-radius: 999px;
-        text-transform: uppercase;
-    }
-
-    .priority-trivial {
-        background: #f3f4f6;
-        color: #6b7280;
-    }
-
-    .priority-easy {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-
-    .priority-medium {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .priority-hard {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    .habit-controls,
-    .daily-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 12px;
-    }
-
-    .btn-score {
-        min-width: 42px;
-        height: 42px;
-        border: none;
+        background: #fafafa;
         border-radius: 12px;
-        font-size: 1.2rem;
-        font-weight: 900;
+        border: 1.5px solid rgba(0,0,0,.06);
+        border-left: 4px solid var(--teal);
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        transition: box-shadow .15s;
+    }
+    .task-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+    .val-blue   { border-left-color: #4457aa; }
+    .val-green  { border-left-color: var(--teal); }
+    .val-yellow { border-left-color: var(--gold); }
+    .val-orange { border-left-color: #e8743a; }
+    .val-red    { border-left-color: var(--rose); }
+
+    .task-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .task-text { font-weight: 600; font-size: .95rem; color: var(--ink); flex: 1; line-height: 1.3; }
+    .task-text.done { text-decoration: line-through; opacity: .5; }
+    .task-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+
+    .btn-task-icon { background: none; border: none; cursor: pointer; font-size: .85rem; padding: 2px 5px; border-radius: 6px; color: #999; transition: background .15s, color .15s; text-decoration: none; }
+    .btn-task-icon:hover { background: #f0f0f0; color: var(--ink); }
+
+    .priority-badge { font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: .04em; }
+    .priority-trivial { background: #f0f0f0; color: #888; }
+    .priority-easy    { background: #e2f5e2; color: #2e7d2e; }
+    .priority-medium  { background: #fff5d6; color: #b07800; }
+    .priority-hard    { background: #fde8ed; color: #c0392b; }
+
+    .habit-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .btn-score { border: none; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform .1s, opacity .15s; }
+    .btn-score:hover { opacity: .85; }
+    .btn-score:active { transform: scale(.93); }
+    .btn-score-up   { background: var(--teal); color: white; }
+    .btn-score-down { background: var(--rose); color: white; }
+    .btn-claim      { background: var(--gold); color: var(--ink); font-size: .85rem; padding: 5px 14px; }
+    .habit-counter  { font-size: .8rem; color: #777; font-weight: 600; flex: 1; text-align: center; }
+
+    .daily-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .daily-check-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: .88rem; color: #555; flex: 1; }
+    .daily-check-label input[type=checkbox] { cursor: pointer; width: 16px; height: 16px; }
+    .daily-check-label input:disabled { cursor: default; opacity: .5; }
+    .streak-badge { font-size: .78rem; font-weight: 700; color: #e8743a; white-space: nowrap; }
+
+    .due-badge { font-size: .72rem; font-weight: 600; padding: 2px 7px; border-radius: 8px; background: #f0f4ff; color: #4457aa; white-space: nowrap; }
+    .due-badge.overdue { background: #fde8ed; color: var(--rose); }
+
+    .checklist-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.06); }
+    .checklist-item { display: flex; align-items: center; gap: 7px; font-size: .83rem; color: #555; padding: 3px 0; }
+    .checklist-item input[type=checkbox] { cursor: pointer; }
+    .checklist-item.done span { text-decoration: line-through; opacity: .5; }
+
+    .gold-cost { font-size: .8rem; font-weight: 700; color: var(--gold); }
+    .reward-note { font-size: .7rem; color: #aaa; }
+
+    .clear-todos-link { font-size: .75rem; color: #aaa; text-decoration: none; margin-top: 8px; display: block; text-align: center; }
+    .clear-todos-link:hover { color: var(--rose); }
+
+    /* ── Skills bar ────────────────────────────────── */
+    .skills-bar {
+        background: white;
+        border-radius: 14px;
+        border: 1.5px solid rgba(0,0,0,.07);
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+    .skill-btn {
         cursor: pointer;
-        transition: .15s ease;
-    }
-
-        .btn-score:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn-score:active {
-            transform: scale(.96);
-        }
-
-    .btn-score-up {
-        background: #10b981;
-        color: #ffffff;
-    }
-
-    .btn-score-down {
-        background: #ef4444;
-        color: #ffffff;
-    }
-
-    .btn-claim {
-        background: #f59e0b;
-        color: #ffffff;
-        font-size: .9rem;
-        padding: 0 16px;
-    }
-
-    .habit-counter {
-        flex: 1;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 10px 14px;
         text-align: center;
-        font-size: .9rem;
-        font-weight: 800;
-        color: #6b7280;
+        background: #fafafa;
+        transition: border-color .15s, box-shadow .15s, background .15s;
+        min-width: 90px;
+        user-select: none;
     }
-
-    .daily-check-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex: 1;
-        cursor: pointer;
-        color: #4b5563;
-        font-weight: 700;
-    }
-
-        .daily-check-label input[type=checkbox] {
-            width: 18px;
-            height: 18px;
-            accent-color: #6d28d9;
-            cursor: pointer;
-        }
-
-        .daily-check-label input:disabled {
-            cursor: default;
-            opacity: .5;
-        }
-
-    .streak-badge {
-        font-size: .85rem;
-        font-weight: 900;
-        color: #f97316;
-        white-space: nowrap;
-    }
-
-    .due-badge {
-        font-size: .78rem;
-        font-weight: 800;
-        padding: 4px 9px;
-        border-radius: 999px;
-        background: #dbeafe;
-        color: #2563eb;
-        white-space: nowrap;
-    }
-
-        .due-badge.overdue {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-    .checklist-section {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid #e5e7eb;
-    }
-
-    .checklist-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: .88rem;
-        color: #4b5563;
-        padding: 5px 0;
-    }
-
-        .checklist-item input[type=checkbox] {
-            accent-color: #6d28d9;
-            cursor: pointer;
-        }
-
-        .checklist-item.done span {
-            text-decoration: line-through;
-            color: #9ca3af;
-        }
-
-    .gold-cost {
-        font-size: .9rem;
-        font-weight: 900;
-        color: #d97706;
-    }
-
-    .clear-todos-link {
-        display: block;
-        margin-top: 14px;
-        text-align: center;
-        font-size: .85rem;
-        font-weight: 800;
-        color: #9ca3af;
-        text-decoration: none;
-    }
-
-        .clear-todos-link:hover {
-            color: #ef4444;
-        }
-
-    .task-note {
-        font-size: .85rem;
-        color: #6b7280;
-        margin-bottom: 8px;
-        line-height: 1.4;
-    }
-
-    @@media (max-width: 1300px) {
-        .task-board {
-            grid-template-columns: repeat(2, minmax(260px, 1fr));
-        }
-    }
-
-    @@media (max-width: 700px) {
-        .task-board {
-            grid-template-columns: 1fr;
-        }
-
-        .board-header h1 {
-            font-size: 1.65rem;
-        }
-    }
+    .skill-btn:hover:not(.skill-disabled) { border-color: #6c757d; background: #f3f0ff; }
+    .skill-btn.skill-active { border-color: var(--violet); box-shadow: 0 0 10px rgba(92,61,222,.35); background: #ede8ff; }
+    .skill-btn.skill-casting { opacity: .6; pointer-events: none; }
+    .skill-btn.skill-disabled { opacity: .45; cursor: not-allowed; }
+    .skill-name { font-size: .73rem; font-weight: 700; color: var(--ink); margin-top: 4px; line-height: 1.2; }
+    .skill-cost { font-size: .7rem; color: #5090d3; margin-top: 2px; }
+    .skill-targeting .task-card { cursor: crosshair !important; outline: 2px dashed var(--violet); outline-offset: 2px; }
+    .skill-targeting .task-card * { pointer-events: none; }
 </style>
+
+<div class="board-header">
+    <h1>📋 My Tasks</h1>
+</div>
 
 @if (TempData["Success"] != null)
 {
@@ -401,333 +186,366 @@
     </div>
 }
 
-<form id="csrf-form" style="display:none">
-    @Html.AntiForgeryToken()
-</form>
+<!-- Hidden CSRF token for AJAX posts -->
+<form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
+
+@if (Model.CanUseSkills && Model.Skills.Any())
+{
+    var userMana    = (int)(Model.User!.Mana);
+    var maxMana     = Model.EffectiveStats!.MaxMana;
+    var manaPct     = maxMana > 0 ? Math.Min(100, userMana * 100 / maxMana) : 0;
+    <div class="skills-bar" id="skillsBar">
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+            <div class="fw-semibold" style="font-size:.85rem;color:var(--violet);">✨ Skills</div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="mana-text text-muted small">💧 @userMana / @maxMana MP</span>
+                <div class="progress" style="width:90px;height:6px;" title="Mana">
+                    <div class="progress-bar" id="skillManaBar"
+                         style="width:@manaPct%;background:var(--violet);"></div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @foreach (var skill in Model.Skills)
+            {
+                bool canCast = Model.User!.Mana >= skill.ManaCost;
+                <div class="skill-btn @(!canCast ? "skill-disabled" : "")"
+                     id="skill-@skill.Key"
+                     data-key="@skill.Key"
+                     data-targets-task="@skill.TargetsTask.ToString().ToLower()"
+                     data-mana="@skill.ManaCost"
+                     data-name="@skill.Name"
+                     onclick="activateSkill(this)"
+                     title="@skill.Description&#10;Cost: @skill.ManaCost MP">
+                    <img src="/images/habitica/skills/shop_@(skill.Key).png" width="40" height="40"
+                         onerror="this.src='/images/habitica/skills/shop_special_fall2015Healer.png'"
+                         alt="@skill.Name" />
+                    <div class="skill-name">@skill.Name</div>
+                    <div class="skill-cost">💧@skill.ManaCost</div>
+                </div>
+            }
+        </div>
+        <div id="skillTargetHint" class="d-none mt-2 small">
+            <span class="text-primary fw-semibold">🎯 Click any task to apply the spell</span>
+            <button class="btn btn-sm btn-link p-0 ms-2 text-muted" style="font-size:.8rem;" onclick="deactivateSkill()">Cancel (ESC)</button>
+        </div>
+    </div>
+}
 
 <div class="task-board">
 
+    <!-- HABITS -->
     <div class="board-col">
         <div class="col-header">
-            <div class="col-title">
-                <span class="col-icon">↻</span>
-                Habits
-                <span class="col-count">@Model.Habits.Count</span>
-            </div>
+            <div class="col-title">🔄 Habits <span class="col-count">@Model.Habits.Count</span></div>
             <a href="/Task/Create?type=habit" class="btn-add-task">+ Add</a>
         </div>
-
-        @if (!Model.Habits.Any())
-        {
-            <div class="empty-state">
-                No habits yet.
-                <small>Track recurring behaviors.</small>
-            </div>
+        @if (!Model.Habits.Any()) {
+            <div class="empty-state">No habits yet.<br /><small>Track recurring behaviors.</small></div>
         }
-
-        @foreach (var task in Model.Habits)
-        {
-            <partial name="_TaskCard" model="task" />
-        }
+        @foreach (var task in Model.Habits) { <partial name="_TaskCard" model="task" /> }
     </div>
 
+    <!-- DAILIES -->
     <div class="board-col">
         <div class="col-header">
             <div class="col-title">
-                <span class="col-icon">●</span>
-                Dailies
-                @if (Model.DueDailiesCount > 0)
-                {
+                ☀️ Dailies
+                @if (Model.DueDailiesCount > 0) {
                     <span class="col-count urgent">@Model.DueDailiesCount due</span>
-                }
-                else
-                {
+                } else {
                     <span class="col-count">@Model.Dailies.Count</span>
                 }
             </div>
             <a href="/Task/Create?type=daily" class="btn-add-task">+ Add</a>
         </div>
-
-        @if (!Model.Dailies.Any())
-        {
-            <div class="empty-state">
-                No dailies yet.
-                <small>Build daily routines.</small>
-            </div>
+        @if (!Model.Dailies.Any()) {
+            <div class="empty-state">No dailies yet.<br /><small>Build daily routines.</small></div>
         }
-
-        @foreach (var task in Model.Dailies)
-        {
-            <partial name="_TaskCard" model="task" />
-        }
+        @foreach (var task in Model.Dailies) { <partial name="_TaskCard" model="task" /> }
     </div>
 
+    <!-- TO-DOS -->
     <div class="board-col">
         <div class="col-header">
-            <div class="col-title">
-                <span class="col-icon">✓</span>
-                To-Dos
-                <span class="col-count">@Model.PendingTodosCount</span>
-            </div>
+            <div class="col-title">✅ To-Dos <span class="col-count">@Model.PendingTodosCount</span></div>
             <a href="/Task/Create?type=todo" class="btn-add-task">+ Add</a>
         </div>
-
-        @if (!Model.Todos.Any())
-        {
-            <div class="empty-state">
-                No to-dos yet.
-                <small>One-time tasks.</small>
-            </div>
+        @if (!Model.Todos.Any()) {
+            <div class="empty-state">No to-dos yet.<br /><small>One-time tasks.</small></div>
         }
-
-        @foreach (var task in Model.Todos)
-        {
-            <partial name="_TaskCard" model="task" />
-        }
-
-        @if (Model.Todos.Any())
-        {
-            <a href="/Task/ClearCompleted" class="clear-todos-link">Clear completed</a>
+        @foreach (var task in Model.Todos) { <partial name="_TaskCard" model="task" /> }
+        @if (Model.Todos.Any()) {
+            <a href="/Task/ClearCompleted" class="clear-todos-link">🗑 Clear completed</a>
         }
     </div>
 
+    <!-- REWARDS -->
     <div class="board-col">
         <div class="col-header">
-            <div class="col-title">
-                <span class="col-icon">★</span>
-                Rewards
-                <span class="col-count">@Model.Rewards.Count</span>
-            </div>
+            <div class="col-title">🎁 Rewards <span class="col-count">@Model.Rewards.Count</span></div>
             <a href="/Task/Create?type=reward" class="btn-add-task">+ Add</a>
         </div>
-
-        @if (!Model.Rewards.Any())
-        {
-            <div class="empty-state">
-                No rewards yet.
-                <small>Treat yourself!</small>
-            </div>
+        @if (!Model.Rewards.Any()) {
+            <div class="empty-state">No rewards yet.<br /><small>Treat yourself!</small></div>
         }
-
-        @foreach (var task in Model.Rewards)
-        {
-            <partial name="_TaskCard" model="task" />
-        }
+        @foreach (var task in Model.Rewards) { <partial name="_TaskCard" model="task" /> }
     </div>
 
 </div>
 
 @section Scripts {
-    <script>
-        var token = $('input[name="__RequestVerificationToken"]').first().val();
+<script>
+    var token = $('input[name="__RequestVerificationToken"]').first().val();
 
-        function handleEconomyToasts(r) {
-            if (r.notEnoughGold) {
-                showToast('🚫', 'Not Enough Gold', 'Need more GP to claim this reward.', 'toast-hp', 3500);
-                return;
-            }
-
-            if (r.goldGained > 0) {
-                showToast('🪙', 'Gold!', '+' + r.goldGained.toFixed(1) + ' GP', 'toast-gold', 2500);
-            }
-
-            if (r.isCrit) {
-                setTimeout(function () {
-                    showToast('⚡', 'Critical Hit!', '1.5× bonus!', 'toast-crit', 3000);
-                }, 300);
-            }
-
-            if (r.droppedItemName) {
-                setTimeout(function () {
-                    showToast(r.droppedItemIcon || '📦', 'Item Drop!', r.droppedItemName, 'toast-drop', 5000);
-                }, 700);
-            }
-
-            if (r.died) {
-                setTimeout(function () {
-                    showToast('💀', 'You Died!', 'Visit Economy to revive.', 'toast-death', 8000);
-                }, 1000);
-            }
-
-            if (typeof refreshHud === 'function') refreshHud();
+    function handleEconomyToasts(r) {
+        if (r.notEnoughGold) {
+            showToast('🚫', 'Not Enough Gold', 'Need more GP to claim this reward.', 'toast-hp', 3500);
+            return;
         }
+        if (r.goldGained > 0)
+            showToast('🪙', 'Gold!', '+' + r.goldGained.toFixed(1) + ' GP', 'toast-gold', 2500);
+        if (r.isCrit)
+            setTimeout(function(){ showToast('⚡', 'Critical Hit!', '1.5× bonus!', 'toast-crit', 3000); }, 300);
+        if (r.droppedItemName)
+            setTimeout(function(){ showToast(r.droppedItemIcon || '📦', 'Item Drop!', r.droppedItemName, 'toast-drop', 5000); }, 700);
+        if (r.died)
+            setTimeout(function(){
+                showToast('💀', 'You Died!', 'Visit Economy to revive.', 'toast-death', 8000);
+            }, 1000);
+        if (typeof refreshHud === 'function') refreshHud();
+    }
 
-        function valueColor(v) {
-            if (v > 5) return 'val-blue';
-            if (v > 0) return 'val-green';
-            if (v > -5) return 'val-yellow';
-            if (v > -15) return 'val-orange';
-            return 'val-red';
-        }
+    function valueColor(v) {
+        if (v > 5)   return 'val-blue';
+        if (v > 0)   return 'val-green';
+        if (v > -5)  return 'val-yellow';
+        if (v > -15) return 'val-orange';
+        return 'val-red';
+    }
 
-        function updateCardColor(taskId, newValue) {
-            var $card = $('#task-' + taskId);
-            $card.removeClass('val-blue val-green val-yellow val-orange val-red').addClass(valueColor(newValue));
-        }
+    function updateCardColor(taskId, newValue) {
+        var $card = $('#task-' + taskId);
+        $card.removeClass('val-blue val-green val-yellow val-orange val-red').addClass(valueColor(newValue));
+    }
 
-        $(document).on('click', '.btn-score', function (e) {
-            e.preventDefault();
+    // Habit +/- score
+    $(document).on('click', '.btn-score', function (e) {
+        e.preventDefault();
+        var $btn      = $(this);
+        var taskId    = $btn.data('id');
+        var direction = $btn.data('direction');
+        $btn.prop('disabled', true);
 
-            var $btn = $(this);
-            var taskId = $btn.data('id');
-            var direction = $btn.data('direction');
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=' + direction,
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (!r.success && !r.notEnoughGold) return;
+                handleEconomyToasts(r);
+                if (!r.success) return;
+                updateCardColor(taskId, r.newValue);
+                var $card = $('#task-' + taskId);
+                $card.find('.counter-up').text(r.counterUp);
+                $card.find('.counter-down').text(r.counterDown);
+                if (r.isCompleted) {
+                    $card.find('.daily-check-input').prop('checked', true).prop('disabled', true);
+                    $card.find('.task-text').addClass('done');
+                }
+                if (r.xpGained > 0) showToast('⚡', 'XP Gained!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                if (r.leveledUp)    setTimeout(function(){ showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000); }, 400);
+                if (r.newBadges && r.newBadges.length) setTimeout(function(){ showToast('🏅', 'New Badge!', r.newBadges.join(', '), 'toast-badge', 5000); }, 900);
+                if (r.died) setTimeout(function(){ window.location.href = '/Economy'; }, 2500);
+            },
+            complete: function () { $btn.prop('disabled', false); }
+        });
+    });
 
-            $btn.prop('disabled', true);
+    // Daily checkbox
+    $(document).on('change', '.daily-check-input', function () {
+        var $cb    = $(this);
+        var taskId = $cb.data('id');
+        if (!$cb.is(':checked')) return;
+        $cb.prop('disabled', true);
 
-            $.ajax({
-                url: '/Task/Score/' + taskId + '?direction=' + direction,
-                type: 'POST',
-                data: { __RequestVerificationToken: token },
-                success: function (r) {
-                    if (!r.success && !r.notEnoughGold) return;
-
-                    handleEconomyToasts(r);
-
-                    if (!r.success) return;
-
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=up',
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.success) {
                     updateCardColor(taskId, r.newValue);
-
                     var $card = $('#task-' + taskId);
-
-                    $card.find('.counter-up').text(r.counterUp);
-                    $card.find('.counter-down').text(r.counterDown);
-
-                    if (r.isCompleted) {
-                        $card.find('.daily-check-input').prop('checked', true).prop('disabled', true);
-                        $card.find('.task-text').addClass('done');
-                    }
-
-                    if (r.xpGained > 0) {
-                        showToast('⚡', 'XP Gained!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
-                    }
-
-                    if (r.leveledUp) {
-                        setTimeout(function () {
-                            showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000);
-                        }, 400);
-                    }
-
-                    if (r.newBadges && r.newBadges.length) {
-                        setTimeout(function () {
-                            showToast('🏅', 'New Badge!', r.newBadges.join(', '), 'toast-badge', 5000);
-                        }, 900);
-                    }
-
-                    if (r.died) {
-                        setTimeout(function () {
-                            window.location.href = '/Economy';
-                        }, 2500);
-                    }
-                },
-                complete: function () {
-                    $btn.prop('disabled', false);
-                }
-            });
-        });
-
-        $(document).on('change', '.daily-check-input', function () {
-            var $cb = $(this);
-            var taskId = $cb.data('id');
-
-            if (!$cb.is(':checked')) return;
-
-            $cb.prop('disabled', true);
-
-            $.ajax({
-                url: '/Task/Score/' + taskId + '?direction=up',
-                type: 'POST',
-                data: { __RequestVerificationToken: token },
-                success: function (r) {
-                    if (r.success) {
-                        updateCardColor(taskId, r.newValue);
-
-                        var $card = $('#task-' + taskId);
-
-                        $card.find('.task-text').addClass('done');
-                        $card.find('.streak-badge').text('🔥 ' + r.newStreak);
-
-                        if (r.xpGained > 0) {
-                            showToast('⚡', 'Daily done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
-                        }
-
-                        if (r.leveledUp) {
-                            setTimeout(function () {
-                                showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000);
-                            }, 400);
-                        }
-
-                        handleEconomyToasts(r);
-
-                        if (r.died) {
-                            setTimeout(function () {
-                                window.location.href = '/Economy';
-                            }, 2500);
-                        }
-                    } else {
-                        $cb.prop('checked', false).prop('disabled', false);
-                    }
-                },
-                error: function () {
+                    $card.find('.task-text').addClass('done');
+                    $card.find('.streak-badge').text('🔥 ' + r.newStreak);
+                    if (r.xpGained > 0) showToast('⚡', 'Daily done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                    if (r.leveledUp)    setTimeout(function(){ showToast('⬆️', 'Level Up!', 'Now Level ' + r.newLevel, 'toast-level', 5000); }, 400);
+                    handleEconomyToasts(r);
+                    if (r.died) setTimeout(function(){ window.location.href = '/Economy'; }, 2500);
+                } else {
                     $cb.prop('checked', false).prop('disabled', false);
                 }
-            });
+            },
+            error: function () { $cb.prop('checked', false).prop('disabled', false); }
         });
+    });
 
-        $(document).on('change', '.todo-check-input', function () {
-            var $cb = $(this);
-            var taskId = $cb.data('id');
+    // Todo checkbox
+    $(document).on('change', '.todo-check-input', function () {
+        var $cb    = $(this);
+        var taskId = $cb.data('id');
+        if (!$cb.is(':checked')) return;
+        $cb.prop('disabled', true);
 
-            if (!$cb.is(':checked')) return;
-
-            $cb.prop('disabled', true);
-
-            $.ajax({
-                url: '/Task/Score/' + taskId + '?direction=up',
-                type: 'POST',
-                data: { __RequestVerificationToken: token },
-                success: function (r) {
-                    if (r.success) {
-                        var $card = $('#task-' + taskId);
-
-                        $card.find('.task-text').addClass('done');
-
-                        if (r.xpGained > 0) {
-                            showToast('⚡', 'To-Do done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
-                        }
-
-                        handleEconomyToasts(r);
-
-                        setTimeout(function () {
-                            $card.fadeOut(400, function () {
-                                $(this).remove();
-                            });
-                        }, 1200);
-                    } else {
-                        $cb.prop('checked', false).prop('disabled', false);
-                    }
-                },
-                error: function () {
+        $.ajax({
+            url:  '/Task/Score/' + taskId + '?direction=up',
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.success) {
+                    var $card = $('#task-' + taskId);
+                    $card.find('.task-text').addClass('done');
+                    if (r.xpGained > 0) showToast('⚡', 'To-Do done!', '+' + r.xpGained + ' XP', 'toast-xp', 3000);
+                    handleEconomyToasts(r);
+                    setTimeout(function() { $card.fadeOut(400, function(){ $(this).remove(); }); }, 1200);
+                } else {
                     $cb.prop('checked', false).prop('disabled', false);
                 }
-            });
+            },
+            error: function () { $cb.prop('checked', false).prop('disabled', false); }
         });
+    });
 
-        $(document).on('change', '.checklist-check', function () {
-            var itemId = $(this).data('item-id');
-            var $row = $(this).closest('.checklist-item');
-
-            $.ajax({
-                url: '/Task/ChecklistToggle/' + itemId,
-                type: 'POST',
-                data: { __RequestVerificationToken: token },
-                success: function (r) {
-                    if (r.isCompleted) {
-                        $row.addClass('done');
-                    } else {
-                        $row.removeClass('done');
-                    }
-                }
-            });
+    // Checklist toggle
+    $(document).on('change', '.checklist-check', function () {
+        var itemId = $(this).data('item-id');
+        var $row   = $(this).closest('.checklist-item');
+        $.ajax({
+            url:  '/Task/ChecklistToggle/' + itemId,
+            type: 'POST',
+            data: { __RequestVerificationToken: token },
+            success: function (r) {
+                if (r.isCompleted) $row.addClass('done');
+                else               $row.removeClass('done');
+            }
         });
-    </script>
+    });
+
+    // ── SKILLS ──────────────────────────────────────────────────────────────
+
+    var activeSkill  = null;
+@if (Model.CanUseSkills && Model.Skills.Any())
+{
+    <text>
+    var currentMana  = @((int)(Model.User!.Mana));
+    var maxManaVal   = @(Model.EffectiveStats!.MaxMana);
+    </text>
+}
+else
+{
+    <text>
+    var currentMana  = 0;
+    var maxManaVal   = 30;
+    </text>
+}
+
+    function activateSkill(el) {
+        if (el.classList.contains('skill-disabled') || el.classList.contains('skill-casting')) return;
+        var key = el.dataset.key;
+        if (activeSkill === key) { deactivateSkill(); return; }
+
+        document.querySelectorAll('.skill-btn').forEach(function(b) { b.classList.remove('skill-active'); });
+        el.classList.add('skill-active');
+        activeSkill = key;
+
+        if (el.dataset.targetsTask !== 'true') {
+            castSkill(key, null);
+        } else {
+            document.body.classList.add('skill-targeting');
+            var hint = document.getElementById('skillTargetHint');
+            if (hint) hint.classList.remove('d-none');
+        }
+    }
+
+    function deactivateSkill() {
+        activeSkill = null;
+        document.querySelectorAll('.skill-btn').forEach(function(b) { b.classList.remove('skill-active'); });
+        document.body.classList.remove('skill-targeting');
+        var hint = document.getElementById('skillTargetHint');
+        if (hint) hint.classList.add('d-none');
+    }
+
+    // Intercept task-card clicks during skill targeting
+    $(document).on('click', '.task-card', function(e) {
+        if (!activeSkill) return;
+        var skillEl = document.getElementById('skill-' + activeSkill);
+        if (!skillEl || skillEl.dataset.targetsTask !== 'true') return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        var taskId = this.id.replace('task-', '');
+        castSkill(activeSkill, taskId);
+    });
+
+    async function castSkill(key, taskId) {
+        var skillEl = document.getElementById('skill-' + key);
+        if (skillEl) skillEl.classList.add('skill-casting');
+        deactivateSkill();
+
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', token);
+        fd.append('spellKey', key);
+        if (taskId) fd.append('taskId', taskId);
+
+        try {
+            var res  = await fetch('/Task/CastSpell', { method: 'POST', body: fd });
+            var d    = await res.json();
+            var name = skillEl ? skillEl.dataset.name : key;
+
+            if (d.success) {
+                currentMana = d.newMana;
+                maxManaVal  = d.maxMana;
+                updateSkillManaDisplay();
+                updateSkillDisabledStates();
+
+                var msg = (d.data && d.data.toastMessage) ? d.data.toastMessage : (name + ' cast!');
+                showToast('✨', name, msg, 'info', 4500);
+
+                if (d.data && d.data.xpGained > 0)
+                    setTimeout(function(){ showToast('⚡', 'XP!', '+' + d.data.xpGained + ' XP', 'toast-xp', 3000); }, 600);
+
+                if (taskId && d.data && d.data.taskValueDelta !== undefined)
+                    updateCardColor(taskId, parseFloat(d.data.taskValueDelta));
+
+                if (typeof refreshHud === 'function') refreshHud();
+            } else {
+                showToast('❌', 'Spell Failed', d.error || 'Not enough mana?', 'danger', 4000);
+            }
+        } catch(err) {
+            showToast('❌', 'Spell Failed', 'Request error.', 'danger', 4000);
+        }
+
+        if (skillEl) skillEl.classList.remove('skill-casting');
+    }
+
+    function updateSkillManaDisplay() {
+        var pct = maxManaVal > 0 ? Math.min(100, currentMana * 100 / maxManaVal) : 0;
+        var bar = document.getElementById('skillManaBar');
+        if (bar) bar.style.width = pct + '%';
+        var txt = document.querySelector('#skillsBar .mana-text');
+        if (txt) txt.textContent = '💧 ' + currentMana + ' / ' + maxManaVal + ' MP';
+    }
+
+    function updateSkillDisabledStates() {
+        document.querySelectorAll('.skill-btn').forEach(function(btn) {
+            var cost = parseInt(btn.dataset.mana) || 0;
+            if (currentMana < cost) btn.classList.add('skill-disabled');
+            else btn.classList.remove('skill-disabled');
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && activeSkill) deactivateSkill();
+    });
+</script>
 }
