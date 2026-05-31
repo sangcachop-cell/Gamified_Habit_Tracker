@@ -38,15 +38,15 @@ namespace HabitTracker.Models
         public string ColorName => PetKey.Contains('-') ? PetKey.Split('-')[1] : string.Empty;
 
         [NotMapped]
-        public string PetImagePath => $"/images/habitica/stable/pets/Pet-{PetKey}.png";
+        public string PetImagePath => $"/fe/stable/pets/Pet-{PetKey}.png";
 
         [NotMapped]
-        public string MountBodyPath => $"/images/habitica/stable/mounts/body/Mount_Body_{PetKey}.png";
+        public string MountBodyPath => $"/fe/stable/mounts/body/Mount_Body_{PetKey}.png";
 
         [NotMapped]
-        public string MountHeadPath => $"/images/habitica/stable/mounts/head/Mount_Head_{PetKey}.png";
+        public string MountHeadPath => $"/fe/stable/mounts/head/Mount_Head_{PetKey}.png";
 
         [NotMapped]
-        public string MountIconPath => $"/images/habitica/stable/mounts/icon/Mount_Icon_{PetKey}.png";
+        public string MountIconPath => $"/fe/stable/mounts/icon/Mount_Icon_{PetKey}.png";
     }
 }

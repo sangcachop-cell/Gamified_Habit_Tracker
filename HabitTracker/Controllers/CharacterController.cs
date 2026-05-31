@@ -226,14 +226,14 @@ namespace HabitTracker.Controllers
 
             static string After(string s, string prefix) => s[prefix.Length..];
 
-            var skinDir    = Path.Combine(root, "images", "habitica", "customize", "skin");
-            var skinColors = Directory.EnumerateFiles(skinDir, "skin_*.png")
-                .Select(f => After(Path.GetFileNameWithoutExtension(f), "skin_"))
-                .Where(c => !c.EndsWith("_sleep"))
-                .OrderBy(c => c)
-                .ToList();
+            var skinDir = Path.Combine(_env.WebRootPath, "fe", "customize", "skin");
+            var skinColors = Directory.Exists(skinDir)
+                ? Directory.EnumerateFiles(skinDir, "skin_*.png")
+                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("skin_", ""))
+                    .ToList()
+                : new List<string>();
 
-            var hairDir    = Path.Combine(root, "images", "habitica", "customize", "hair");
+            var hairDir = Path.Combine(_env.WebRootPath, "fe", "customize", "hair");
             var hairColors = Directory.EnumerateFiles(hairDir, "hair_base_1_*.png")
                 .Select(f => After(Path.GetFileNameWithoutExtension(f), "hair_base_1_"))
                 .OrderBy(c => c)
@@ -242,11 +242,11 @@ namespace HabitTracker.Controllers
             var hairStyleCount = Directory.EnumerateFiles(hairDir,   "hair_base_*_black.png").Count();
             var hairBangsCount = Directory.EnumerateFiles(hairDir,   "hair_bangs_*_black.png").Count();
 
-            var beardDir         = Path.Combine(root, "images", "habitica", "customize", "beards");
+            var beardDir = Path.Combine(_env.WebRootPath, "fe", "customize", "beards");
             var hairBeardCount   = Directory.EnumerateFiles(beardDir, "hair_beard_*_black.png").Count();
             var hairMustacheCount = Directory.EnumerateFiles(beardDir, "hair_mustache_*_black.png").Count();
 
-            var shirtDir    = Path.Combine(root, "images", "habitica", "customize", "shirts");
+            var shirtDir = Path.Combine(_env.WebRootPath, "fe", "customize", "shirts");
             var shirtStyles = Directory.EnumerateFiles(shirtDir, "broad_shirt_*.png")
                 .Select(f => After(Path.GetFileNameWithoutExtension(f), "broad_shirt_"))
                 .OrderBy(s => s)

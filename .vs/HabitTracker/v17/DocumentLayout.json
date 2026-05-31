@@ -1,0 +1,763 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\baitap\\lt\\HabitTracker\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\changepassword.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\changepassword.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\profile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\profile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\badges.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\badges.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\equipment\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\equipment\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\character\\customize.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\character\\customize.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\character\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\character\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\controllers\\charactercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\controllers\\charactercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\character\\spells.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\character\\spells.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\models\\gameitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\models\\gameitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\models\\gearitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\models\\gearitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\models\\userpet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\models\\userpet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\services\\implementations\\petcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\services\\implementations\\petcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\stable\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\stable\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\market\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\market\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\economy\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\economy\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\leaderboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\friend\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\friend\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\search.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\task\\_taskcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\task\\_taskcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\questshop\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\questshop\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\friend\\viewprofile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\friend\\viewprofile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\dashboard\\statistics.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\character\\selectclass.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\character\\selectclass.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\character\\rebirth.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\character\\rebirth.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\admin\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\admin\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\admin\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\admin\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\admin\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\admin\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\admin\\_questform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\admin\\_questform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\views\\account\\editprofile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\views\\account\\editprofile.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|d:\\baitap\\lt\\habittracker\\habittracker\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{AE5C737B-C9D9-43A9-BE5A-3E047A9B6A94}|HabitTracker\\HabitTracker.csproj|solutionrelative:habittracker\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 317,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 83,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "site.js",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\wwwroot\\js\\site.js",
+              "RelativeDocumentMoniker": "HabitTracker\\wwwroot\\js\\site.js",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\wwwroot\\js\\site.js",
+              "RelativeToolTip": "HabitTracker\\wwwroot\\js\\site.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-05-29T08:55:18.264Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "PetCatalogService.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\PetCatalogService.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Services\\Implementations\\PetCatalogService.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Services\\Implementations\\PetCatalogService.cs",
+              "RelativeToolTip": "HabitTracker\\Services\\Implementations\\PetCatalogService.cs",
+              "ViewState": "AgIAAEMBAAAAAAAAAAAswD8BAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T17:37:09.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Character\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Character\\Index.cshtml",
+              "ViewState": "AgIAAPYAAAAAAAAAAAAYwBEBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:24.795Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Customize.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Customize.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Character\\Customize.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Customize.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Character\\Customize.cshtml",
+              "ViewState": "AgIAAMQCAAAAAAAAAAAwwOQCAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:14.083Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Equipment\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Equipment\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Equipment\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Equipment\\Index.cshtml",
+              "ViewState": "AgIAANMDAAAAAAAAAAAwwPMDAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:57:46.668Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Inventory\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Inventory\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Inventory\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Inventory\\Index.cshtml",
+              "ViewState": "AgIAANMBAAAAAAAAAAAowOYBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:58:49.564Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Profile.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Profile.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Profile.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Profile.cshtml",
+              "ViewState": "AgIAAAIBAAAAAAAAAAAYwBUBAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:48:12.427Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ChangePassword.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\ChangePassword.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\ChangePassword.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\ChangePassword.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\ChangePassword.cshtml",
+              "ViewState": "AgIAAGMBAAAAAAAAAAAwwIMBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:47:09.036Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Badges.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Badges.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Badges.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Badges.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Badges.cshtml",
+              "ViewState": "AgIAADQBAAAAAAAAAAAwwFQBAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:57:04.986Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "UserPet.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\UserPet.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Models\\UserPet.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\UserPet.cs",
+              "RelativeToolTip": "HabitTracker\\Models\\UserPet.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAwwDQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T19:20:03.302Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CharacterController.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CharacterController.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Controllers\\CharacterController.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Controllers\\CharacterController.cs",
+              "RelativeToolTip": "HabitTracker\\Controllers\\CharacterController.cs",
+              "ViewState": "AgIAANkAAAAAAAAAAADwv/QAAABXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T19:27:39.623Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAuwHIAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:37:18.024Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Spells.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Spells.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Character\\Spells.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Spells.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Character\\Spells.cshtml",
+              "ViewState": "AgIAAOUAAAAAAAAAAAAowAcBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:51.175Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "GameItem.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\GameItem.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Models\\GameItem.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\GameItem.cs",
+              "RelativeToolTip": "HabitTracker\\Models\\GameItem.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAowEYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T19:20:51.365Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Stable\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Stable\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Stable\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Stable\\Index.cshtml",
+              "ViewState": "AgIAACUCAAAAAAAAAAAswEQCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:28.701Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Market\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Market\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Market\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Market\\Index.cshtml",
+              "ViewState": "AgIAALgCAAAAAAAAAAAuwNUCAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:01.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Economy\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Economy\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Economy\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Economy\\Index.cshtml",
+              "ViewState": "AgIAAOEBAAAAAAAAAAAswA8CAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:57:31.753Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "GearItem.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\GearItem.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Models\\GearItem.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Models\\GearItem.cs",
+              "RelativeToolTip": "HabitTracker\\Models\\GearItem.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAswEYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T16:27:14.129Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Leaderboard.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Leaderboard.cshtml",
+              "ViewState": "AgIAADoCAAAAAAAAAAAuwE8CAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:47:48.993Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Edit.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Edit.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Edit.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Edit.cshtml",
+              "ViewState": "AgIAAEwBAAAAAAAAAAAswGsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:54.227Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Index.cshtml",
+              "ViewState": "AgIAAKgBAAAAAAAAAAAswLcBAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:57:12.262Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Register.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Register.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Register.cshtml",
+              "ViewState": "AgIAABUBAAAAAAAAAAAAACABAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:48:21.862Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\Login.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAAA8BAAAAAAAAAAAswB0BAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:48:02.09Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAIsDAAAAAAAAAAAswJsDAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:58:29.077Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Index.cshtml",
+              "ViewState": "AgIAAH0BAAAAAAAAAAAswIoBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T09:00:06.606Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Friend\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Friend\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Friend\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Friend\\Index.cshtml",
+              "ViewState": "AgIAABkCAAAAAAAAAAAvwCoCAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:58:08.146Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Create.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Create.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Create.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Create.cshtml",
+              "ViewState": "AgIAAEoBAAAAAAAAAAAswGkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:49.998Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "_TaskCard.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\_TaskCard.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\_TaskCard.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\_TaskCard.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\_TaskCard.cshtml",
+              "ViewState": "AgIAAHAAAAAAAAAAAAAswI8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:39.443Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Search.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Task\\Search.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Task\\Search.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Task\\Search.cshtml",
+              "ViewState": "AgIAAG0BAAAAAAAAAAAuwIoBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T09:00:10.341Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "site.css",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\wwwroot\\css\\site.css",
+              "RelativeDocumentMoniker": "HabitTracker\\wwwroot\\css\\site.css",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\wwwroot\\css\\site.css",
+              "RelativeToolTip": "HabitTracker\\wwwroot\\css\\site.css",
+              "ViewState": "AgIAACABAAAAAAAAAAAkwD4BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-05-29T08:36:33.893Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\QuestShop\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\QuestShop\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\QuestShop\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\QuestShop\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:59:16.85Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "Privacy.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Privacy.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Home\\Privacy.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Home\\Privacy.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Home\\Privacy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:58:36.407Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ViewProfile.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Friend\\ViewProfile.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Friend\\ViewProfile.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Friend\\ViewProfile.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Friend\\ViewProfile.cshtml",
+              "ViewState": "AgIAAOMBAAAAAAAAAAAswAICAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:58:06.062Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "Statistics.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Dashboard\\Statistics.cshtml",
+              "ViewState": "AgIAADcCAAAAAAAAAAAswFYCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:57:19.215Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "SelectClass.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\SelectClass.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Character\\SelectClass.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\SelectClass.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Character\\SelectClass.cshtml",
+              "ViewState": "AgIAAK4AAAAAAAAAAAAswM4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:42.284Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "Rebirth.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Rebirth.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Character\\Rebirth.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Character\\Rebirth.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Character\\Rebirth.cshtml",
+              "ViewState": "AgIAADIAAAAAAAAAAAAswFEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:32.507Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Index.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Index.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Index.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Admin\\Index.cshtml",
+              "ViewState": "AgIAAFMBAAAAAAAAAAAswHIBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:56:00.281Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Edit.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Edit.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Edit.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Admin\\Edit.cshtml",
+              "ViewState": "AgIAAKcAAAAAAAAAAAAswMYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:55:51.369Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Create.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\Create.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\Create.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Admin\\Create.cshtml",
+              "ViewState": "AgIAAKYAAAAAAAAAAAAswMUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:55:43.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "_QuestForm.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Admin\\_QuestForm.cshtml",
+              "ViewState": "AgIAAJQAAAAAAAAAAAAswLMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:53:46.778Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "EditProfile.cshtml",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\EditProfile.cshtml",
+              "RelativeDocumentMoniker": "HabitTracker\\Views\\Account\\EditProfile.cshtml",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Views\\Account\\EditProfile.cshtml",
+              "RelativeToolTip": "HabitTracker\\Views\\Account\\EditProfile.cshtml",
+              "ViewState": "AgIAAFsAAAAAAAAAAAAswHcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-29T08:47:35.204Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": ".gitignore",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\.gitignore",
+              "RelativeDocumentMoniker": "HabitTracker\\.gitignore",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\.gitignore",
+              "RelativeToolTip": "HabitTracker\\.gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-05-29T08:08:08.92Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "HabitTracker\\appsettings.Development.json",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.Development.json",
+              "RelativeToolTip": "HabitTracker\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-29T08:07:37.815Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.json",
+              "RelativeDocumentMoniker": "HabitTracker\\appsettings.json",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\appsettings.json",
+              "RelativeToolTip": "HabitTracker\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-29T08:07:25.578Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
+              "RelativeDocumentMoniker": "HabitTracker\\Program.cs",
+              "ToolTip": "D:\\baitap\\lt\\HabitTracker\\HabitTracker\\Program.cs",
+              "RelativeToolTip": "HabitTracker\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-29T08:04:52.328Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

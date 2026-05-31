@@ -43,11 +43,11 @@
 
     body {
         background: var(--paper);
-        font-family: "DM Sans",sans-serif
+        font-family: "Nunito", sans-serif
     }
 
     h1, h2, h3, h4 {
-        font-family: "Syne",sans-serif
+        font-family: "Nunito", sans-serif
     }
 
     .profile-hero {
@@ -95,7 +95,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: "Syne",sans-serif;
+        font-family: "Nunito", sans-serif;
         font-weight: 800;
         font-size: 2.5rem;
         color: white;
@@ -131,7 +131,7 @@
     }
 
         .hstat .n {
-            font-family: "Syne",sans-serif;
+            font-family: "Nunito", sans-serif;
             font-weight: 800;
             font-size: 1.3rem;
             line-height: 1
@@ -161,7 +161,7 @@
         color: white;
         border: none;
         border-radius: 50px;
-        font-family: "Syne",sans-serif;
+        font-family: "Nunito", sans-serif;
         font-weight: 700;
         font-size: .88rem;
         cursor: pointer;
@@ -222,7 +222,7 @@
         color: white;
         border: none;
         border-radius: 50px;
-        font-family: "Syne",sans-serif;
+        font-family: "Nunito", sans-serif;
         font-weight: 700;
         font-size: .88rem;
         cursor: pointer
@@ -303,7 +303,7 @@
         }
 
         .sr .sv {
-            font-family: "Syne",sans-serif;
+            font-family: "Nunito", sans-serif;
             font-weight: 700;
             font-size: .9rem
         }
@@ -352,7 +352,7 @@
     }
 
     .q-xp {
-        font-family: "Syne",sans-serif;
+        font-family: "Nunito", sans-serif;
         font-weight: 700;
         color: var(--violet);
         font-size: .82rem
@@ -381,9 +381,9 @@
             {
 
                 <img src="@Url.Content("~/images/" + Model.Avatar)" class="hero-av"
-                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <div class="hero-av-ph" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
-}
+            }
             else
             {
                 <div class="hero-av-ph">@Model.Username.Substring(0, 1).ToUpper()</div>
