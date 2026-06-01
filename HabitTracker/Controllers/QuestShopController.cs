@@ -16,7 +16,7 @@ namespace HabitTracker.Controllers
         public QuestShopController(IBossQuestService bossQuestService, AppDbContext db)
         {
             _bossQuestService = bossQuestService;
-            _db               = db;
+            _db = db;
         }
 
         // GET /QuestShop
@@ -48,11 +48,11 @@ namespace HabitTracker.Controllers
 
             var vm = new QuestShopViewModel
             {
-                Quests             = quests,
-                OwnedScrolls       = ownedScrolls,
-                UserGold           = (int)user.Gold,
-                UserGems           = user.Gems,
-                UserLevel          = user.Level,
+                Quests = quests,
+                OwnedScrolls = ownedScrolls,
+                UserGold = (int)user.Gold,
+                UserGems = user.Gems,
+                UserLevel = user.Level,
                 CompletedQuestKeys = completedKeys,
             };
 

@@ -11,12 +11,12 @@ namespace HabitTracker.Controllers
     public class InventoryController : Controller
     {
         private readonly IEconomyService _economyService;
-        private readonly AppDbContext    _context;
+        private readonly AppDbContext _context;
 
         public InventoryController(IEconomyService economyService, AppDbContext context)
         {
             _economyService = economyService;
-            _context        = context;
+            _context = context;
         }
 
         // GET /Inventory
@@ -40,8 +40,8 @@ namespace HabitTracker.Controllers
 
             var vm = new InventoryViewModel
             {
-                User      = user,
-                Items     = items,
+                User = user,
+                Items = items,
                 OwnedGear = ownedGear
             };
 

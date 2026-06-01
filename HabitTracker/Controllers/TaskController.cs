@@ -11,10 +11,10 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class TaskController : Controller
     {
-        private readonly ITaskService      _taskService;
-        private readonly ISpellService     _spellService;
+        private readonly ITaskService _taskService;
+        private readonly ISpellService _spellService;
         private readonly ICharacterService _characterService;
-        private readonly AppDbContext      _context;
+        private readonly AppDbContext _context;
         private readonly ILogger<TaskController> _logger;
 
         public TaskController(
@@ -24,11 +24,11 @@ namespace HabitTracker.Controllers
             AppDbContext context,
             ILogger<TaskController> logger)
         {
-            _taskService      = taskService;
-            _spellService     = spellService;
+            _taskService = taskService;
+            _spellService = spellService;
             _characterService = characterService;
-            _context          = context;
-            _logger           = logger;
+            _context = context;
+            _logger = logger;
         }
 
         // ===== BOARD =====
@@ -51,9 +51,9 @@ namespace HabitTracker.Controllers
 
             if (user != null)
             {
-                board.User          = user;
+                board.User = user;
                 board.EffectiveStats = await _characterService.GetEffectiveStatsAsync(user);
-                board.Skills        = _spellService.GetSpellsForClass(user.Class ?? "");
+                board.Skills = _spellService.GetSpellsForClass(user.Class ?? "");
             }
 
             return View(board);
@@ -69,10 +69,10 @@ namespace HabitTracker.Controllers
 
             var taskType = type.ToLower() switch
             {
-                "daily"  => TaskType.Daily,
-                "todo"   => TaskType.Todo,
+                "daily" => TaskType.Daily,
+                "todo" => TaskType.Todo,
                 "reward" => TaskType.Reward,
-                _        => TaskType.Habit
+                _ => TaskType.Habit
             };
 
             var model = new CreateTaskViewModel { Type = taskType };
@@ -119,32 +119,32 @@ namespace HabitTracker.Controllers
 
             var model = new EditTaskViewModel
             {
-                Id              = task.Id,
-                Type            = task.Type,
-                Text            = task.Text,
-                Notes           = task.Notes,
-                Priority        = task.Priority,
-                Up              = task.Up ?? true,
-                Down            = task.Down ?? true,
-                HabitFrequency  = task.HabitFrequency ?? HabitResetFrequency.Daily,
-                DailyFrequency  = task.DailyFrequency ?? DailyFrequency.Weekly,
-                EveryX          = task.EveryX,
-                StartDate       = task.StartDate,
-                RepeatMonday    = task.RepeatMonday,
-                RepeatTuesday   = task.RepeatTuesday,
+                Id = task.Id,
+                Type = task.Type,
+                Text = task.Text,
+                Notes = task.Notes,
+                Priority = task.Priority,
+                Up = task.Up ?? true,
+                Down = task.Down ?? true,
+                HabitFrequency = task.HabitFrequency ?? HabitResetFrequency.Daily,
+                DailyFrequency = task.DailyFrequency ?? DailyFrequency.Weekly,
+                EveryX = task.EveryX,
+                StartDate = task.StartDate,
+                RepeatMonday = task.RepeatMonday,
+                RepeatTuesday = task.RepeatTuesday,
                 RepeatWednesday = task.RepeatWednesday,
-                RepeatThursday  = task.RepeatThursday,
-                RepeatFriday    = task.RepeatFriday,
-                RepeatSaturday  = task.RepeatSaturday,
-                RepeatSunday    = task.RepeatSunday,
-                DueDate         = task.DueDate,
-                GoldCost        = task.GoldCost,
+                RepeatThursday = task.RepeatThursday,
+                RepeatFriday = task.RepeatFriday,
+                RepeatSaturday = task.RepeatSaturday,
+                RepeatSunday = task.RepeatSunday,
+                DueDate = task.DueDate,
+                GoldCost = task.GoldCost,
                 ExistingChecklist = task.ChecklistItems?
                     .OrderBy(c => c.SortOrder)
                     .Select(c => new EditTaskViewModel.ExistingChecklistItem
                     {
-                        ItemId      = c.Id,
-                        Text        = c.Text,
+                        ItemId = c.Id,
+                        Text = c.Text,
                         IsCompleted = c.IsCompleted
                     }).ToList() ?? new()
             };
@@ -261,14 +261,14 @@ namespace HabitTracker.Controllers
 
             return Json(new
             {
-                success  = true,
+                success = true,
                 spellKey = spellKey,
-                newMana  = (int)(user?.Mana ?? 0),
-                maxMana  = maxMana,
-                newHP    = user?.HP ?? 0,
-                newGold  = user?.Gold ?? 0,
-                newXP    = user?.XP ?? 0,
-                data     = data
+                newMana = (int)(user?.Mana ?? 0),
+                maxMana = maxMana,
+                newHP = user?.HP ?? 0,
+                newGold = user?.Gold ?? 0,
+                newXP = user?.XP ?? 0,
+                data = data
             });
         }
 
@@ -279,8 +279,8 @@ namespace HabitTracker.Controllers
 
         public class ReorderRequest
         {
-            public TaskType  Type { get; set; }
-            public List<int> Ids  { get; set; } = new();
+            public TaskType Type { get; set; }
+            public List<int> Ids { get; set; } = new();
         }
     }
 }

@@ -13,7 +13,7 @@ public class PartyController : Controller
 
     public PartyController(IPartyService party, AppDbContext context)
     {
-        _party   = party;
+        _party = party;
         _context = context;
     }
 
@@ -33,7 +33,7 @@ public class PartyController : Controller
             var pendingInvites = await _party.GetPendingInvitesAsync(userId.Value);
             return View(new HabitTracker.Models.ViewModels.PartyViewModel
             {
-                Party          = null,
+                Party = null,
                 PendingInvites = pendingInvites
             });
         }
@@ -159,12 +159,12 @@ public class PartyController : Controller
 
         return Json(new
         {
-            success      = true,
-            messageId    = msg.Id,
-            body         = renderedBody,
-            sentAt       = msg.SentAt.ToLocalTime().ToString("g"),
-            authorId     = userId.Value,
-            authorName   = author?.Username ?? "Unknown",
+            success = true,
+            messageId = msg.Id,
+            body = renderedBody,
+            sentAt = msg.SentAt.ToLocalTime().ToString("g"),
+            authorId = userId.Value,
+            authorName = author?.Username ?? "Unknown",
             authorAvatar = avatarSrc
         });
     }
@@ -182,20 +182,20 @@ public class PartyController : Controller
         var entries = await _party.GetMessagesAsync(myParty.Id, userId.Value, page);
         return Json(new
         {
-            success  = true,
-            hasMore  = entries.Count == 20,
+            success = true,
+            hasMore = entries.Count == 20,
             messages = entries.Select(e => new
             {
-                id           = e.Message.Id,
-                body         = e.RenderedBody,
-                sentAt       = e.Message.SentAt.ToLocalTime().ToString("g"),
-                authorId     = e.Message.AuthorId,
-                authorName   = e.Message.Author?.Username ?? "?",
+                id = e.Message.Id,
+                body = e.RenderedBody,
+                sentAt = e.Message.SentAt.ToLocalTime().ToString("g"),
+                authorId = e.Message.AuthorId,
+                authorName = e.Message.Author?.Username ?? "?",
                 authorAvatar = string.IsNullOrEmpty(e.Message.Author?.Avatar) || e.Message.Author.Avatar == "default.png"
                                ? "/images/default.png" : "/uploads/" + e.Message.Author.Avatar,
-                likedByMe    = e.LikedByMe,
-                likeCount    = e.LikeCount,
-                isSystem     = e.IsSystem
+                likedByMe = e.LikedByMe,
+                likeCount = e.LikeCount,
+                isSystem = e.IsSystem
             })
         });
     }

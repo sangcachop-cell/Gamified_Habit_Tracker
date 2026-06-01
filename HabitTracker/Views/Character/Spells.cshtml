@@ -3,27 +3,25 @@
 
 @{
     ViewData["Title"] = "Spells";
-    var u = Model.User;
-    var es = Model.EffectiveStats;
-    var mana = (int)u.Mana;
+    var u     = Model.User;
+    var es    = Model.EffectiveStats;
+    var mana  = (int)u.Mana;
     var maxMp = Model.MaxMana;
     var mpPct = maxMp > 0 ? Math.Round((double)mana / maxMp * 100, 1) : 0;
 
-    string classColor = u.Class switch
-    {
+    string classColor = u.Class switch {
         "warrior" => "danger",
-        "mage" => "primary",
-        "rogue" => "warning",
-        "healer" => "success",
-        _ => "secondary"
+        "mage"    => "primary",
+        "rogue"   => "warning",
+        "healer"  => "success",
+        _         => "secondary"
     };
-    string classEmoji = u.Class switch
-    {
+    string classEmoji = u.Class switch {
         "warrior" => "⚔️",
-        "mage" => "🔮",
-        "rogue" => "🗡️",
-        "healer" => "💚",
-        _ => "✨"
+        "mage"    => "🔮",
+        "rogue"   => "🗡️",
+        "healer"  => "💚",
+        _         => "✨"
     };
     string className = u.Class != null
         ? char.ToUpper(u.Class[0]) + u.Class[1..]
@@ -91,11 +89,10 @@
                         var grouped = Model.Tasks.GroupBy(t => t.Type);
                         foreach (var group in grouped.OrderBy(g => g.Key))
                         {
-                            var groupLabel = group.Key switch
-                            {
+                            var groupLabel = group.Key switch {
                                 TaskType.Habit => "Habits",
                                 TaskType.Daily => "Dailies",
-                                TaskType.Todo => "To-Dos",
+                                TaskType.Todo  => "To-Dos",
                                 _ => group.Key.ToString()
                             };
                             <optgroup label="@groupLabel">
@@ -125,11 +122,11 @@
             bool canCast = Model.CanCast(spell);
             string? cantReason = Model.CantCastReason(spell);
             bool isPartySpell = !spell.TargetsTask
-            && !spell.TargetsAllTasks
-            && (spell.Key == "valorousPresence" || spell.Key == "intimidate"
-            || spell.Key == "mpheal" || spell.Key == "earth"
-            || spell.Key == "toolsOfTrade"
-            || spell.Key == "protectAura" || spell.Key == "healAll");
+                                && !spell.TargetsAllTasks
+                                && (spell.Key == "valorousPresence" || spell.Key == "intimidate"
+                                    || spell.Key == "mpheal" || spell.Key == "earth"
+                                    || spell.Key == "toolsOfTrade"
+                                    || spell.Key == "protectAura" || spell.Key == "healAll");
 
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 text-center @(canCast ? "" : "opacity-75") @(isPartySpell ? "border-secondary" : $"border-{classColor}")">
@@ -137,7 +134,7 @@
 
                         <!-- Spell Icon -->
                         <div class="mb-2">
-                            <img src="/fe/skills/shop_@(spell.Key).png"
+                            <img src="/images/habitica/skills/shop_@(spell.Key).png"
                                  width="56" height="56"
                                  style="image-rendering:pixelated; @(canCast ? "" : "filter:grayscale(60%);")"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
@@ -199,65 +196,66 @@
     </div><!-- /row -->
 
 </div><!-- /container -->
+
 @section Scripts {
-    <script>
-        (function () {
-            var token = function () {
-                return $('input[name="__RequestVerificationToken"]').first().val();
-            };
+<script>
+(function () {
+    var token = function () {
+        return $('input[name="__RequestVerificationToken"]').first().val();
+    };
 
-            $(document).on('click', '.btn-cast', function () {
-                var btn         = $(this);
-                var spellKey    = btn.data('spell');
-                var spellName   = btn.data('spell-name');
-                var needsTask   = String(btn.data('targets-task')) === '1';
-                var taskId      = needsTask ? $('#target-task-id').val() : null;
+    $(document).on('click', '.btn-cast', function () {
+        var btn         = $(this);
+        var spellKey    = btn.data('spell');
+        var spellName   = btn.data('spell-name');
+        var needsTask   = String(btn.data('targets-task')) === '1';
+        var taskId      = needsTask ? $('#target-task-id').val() : null;
 
-                if (needsTask && (!taskId || taskId === '')) {
-                    showToast('⚠️', 'No Target', 'Select a task first.', 'toast-death', 3000);
+        if (needsTask && (!taskId || taskId === '')) {
+            showToast('⚠️', 'No Target', 'Select a task first.', 'toast-death', 3000);
+            return;
+        }
+
+        btn.prop('disabled', true).text('Casting…');
+
+        var formData = {
+            __RequestVerificationToken: token(),
+            spellKey: spellKey
+        };
+        if (taskId) formData.taskId = taskId;
+
+        $.ajax({
+            url:    '/Character/CastSpell',
+            method: 'POST',
+            data:   formData,
+            success: function (r) {
+                if (!r.success) {
+                    showToast('❌', 'Spell Failed', r.error || 'Cannot cast.', 'toast-death', 3500);
+                    btn.prop('disabled', false).text('✨ Cast');
                     return;
                 }
 
-                btn.prop('disabled', true).text('Casting…');
+                // Update mana bar
+                var pct = r.maxMana > 0 ? Math.round(r.newMana / r.maxMana * 100) : 0;
+                $('#spell-mana-bar').css('width', pct + '%');
+                $('#spell-mana-text').text(r.newMana + ' / ' + r.maxMana);
 
-                var formData = {
-                    __RequestVerificationToken: token(),
-                    spellKey: spellKey
-                };
-                if (taskId) formData.taskId = taskId;
+                // Refresh HUD navbar
+                if (typeof refreshHud === 'function') refreshHud();
 
-                $.ajax({
-                    url:    '/Character/CastSpell',
-                    method: 'POST',
-                    data:   formData,
-                    success: function (r) {
-                        if (!r.success) {
-                            showToast('❌', 'Spell Failed', r.error || 'Cannot cast.', 'toast-death', 3500);
-                            btn.prop('disabled', false).text('✨ Cast');
-                            return;
-                        }
+                // Toast
+                var msg = (r.data && r.data.toastMessage) ? r.data.toastMessage : spellName + ' cast!';
+                showToast('✨', spellName, msg, 'toast-xp', 3500);
 
-                        // Update mana bar
-                        var pct = r.maxMana > 0 ? Math.round(r.newMana / r.maxMana * 100) : 0;
-                        $('#spell-mana-bar').css('width', pct + '%');
-                        $('#spell-mana-text').text(r.newMana + ' / ' + r.maxMana);
-
-                        // Refresh HUD navbar
-                        if (typeof refreshHud === 'function') refreshHud();
-
-                        // Toast
-                        var msg = (r.data && r.data.toastMessage) ? r.data.toastMessage : spellName + ' cast!';
-                        showToast('✨', spellName, msg, 'toast-xp', 3500);
-
-                        // Reload after short delay so page reflects updated state
-                        setTimeout(function () { location.reload(); }, 1800);
-                    },
-                    error: function () {
-                        showToast('❌', 'Error', 'Request failed. Try again.', 'toast-death', 3500);
-                        btn.prop('disabled', false).text('✨ Cast');
-                    }
-                });
-            });
-        })();
-    </script>
+                // Reload after short delay so page reflects updated state
+                setTimeout(function () { location.reload(); }, 1800);
+            },
+            error: function () {
+                showToast('❌', 'Error', 'Request failed. Try again.', 'toast-death', 3500);
+                btn.prop('disabled', false).text('✨ Cast');
+            }
+        });
+    });
+})();
+</script>
 }

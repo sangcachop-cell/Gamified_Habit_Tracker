@@ -11,24 +11,24 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class CharacterController : Controller
     {
-        private readonly AppDbContext        _context;
-        private readonly ICharacterService   _characterService;
-        private readonly IQuestService       _questService;
-        private readonly ISpellService       _spellService;
+        private readonly AppDbContext _context;
+        private readonly ICharacterService _characterService;
+        private readonly IQuestService _questService;
+        private readonly ISpellService _spellService;
         private readonly IWebHostEnvironment _env;
 
         public CharacterController(
-            AppDbContext        context,
-            ICharacterService   characterService,
-            IQuestService       questService,
-            ISpellService       spellService,
+            AppDbContext context,
+            ICharacterService characterService,
+            IQuestService questService,
+            ISpellService spellService,
             IWebHostEnvironment env)
         {
-            _context          = context;
+            _context = context;
             _characterService = characterService;
-            _questService     = questService;
-            _spellService     = spellService;
-            _env              = env;
+            _questService = questService;
+            _spellService = spellService;
+            _env = env;
         }
 
         // GET /Character
@@ -50,10 +50,10 @@ namespace HabitTracker.Controllers
 
             var vm = new CharacterViewModel
             {
-                User           = user,
+                User = user,
                 EffectiveStats = effectiveStats,
-                XpWithinLevel  = _questService.XpWithinLevel(user.XP),
-                XpToNextLevel  = _questService.XpToNextLevel(user.Level),
+                XpWithinLevel = _questService.XpWithinLevel(user.XP),
+                XpToNextLevel = _questService.XpToNextLevel(user.Level),
             };
 
             return View(vm);
@@ -79,10 +79,10 @@ namespace HabitTracker.Controllers
             {
                 success,
                 newStatPoints = user?.StatPoints ?? 0,
-                newSTR        = user?.STR ?? 0,
-                newCON        = user?.CON ?? 0,
-                newINT        = user?.INT ?? 0,
-                newPER        = user?.PER ?? 0,
+                newSTR = user?.STR ?? 0,
+                newCON = user?.CON ?? 0,
+                newINT = user?.INT ?? 0,
+                newPER = user?.PER ?? 0,
             });
         }
 
@@ -96,8 +96,8 @@ namespace HabitTracker.Controllers
             if (userId == null) return RedirectToAction("Login", "Account");
 
             var user = await _context.Users.FindAsync(userId.Value);
-            if (user == null)              return RedirectToAction("Login", "Account");
-            if (user.Level < 10)           return RedirectToAction("Index");
+            if (user == null) return RedirectToAction("Login", "Account");
+            if (user.Level < 10) return RedirectToAction("Index");
             if (!string.IsNullOrEmpty(user.Class)) return RedirectToAction("Index");
 
             return View();
@@ -155,10 +155,10 @@ namespace HabitTracker.Controllers
 
             var vm = new SpellsViewModel
             {
-                User           = user,
+                User = user,
                 EffectiveStats = es,
-                Spells         = _spellService.GetSpellsForClass(user.Class),
-                Tasks          = tasks,
+                Spells = _spellService.GetSpellsForClass(user.Class),
+                Tasks = tasks,
             };
 
             return View(vm);
@@ -169,7 +169,7 @@ namespace HabitTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CastSpell(
             [FromForm] string spellKey,
-            [FromForm] int?   taskId = null)
+            [FromForm] int? taskId = null)
         {
             var userId = GetUserId();
             if (userId == null)
@@ -181,21 +181,21 @@ namespace HabitTracker.Controllers
                 return Json(new { success = false, error });
 
             // Load fresh user (with gear) for response values
-            var user     = await _context.Users
+            var user = await _context.Users
                 .Include(u => u.OwnedGear!).ThenInclude(ug => ug.GearItem)
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
             var effStats = await _characterService.GetEffectiveStatsAsync(user!);
-            int maxMana  = effStats.MaxMana;
+            int maxMana = effStats.MaxMana;
 
             return Json(new
             {
-                success  = true,
+                success = true,
                 spellKey,
-                newMana  = (int)user.Mana,
+                newMana = (int)user.Mana,
                 maxMana,
-                newHP    = Math.Round(user.HP, 1),
-                newGold  = Math.Round(user.Gold, 2),
-                newXP    = user.XP,
+                newHP = Math.Round(user.HP, 1),
+                newGold = Math.Round(user.Gold, 2),
+                newXP = user.XP,
                 data,
             });
         }
@@ -215,44 +215,44 @@ namespace HabitTracker.Controllers
             if (user == null) return RedirectToAction("Login", "Account");
 
             bool dirty = false;
-            if (string.IsNullOrEmpty(user.BodyType))   { user.BodyType   = "broad";   dirty = true; }
-            if (string.IsNullOrEmpty(user.SkinColor))  { user.SkinColor  = "915533";  dirty = true; }
-            if (string.IsNullOrEmpty(user.HairColor))  { user.HairColor  = "black";   dirty = true; }
-            if (string.IsNullOrEmpty(user.ShirtStyle)) { user.ShirtStyle = "black";   dirty = true; }
-            if (user.HairStyle < 1)                    { user.HairStyle  = 1;         dirty = true; }
+            if (string.IsNullOrEmpty(user.BodyType)) { user.BodyType = "broad"; dirty = true; }
+            if (string.IsNullOrEmpty(user.SkinColor)) { user.SkinColor = "915533"; dirty = true; }
+            if (string.IsNullOrEmpty(user.HairColor)) { user.HairColor = "black"; dirty = true; }
+            if (string.IsNullOrEmpty(user.ShirtStyle)) { user.ShirtStyle = "black"; dirty = true; }
+            if (user.HairStyle < 1) { user.HairStyle = 1; dirty = true; }
             if (dirty) await _context.SaveChangesAsync();
 
             var root = _env.WebRootPath;
 
             static string After(string s, string prefix) => s[prefix.Length..];
 
-            var skinDir = Path.Combine(_env.WebRootPath, "fe", "customize", "skin");
-            var skinColors = Directory.Exists(skinDir)
-                ? Directory.EnumerateFiles(skinDir, "skin_*.png")
-                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("skin_", ""))
-                    .ToList()
-                : new List<string>();
+            var skinDir = Path.Combine(root, "images", "habitica", "customize", "skin");
+            var skinColors = Directory.EnumerateFiles(skinDir, "skin_*.png")
+                .Select(f => After(Path.GetFileNameWithoutExtension(f), "skin_"))
+                .Where(c => !c.EndsWith("_sleep"))
+                .OrderBy(c => c)
+                .ToList();
 
-            var hairDir = Path.Combine(_env.WebRootPath, "fe", "customize", "hair");
+            var hairDir = Path.Combine(root, "images", "habitica", "customize", "hair");
             var hairColors = Directory.EnumerateFiles(hairDir, "hair_base_1_*.png")
                 .Select(f => After(Path.GetFileNameWithoutExtension(f), "hair_base_1_"))
                 .OrderBy(c => c)
                 .ToList();
 
-            var hairStyleCount = Directory.EnumerateFiles(hairDir,   "hair_base_*_black.png").Count();
-            var hairBangsCount = Directory.EnumerateFiles(hairDir,   "hair_bangs_*_black.png").Count();
+            var hairStyleCount = Directory.EnumerateFiles(hairDir, "hair_base_*_black.png").Count();
+            var hairBangsCount = Directory.EnumerateFiles(hairDir, "hair_bangs_*_black.png").Count();
 
-            var beardDir = Path.Combine(_env.WebRootPath, "fe", "customize", "beards");
-            var hairBeardCount   = Directory.EnumerateFiles(beardDir, "hair_beard_*_black.png").Count();
+            var beardDir = Path.Combine(root, "images", "habitica", "customize", "beards");
+            var hairBeardCount = Directory.EnumerateFiles(beardDir, "hair_beard_*_black.png").Count();
             var hairMustacheCount = Directory.EnumerateFiles(beardDir, "hair_mustache_*_black.png").Count();
 
-            var shirtDir = Path.Combine(_env.WebRootPath, "fe", "customize", "shirts");
+            var shirtDir = Path.Combine(root, "images", "habitica", "customize", "shirts");
             var shirtStyles = Directory.EnumerateFiles(shirtDir, "broad_shirt_*.png")
                 .Select(f => After(Path.GetFileNameWithoutExtension(f), "broad_shirt_"))
                 .OrderBy(s => s)
                 .ToList();
 
-            var bgDir      = Path.Combine(root, "images", "habitica", "backgrounds");
+            var bgDir = Path.Combine(root, "images", "habitica", "backgrounds");
             var backgrounds = Directory.EnumerateFiles(bgDir, "background_*.png")
                 .Select(f => After(Path.GetFileNameWithoutExtension(f), "background_"))
                 .OrderBy(b => b)
@@ -260,15 +260,15 @@ namespace HabitTracker.Controllers
 
             var vm = new CustomizeViewModel
             {
-                User              = user,
-                SkinColors        = skinColors,
-                HairColors        = hairColors,
-                HairStyleCount    = hairStyleCount,
-                HairBangsCount    = hairBangsCount,
-                HairBeardCount    = hairBeardCount,
+                User = user,
+                SkinColors = skinColors,
+                HairColors = hairColors,
+                HairStyleCount = hairStyleCount,
+                HairBangsCount = hairBangsCount,
+                HairBeardCount = hairBeardCount,
                 HairMustacheCount = hairMustacheCount,
-                ShirtStyles       = shirtStyles,
-                Backgrounds       = backgrounds,
+                ShirtStyles = shirtStyles,
+                Backgrounds = backgrounds,
             };
 
             return View(vm);
@@ -284,7 +284,7 @@ namespace HabitTracker.Controllers
             var user = await _context.Users.FindAsync(userId.Value);
             if (user == null) return Json(new { success = false });
             user.Background = string.IsNullOrWhiteSpace(key) ? null : key;
-            user.UpdatedAt  = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return Json(new { success = true });
         }
@@ -295,11 +295,11 @@ namespace HabitTracker.Controllers
         public async Task<IActionResult> SaveAppearance(
             [FromForm] string bodyType,
             [FromForm] string skinColor,
-            [FromForm] int    hairStyle,
+            [FromForm] int hairStyle,
             [FromForm] string hairColor,
-            [FromForm] int    hairBangs,
-            [FromForm] int    hairBeard,
-            [FromForm] int    hairMustache,
+            [FromForm] int hairBangs,
+            [FromForm] int hairBeard,
+            [FromForm] int hairMustache,
             [FromForm] string shirtStyle)
         {
             var userId = GetUserId();
@@ -308,15 +308,15 @@ namespace HabitTracker.Controllers
             var user = await _context.Users.FindAsync(userId.Value);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            user.BodyType     = bodyType is "broad" or "slim" ? bodyType : "broad";
-            user.SkinColor    = skinColor;
-            user.HairStyle    = Math.Clamp(hairStyle, 1, 20);
-            user.HairColor    = hairColor;
-            user.HairBangs    = Math.Clamp(hairBangs, 0, 4);
-            user.HairBeard    = Math.Clamp(hairBeard, 0, 3);
+            user.BodyType = bodyType is "broad" or "slim" ? bodyType : "broad";
+            user.SkinColor = skinColor;
+            user.HairStyle = Math.Clamp(hairStyle, 1, 20);
+            user.HairColor = hairColor;
+            user.HairBangs = Math.Clamp(hairBangs, 0, 4);
+            user.HairBeard = Math.Clamp(hairBeard, 0, 3);
             user.HairMustache = Math.Clamp(hairMustache, 0, 2);
-            user.ShirtStyle   = shirtStyle;
-            user.UpdatedAt    = DateTime.UtcNow;
+            user.ShirtStyle = shirtStyle;
+            user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["ToastLevel"] = "Appearance saved!";

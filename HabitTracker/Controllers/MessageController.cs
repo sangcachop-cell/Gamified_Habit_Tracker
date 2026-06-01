@@ -15,7 +15,7 @@ public class MessageController : Controller
     public MessageController(IMessageService messages, AppDbContext context)
     {
         _messages = messages;
-        _context  = context;
+        _context = context;
     }
 
     private int? GetUserId() => HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
@@ -27,7 +27,7 @@ public class MessageController : Controller
         if (userId == null) return RedirectToAction("Login", "Account");
 
         var conversations = await _messages.GetConversationsAsync(userId.Value);
-        var totalUnread   = await _messages.GetUnreadCountAsync(userId.Value);
+        var totalUnread = await _messages.GetUnreadCountAsync(userId.Value);
 
         ConversationViewModel? active = null;
 
@@ -37,28 +37,28 @@ public class MessageController : Controller
             if (otherUser != null)
             {
                 await _messages.MarkReadAsync(userId.Value, otherId.Value);
-                var entries     = await _messages.GetConversationAsync(userId.Value, otherId.Value, page);
-                var isBlocker   = await _messages.IsBlockerAsync(userId.Value, otherId.Value);
+                var entries = await _messages.GetConversationAsync(userId.Value, otherId.Value, page);
+                var isBlocker = await _messages.IsBlockerAsync(userId.Value, otherId.Value);
                 var isBlockedBy = await _messages.IsBlockerAsync(otherId.Value, userId.Value);
 
                 active = new ConversationViewModel
                 {
-                    OtherUser   = otherUser,
-                    Messages    = entries,
-                    IsBlocked   = isBlocker,
+                    OtherUser = otherUser,
+                    Messages = entries,
+                    IsBlocked = isBlocker,
                     IsBlockedBy = isBlockedBy,
-                    Page        = page,
-                    HasMore     = entries.Count == 20
+                    Page = page,
+                    HasMore = entries.Count == 20
                 };
             }
         }
 
         var model = new InboxViewModel
         {
-            Conversations            = conversations,
-            TotalUnread              = totalUnread,
+            Conversations = conversations,
+            TotalUnread = totalUnread,
             ActiveConversationUserId = otherId,
-            ActiveConversation       = active
+            ActiveConversation = active
         };
 
         return View(model);
@@ -93,10 +93,10 @@ public class MessageController : Controller
 
         return Json(new
         {
-            success    = true,
-            messageId  = msg!.Id,
-            body       = msg.Body,
-            sentAt     = msg.SentAt.ToString("g")
+            success = true,
+            messageId = msg!.Id,
+            body = msg.Body,
+            sentAt = msg.SentAt.ToString("g")
         });
     }
 

@@ -278,8 +278,8 @@ namespace HabitTracker.Services.Implementations
                 ColorKey: color,
                 Category: cat,
                 CanBecomeMount: canMount,
-                PetImagePath: $"/fe/stable/pets/Pet-{key}.png",
-                MountIconPath: canMount ? $"/fe/stable/mounts/icon/Mount_Icon_{key}.png" : null);
+                PetImagePath: $"/images/habitica/stable/pets/Pet-{key}.png",
+                MountIconPath: canMount ? $"/images/habitica/stable/mounts/icon/Mount_Icon_{key}.png" : null);
         }
 
         private static PetCatalogEntry MakeSpecial(string animal, string color, bool canMount)
@@ -291,8 +291,8 @@ namespace HabitTracker.Services.Implementations
                 ColorKey: color,
                 Category: PetCategory.Special,
                 CanBecomeMount: canMount,
-                PetImagePath: $"/fe/stable/pets/Pet-{key}.png",
-                MountIconPath: canMount ? $"/fe/stable/mounts/icon/Mount_Icon_{key}.png" : null);
+                PetImagePath: $"/images/habitica/stable/pets/Pet-{key}.png",
+                MountIconPath: canMount ? $"/images/habitica/stable/mounts/icon/Mount_Icon_{key}.png" : null);
         }
 
         // Slot for view rendering — owned/mount fields start false, populated by StableService

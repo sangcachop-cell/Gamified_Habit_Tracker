@@ -11,12 +11,12 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class EquipmentController : Controller
     {
-        private readonly AppDbContext      _context;
+        private readonly AppDbContext _context;
         private readonly ICharacterService _characterService;
 
         public EquipmentController(AppDbContext context, ICharacterService characterService)
         {
-            _context          = context;
+            _context = context;
             _characterService = characterService;
         }
 
@@ -58,32 +58,32 @@ namespace HabitTracker.Controllers
 
             var vm = new EquipmentViewModel
             {
-                User        = user,
+                User = user,
                 OwnedBySlot = ownedBySlot,
-                ShopBySlot  = shopBySlot,
-                OwnedKeys   = ownedKeys,
-                Stats       = stats,
+                ShopBySlot = shopBySlot,
+                OwnedKeys = ownedKeys,
+                Stats = stats,
                 EquippedKeys = new Dictionary<string, string?>
                 {
-                    ["weapon"]        = user.EquippedWeapon,
-                    ["armor"]         = user.EquippedArmor,
-                    ["head"]          = user.EquippedHead,
-                    ["shield"]        = user.EquippedShield,
-                    ["back"]          = user.EquippedBack,
-                    ["eyewear"]       = user.EquippedEyewear,
+                    ["weapon"] = user.EquippedWeapon,
+                    ["armor"] = user.EquippedArmor,
+                    ["head"] = user.EquippedHead,
+                    ["shield"] = user.EquippedShield,
+                    ["back"] = user.EquippedBack,
+                    ["eyewear"] = user.EquippedEyewear,
                     ["headAccessory"] = user.EquippedHeadAccessory,
-                    ["body"]          = user.EquippedBody,
+                    ["body"] = user.EquippedBody,
                 },
                 CostumeKeys = new Dictionary<string, string?>
                 {
-                    ["weapon"]        = user.CostumeWeapon,
-                    ["armor"]         = user.CostumeArmor,
-                    ["head"]          = user.CostumeHead,
-                    ["shield"]        = user.CostumeShield,
-                    ["back"]          = user.CostumeBack,
-                    ["eyewear"]       = user.CostumeEyewear,
+                    ["weapon"] = user.CostumeWeapon,
+                    ["armor"] = user.CostumeArmor,
+                    ["head"] = user.CostumeHead,
+                    ["shield"] = user.CostumeShield,
+                    ["back"] = user.CostumeBack,
+                    ["eyewear"] = user.CostumeEyewear,
                     ["headAccessory"] = user.CostumeHeadAccessory,
-                    ["body"]          = user.CostumeBody,
+                    ["body"] = user.CostumeBody,
                 },
             };
 
@@ -137,8 +137,8 @@ namespace HabitTracker.Controllers
             // Two-handed weapon auto-clears shield slot
             if (gear.TwoHanded)
             {
-                if (isCostume) user.CostumeShield  = null;
-                else           user.EquippedShield  = null;
+                if (isCostume) user.CostumeShield = null;
+                else user.EquippedShield = null;
             }
 
             SetSlot(user, gear.Slot, key, isCostume);
@@ -149,15 +149,15 @@ namespace HabitTracker.Controllers
 
             return Json(new
             {
-                success     = true,
-                slot        = gear.Slot,
+                success = true,
+                slot = gear.Slot,
                 key,
                 mode,
-                twoHanded   = gear.TwoHanded,
+                twoHanded = gear.TwoHanded,
                 wornImgPath = gear.GetWornImagePath(user.BodyType ?? "broad"),
                 shopImgPath = gear.ShopImagePath,
-                itemName    = gear.Name,
-                newStats    = new { stats.STR, stats.CON, stats.INT, stats.PER, stats.MaxMana },
+                itemName = gear.Name,
+                newStats = new { stats.STR, stats.CON, stats.INT, stats.PER, stats.MaxMana },
             });
         }
 
@@ -181,7 +181,7 @@ namespace HabitTracker.Controllers
 
             return Json(new
             {
-                success  = true,
+                success = true,
                 slot,
                 mode,
                 newStats = new { stats.STR, stats.CON, stats.INT, stats.PER, stats.MaxMana },
@@ -235,7 +235,7 @@ namespace HabitTracker.Controllers
             user.Gold -= gear.GoldCost;
             _context.UserGearItems.Add(new UserGearItem
             {
-                UserId     = userId.Value,
+                UserId = userId.Value,
                 GearItemId = gear.Id,
                 AcquiredAt = DateTime.UtcNow,
             });
@@ -243,12 +243,12 @@ namespace HabitTracker.Controllers
 
             return Json(new
             {
-                success     = true,
+                success = true,
                 key,
-                itemName    = gear.Name,
-                slot        = gear.Slot,
+                itemName = gear.Name,
+                slot = gear.Slot,
                 shopImgPath = gear.ShopImagePath,
-                newGold     = Math.Round(user.Gold, 2),
+                newGold = Math.Round(user.Gold, 2),
             });
         }
 
@@ -260,28 +260,28 @@ namespace HabitTracker.Controllers
             {
                 switch (slot)
                 {
-                    case "weapon":        user.CostumeWeapon        = key; break;
-                    case "armor":         user.CostumeArmor         = key; break;
-                    case "head":          user.CostumeHead          = key; break;
-                    case "shield":        user.CostumeShield        = key; break;
-                    case "back":          user.CostumeBack          = key; break;
-                    case "eyewear":       user.CostumeEyewear       = key; break;
+                    case "weapon": user.CostumeWeapon = key; break;
+                    case "armor": user.CostumeArmor = key; break;
+                    case "head": user.CostumeHead = key; break;
+                    case "shield": user.CostumeShield = key; break;
+                    case "back": user.CostumeBack = key; break;
+                    case "eyewear": user.CostumeEyewear = key; break;
                     case "headAccessory": user.CostumeHeadAccessory = key; break;
-                    case "body":          user.CostumeBody          = key; break;
+                    case "body": user.CostumeBody = key; break;
                 }
             }
             else
             {
                 switch (slot)
                 {
-                    case "weapon":        user.EquippedWeapon        = key; break;
-                    case "armor":         user.EquippedArmor         = key; break;
-                    case "head":          user.EquippedHead          = key; break;
-                    case "shield":        user.EquippedShield        = key; break;
-                    case "back":          user.EquippedBack          = key; break;
-                    case "eyewear":       user.EquippedEyewear       = key; break;
+                    case "weapon": user.EquippedWeapon = key; break;
+                    case "armor": user.EquippedArmor = key; break;
+                    case "head": user.EquippedHead = key; break;
+                    case "shield": user.EquippedShield = key; break;
+                    case "back": user.EquippedBack = key; break;
+                    case "eyewear": user.EquippedEyewear = key; break;
                     case "headAccessory": user.EquippedHeadAccessory = key; break;
-                    case "body":          user.EquippedBody          = key; break;
+                    case "body": user.EquippedBody = key; break;
                 }
             }
         }

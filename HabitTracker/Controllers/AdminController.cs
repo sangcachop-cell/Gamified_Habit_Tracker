@@ -304,8 +304,8 @@ namespace HabitTracker.Controllers
             if (report == null) return NotFound();
 
             var adminId = HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
-            report.IsResolved        = true;
-            report.ResolvedAt        = DateTime.UtcNow;
+            report.IsResolved = true;
+            report.ResolvedAt = DateTime.UtcNow;
             report.ResolvedByAdminId = adminId;
 
             await _context.SaveChangesAsync();

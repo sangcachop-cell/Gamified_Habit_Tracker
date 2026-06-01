@@ -9,16 +9,16 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class EconomyController : Controller
     {
-        private readonly IEconomyService   _economyService;
-        private readonly AppDbContext      _context;
-        private readonly IQuestService     _questService;
+        private readonly IEconomyService _economyService;
+        private readonly AppDbContext _context;
+        private readonly IQuestService _questService;
         private readonly ICharacterService _characterService;
 
         public EconomyController(IEconomyService economyService, AppDbContext context, IQuestService questService, ICharacterService characterService)
         {
-            _economyService   = economyService;
-            _context          = context;
-            _questService     = questService;
+            _economyService = economyService;
+            _context = context;
+            _questService = questService;
             _characterService = characterService;
         }
 
@@ -30,12 +30,12 @@ namespace HabitTracker.Controllers
             var userId = GetUserId();
             if (userId == null) return RedirectToAction("Login", "Account");
 
-            var user      = await _context.Users.FindAsync(userId.Value);
+            var user = await _context.Users.FindAsync(userId.Value);
             if (user == null) return RedirectToAction("Login", "Account");
 
             var inventory = await _economyService.GetInventoryAsync(userId.Value);
 
-            ViewBag.User      = user;
+            ViewBag.User = user;
             ViewBag.Inventory = inventory;
             return View();
         }
@@ -52,33 +52,33 @@ namespace HabitTracker.Controllers
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
             if (user == null) return Json(null);
 
-            var effStats      = await _characterService.GetEffectiveStatsAsync(user);
-            int maxMana       = effStats.MaxMana;
+            var effStats = await _characterService.GetEffectiveStatsAsync(user);
+            int maxMana = effStats.MaxMana;
             int xpToNextLevel = _questService.XpToNextLevel(user.Level);
             int xpWithinLevel = _questService.XpWithinLevel(user.XP);
 
             return Json(new
             {
-                hp            = user.HP,
-                maxHp         = (int)AppConstants.MAX_HP,
-                mana          = user.Mana,
+                hp = user.HP,
+                maxHp = (int)AppConstants.MAX_HP,
+                mana = user.Mana,
                 maxMana,
-                gold          = user.Gold,
-                level         = user.Level,
-                xp            = user.XP,
-                xpToNext      = xpToNextLevel,   // replaced hardcoded constant
+                gold = user.Gold,
+                level = user.Level,
+                xp = user.XP,
+                xpToNext = xpToNextLevel,   // replaced hardcoded constant
                 xpWithinLevel,
                 xpToNextLevel,
-                isSleeping    = user.IsSleeping,
-                isDead        = user.HP <= 0,
+                isSleeping = user.IsSleeping,
+                isDead = user.HP <= 0,
                 // Phase 3 — character stats
-                str           = user.STR,
-                con           = user.CON,
-                intel         = user.INT,         // 'int' is a C# keyword; use 'intel'
-                per           = user.PER,
-                statPoints    = user.StatPoints,
+                str = user.STR,
+                con = user.CON,
+                intel = user.INT,         // 'int' is a C# keyword; use 'intel'
+                per = user.PER,
+                statPoints = user.StatPoints,
                 // Phase 4
-                gems          = user.Gems
+                gems = user.Gems
             });
         }
 
@@ -97,7 +97,7 @@ namespace HabitTracker.Controllers
             {
                 success,
                 error,
-                newHp   = user?.HP   ?? 0,
+                newHp = user?.HP ?? 0,
                 newGold = user?.Gold ?? 0
             });
         }
@@ -127,11 +127,11 @@ namespace HabitTracker.Controllers
             var user = await _context.Users.FindAsync(userId.Value);
             return Json(new
             {
-                success  = true,
-                newHp    = user?.HP    ?? 0,
-                newGold  = user?.Gold  ?? 0,
+                success = true,
+                newHp = user?.HP ?? 0,
+                newGold = user?.Gold ?? 0,
                 newLevel = user?.Level ?? 1,
-                newXp    = user?.XP    ?? 0
+                newXp = user?.XP ?? 0
             });
         }
 

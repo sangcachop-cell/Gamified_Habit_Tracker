@@ -1,59 +1,356 @@
 @model HabitTracker.Models.ViewModels.InventoryViewModel
 @{
     ViewData["Title"] = "Inventory";
-    var u         = Model.User;
+    var u = Model.User;
     var itemTypes = new[] { HabitTracker.Constants.ItemType.Food, HabitTracker.Constants.ItemType.Egg, HabitTracker.Constants.ItemType.HatchingPotion };
 
     string TypeLabel(HabitTracker.Constants.ItemType t) => t switch
     {
-        HabitTracker.Constants.ItemType.Food           => "🍖 Food",
-        HabitTracker.Constants.ItemType.Egg            => "🥚 Eggs",
+        HabitTracker.Constants.ItemType.Food => "🍖 Food",
+        HabitTracker.Constants.ItemType.Egg => "🥚 Eggs",
         HabitTracker.Constants.ItemType.HatchingPotion => "🧪 Hatching Potions",
         _ => "📦 Other"
     };
 
     string SlotIcon(string slot) => slot switch
     {
-        "weapon"        => "⚔️",
-        "armor"         => "🛡️",
-        "head"          => "🪖",
-        "shield"        => "🔰",
-        _               => "📦"
+        "weapon" => "⚔️",
+        "armor" => "🛡️",
+        "head" => "🪖",
+        "shield" => "🔰",
+        _ => "📦"
     };
 }
 
+<style>
+    :root {
+        --inv-bg: #f6f7fb;
+        --inv-card: #ffffff;
+        --inv-text: #1f2937;
+        --inv-muted: #6b7280;
+        --inv-border: #e5e7eb;
+        --inv-soft: #f1f5f9;
+        --inv-primary: #2563eb;
+        --inv-primary-hover: #1d4ed8;
+        --inv-gold: #f59e0b;
+        --inv-green: #16a34a;
+        --inv-blue-soft: #eff6ff;
+        --inv-shadow: 0 14px 32px rgba(15, 23, 42, .07);
+    }
+
+    body {
+        background: var(--inv-bg);
+        color: var(--inv-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .inventory-page {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 24px 12px 48px;
+    }
+
+    .inventory-header {
+        background: var(--inv-card);
+        border: 1px solid var(--inv-border);
+        border-radius: 24px;
+        box-shadow: var(--inv-shadow);
+        padding: 22px 24px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .inventory-title {
+        margin: 0;
+        font-size: 1.65rem;
+        font-weight: 900;
+        letter-spacing: -.04em;
+        color: var(--inv-text);
+    }
+
+    .inventory-subtitle {
+        margin: 6px 0 0;
+        color: var(--inv-muted);
+        font-size: .92rem;
+    }
+
+    .inventory-count {
+        background: var(--inv-blue-soft);
+        color: var(--inv-primary);
+        border: 1px solid rgba(37, 99, 235, .14);
+        border-radius: 999px;
+        padding: 8px 13px;
+        font-size: .86rem;
+        font-weight: 850;
+    }
+
+    .inventory-tabs {
+        background: var(--inv-card);
+        border: 1px solid var(--inv-border);
+        border-radius: 16px;
+        padding: 6px;
+        display: inline-flex;
+        gap: 6px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+    }
+
+        .inventory-tabs .nav-link {
+            border: 0;
+            border-radius: 12px;
+            color: var(--inv-muted);
+            font-weight: 850;
+            padding: 10px 16px;
+        }
+
+            .inventory-tabs .nav-link:hover {
+                background: var(--inv-soft);
+                color: var(--inv-text);
+            }
+
+            .inventory-tabs .nav-link.active {
+                background: var(--inv-primary);
+                color: white;
+            }
+
+    .tab-badge {
+        background: rgba(255,255,255,.22);
+        color: inherit;
+        border-radius: 999px;
+        padding: 2px 7px;
+        margin-left: 5px;
+        font-size: .72rem;
+    }
+
+    .section-heading {
+        margin: 18px 0 10px;
+        color: var(--inv-text);
+        font-size: 1rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .inv-card {
+        background: var(--inv-card);
+        border: 1px solid var(--inv-border);
+        border-radius: 18px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+        padding: 16px;
+        text-align: center;
+        height: 100%;
+        transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+        .inv-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--inv-shadow);
+            border-color: #cfd8e3;
+        }
+
+    .inv-img-box {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 10px;
+        border-radius: 18px;
+        background: #f8fafc;
+        border: 1px solid var(--inv-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .inv-img-box img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+    .inv-name {
+        color: var(--inv-text);
+        font-size: .92rem;
+        font-weight: 900;
+        line-height: 1.25;
+        min-height: 36px;
+    }
+
+    .qty-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        background: var(--inv-soft);
+        color: var(--inv-muted);
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: .76rem;
+        font-weight: 850;
+    }
+
+    .gear-stats {
+        margin-top: 8px;
+        color: var(--inv-muted);
+        font-size: .75rem;
+        min-height: 20px;
+    }
+
+    .btn-inv {
+        border-radius: 12px;
+        padding: 8px 11px;
+        font-size: .8rem;
+        font-weight: 850;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        margin-top: 10px;
+        width: 100%;
+        transition: background .15s ease, transform .12s ease;
+    }
+
+        .btn-inv:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+    .btn-hatch {
+        background: #ecfeff;
+        color: #0e7490;
+        border-color: #a5f3fc;
+    }
+
+    .btn-sell {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .btn-equip {
+        background: var(--inv-soft);
+        color: var(--inv-text);
+        border-color: var(--inv-border);
+    }
+
+        .btn-equip:hover {
+            background: #e5e7eb;
+            color: var(--inv-text);
+        }
+
+    .not-sellable {
+        margin-top: 10px;
+        display: block;
+        color: var(--inv-muted);
+        font-size: .78rem;
+    }
+
+    .empty-state {
+        background: var(--inv-card);
+        border: 1px dashed #cbd5e1;
+        border-radius: 22px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .04);
+        text-align: center;
+        color: var(--inv-muted);
+        padding: 54px 20px;
+    }
+
+        .empty-state a {
+            color: var(--inv-primary);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    @@media (max-width: 1000px) {
+        .inventory-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .inventory-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .inventory-header {
+            padding: 20px;
+        }
+
+        .inventory-title {
+            font-size: 1.4rem;
+        }
+
+        .inventory-tabs {
+            width: 100%;
+        }
+
+            .inventory-tabs .nav-item,
+            .inventory-tabs .nav-link {
+                flex: 1;
+                text-align: center;
+            }
+    }
+
+    @@media (max-width: 420px) {
+        .inventory-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
-<div class="container-fluid py-4" style="max-width:1100px;">
+<div class="inventory-page">
 
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <h2 class="mb-0">🎒 Inventory</h2>
-        <span class="badge bg-secondary">@Model.Items.Sum(i => i.Quantity) items</span>
+    <div class="inventory-header">
+        <div>
+            <h2 class="inventory-title">🎒 Inventory</h2>
+            <p class="inventory-subtitle">Quản lý vật phẩm, trứng, bình ấp và trang bị bạn đang sở hữu.</p>
+        </div>
+
+        <div class="inventory-count">
+            📦 @Model.Items.Sum(i => i.Quantity) items
+        </div>
     </div>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" id="invTab" role="tablist">
+    <ul class="nav inventory-tabs" id="invTab" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-items" type="button">
-                Items <span class="badge bg-secondary ms-1">@Model.Items.Count</span>
+                Items <span class="tab-badge">@Model.Items.Count</span>
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gear" type="button">
-                Gear <span class="badge bg-secondary ms-1">@Model.OwnedGear.Count</span>
+                Gear <span class="tab-badge">@Model.OwnedGear.Count</span>
             </button>
         </li>
     </ul>
 
     <div class="tab-content">
 
-        <!-- ITEMS TAB -->
         <div class="tab-pane fade show active" id="tab-items">
             @if (!Model.Items.Any())
             {
-                <div class="text-center text-muted py-5">
-                    <div style="font-size:3rem;">📦</div>
-                    <p class="mt-2">No items yet. Complete tasks to earn drops!</p>
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p class="mt-2 mb-0">No items yet. Complete tasks to earn drops!</p>
                 </div>
             }
             else
@@ -63,37 +360,45 @@
                     var group = Model.Items.Where(i => i.GameItem?.Type == type).ToList();
                     if (!group.Any()) continue;
 
-                    <h5 class="mt-3 mb-2 text-secondary">@TypeLabel(type)</h5>
-                    <div class="row g-3 mb-4">
+                    <h5 class="section-heading">@TypeLabel(type)</h5>
+
+                    <div class="inventory-grid">
                         @foreach (var inv in group)
                         {
                             var item = inv.GameItem!;
                             bool canSell = item.GoldValue > 0;
                             bool isHatchable = item.Type == HabitTracker.Constants.ItemType.Egg ||
-                                               item.Type == HabitTracker.Constants.ItemType.HatchingPotion;
-                            <div class="col-6 col-md-4 col-lg-3" id="inv-card-@inv.GameItemId">
-                                <div class="card h-100 bg-dark border-secondary text-center p-3">
-                                    <img src="@item.ImagePath" alt="@item.Name"
-                                         style="width:56px;height:56px;object-fit:contain;margin:auto;"
-                                         onerror="this.outerHTML='<div style=\'font-size:2.5rem;\'>@item.Icon</div>'">
-                                    <div class="fw-bold mt-1 text-white">@item.Name</div>
-                                    <div class="text-muted small">
-                                        <span class="badge bg-secondary">×<span class="qty-badge">@inv.Quantity</span></span>
+                            item.Type == HabitTracker.Constants.ItemType.HatchingPotion;
+
+                            <div id="inv-card-@inv.GameItemId">
+                                <div class="inv-card">
+                                    <div class="inv-img-box">
+                                        <img src="@item.ImagePath" alt="@item.Name"
+                                             onerror="this.outerHTML='<div style=\'font-size:2.5rem;\'>@item.Icon</div>'">
                                     </div>
+
+                                    <div class="inv-name">@item.Name</div>
+
+                                    <div class="qty-pill">
+                                        ×<span class="qty-badge">@inv.Quantity</span>
+                                    </div>
+
                                     @if (isHatchable)
                                     {
-                                        <a href="/Stable#tab-hatch" class="btn btn-sm btn-outline-info mt-2">🥚 Hatch</a>
+                                        <a href="/Stable#tab-hatch" class="btn-inv btn-hatch">🥚 Hatch</a>
                                     }
+
                                     @if (canSell)
                                     {
-                                        <button class="btn btn-sm btn-outline-warning mt-2"
+                                        <button class="btn-inv btn-sell"
                                                 onclick="sellItem(@inv.GameItemId, this)">
                                             Sell · @item.GoldValue GP
                                         </button>
                                     }
+
                                     @if (!canSell && !isHatchable)
                                     {
-                                        <span class="text-muted small mt-2 d-block">Not sellable</span>
+                                        <span class="not-sellable">Not sellable</span>
                                     }
                                 </div>
                             </div>
@@ -103,38 +408,60 @@
             }
         </div>
 
-        <!-- GEAR TAB -->
         <div class="tab-pane fade" id="tab-gear">
             @if (!Model.OwnedGear.Any())
             {
-                <div class="text-center text-muted py-5">
-                    <div style="font-size:3rem;">⚔️</div>
-                    <p class="mt-2">No gear owned yet. Visit the <a href="/Market">Market</a> or <a href="/Equipment">Equipment</a> page to buy some!</p>
+                <div class="empty-state">
+                    <div class="empty-icon">⚔️</div>
+                    <p class="mt-2 mb-0">
+                        No gear owned yet. Visit the <a href="/Market">Market</a> or <a href="/Equipment">Equipment</a> page to buy some!
+                    </p>
                 </div>
             }
             else
             {
                 var bySlot = Model.OwnedGear.GroupBy(g => g.GearItem!.Slot).OrderBy(g => g.Key);
+
                 @foreach (var slotGroup in bySlot)
                 {
-                    <h5 class="mt-3 mb-2 text-secondary">@SlotIcon(slotGroup.Key) @char.ToUpper(slotGroup.Key[0])@slotGroup.Key[1..]</h5>
-                    <div class="row g-3 mb-4">
+                    <h5 class="section-heading">
+                        @SlotIcon(slotGroup.Key) @char.ToUpper(slotGroup.Key[0])@slotGroup.Key[1..]
+                    </h5>
+
+                    <div class="inventory-grid">
                         @foreach (var ug in slotGroup.OrderBy(g => g.GearItem!.Tier))
                         {
                             var gear = ug.GearItem!;
-                            <div class="col-6 col-md-4 col-lg-3">
-                                <div class="card h-100 bg-dark border-secondary p-2 text-center">
-                                    <img src="@gear.ShopImagePath" alt="@gear.Name"
-                                         style="width:48px;height:48px;object-fit:contain;margin:auto;"
-                                         onerror="this.style.display='none'">
-                                    <div class="fw-bold small mt-1 text-white">@gear.Name</div>
-                                    <div class="text-muted" style="font-size:.72rem;">
-                                        @if (gear.STR > 0) { <span class="me-1 text-danger">STR+@gear.STR</span> }
-                                        @if (gear.CON > 0) { <span class="me-1 text-success">CON+@gear.CON</span> }
-                                        @if (gear.INT > 0) { <span class="me-1 text-info">INT+@gear.INT</span> }
-                                        @if (gear.PER > 0) { <span class="me-1 text-warning">PER+@gear.PER</span> }
+
+                            <div>
+                                <div class="inv-card">
+                                    <div class="inv-img-box">
+                                        <img src="@gear.ShopImagePath" alt="@gear.Name"
+                                             onerror="this.style.display='none'">
                                     </div>
-                                    <a href="/Equipment" class="btn btn-sm btn-outline-secondary mt-2" style="font-size:.75rem;">Equip →</a>
+
+                                    <div class="inv-name">@gear.Name</div>
+
+                                    <div class="gear-stats">
+                                        @if (gear.STR > 0)
+                                        {
+                                            <span class="me-1 text-danger">STR+@gear.STR</span>
+                                        }
+                                        @if (gear.CON > 0)
+                                        {
+                                            <span class="me-1 text-success">CON+@gear.CON</span>
+                                        }
+                                        @if (gear.INT > 0)
+                                        {
+                                            <span class="me-1 text-info">INT+@gear.INT</span>
+                                        }
+                                        @if (gear.PER > 0)
+                                        {
+                                            <span class="me-1 text-warning">PER+@gear.PER</span>
+                                        }
+                                    </div>
+
+                                    <a href="/Equipment" class="btn-inv btn-equip">Equip →</a>
                                 </div>
                             </div>
                         }
@@ -143,41 +470,41 @@
             }
         </div>
 
-    </div><!-- tab-content -->
+    </div>
 </div>
 
 @section Scripts {
-<script>
-function token() { return document.querySelector('input[name="__RequestVerificationToken"]').value; }
+    <script>
+        function token() { return document.querySelector('input[name="__RequestVerificationToken"]').value; }
 
-function sellItem(gameItemId, btn) {
-    btn.disabled = true;
-    fetch('/Inventory/Sell?gameItemId=' + gameItemId, {
-        method: 'POST',
-        headers: { 'RequestVerificationToken': token(), 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '__RequestVerificationToken=' + encodeURIComponent(token()) + '&gameItemId=' + gameItemId
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) {
-            showToast('🪙', 'Sold!', '+' + d.goldAwarded + ' GP', 'toast-gold', 2500);
-            refreshHud();
-            const card = document.getElementById('inv-card-' + gameItemId);
-            const qtyEl = card?.querySelector('.qty-badge');
-            if (qtyEl) {
-                const newQty = parseInt(qtyEl.textContent) - 1;
-                if (newQty <= 0) {
-                    card.remove();
+        function sellItem(gameItemId, btn) {
+            btn.disabled = true;
+            fetch('/Inventory/Sell?gameItemId=' + gameItemId, {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token(), 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token()) + '&gameItemId=' + gameItemId
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('🪙', 'Sold!', '+' + d.goldAwarded + ' GP', 'toast-gold', 2500);
+                    refreshHud();
+                    const card = document.getElementById('inv-card-' + gameItemId);
+                    const qtyEl = card?.querySelector('.qty-badge');
+                    if (qtyEl) {
+                        const newQty = parseInt(qtyEl.textContent) - 1;
+                        if (newQty <= 0) {
+                            card.remove();
+                        } else {
+                            qtyEl.textContent = newQty;
+                            btn.disabled = false;
+                        }
+                    }
                 } else {
-                    qtyEl.textContent = newQty;
+                    showToast('🚫', 'Cannot Sell', d.error, 'toast-hp', 3000);
                     btn.disabled = false;
                 }
-            }
-        } else {
-            showToast('🚫', 'Cannot Sell', d.error, 'toast-hp', 3000);
-            btn.disabled = false;
+            });
         }
-    });
-}
-</script>
+    </script>
 }

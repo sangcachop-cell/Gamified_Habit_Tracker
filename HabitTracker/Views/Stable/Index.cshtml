@@ -30,103 +30,459 @@
             p => p.PetKey,
             p => new { feedingPoints = p.FeedingPoints, isActive = p.PetKey == u.ActivePetKey, colorName = p.ColorName }));
 
-    string CategoryLabel(PetCategory cat) => cat switch {
-        PetCategory.Drop    => "standard",
+    string CategoryLabel(PetCategory cat) => cat switch
+    {
+        PetCategory.Drop => "standard",
         PetCategory.Premium => "premium",
-        PetCategory.Quest   => "quest",
-        PetCategory.Wacky   => "wacky",
+        PetCategory.Quest => "quest",
+        PetCategory.Wacky => "wacky",
         PetCategory.Special => "special",
         _ => ""
     };
-    string BadgeColor(PetCategory cat) => cat switch {
-        PetCategory.Drop    => "bg-primary",
+    string BadgeColor(PetCategory cat) => cat switch
+    {
+        PetCategory.Drop => "bg-primary",
         PetCategory.Premium => "bg-warning text-dark",
-        PetCategory.Quest   => "bg-success",
-        PetCategory.Wacky   => "bg-danger",
+        PetCategory.Quest => "bg-success",
+        PetCategory.Wacky => "bg-danger",
         PetCategory.Special => "bg-secondary",
         _ => "bg-secondary"
     };
 }
 
 <style>
+    :root {
+        --stable-bg: #f6f7fb;
+        --stable-card: #ffffff;
+        --stable-text: #1f2937;
+        --stable-muted: #6b7280;
+        --stable-border: #e5e7eb;
+        --stable-soft: #f1f5f9;
+        --stable-primary: #2563eb;
+        --stable-primary-hover: #1d4ed8;
+        --stable-orange: #f97316;
+        --stable-green: #16a34a;
+        --stable-yellow: #f59e0b;
+        --stable-red: #dc2626;
+        --stable-blue-soft: #eff6ff;
+        --stable-shadow: 0 14px 32px rgba(15, 23, 42, .07);
+    }
+
+    body {
+        background: var(--stable-bg);
+        color: var(--stable-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .container-fluid.py-4[style*="max-width:1200px"] {
+        max-width: 1180px !important;
+        padding-top: 24px !important;
+        padding-bottom: 48px !important;
+    }
+
+        .container-fluid.py-4[style*="max-width:1200px"] > .d-flex.align-items-center.justify-content-between.mb-3 {
+            background: var(--stable-card);
+            border: 1px solid var(--stable-border);
+            border-radius: 24px;
+            box-shadow: var(--stable-shadow);
+            padding: 22px 24px;
+            margin-bottom: 18px !important;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .container-fluid.py-4[style*="max-width:1200px"] h2 {
+            color: var(--stable-text);
+            font-size: 1.65rem;
+            font-weight: 900;
+            letter-spacing: -.04em;
+        }
+
+        .container-fluid.py-4[style*="max-width:1200px"] > .d-flex.align-items-center.justify-content-between.mb-3 .text-muted {
+            background: var(--stable-blue-soft);
+            color: var(--stable-primary) !important;
+            border: 1px solid rgba(37, 99, 235, .14);
+            border-radius: 999px;
+            padding: 8px 13px;
+            font-size: .84rem !important;
+            font-weight: 850;
+        }
+
+    #stableTab {
+        background: var(--stable-card);
+        border: 1px solid var(--stable-border);
+        border-radius: 16px;
+        padding: 6px;
+        gap: 6px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+        display: flex;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--stable-border) !important;
+    }
+
+        #stableTab .nav-link {
+            border: 0;
+            border-radius: 12px;
+            color: var(--stable-muted);
+            font-weight: 850;
+            padding: 10px 14px;
+            font-size: .88rem;
+            transition: background .15s ease, color .15s ease, transform .12s ease;
+        }
+
+            #stableTab .nav-link:hover {
+                background: var(--stable-soft);
+                color: var(--stable-text);
+                transform: translateY(-1px);
+            }
+
+            #stableTab .nav-link.active {
+                background: var(--stable-primary);
+                color: #fff;
+            }
+
+        #stableTab .badge {
+            border-radius: 999px;
+            background: rgba(255,255,255,.22) !important;
+            color: inherit;
+            font-size: .68rem;
+            padding: 3px 7px;
+        }
+
+    #stableTabContent {
+        background: var(--stable-card);
+        border: 1px solid var(--stable-border);
+        border-radius: 24px;
+        box-shadow: var(--stable-shadow);
+        padding: 18px;
+        min-height: 420px;
+    }
+
+    #food-bar {
+        background: #fff7ed !important;
+        border: 1px solid #fed7aa !important;
+        border-radius: 18px !important;
+        padding: 14px !important;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+    }
+
     .feed-targeting .pet-slot.slot-owned:not(.slot-is-mount) {
         cursor: crosshair;
-        outline: 2px dashed #fd7e14;
-        outline-offset: 2px;
+        outline: 2px dashed var(--stable-orange);
+        outline-offset: 3px;
     }
-    .feed-targeting .pet-slot.slot-owned:not(.slot-is-mount):hover {
-        outline-color: #e55a00;
-        background: rgba(253,126,20,.12);
-    }
+
+        .feed-targeting .pet-slot.slot-owned:not(.slot-is-mount):hover {
+            outline-color: #ea580c;
+            background: #fff7ed;
+        }
+
     .food-select-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 4px 6px;
-        min-width: 52px;
+        justify-content: center;
+        padding: 7px 8px;
+        min-width: 58px;
         line-height: 1.2;
+        border-radius: 14px !important;
+        border: 1px solid var(--stable-border) !important;
+        background: #fff !important;
+        color: var(--stable-muted) !important;
+        font-weight: 800;
     }
-    .food-select-btn.active {
-        background: #fd7e14;
-        border-color: #fd7e14;
-        color: #fff;
+
+        .food-select-btn:hover {
+            border-color: var(--stable-orange) !important;
+            background: #fff7ed !important;
+            color: #9a3412 !important;
+        }
+
+        .food-select-btn.active {
+            background: var(--stable-orange) !important;
+            border-color: var(--stable-orange) !important;
+            color: #fff !important;
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, .14);
+        }
+
+    #cancel-feed-btn,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-secondary,
+    .btn-outline-primary,
+    .btn-primary {
+        border-radius: 12px;
+        font-weight: 800;
     }
-    .owned-pet-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 8px;
-        border: 2px solid #6c757d;
-        border-radius: 8px;
-        background: rgba(255,255,255,.9);
-        cursor: pointer;
-        width: 80px;
-        text-align: center;
-        position: relative;
+
+    #feed-hint {
+        color: #9a3412 !important;
+        background: #ffedd5;
+        border: 1px solid #fed7aa;
+        border-radius: 12px;
+        padding: 8px 10px;
+        margin-top: 10px !important;
+        font-weight: 800;
     }
-    .owned-pet-card:hover { border-color: #0d6efd; background: rgba(13,110,253,.06); }
-    .owned-pet-card.is-active { border-color: #198754 !important; box-shadow: 0 0 0 2px rgba(25,135,84,.35); }
-    .owned-pet-card .card-progress {
-        width: 100%;
-        height: 4px;
-        background: #dee2e6;
-        border-radius: 2px;
-        margin-top: 4px;
+
+    #tab-my-pets > .d-flex.align-items-center.gap-3.p-2.mb-3.rounded,
+    #tab-my-mounts > .d-flex.align-items-center.gap-3.p-2.mb-3.rounded {
+        background: var(--stable-blue-soft) !important;
+        border: 1px solid rgba(37, 99, 235, .14) !important;
+        border-radius: 18px !important;
+        padding: 12px 14px !important;
+        color: var(--stable-text);
     }
-    .owned-pet-card .card-progress > div {
-        height: 100%;
-        background: #ffc107;
-        border-radius: 2px;
-        transition: width .3s;
+
+    #tab-my-pets > .text-muted.small.mb-3,
+    #tab-my-mounts > .text-muted.small.mb-3,
+    #tab-pet-collection > .text-muted.small.mb-3,
+    #tab-mount-collection > .text-muted.small.mb-3 {
+        color: var(--stable-muted) !important;
+        font-weight: 650;
     }
-    .owned-pet-card .card-label {
-        font-size: .6rem;
-        color: #6c757d;
-        margin-top: 2px;
-        word-break: break-all;
-        line-height: 1.2;
-    }
+
+    .owned-pet-card,
     .owned-mount-card {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 8px;
-        border: 2px solid #6c757d;
-        border-radius: 8px;
-        background: rgba(255,255,255,.9);
+        justify-content: center;
+        padding: 10px;
+        border: 1px solid var(--stable-border);
+        border-radius: 18px;
+        background: #fff;
         cursor: pointer;
-        width: 80px;
+        width: 92px;
+        min-height: 106px;
         text-align: center;
         position: relative;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .05);
+        transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
     }
-    .owned-mount-card:hover { border-color: #fd7e14; background: rgba(253,126,20,.06); }
-    .owned-mount-card.is-active { border-color: #198754 !important; box-shadow: 0 0 0 2px rgba(25,135,84,.35); }
-    .owned-mount-card .card-label {
-        font-size: .6rem;
-        color: #6c757d;
-        margin-top: 4px;
-        word-break: break-all;
-        line-height: 1.2;
+
+        .owned-pet-card:hover,
+        .owned-mount-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--stable-shadow);
+            border-color: var(--stable-primary);
+            background: #f8fafc;
+        }
+
+        .owned-pet-card.is-active,
+        .owned-mount-card.is-active {
+            border-color: var(--stable-green) !important;
+            background: #ecfdf5;
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, .12), 0 12px 24px rgba(15, 23, 42, .06);
+        }
+
+        .owned-pet-card .card-progress {
+            width: 100%;
+            height: 7px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+            .owned-pet-card .card-progress > div {
+                height: 100%;
+                background: linear-gradient(90deg, var(--stable-yellow), #fbbf24);
+                border-radius: 999px;
+                transition: width .3s;
+            }
+
+        .owned-pet-card .card-label,
+        .owned-mount-card .card-label {
+            font-size: .68rem;
+            color: var(--stable-muted);
+            margin-top: 5px;
+            word-break: break-word;
+            line-height: 1.2;
+            font-weight: 800;
+        }
+
+    .animal-section {
+        background: #fff;
+        border: 1px solid var(--stable-border);
+        border-radius: 18px;
+        padding: 14px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+    }
+
+        .animal-section .fw-semibold.small {
+            color: var(--stable-text);
+            font-weight: 900 !important;
+            font-size: .9rem !important;
+        }
+
+        .animal-section .badge {
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-weight: 850;
+        }
+
+    .pet-slot {
+        width: 66px;
+        height: 74px;
+        border: 1px solid var(--stable-border);
+        border-radius: 16px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 7px;
+        transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    }
+
+        .pet-slot:hover {
+            transform: translateY(-1px);
+            border-color: var(--stable-primary);
+            background: #fff;
+        }
+
+    .slot-owned {
+        background: #ffffff;
+        border-color: #cbd5e1;
+    }
+
+    .slot-unowned {
+        opacity: .38;
+        filter: grayscale(.7);
+    }
+
+    .slot-active-pet,
+    .slot-active-mount {
+        border-color: var(--stable-green) !important;
+        background: #ecfdf5;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, .12);
+    }
+
+    .slot-progress {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 6px;
+        height: 5px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+        .slot-progress > div {
+            height: 100%;
+            background: var(--stable-yellow);
+            border-radius: 999px;
+        }
+
+    .slot-badge {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        font-size: .72rem;
+        background: #fff;
+        border: 1px solid var(--stable-border);
+        border-radius: 999px;
+        padding: 1px 4px;
+    }
+
+    .mount-badge {
+        color: var(--stable-orange);
+    }
+
+    #tab-hatch .card {
+        border: 1px solid var(--stable-border);
+        border-radius: 22px;
+        box-shadow: var(--stable-shadow);
+    }
+
+    #tab-hatch h5 {
+        color: var(--stable-text);
+        font-weight: 900;
+        letter-spacing: -.02em;
+    }
+
+    .hatch-egg-btn,
+    .hatch-potion-btn {
+        border-radius: 16px !important;
+        border: 1px solid var(--stable-border) !important;
+        background: #fff !important;
+        color: var(--stable-text) !important;
+        min-width: 76px;
+        padding: 10px 8px;
+        font-weight: 800;
+        transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    }
+
+        .hatch-egg-btn:hover,
+        .hatch-potion-btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--stable-primary) !important;
+            background: var(--stable-blue-soft) !important;
+        }
+
+        .hatch-egg-btn.active,
+        .hatch-potion-btn.active,
+        .hatch-egg-btn.btn-primary,
+        .hatch-potion-btn.btn-primary {
+            background: var(--stable-primary) !important;
+            border-color: var(--stable-primary) !important;
+            color: #fff !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+        }
+
+    #hatch-preview {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    #hatch-btn {
+        border: 0;
+        border-radius: 14px;
+        background: var(--stable-primary);
+        font-weight: 900;
+        padding: 11px 16px;
+    }
+
+        #hatch-btn:hover:not(:disabled) {
+            background: var(--stable-primary-hover);
+        }
+
+        #hatch-btn:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+        }
+
+    .text-muted.text-center.py-5 {
+        background: #fff;
+        border: 1px dashed #cbd5e1;
+        border-radius: 22px;
+        color: var(--stable-muted) !important;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+    }
+
+    @@media (max-width: 760px) {
+        #stableTabContent {
+            padding: 14px;
+        }
+
+        .owned-pet-card,
+        .owned-mount-card {
+            width: 84px;
+        }
+
+        .pet-slot {
+            width: 58px;
+            height: 68px;
+        }
+
+        #stableTab .nav-link {
+            flex: 1;
+            min-width: 130px;
+        }
     }
 </style>
 
@@ -199,7 +555,9 @@
                         <span class="text-muted small" id="no-food-msg">No food — complete tasks to earn drops</span>
                     }
                     <button id="cancel-feed-btn" class="btn btn-sm btn-outline-danger ms-auto"
-                            style="display:none;" onclick="cancelFeed()">✕ Cancel</button>
+                            style="display:none;" onclick="cancelFeed()">
+                        ✕ Cancel
+                    </button>
                 </div>
                 <div id="feed-hint" class="text-warning small mt-1" style="display:none;">
                     Click a pet below to feed it
@@ -237,7 +595,10 @@
                         <div class="owned-pet-card @(isActive ? "is-active" : "")"
                              data-petkey="@pet.PetKey"
                              title="@pet.PetKey (@pet.FeedingPoints/50)@(isActive ? " ★ active" : "")">
-                            @if (isActive) { <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div> }
+                            @if (isActive)
+                            {
+                                <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div>
+                            }
                             <img src="/images/habitica/stable/pets/Pet-@(pet.PetKey).png"
                                  width="48" height="48"
                                  style="image-rendering:pixelated;"
@@ -284,7 +645,10 @@
                         <div class="owned-mount-card @(isActive ? "is-active" : "")"
                              data-mountkey="@mount.PetKey"
                              title="@mount.PetKey@(isActive ? " ★ riding" : "")">
-                            @if (isActive) { <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div> }
+                            @if (isActive)
+                            {
+                                <div style="position:absolute;top:2px;right:4px;font-size:.65rem;">★</div>
+                            }
                             <img src="@iconPath" width="48" height="48"
                                  style="image-rendering:pixelated;"
                                  onerror="this.src='@fallbackPath';this.onerror=null;" />
@@ -312,8 +676,8 @@
                     <div class="d-flex flex-wrap gap-1">
                         @foreach (var slot in group.Slots)
                         {
-                            string slotClass = slot.IsMount   ? "slot-is-mount" :
-                                               slot.IsOwned   ? "slot-owned"    : "slot-unowned";
+                            string slotClass = slot.IsMount ? "slot-is-mount" :
+                            slot.IsOwned ? "slot-owned" : "slot-unowned";
                             string activeClass = slot.IsActivePet ? "slot-active-pet" : "";
                             int progressPct = slot.FeedingPoints * 2;
                             <div class="pet-slot @slotClass @activeClass"
@@ -325,8 +689,14 @@
                                 {
                                     <div class="slot-progress"><div style="width:@progressPct%"></div></div>
                                 }
-                                @if (slot.IsActivePet) { <div class="slot-badge">★</div> }
-                                @if (slot.IsMount) { <div class="slot-badge mount-badge" title="Evolved to mount">🐴</div> }
+                                @if (slot.IsActivePet)
+                                {
+                                    <div class="slot-badge">★</div>
+                                }
+                                @if (slot.IsMount)
+                                {
+                                    <div class="slot-badge mount-badge" title="Evolved to mount">🐴</div>
+                                }
                             </div>
                         }
                     </div>
@@ -357,7 +727,10 @@
                                 <img src="@imgSrc" width="48" height="48"
                                      style="image-rendering:pixelated;"
                                      onerror="this.src='@slot.PetImagePath';this.onerror=null;" />
-                                @if (slot.IsActiveMount) { <div class="slot-badge">★</div> }
+                                @if (slot.IsActiveMount)
+                                {
+                                    <div class="slot-badge">★</div>
+                                }
                             </div>
                         }
                     </div>
@@ -372,11 +745,19 @@
                 <div class="text-muted text-center py-5">
                     <div style="font-size:3rem;">🧪</div>
                     @if (!Model.EggsInInventory.Any() && !Model.PotionsInInventory.Any())
-                    { <p>No eggs or potions in inventory. Complete tasks to earn drops!</p> }
+                    {
+                        <p>No eggs or potions in inventory. Complete tasks to earn drops!</p>
+                    }
                     else if (!Model.EggsInInventory.Any())
-                    { <p>No eggs in inventory.</p> }
+                    {
+
+                        <p>No eggs in inventory.</p>
+                    }
                     else
-                    { <p>No potions in inventory.</p> }
+                    {
+
+                        <p>No potions in inventory.</p>
+                    }
                 </div>
             }
             else
@@ -398,14 +779,15 @@
                                                 data-isquest="@(isQuest ? "true" : "false")"
                                                 onclick="selectEgg(this)"
                                                 title="@inv.GameItem?.Name ×@inv.Quantity@(isQuest ? " (quest)" : "")">
-                                            <img src="@inv.GameItem?.ImagePath" width="40" height="40" style="image-rendering:pixelated;" /><br/>
+                                            <img src="@inv.GameItem?.ImagePath" width="40" height="40" style="image-rendering:pixelated;" /><br />
                                             <span style="font-size:.65rem;">×@inv.Quantity</span>
                                         </button>
                                     }
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold">Select Potion
+                                <label class="form-label small fw-semibold">
+                                    Select Potion
                                     <span id="potion-hint" class="text-warning ms-2" style="font-size:.7rem;display:none;">Quest eggs use standard potions only</span>
                                 </label>
                                 <div class="d-flex flex-wrap gap-2" id="potion-grid">
@@ -420,7 +802,7 @@
                                                 onclick="selectPotion(this)"
                                                 title="@inv.GameItem?.Name ×@inv.Quantity">
                                             <img src="@inv.GameItem?.ImagePath" width="40" height="40"
-                                                 style="image-rendering:pixelated;" onerror="this.style.opacity='.3'" /><br/>
+                                                 style="image-rendering:pixelated;" onerror="this.style.opacity='.3'" /><br />
                                             <span style="font-size:.65rem;">×@inv.Quantity</span>
                                         </button>
                                     }
@@ -442,226 +824,226 @@
 </div>
 
 @section Scripts {
-<script>
-    const csrf = () => document.querySelector('#csrf-form input[name="__RequestVerificationToken"]').value;
-    const ownedPetKeys  = @Html.Raw(ownedPetKeys);
-    const eggAnimalMap  = @Html.Raw(eggAnimalMap);
-    const questEggIds   = @Html.Raw(questEggIds);
-    const dropPotionIds = @Html.Raw(dropPotionIds);
-    const petDataMap    = @Html.Raw(petDataMap);
+    <script>
+        const csrf = () => document.querySelector('#csrf-form input[name="__RequestVerificationToken"]').value;
+        const ownedPetKeys  = @Html.Raw(ownedPetKeys);
+        const eggAnimalMap  = @Html.Raw(eggAnimalMap);
+        const questEggIds   = @Html.Raw(questEggIds);
+        const dropPotionIds = @Html.Raw(dropPotionIds);
+        const petDataMap    = @Html.Raw(petDataMap);
 
-    let selectedEggId       = null;
-    let selectedPotionId    = null;
-    let selectedEggAnimal   = null;
-    let selectedPotionColor = null;
-    let selectedFoodId      = null;
-    let selectedFoodColor   = null;
+        let selectedEggId       = null;
+        let selectedPotionId    = null;
+        let selectedEggAnimal   = null;
+        let selectedPotionColor = null;
+        let selectedFoodId      = null;
+        let selectedFoodColor   = null;
 
-    // ── Food selection ────────────────────────────────────────────────────
+        // ── Food selection ────────────────────────────────────────────────────
 
-    function selectFood(btn) {
-        var foodId = parseInt(btn.dataset.foodId);
-        if (selectedFoodId === foodId) { cancelFeed(); return; }
-        document.querySelectorAll('.food-select-btn').forEach(b => {
-            b.classList.remove('active', 'btn-warning');
-            b.classList.add('btn-outline-secondary');
-        });
-        btn.classList.remove('btn-outline-secondary');
-        btn.classList.add('active', 'btn-warning');
-        selectedFoodId    = foodId;
-        selectedFoodColor = btn.dataset.foodColor;
-        document.getElementById('cancel-feed-btn').style.display = '';
-        document.getElementById('feed-hint').style.display = '';
-        document.getElementById('tab-my-pets').classList.add('feed-targeting');
-    }
-
-    function cancelFeed() {
-        selectedFoodId = null; selectedFoodColor = null;
-        document.querySelectorAll('.food-select-btn').forEach(b => {
-            b.classList.remove('active', 'btn-warning');
-            b.classList.add('btn-outline-secondary');
-        });
-        document.getElementById('cancel-feed-btn').style.display = 'none';
-        document.getElementById('feed-hint').style.display = 'none';
-        document.getElementById('tab-my-pets').classList.remove('feed-targeting');
-    }
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectedFoodId !== null) cancelFeed(); });
-
-    // ── My Pets click delegation ──────────────────────────────────────────
-
-    document.getElementById('tab-my-pets').addEventListener('click', function(e) {
-        var card = e.target.closest('.owned-pet-card');
-        if (!card) return;
-        var petKey = card.dataset.petkey;
-        if (!petKey) return;
-        if (selectedFoodId !== null) {
-            doFeed(petKey, selectedFoodId);
-        } else {
-            var data = petDataMap[petKey];
-            setActivePet((data && data.isActive) ? '' : petKey);
+        function selectFood(btn) {
+            var foodId = parseInt(btn.dataset.foodId);
+            if (selectedFoodId === foodId) { cancelFeed(); return; }
+            document.querySelectorAll('.food-select-btn').forEach(b => {
+                b.classList.remove('active', 'btn-warning');
+                b.classList.add('btn-outline-secondary');
+            });
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('active', 'btn-warning');
+            selectedFoodId    = foodId;
+            selectedFoodColor = btn.dataset.foodColor;
+            document.getElementById('cancel-feed-btn').style.display = '';
+            document.getElementById('feed-hint').style.display = '';
+            document.getElementById('tab-my-pets').classList.add('feed-targeting');
         }
-    });
 
-    // ── My Mounts click delegation ────────────────────────────────────────
+        function cancelFeed() {
+            selectedFoodId = null; selectedFoodColor = null;
+            document.querySelectorAll('.food-select-btn').forEach(b => {
+                b.classList.remove('active', 'btn-warning');
+                b.classList.add('btn-outline-secondary');
+            });
+            document.getElementById('cancel-feed-btn').style.display = 'none';
+            document.getElementById('feed-hint').style.display = 'none';
+            document.getElementById('tab-my-pets').classList.remove('feed-targeting');
+        }
 
-    document.getElementById('tab-my-mounts').addEventListener('click', function(e) {
-        var card = e.target.closest('.owned-mount-card');
-        if (!card) return;
-        var mountKey = card.dataset.mountkey;
-        if (!mountKey) return;
-        setActiveMount(card.classList.contains('is-active') ? '' : mountKey);
-    });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectedFoodId !== null) cancelFeed(); });
 
-    // ── Feed ──────────────────────────────────────────────────────────────
+        // ── My Pets click delegation ──────────────────────────────────────────
 
-    function doFeed(petKey, foodId) {
-        fetch('/Stable/Feed', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'petKey=' + encodeURIComponent(petKey) + '&foodGameItemId=' + foodId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
-        })
-        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(d => {
-            if (!d.success) { showToast('❌', 'Feed Failed', d.error || 'Unknown error', 'toast-hp', 3000); return; }
-            if (d.evolved) {
-                var imgHtml = d.mountIconPath
-                    ? '<img src="' + d.mountIconPath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🐴\'))">'
-                    : '🐴';
-                showToast(imgHtml, 'Mount Raised!', petKey + ' evolved!', 'toast-level', 5000);
-                setTimeout(() => location.reload(), 1800);
+        document.getElementById('tab-my-pets').addEventListener('click', function(e) {
+            var card = e.target.closest('.owned-pet-card');
+            if (!card) return;
+            var petKey = card.dataset.petkey;
+            if (!petKey) return;
+            if (selectedFoodId !== null) {
+                doFeed(petKey, selectedFoodId);
             } else {
-                showToast('🍖', 'Fed!', petKey + ': ' + d.newFeedingPoints + '/50 pts', 'toast-xp', 2500);
+                var data = petDataMap[petKey];
+                setActivePet((data && data.isActive) ? '' : petKey);
+            }
+        });
 
-                // Update card progress bar and label
-                var card = document.querySelector('.owned-pet-card[data-petkey="' + petKey + '"]');
-                if (card) {
-                    var bar = card.querySelector('.card-progress > div');
-                    if (bar) bar.style.width = (d.newFeedingPoints * 2) + '%';
-                    var lbl = card.querySelector('.card-label');
-                    if (lbl) lbl.textContent = d.newFeedingPoints + '/50';
-                    card.title = card.title.replace(/\d+\/50/, d.newFeedingPoints + '/50');
+        // ── My Mounts click delegation ────────────────────────────────────────
+
+        document.getElementById('tab-my-mounts').addEventListener('click', function(e) {
+            var card = e.target.closest('.owned-mount-card');
+            if (!card) return;
+            var mountKey = card.dataset.mountkey;
+            if (!mountKey) return;
+            setActiveMount(card.classList.contains('is-active') ? '' : mountKey);
+        });
+
+        // ── Feed ──────────────────────────────────────────────────────────────
+
+        function doFeed(petKey, foodId) {
+            fetch('/Stable/Feed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'petKey=' + encodeURIComponent(petKey) + '&foodGameItemId=' + foodId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
+            })
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(d => {
+                if (!d.success) { showToast('❌', 'Feed Failed', d.error || 'Unknown error', 'toast-hp', 3000); return; }
+                if (d.evolved) {
+                    var imgHtml = d.mountIconPath
+                        ? '<img src="' + d.mountIconPath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🐴\'))">'
+                        : '🐴';
+                    showToast(imgHtml, 'Mount Raised!', petKey + ' evolved!', 'toast-level', 5000);
+                    setTimeout(() => location.reload(), 1800);
+                } else {
+                    showToast('🍖', 'Fed!', petKey + ': ' + d.newFeedingPoints + '/50 pts', 'toast-xp', 2500);
+
+                    // Update card progress bar and label
+                    var card = document.querySelector('.owned-pet-card[data-petkey="' + petKey + '"]');
+                    if (card) {
+                        var bar = card.querySelector('.card-progress > div');
+                        if (bar) bar.style.width = (d.newFeedingPoints * 2) + '%';
+                        var lbl = card.querySelector('.card-label');
+                        if (lbl) lbl.textContent = d.newFeedingPoints + '/50';
+                        card.title = card.title.replace(/\d+\/50/, d.newFeedingPoints + '/50');
+                    }
+                    // Update petDataMap
+                    if (petDataMap[petKey]) petDataMap[petKey].feedingPoints = d.newFeedingPoints;
+                    updateFoodQtyBar(foodId, d.newFoodQuantity);
                 }
-                // Update petDataMap
-                if (petDataMap[petKey]) petDataMap[petKey].feedingPoints = d.newFeedingPoints;
-                updateFoodQtyBar(foodId, d.newFoodQuantity);
-            }
-        })
-        .catch(function(err) { showToast('❌', 'Feed Error', err.message || 'Unknown error', 'toast-hp', 3000); });
-    }
-
-    function updateFoodQtyBar(foodId, newQty) {
-        var btn = document.querySelector('.food-select-btn[data-food-id="' + foodId + '"]');
-        if (!btn) return;
-        if (newQty <= 0) {
-            btn.remove();
-            cancelFeed();
-            if (document.querySelectorAll('.food-select-btn').length === 0) {
-                var msg = document.createElement('span');
-                msg.className = 'text-muted small'; msg.id = 'no-food-msg';
-                msg.textContent = 'No food — complete tasks to earn drops';
-                document.getElementById('food-bar-inner').appendChild(msg);
-            }
-        } else {
-            btn.querySelector('.food-qty').textContent = newQty;
+            })
+            .catch(function(err) { showToast('❌', 'Feed Error', err.message || 'Unknown error', 'toast-hp', 3000); });
         }
-    }
 
-    // ── Active pet / mount ────────────────────────────────────────────────
-
-    function setActivePet(petKey) {
-        fetch('/Stable/SetActivePet', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'petKey=' + encodeURIComponent(petKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (d.success) {
-                showToast('🐾', 'Active Pet', petKey ? (petKey + ' is your companion!') : 'Pet unequipped.', 'toast-xp', 2500);
-                setTimeout(() => location.reload(), 800);
-            } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
-        });
-    }
-
-    function setActiveMount(mountKey) {
-        fetch('/Stable/SetActiveMount', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'mountKey=' + encodeURIComponent(mountKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (d.success) {
-                showToast('🐴', 'Mount', mountKey ? ('Now riding ' + mountKey + '!') : 'Dismounted.', 'toast-xp', 2500);
-                setTimeout(() => location.reload(), 800);
-            } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
-        });
-    }
-
-    // ── Hatch tab ─────────────────────────────────────────────────────────
-
-    function selectEgg(btn) {
-        document.querySelectorAll('.hatch-egg-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
-        btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
-        selectedEggId = parseInt(btn.dataset.id); selectedEggAnimal = btn.dataset.animal;
-        var isQuest = btn.dataset.isquest === 'true';
-        document.getElementById('potion-hint').style.display = isQuest ? 'inline' : 'none';
-        document.querySelectorAll('.hatch-potion-btn').forEach(b => {
-            var ok = !isQuest || b.dataset.isdrop === 'true';
-            b.disabled = !ok; b.classList.toggle('opacity-50', !ok);
-            if (!ok && b.classList.contains('active')) {
-                b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary');
-                selectedPotionId = null; selectedPotionColor = null;
-            }
-        });
-        updateHatchPreview();
-    }
-
-    function selectPotion(btn) {
-        if (btn.disabled) return;
-        document.querySelectorAll('.hatch-potion-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
-        btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
-        selectedPotionId = parseInt(btn.dataset.id); selectedPotionColor = btn.dataset.color;
-        updateHatchPreview();
-    }
-
-    function updateHatchPreview() {
-        var preview = document.getElementById('hatch-preview');
-        var hatchBtn = document.getElementById('hatch-btn');
-        if (!selectedEggAnimal || !selectedPotionColor) {
-            preview.innerHTML = '<span class="text-muted small">Select egg + potion to preview</span>';
-            hatchBtn.disabled = true; return;
-        }
-        var petKey = selectedEggAnimal + '-' + selectedPotionColor;
-        var alreadyOwned = ownedPetKeys.includes(petKey);
-        preview.innerHTML =
-            '<img src="/images/habitica/stable/pets/Pet-' + petKey + '.png" width="64" height="64" style="image-rendering:pixelated;" onerror="this.style.opacity=\'.2\'" />' +
-            '<div class="small mt-1">' + selectedEggAnimal + ' (' + selectedPotionColor + ')</div>' +
-            (alreadyOwned ? '<div class="badge bg-secondary mt-1">Already hatched</div>' : '');
-        hatchBtn.disabled = alreadyOwned;
-    }
-
-    function doHatch() {
-        if (!selectedEggId || !selectedPotionId) return;
-        var btn = document.getElementById('hatch-btn');
-        btn.disabled = true; btn.textContent = 'Hatching…';
-        fetch('/Stable/Hatch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'eggGameItemId=' + selectedEggId + '&potionGameItemId=' + selectedPotionId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (d.success) {
-                var imgHtml = '<img src="' + d.petImagePath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🥚\'))">';
-                showToast(imgHtml, 'Pet Hatched!', d.petName + ' is now yours!', 'toast-drop', 5000);
-                setTimeout(() => location.reload(), 1500);
+        function updateFoodQtyBar(foodId, newQty) {
+            var btn = document.querySelector('.food-select-btn[data-food-id="' + foodId + '"]');
+            if (!btn) return;
+            if (newQty <= 0) {
+                btn.remove();
+                cancelFeed();
+                if (document.querySelectorAll('.food-select-btn').length === 0) {
+                    var msg = document.createElement('span');
+                    msg.className = 'text-muted small'; msg.id = 'no-food-msg';
+                    msg.textContent = 'No food — complete tasks to earn drops';
+                    document.getElementById('food-bar-inner').appendChild(msg);
+                }
             } else {
-                showToast('❌', 'Hatch Failed', d.error || 'Unknown error', 'toast-hp', 3000);
-                btn.disabled = false; btn.textContent = '🥚 Hatch!';
+                btn.querySelector('.food-qty').textContent = newQty;
             }
-        });
-    }
-</script>
+        }
+
+        // ── Active pet / mount ────────────────────────────────────────────────
+
+        function setActivePet(petKey) {
+            fetch('/Stable/SetActivePet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'petKey=' + encodeURIComponent(petKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('🐾', 'Active Pet', petKey ? (petKey + ' is your companion!') : 'Pet unequipped.', 'toast-xp', 2500);
+                    setTimeout(() => location.reload(), 800);
+                } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
+            });
+        }
+
+        function setActiveMount(mountKey) {
+            fetch('/Stable/SetActiveMount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'mountKey=' + encodeURIComponent(mountKey) + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    showToast('🐴', 'Mount', mountKey ? ('Now riding ' + mountKey + '!') : 'Dismounted.', 'toast-xp', 2500);
+                    setTimeout(() => location.reload(), 800);
+                } else { showToast('❌', 'Error', d.error || 'Unknown error', 'toast-hp', 3000); }
+            });
+        }
+
+        // ── Hatch tab ─────────────────────────────────────────────────────────
+
+        function selectEgg(btn) {
+            document.querySelectorAll('.hatch-egg-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
+            btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
+            selectedEggId = parseInt(btn.dataset.id); selectedEggAnimal = btn.dataset.animal;
+            var isQuest = btn.dataset.isquest === 'true';
+            document.getElementById('potion-hint').style.display = isQuest ? 'inline' : 'none';
+            document.querySelectorAll('.hatch-potion-btn').forEach(b => {
+                var ok = !isQuest || b.dataset.isdrop === 'true';
+                b.disabled = !ok; b.classList.toggle('opacity-50', !ok);
+                if (!ok && b.classList.contains('active')) {
+                    b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary');
+                    selectedPotionId = null; selectedPotionColor = null;
+                }
+            });
+            updateHatchPreview();
+        }
+
+        function selectPotion(btn) {
+            if (btn.disabled) return;
+            document.querySelectorAll('.hatch-potion-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-secondary'); });
+            btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-primary','active');
+            selectedPotionId = parseInt(btn.dataset.id); selectedPotionColor = btn.dataset.color;
+            updateHatchPreview();
+        }
+
+        function updateHatchPreview() {
+            var preview = document.getElementById('hatch-preview');
+            var hatchBtn = document.getElementById('hatch-btn');
+            if (!selectedEggAnimal || !selectedPotionColor) {
+                preview.innerHTML = '<span class="text-muted small">Select egg + potion to preview</span>';
+                hatchBtn.disabled = true; return;
+            }
+            var petKey = selectedEggAnimal + '-' + selectedPotionColor;
+            var alreadyOwned = ownedPetKeys.includes(petKey);
+            preview.innerHTML =
+                '<img src="/images/habitica/stable/pets/Pet-' + petKey + '.png" width="64" height="64" style="image-rendering:pixelated;" onerror="this.style.opacity=\'.2\'" />' +
+                '<div class="small mt-1">' + selectedEggAnimal + ' (' + selectedPotionColor + ')</div>' +
+                (alreadyOwned ? '<div class="badge bg-secondary mt-1">Already hatched</div>' : '');
+            hatchBtn.disabled = alreadyOwned;
+        }
+
+        function doHatch() {
+            if (!selectedEggId || !selectedPotionId) return;
+            var btn = document.getElementById('hatch-btn');
+            btn.disabled = true; btn.textContent = 'Hatching…';
+            fetch('/Stable/Hatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'eggGameItemId=' + selectedEggId + '&potionGameItemId=' + selectedPotionId + '&__RequestVerificationToken=' + encodeURIComponent(csrf())
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    var imgHtml = '<img src="' + d.petImagePath + '" style="width:36px;height:36px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode(\'🥚\'))">';
+                    showToast(imgHtml, 'Pet Hatched!', d.petName + ' is now yours!', 'toast-drop', 5000);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast('❌', 'Hatch Failed', d.error || 'Unknown error', 'toast-hp', 3000);
+                    btn.disabled = false; btn.textContent = '🥚 Hatch!';
+                }
+            });
+        }
+    </script>
 }

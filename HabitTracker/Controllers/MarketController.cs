@@ -11,12 +11,12 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class MarketController : Controller
     {
-        private readonly AppDbContext    _context;
+        private readonly AppDbContext _context;
         private readonly IEconomyService _economyService;
 
         public MarketController(AppDbContext context, IEconomyService economyService)
         {
-            _context        = context;
+            _context = context;
             _economyService = economyService;
         }
 
@@ -38,7 +38,7 @@ namespace HabitTracker.Controllers
             var allGear = await _context.GearItems.ToListAsync();
 
             // Regular shop items (not armoire)
-            var shopGear    = allGear.Where(g => !g.IsArmoire).ToList();
+            var shopGear = allGear.Where(g => !g.IsArmoire).ToList();
             var armoireGear = allGear.Where(g => g.IsArmoire).ToList();
 
             // Group: GearClass → Slot → items
@@ -52,10 +52,10 @@ namespace HabitTracker.Controllers
 
             var vm = new MarketViewModel
             {
-                User           = user,
+                User = user,
                 ByClassAndSlot = byClassAndSlot,
-                OwnedKeys      = ownedKeys,
-                ArmoireItems   = armoireGear
+                OwnedKeys = ownedKeys,
+                ArmoireItems = armoireGear
             };
 
             return View(vm);
@@ -90,7 +90,7 @@ namespace HabitTracker.Controllers
             user.Gold -= gear.GoldCost;
             _context.UserGearItems.Add(new UserGearItem
             {
-                UserId     = userId.Value,
+                UserId = userId.Value,
                 GearItemId = gear.Id,
                 AcquiredAt = DateTime.UtcNow
             });
@@ -112,16 +112,16 @@ namespace HabitTracker.Controllers
             var user = await _context.Users.FindAsync(userId.Value);
             return Json(new
             {
-                success      = result.Success,
-                error        = result.Error,
-                rewardType   = result.RewardType.ToString().ToLower(),
-                gearKey      = result.GearKey,
-                gearName     = result.GearName,
-                gearImgPath  = result.GearImgPath,
-                foodIcon     = result.FoodIcon,
-                foodName     = result.FoodName,
-                xpGained     = result.XpGained,
-                newGold      = user?.Gold ?? 0
+                success = result.Success,
+                error = result.Error,
+                rewardType = result.RewardType.ToString().ToLower(),
+                gearKey = result.GearKey,
+                gearName = result.GearName,
+                gearImgPath = result.GearImgPath,
+                foodIcon = result.FoodIcon,
+                foodName = result.FoodName,
+                xpGained = result.XpGained,
+                newGold = user?.Gold ?? 0
             });
         }
 

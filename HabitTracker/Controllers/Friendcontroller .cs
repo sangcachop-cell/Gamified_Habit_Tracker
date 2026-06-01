@@ -114,12 +114,12 @@ namespace HabitTracker.Controllers
             ViewBag.EquippedGear = gearItems;
 
             // Block status (does viewer block target?)
-            var isBlocked  = await _context.UserBlocks.AsNoTracking()
+            var isBlocked = await _context.UserBlocks.AsNoTracking()
                 .AnyAsync(b => b.BlockerId == userId && b.BlockedId == id);
             var isBlockedBy = await _context.UserBlocks.AsNoTracking()
                 .AnyAsync(b => b.BlockerId == id && b.BlockedId == userId);
 
-            ViewBag.IsBlocked   = isBlocked;
+            ViewBag.IsBlocked = isBlocked;
             ViewBag.IsBlockedBy = isBlockedBy;
 
             return View(target);

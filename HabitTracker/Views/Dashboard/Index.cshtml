@@ -6,6 +6,12 @@
     int currentXp = Model.XP;
     int xpInLevel = Model.XP % 100;
 
+    var hpValue = Model.HP;
+    var manaValue = Model.Mana;
+
+    var hpPercent = Math.Max(0, Math.Min(100, (double)Model.HP * 100 / 50));
+    var manaPercent = Math.Max(0, Math.Min(100, (double)Model.Mana * 100 / 32));
+
     var recentBadges = Model.UserBadges?
         .OrderByDescending(b => b.EarnedDate)
         .Take(3)
@@ -14,6 +20,7 @@
 
 <style>
     .dashboard-page {
+        font-family: "Nunito", "Inter", "Segoe UI", sans-serif;
         display: flex;
         flex-direction: column;
         gap: 28px;
@@ -50,6 +57,7 @@
         font-weight: 900;
         color: #111827;
         margin-bottom: 8px;
+        letter-spacing: -.02em;
     }
 
     .welcome-content p {
@@ -66,7 +74,7 @@
     }
 
     .level-pill {
-        background: #6d28d9;
+        background: #111827;
         color: #fff;
         padding: 7px 18px;
         border-radius: 999px;
@@ -89,7 +97,8 @@
         .xp-bar-main span {
             display: block;
             height: 100%;
-            background: linear-gradient(90deg, #6d28d9, #9333ea);
+            background: #111827;
+            border-radius: 999px;
         }
 
     .resource-card {
@@ -109,18 +118,23 @@
 
     .resource-icon {
         font-size: 2.45rem;
+        line-height: 1;
     }
 
     .resource-label {
-        color: #374151;
-        font-weight: 800;
+        color: #1f2937;
+        font-weight: 900;
+        letter-spacing: -.01em;
     }
 
     .resource-value {
-        font-size: 1.45rem;
+        font-size: 1.55rem;
         font-weight: 900;
-        color: #111827;
+        color: #020617;
         margin-left: 54px;
+        line-height: 1.35;
+        letter-spacing: -.02em;
+        word-break: normal;
     }
 
     .resource-bar {
@@ -173,13 +187,17 @@
 
         .panel-title span,
         .panel-link {
-            color: #6d28d9;
+            color: #111827;
         }
 
     .panel-link {
         font-weight: 800;
         text-decoration: none;
     }
+
+        .panel-link:hover {
+            text-decoration: underline;
+        }
 
     .quick-stats-grid {
         display: grid;
@@ -207,15 +225,12 @@
     .quick-stat-number {
         font-size: 1.65rem;
         font-weight: 900;
-        color: #6d28d9;
+        color: #111827;
     }
 
-        .quick-stat-number.green {
-            color: #22c55e;
-        }
-
+        .quick-stat-number.green,
         .quick-stat-number.orange {
-            color: #f59e0b;
+            color: #111827;
         }
 
     .quick-stat-sub {
@@ -240,7 +255,7 @@
         width: 86px;
         height: 86px;
         border-radius: 22px;
-        background: linear-gradient(135deg, #2e1065, #6d28d9);
+        background: #111827;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -262,7 +277,7 @@
     }
 
     .badge-time {
-        color: #6d28d9;
+        color: #111827;
         font-weight: 800;
         font-size: .92rem;
     }
@@ -334,9 +349,9 @@
                 <span class="resource-icon">❤️</span>
                 <span class="resource-label">HP</span>
             </div>
-            <div class="resource-value">@Model.HP / 50</div>
+            <div class="resource-value">@hpValue.ToString("0.#") / 50</div>
             <div class="resource-bar">
-                <span class="bar-red" style="width:@((Model.HP * 100) / 50)%"></span>
+                <span class="bar-red" style="width:@hpPercent.ToString("0.#")%"></span>
             </div>
         </div>
 
@@ -345,9 +360,9 @@
                 <span class="resource-icon">💧</span>
                 <span class="resource-label">Mana</span>
             </div>
-            <div class="resource-value">@Model.Mana / 32</div>
+            <div class="resource-value">@manaValue.ToString("0.#") / 32</div>
             <div class="resource-bar">
-                <span class="bar-blue" style="width:@((Model.Mana * 100) / 32)%"></span>
+                <span class="bar-blue" style="width:@manaPercent.ToString("0.#")%"></span>
             </div>
         </div>
 
@@ -356,7 +371,7 @@
                 <span class="resource-icon">🪙</span>
                 <span class="resource-label">Gold</span>
             </div>
-            <div class="resource-value">@Model.Gold.ToString("N0")</div>
+            <div class="resource-value">@Model.Gold.ToString("0.#")</div>
         </div>
 
         <div class="resource-card">
@@ -364,7 +379,7 @@
                 <span class="resource-icon">💎</span>
                 <span class="resource-label">Gems</span>
             </div>
-            <div class="resource-value">@Model.Gems.ToString("N0")</div>
+            <div class="resource-value">@Model.Gems.ToString("0.#")</div>
         </div>
     </section>
 
@@ -376,7 +391,6 @@
                     <span>▥</span>
                     Thống kê nhanh
                 </div>
-                <a class="panel-link" href="/Dashboard/Statistics">Xem chi tiết</a>
             </div>
 
             <div class="quick-stats-grid">
@@ -400,7 +414,7 @@
 
                 <div class="quick-stat">
                     <div class="quick-stat-label">🪙 Gold hiện có</div>
-                    <div class="quick-stat-number orange">@Model.Gold.ToString("N0")</div>
+                    <div class="quick-stat-number orange">@Model.Gold.ToString("0.#")</div>
                     <div class="quick-stat-sub">Vàng</div>
                 </div>
             </div>

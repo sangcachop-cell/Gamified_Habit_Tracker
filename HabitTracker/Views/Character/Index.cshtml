@@ -2,7 +2,7 @@
 @using HabitTracker.Constants
 @{
     ViewData["Title"] = "Character";
-    var u  = Model.User;
+    var u = Model.User;
     var es = Model.EffectiveStats;
     bool hasPoints = u.StatPoints > 0;
     double xpPct = Model.XpToNextLevel > 0
@@ -12,317 +12,663 @@
     string ClassLabel(string? cls) => cls switch
     {
         CharacterClass.Warrior => "⚔️ Warrior",
-        CharacterClass.Mage    => "🔮 Mage",
-        CharacterClass.Rogue   => "🗡️ Rogue",
-        CharacterClass.Healer  => "💚 Healer",
-        _                      => "No Class"
+        CharacterClass.Mage => "🔮 Mage",
+        CharacterClass.Rogue => "🗡️ Rogue",
+        CharacterClass.Healer => "💚 Healer",
+        _ => "No Class"
     };
 
     // Resolve equipped gear for avatar layers
-    string? eqArmorKey   = u.EquippedArmor;
-    string? eqHeadKey    = u.EquippedHead;
-    string? eqShieldKey  = u.EquippedShield;
-    string? eqWeaponKey  = u.EquippedWeapon;
-    string bodyType      = u.BodyType ?? "broad";
+    string? eqArmorKey = u.EquippedArmor;
+    string? eqHeadKey = u.EquippedHead;
+    string? eqShieldKey = u.EquippedShield;
+    string? eqWeaponKey = u.EquippedWeapon;
+    string bodyType = u.BodyType ?? "broad";
 
     HabitTracker.Models.GearItem? FindGear(string? key) =>
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear         = FindGear(eqArmorKey);
-    var headGear          = FindGear(eqHeadKey);
-    var shieldGear        = FindGear(eqShieldKey);
-    var weaponGear        = FindGear(eqWeaponKey);
-    var backGear          = FindGear(u.EquippedBack);
-    var eyewearGear       = FindGear(u.EquippedEyewear);
+    var armorGear = FindGear(eqArmorKey);
+    var headGear = FindGear(eqHeadKey);
+    var shieldGear = FindGear(eqShieldKey);
+    var weaponGear = FindGear(eqWeaponKey);
+    var backGear = FindGear(u.EquippedBack);
+    var eyewearGear = FindGear(u.EquippedEyewear);
     var headAccessoryGear = FindGear(u.EquippedHeadAccessory);
-    bool wep2H     = weaponGear?.TwoHanded ?? false;
+    bool wep2H = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
 
+<style>
+    :root {
+        --char-bg: #f6f7fb;
+        --char-card: #ffffff;
+        --char-text: #1f2937;
+        --char-muted: #6b7280;
+        --char-border: #e5e7eb;
+        --char-soft: #f1f5f9;
+        --char-primary: #2563eb;
+        --char-primary-hover: #1d4ed8;
+        --char-gold: #f59e0b;
+        --char-green: #16a34a;
+        --char-red: #dc2626;
+        --char-blue-soft: #eff6ff;
+        --char-shadow: 0 14px 32px rgba(15, 23, 42, .07);
+    }
+
+    body {
+        background: var(--char-bg);
+        color: var(--char-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .character-page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 22px 12px 48px;
+    }
+
+    .character-hero {
+        background: var(--char-card);
+        border: 1px solid var(--char-border);
+        border-radius: 24px;
+        box-shadow: var(--char-shadow);
+        padding: 24px;
+        margin-bottom: 18px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 24px;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .character-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 12% 15%, rgba(37, 99, 235, .10), transparent 34%), radial-gradient(circle at 88% 5%, rgba(245, 158, 11, .12), transparent 28%);
+            pointer-events: none;
+        }
+
+    .hero-content,
+    .avatar-panel {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--char-primary);
+        background: var(--char-blue-soft);
+        border: 1px solid rgba(37, 99, 235, .12);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: .78rem;
+        font-weight: 850;
+        margin-bottom: 10px;
+    }
+
+    .character-title {
+        margin: 0;
+        color: var(--char-text);
+        font-size: 1.7rem;
+        font-weight: 900;
+        letter-spacing: -.04em;
+    }
+
+    .character-subtitle {
+        margin: 7px 0 0;
+        color: var(--char-muted);
+        font-size: .94rem;
+        line-height: 1.45;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
+    .char-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-radius: 13px;
+        border: 1px solid var(--char-border);
+        padding: 9px 13px;
+        font-size: .84rem;
+        font-weight: 850;
+        text-decoration: none;
+        transition: transform .12s ease, background .15s ease, border-color .15s ease;
+        white-space: nowrap;
+    }
+
+        .char-btn:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+    .char-btn-primary {
+        background: var(--char-primary);
+        color: #fff;
+        border-color: var(--char-primary);
+    }
+
+        .char-btn-primary:hover {
+            background: var(--char-primary-hover);
+            color: #fff;
+        }
+
+    .char-btn-soft {
+        background: #fff;
+        color: var(--char-text);
+    }
+
+        .char-btn-soft:hover {
+            background: var(--char-soft);
+            color: var(--char-text);
+        }
+
+    .char-btn-warning {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .char-btn-danger {
+        background: #fff1f2;
+        color: #be123c;
+        border-color: #fecdd3;
+    }
+
+    .avatar-panel {
+        width: 210px;
+        min-height: 210px;
+        border: 1px solid var(--char-border);
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, .06);
+        padding: 14px;
+    }
+
+    .avatar-frame {
+        position: relative;
+        width: 141px;
+        height: 147px;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, .08);
+        background-color: #f8fafc;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center top;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+    }
+
+    .avatar-stack {
+        position: relative;
+        margin-left: 24px;
+        width: 90px;
+        height: 90px;
+    }
+
+        .avatar-stack img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            image-rendering: pixelated;
+        }
+
+    .avatar-layer-90 {
+        width: 90px;
+        height: 90px;
+    }
+
+    .level-card {
+        background: var(--char-card);
+        border: 1px solid var(--char-border);
+        border-radius: 20px;
+        box-shadow: var(--char-shadow);
+        padding: 18px;
+        margin-bottom: 18px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+    }
+
+    .class-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 128px;
+        border-radius: 15px;
+        padding: 11px 14px;
+        color: #fff;
+        background: var(--char-primary);
+        font-weight: 900;
+        font-size: .92rem;
+    }
+
+        .class-badge.no-class {
+            background: #6b7280;
+        }
+
+    .level-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+        color: var(--char-muted);
+        font-size: .84rem;
+        font-weight: 750;
+    }
+
+    .xp-track {
+        height: 12px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        overflow: hidden;
+    }
+
+    .xp-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .stat-alert {
+        border: 1px solid rgba(22, 163, 74, .18);
+        background: #ecfdf5;
+        color: #065f46;
+        border-radius: 18px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .04);
+    }
+
+    .stat-muted-row {
+        background: var(--char-card);
+        border: 1px solid var(--char-border);
+        border-radius: 16px;
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        color: var(--char-muted);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+    }
+
+    .stats-grid {
+        margin-bottom: 18px;
+    }
+
+        .stats-grid .card,
+        .stats-grid [class*="card"] {
+            border-radius: 18px !important;
+            border-color: var(--char-border) !important;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .05) !important;
+        }
+
+    .derived-card,
+    .buff-card {
+        background: var(--char-card);
+        border: 1px solid var(--char-border);
+        border-radius: 20px;
+        box-shadow: var(--char-shadow);
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        margin: 0 0 14px;
+        color: var(--char-text);
+        font-size: .98rem;
+        font-weight: 900;
+        letter-spacing: -.02em;
+    }
+
+    .derived-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .derived-item {
+        background: #f9fafb;
+        border: 1px solid var(--char-border);
+        border-radius: 16px;
+        padding: 14px;
+        text-align: center;
+    }
+
+    .derived-label {
+        color: var(--char-text);
+        font-weight: 900;
+        font-size: .88rem;
+    }
+
+    .derived-value {
+        margin-top: 7px;
+        color: var(--char-primary);
+        font-size: 1.15rem;
+        font-weight: 950;
+    }
+
+    .derived-note {
+        display: block;
+        margin-top: 4px;
+        color: var(--char-muted);
+        font-size: .74rem;
+    }
+
+    .buff-card {
+        background: #eff6ff;
+        border-color: rgba(37, 99, 235, .18);
+        color: #1e3a8a;
+    }
+
+    .buff-line {
+        color: #1f2937;
+        font-weight: 750;
+        margin-top: 8px;
+    }
+
+    @@media (max-width: 760px) {
+        .character-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .avatar-panel {
+            width: 100%;
+            min-height: 188px;
+        }
+
+        .level-card {
+            grid-template-columns: 1fr;
+        }
+
+        .class-badge {
+            width: 100%;
+        }
+
+        .derived-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-alert {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
-<div class="container mt-4" style="max-width:860px;">
+<div class="character-page">
 
-    <!-- Header row -->
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="mb-0">⚔️ Character Sheet</h2>
-        <div class="d-flex gap-2">
-            <a href="/Character/Customize" class="btn btn-outline-info btn-sm">
-                🎨 Customize
-            </a>
-            @if (Model.CanSelectClass)
-            {
-                <a href="/Character/SelectClass" class="btn btn-warning btn-sm">
-                    🌟 Select Your Class
-                </a>
-            }
-            @if (u.Level >= 10)
-            {
-                <a href="/Character/Rebirth" class="btn btn-outline-danger btn-sm">
-                    🔁 Rebirth
-                </a>
-            }
+    <div class="character-hero">
+        <div class="avatar-panel">
+            <div class="avatar-frame"
+                 style="padding-top:@(isMounted ? "0px" : "24px");@(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');" : "")">
+                <div class="avatar-stack">
+                    @if (isMounted)
+                    {
+                        <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png" />
+                    }
+                    @if (backGear != null)
+                    {
+                        <img src="@backGear.GetWornImagePath(bodyType)"
+                             class="avatar-layer-90"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                    }
+                    <img src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png" class="avatar-layer-90" />
+                    <img src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png" class="avatar-layer-90" />
+                    @if (armorGear != null)
+                    {
+                        <img src="@armorGear.GetWornImagePath(bodyType)" class="avatar-layer-90" />
+                    }
+                    @if (u.HairBangs > 0)
+                    {
+                        <img src="/images/habitica/customize/hair/hair_bangs_@(u.HairBangs)_@(u.HairColor).png" class="avatar-layer-90" />
+                    }
+                    <img src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png" class="avatar-layer-90" />
+                    @if (u.HairMustache > 0)
+                    {
+                        <img src="/images/habitica/customize/beards/hair_mustache_@(u.HairMustache)_@(u.HairColor).png" class="avatar-layer-90" />
+                    }
+                    @if (u.HairBeard > 0)
+                    {
+                        <img src="/images/habitica/customize/beards/hair_beard_@(u.HairBeard)_@(u.HairColor).png" class="avatar-layer-90" />
+                    }
+                    @if (eyewearGear != null)
+                    {
+                        <img src="@eyewearGear.GetWornImagePath(bodyType)"
+                             class="avatar-layer-90"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                    }
+                    @if (headGear != null)
+                    {
+                        <img src="@headGear.GetWornImagePath(bodyType)" class="avatar-layer-90" />
+                    }
+                    @if (headAccessoryGear != null)
+                    {
+                        <img src="@headAccessoryGear.GetWornImagePath(bodyType)"
+                             class="avatar-layer-90"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                    }
+                    @if (shieldGear != null && !wep2H)
+                    {
+                        <img src="@shieldGear.GetWornImagePath(bodyType)" class="avatar-layer-90" />
+                    }
+                    @if (weaponGear != null)
+                    {
+                        <img src="@weaponGear.GetWornImagePath(bodyType)" class="avatar-layer-90" />
+                    }
+                    @if (isMounted)
+                    {
+                        <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png" />
+                    }
+                    @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
+                    {
+                        <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
+                             style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <div class="page-kicker">⚔️ Character Sheet</div>
+            <h2 class="character-title">Nhân vật của bạn</h2>
+            <p class="character-subtitle">Theo dõi cấp độ, lớp nhân vật, chỉ số sức mạnh và các hiệu ứng đang hoạt động.</p>
+
+            <div class="hero-actions">
+                <a href="/Character/Customize" class="char-btn char-btn-soft">🎨 Customize</a>
+                @if (Model.CanSelectClass)
+                {
+                    <a href="/Character/SelectClass" class="char-btn char-btn-warning">🌟 Select Your Class</a>
+                }
+                @if (u.Level >= 10)
+                {
+                    <a href="/Character/Rebirth" class="char-btn char-btn-danger">🔁 Rebirth</a>
+                }
+            </div>
         </div>
     </div>
 
-    <!-- Avatar + Class/Level row -->
-    <div class="d-flex gap-4 mb-4 align-items-center">
+    <div class="level-card">
+        <span class="class-badge @(string.IsNullOrEmpty(u.Class) ? "no-class" : "")">
+            @ClassLabel(u.Class)
+        </span>
 
-        <!-- Avatar (layer stack) -->
-        <div style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; flex-shrink:0; background:rgba(255,255,255,0.04); border-radius:8px; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
-            <div style="position:relative; margin-left:24px; width:90px; height:90px;">
-                @if (isMounted)
-                {
-                    <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
-                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                }
-                @if (backGear != null)
-                {
-                    <img src="@backGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                }
-                <img src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
-                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                <img src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png"
-                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                @if (armorGear != null)
-                {
-                    <img src="@armorGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (u.HairBangs > 0)
-                {
-                    <img src="/images/habitica/customize/hair/hair_bangs_@(u.HairBangs)_@(u.HairColor).png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                <img src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png"
-                     style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                @if (u.HairMustache > 0)
-                {
-                    <img src="/images/habitica/customize/beards/hair_mustache_@(u.HairMustache)_@(u.HairColor).png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (u.HairBeard > 0)
-                {
-                    <img src="/images/habitica/customize/beards/hair_beard_@(u.HairBeard)_@(u.HairColor).png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (eyewearGear != null)
-                {
-                    <img src="@eyewearGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                }
-                @if (headGear != null)
-                {
-                    <img src="@headGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (headAccessoryGear != null)
-                {
-                    <img src="@headAccessoryGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                }
-                @if (shieldGear != null && !wep2H)
-                {
-                    <img src="@shieldGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (weaponGear != null)
-                {
-                    <img src="@weaponGear.GetWornImagePath(bodyType)"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                }
-                @if (isMounted)
-                {
-                    <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
-                         style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                }
-                @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
-                {
-                    <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                         style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
-                }
+        <div>
+            <div class="level-row">
+                <span>Level @u.Level</span>
+                <span>@Model.XpWithinLevel / @Model.XpToNextLevel XP</span>
             </div>
-        </div>
-
-        <!-- Class + Level card -->
-        <div class="flex-grow-1">
-    <div class="card p-3">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <span class="badge fs-6 @(string.IsNullOrEmpty(u.Class) ? "bg-secondary" : "bg-primary") px-3 py-2">
-                    @ClassLabel(u.Class)
-                </span>
-            </div>
-            <div class="col">
-                <div class="d-flex justify-content-between mb-1">
-                    <small class="text-muted">Level @u.Level</small>
-                    <small class="text-muted">@Model.XpWithinLevel / @Model.XpToNextLevel XP</small>
-                </div>
-                <div class="progress" style="height:10px;" title="XP Progress">
-                    <div class="progress-bar bg-warning"
-                         style="width:@xpPct%;"
-                         aria-valuenow="@Model.XpWithinLevel"
-                         aria-valuemin="0"
-                         aria-valuemax="@Model.XpToNextLevel">
-                    </div>
+            <div class="xp-track" title="XP Progress">
+                <div class="xp-fill"
+                     style="width:@xpPct%;"
+                     aria-valuenow="@Model.XpWithinLevel"
+                     aria-valuemin="0"
+                     aria-valuemax="@Model.XpToNextLevel">
                 </div>
             </div>
         </div>
     </div>
-        </div><!-- /flex-grow-1 -->
-    </div><!-- /d-flex avatar+level row -->
 
-    <!-- Stat Points banner -->
     @if (u.StatPoints > 0)
     {
-        <div class="alert alert-success d-flex align-items-center justify-content-between mb-4" role="alert">
+        <div class="stat-alert stat-points-alert" role="alert">
             <span>✨ You have <strong id="stat-points-count">@u.StatPoints</strong> unallocated stat point@(u.StatPoints != 1 ? "s" : "")!</span>
-            <small class="text-muted">Click <strong>+</strong> on any stat below to allocate.</small>
+            <small>Click <strong>+</strong> on any stat below to allocate.</small>
         </div>
     }
     else
     {
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <small class="text-muted">Stat points: <span id="stat-points-count">0</span> (earn 1 per level-up)</small>
+        <div class="stat-muted-row">
+            <small>Stat points: <span id="stat-points-count">0</span> (earn 1 per level-up)</small>
         </div>
     }
 
-    <!-- Stat cards grid -->
-    <div class="row g-3 mb-4">
-
-        @* STR *@
+    <div class="row g-3 stats-grid">
         <div class="col-sm-6 col-lg-3">
             @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                "STR", "⚔️", "Strength",
-                "Boosts XP and melee damage",
-                u.STR, es.GearSTR, es.ClassBonusSTR, es.LevelBonus, es.BuffSTR, es.STR,
-                hasPoints))
+            "STR", "⚔️", "Strength",
+                        "Boosts XP and melee damage",
+                        u.STR, es.GearSTR, es.ClassBonusSTR, es.LevelBonus, es.BuffSTR, es.STR,
+                        hasPoints))
         </div>
 
-        @* CON *@
         <div class="col-sm-6 col-lg-3">
             @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                "CON", "🛡️", "Constitution",
-                "Reduces HP damage taken from missed dailies",
-                u.CON, es.GearCON, es.ClassBonusCON, es.LevelBonus, es.BuffCON, es.CON,
-                hasPoints))
+                        "CON", "🛡️", "Constitution",
+                        "Reduces HP damage taken from missed dailies",
+                        u.CON, es.GearCON, es.ClassBonusCON, es.LevelBonus, es.BuffCON, es.CON,
+                        hasPoints))
         </div>
 
-        @* INT *@
         <div class="col-sm-6 col-lg-3">
             @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                "INT", "🔮", "Intelligence",
-                "Boosts mana pool and XP gained",
-                u.INT, es.GearINT, es.ClassBonusINT, es.LevelBonus, es.BuffINT, es.INT,
-                hasPoints))
+                        "INT", "🔮", "Intelligence",
+                        "Boosts mana pool and XP gained",
+                        u.INT, es.GearINT, es.ClassBonusINT, es.LevelBonus, es.BuffINT, es.INT,
+                        hasPoints))
         </div>
 
-        @* PER *@
         <div class="col-sm-6 col-lg-3">
             @await Html.PartialAsync("_StatCard", new HabitTracker.Models.ViewModels.StatCardModel(
-                "PER", "👁️", "Perception",
-                "Boosts gold earned and critical hit chance",
-                u.PER, es.GearPER, es.ClassBonusPER, es.LevelBonus, es.BuffPER, es.PER,
-                hasPoints))
+                        "PER", "👁️", "Perception",
+                        "Boosts gold earned and critical hit chance",
+                        u.PER, es.GearPER, es.ClassBonusPER, es.LevelBonus, es.BuffPER, es.PER,
+                        hasPoints))
         </div>
-
     </div>
 
-    <!-- Derived stats -->
-    <div class="card p-3 mb-4">
-        <h6 class="text-muted mb-3">Derived Stats</h6>
-        <div class="row text-center">
-            <div class="col-4">
-                <div class="fw-bold">❤️ Max HP</div>
-                <div>@es.MaxHP</div>
-                <small class="text-muted">flat (CON reduces dmg)</small>
+    <div class="derived-card">
+        <h6 class="section-title">Derived Stats</h6>
+        <div class="derived-grid">
+            <div class="derived-item">
+                <div class="derived-label">❤️ Max HP</div>
+                <div class="derived-value">@es.MaxHP</div>
+                <small class="derived-note">flat (CON reduces dmg)</small>
             </div>
-            <div class="col-4">
-                <div class="fw-bold">💙 Max Mana</div>
-                <div>@es.MaxMana</div>
-                <small class="text-muted">INT × 2 + 30</small>
+            <div class="derived-item">
+                <div class="derived-label">💙 Max Mana</div>
+                <div class="derived-value">@es.MaxMana</div>
+                <small class="derived-note">INT × 2 + 30</small>
             </div>
-            <div class="col-4">
-                <div class="fw-bold">📐 Level Bonus</div>
-                <div>+@es.LevelBonus to all stats</div>
-                <small class="text-muted">floor(level / 2)</small>
+            <div class="derived-item">
+                <div class="derived-label">📐 Level Bonus</div>
+                <div class="derived-value">+@es.LevelBonus</div>
+                <small class="derived-note">to all stats · floor(level / 2)</small>
             </div>
         </div>
     </div>
 
-    <!-- Active buffs -->
     @if (u.BuffExpiry.HasValue && u.BuffExpiry.Value > DateTime.UtcNow)
-    {
-        <div class="alert alert-info mb-4">
-            ✨ <strong>Active Buff</strong> — expires @u.BuffExpiry.Value.ToLocalTime().ToString("g")
-            <br/>
+        {
+    <div class="buff-card">
+        ✨ <strong>Active Buff</strong> — expires @u.BuffExpiry.Value.ToLocalTime().ToString("g")
+        <div class="buff-line">
             STR +@u.BuffSTR &nbsp; CON +@u.BuffCON &nbsp; INT +@u.BuffINT &nbsp; PER +@u.BuffPER
         </div>
-    }
+    </div>
+        }
 
 </div>
 
 @section Scripts {
-<script>
-(function () {
-    'use strict';
+    <script>
+        (function () {
+            'use strict';
 
-    const token = () => $('input[name="__RequestVerificationToken"]').first().val();
+            const token = () => $('input[name="__RequestVerificationToken"]').first().val();
 
-    // Stat allocate buttons
-    $(document).on('click', '.btn-allocate', function () {
-        const stat = $(this).data('stat');
-        const btn  = $(this);
-        btn.prop('disabled', true);
+            // Stat allocate buttons
+            $(document).on('click', '.btn-allocate', function () {
+                const stat = $(this).data('stat');
+                const btn  = $(this);
+                btn.prop('disabled', true);
 
-        $.ajax({
-            url: '/Character/AllocateStat?stat=' + stat,
-            method: 'POST',
-            data: { __RequestVerificationToken: token() },
-            success: function (r) {
-                if (!r.success) {
-                    showToast('❌', 'Error', r.error || 'Could not allocate.', 'toast-death', 3500);
-                    btn.prop('disabled', false);
-                    return;
-                }
+                $.ajax({
+                    url: '/Character/AllocateStat?stat=' + stat,
+                    method: 'POST',
+                    data: { __RequestVerificationToken: token() },
+                    success: function (r) {
+                        if (!r.success) {
+                            showToast('❌', 'Error', r.error || 'Could not allocate.', 'toast-death', 3500);
+                            btn.prop('disabled', false);
+                            return;
+                        }
 
-                // Update displayed values
-                const statLow = stat.toLowerCase();
-                $('#base-' + statLow).text(r['new' + stat]);
-                $('#total-' + statLow).text(r['new' + stat]
-                    + parseInt($('#gear-' + statLow).text() || '0')
-                    + parseInt($('#classbns-' + statLow).text() || '0')
-                    + parseInt($('#lvlbns-' + statLow).text() || '0')
-                    + parseInt($('#buff-' + statLow).text() || '0'));
+                        // Update displayed values
+                        const statLow = stat.toLowerCase();
+                        $('#base-' + statLow).text(r['new' + stat]);
+                        $('#total-' + statLow).text(r['new' + stat]
+                            + parseInt($('#gear-' + statLow).text() || '0')
+                            + parseInt($('#classbns-' + statLow).text() || '0')
+                            + parseInt($('#lvlbns-' + statLow).text() || '0')
+                            + parseInt($('#buff-' + statLow).text() || '0'));
 
-                const pts = r.newStatPoints;
-                $('#stat-points-count').text(pts);
+                        const pts = r.newStatPoints;
+                        $('#stat-points-count').text(pts);
 
-                // Disable all "+" buttons if points exhausted
-                if (pts <= 0) {
-                    $('.btn-allocate').prop('disabled', true);
-                    $('.stat-points-alert').hide();
-                } else {
-                    btn.prop('disabled', false);
-                }
+                        // Disable all "+" buttons if points exhausted
+                        if (pts <= 0) {
+                            $('.btn-allocate').prop('disabled', true);
+                            $('.stat-points-alert').hide();
+                        } else {
+                            btn.prop('disabled', false);
+                        }
 
-                showToast('✨', stat + ' increased!',
-                    stat + ' is now ' + r['new' + stat] + '. (' + pts + ' points left)',
-                    'toast-xp', 2500);
+                        showToast('✨', stat + ' increased!',
+                            stat + ' is now ' + r['new' + stat] + '. (' + pts + ' points left)',
+                            'toast-xp', 2500);
 
-                refreshHud();
-            },
-            error: function () {
-                showToast('❌', 'Error', 'Request failed.', 'toast-death', 3500);
-                btn.prop('disabled', false);
-            }
-        });
-    });
-})();
-</script>
+                        refreshHud();
+                    },
+                    error: function () {
+                        showToast('❌', 'Error', 'Request failed.', 'toast-death', 3500);
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+        })();
+    </script>
 }

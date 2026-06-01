@@ -9,39 +9,320 @@
         key == null ? null : u.OwnedGear?.Select(ug => ug.GearItem)
             .FirstOrDefault(g => g?.Key == key);
 
-    var armorGear         = FindGear(u.EquippedArmor);
-    var headGear          = FindGear(u.EquippedHead);
-    var shieldGear        = FindGear(u.EquippedShield);
-    var weaponGear        = FindGear(u.EquippedWeapon);
-    var backGear          = FindGear(u.EquippedBack);
-    var eyewearGear       = FindGear(u.EquippedEyewear);
+    var armorGear = FindGear(u.EquippedArmor);
+    var headGear = FindGear(u.EquippedHead);
+    var shieldGear = FindGear(u.EquippedShield);
+    var weaponGear = FindGear(u.EquippedWeapon);
+    var backGear = FindGear(u.EquippedBack);
+    var eyewearGear = FindGear(u.EquippedEyewear);
     var headAccessoryGear = FindGear(u.EquippedHeadAccessory);
-    bool wep2H     = weaponGear?.TwoHanded ?? false;
+    bool wep2H = weaponGear?.TwoHanded ?? false;
     bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
+
+
+<style>
+    :root {
+        --custom-bg: #f6f7fb;
+        --custom-card: #ffffff;
+        --custom-text: #1f2937;
+        --custom-muted: #6b7280;
+        --custom-border: #e5e7eb;
+        --custom-soft: #f1f5f9;
+        --custom-primary: #2563eb;
+        --custom-primary-hover: #1d4ed8;
+        --custom-success: #16a34a;
+        --custom-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+        --custom-radius: 20px;
+    }
+
+    body {
+        background: var(--custom-bg);
+        color: var(--custom-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .customize-page {
+        max-width: 1180px;
+        padding-top: 22px !important;
+        padding-bottom: 46px !important;
+    }
+
+        .customize-page h2 {
+            margin: 0;
+            font-size: 1.55rem;
+            font-weight: 850;
+            letter-spacing: -.03em;
+            color: var(--custom-text);
+        }
+
+        .customize-page .btn {
+            border-radius: 12px;
+            font-weight: 750;
+            transition: transform .12s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+        }
+
+            .customize-page .btn:hover {
+                transform: translateY(-1px);
+            }
+
+        .customize-page .btn-primary,
+        .customize-page .btn-success {
+            border: 0;
+            background: var(--custom-primary);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, .16);
+        }
+
+            .customize-page .btn-primary:hover,
+            .customize-page .btn-success:hover {
+                background: var(--custom-primary-hover);
+                color: #fff;
+            }
+
+        .customize-page .btn-outline-secondary {
+            background: #fff;
+            border-color: var(--custom-border);
+            color: var(--custom-muted);
+        }
+
+            .customize-page .btn-outline-secondary:hover {
+                background: var(--custom-soft);
+                border-color: #cbd5e1;
+                color: var(--custom-text);
+            }
+
+        .customize-page .alert {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+            border-radius: 14px;
+            font-weight: 650;
+        }
+
+    .customize-toolbar {
+        background: var(--custom-card);
+        border: 1px solid var(--custom-border);
+        border-radius: var(--custom-radius);
+        padding: 18px 20px;
+        box-shadow: var(--custom-shadow);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .customize-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .customize-back-btn {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: var(--custom-soft);
+        border: 1px solid var(--custom-border);
+        color: var(--custom-text);
+        text-decoration: none;
+        font-weight: 900;
+    }
+
+    .customize-subtitle {
+        margin: 4px 0 0;
+        color: var(--custom-muted);
+        font-size: .9rem;
+    }
+
+    .customize-page .nav-tabs {
+        background: var(--custom-card);
+        border: 1px solid var(--custom-border);
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: var(--custom-shadow);
+        gap: 6px;
+    }
+
+        .customize-page .nav-tabs .nav-item {
+            flex: 1;
+        }
+
+        .customize-page .nav-tabs .nav-link {
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            color: var(--custom-muted);
+            font-weight: 800;
+            padding: 11px 12px;
+            background: transparent;
+        }
+
+            .customize-page .nav-tabs .nav-link:hover {
+                background: var(--custom-soft);
+                color: var(--custom-text);
+            }
+
+            .customize-page .nav-tabs .nav-link.active {
+                background: var(--custom-primary);
+                color: #fff;
+            }
+
+    .customize-page .card {
+        border: 1px solid var(--custom-border) !important;
+        border-radius: var(--custom-radius);
+        background: var(--custom-card) !important;
+        color: var(--custom-text);
+        box-shadow: var(--custom-shadow);
+        overflow: hidden;
+    }
+
+        .customize-page .card.bg-dark,
+        .customize-page .bg-dark {
+            background: var(--custom-card) !important;
+        }
+
+    .customize-page .card-body {
+        padding: 18px 20px;
+    }
+
+    .customize-page .small.fw-semibold.text-muted {
+        color: var(--custom-muted) !important;
+        font-size: .74rem;
+        font-weight: 900 !important;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: 12px !important;
+    }
+
+    .customize-swatch,
+    .customize-page .bg-opt {
+        background: #fff;
+        border-radius: 12px !important;
+        border: 2px solid transparent !important;
+        box-shadow: 0 0 0 1px var(--custom-border);
+        padding: 2px;
+        transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+        .customize-swatch:hover,
+        .customize-page .bg-opt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, .12);
+        }
+
+        .customize-swatch[style*="#4a90d9"],
+        .customize-page .bg-opt[style*="#4a90d9"] {
+            border-color: var(--custom-primary) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .14);
+        }
+
+    .customize-page .btn-sm {
+        padding: 8px 13px;
+        font-size: .84rem;
+    }
+
+    #avatar-preview {
+        background-color: #eef2ff !important;
+        border: 1px solid var(--custom-border);
+        border-radius: 18px !important;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .65), 0 12px 28px rgba(15, 23, 42, .08);
+    }
+
+    .preview-card {
+        position: sticky;
+        top: 84px;
+    }
+
+    .save-note {
+        color: var(--custom-muted);
+        font-size: .82rem;
+        line-height: 1.45;
+    }
+
+    .customize-page .text-muted {
+        color: var(--custom-muted) !important;
+    }
+
+    .customize-page .tab-content {
+        margin-top: 16px;
+    }
+
+    .option-help {
+        color: var(--custom-muted);
+        font-size: .8rem;
+        margin-top: -4px;
+        margin-bottom: 12px;
+    }
+
+    .customize-page .bg-thumb-wrap > div {
+        border-radius: 12px !important;
+        background: var(--custom-soft) !important;
+        box-shadow: 0 0 0 1px var(--custom-border);
+        color: var(--custom-muted);
+    }
+
+    @@media (max-width: 767px) {
+        .customize-page {
+            padding-top: 12px !important;
+        }
+
+        .customize-toolbar {
+            align-items: flex-start;
+        }
+
+        .preview-card {
+            position: static;
+        }
+
+        .customize-page h2 {
+            font-size: 1.32rem;
+        }
+
+        .customize-page .nav-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+
+            .customize-page .nav-tabs .nav-item {
+                min-width: 150px;
+            }
+    }
+</style>
 
 <!-- Hidden form — submitted by Save button -->
 <form id="customize-form" method="post" action="/Character/SaveAppearance">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="bodyType"     id="val-bodyType"     value="@u.BodyType" />
-    <input type="hidden" name="skinColor"    id="val-skinColor"    value="@u.SkinColor" />
-    <input type="hidden" name="hairStyle"    id="val-hairStyle"    value="@u.HairStyle" />
-    <input type="hidden" name="hairColor"    id="val-hairColor"    value="@u.HairColor" />
-    <input type="hidden" name="hairBangs"    id="val-hairBangs"    value="@u.HairBangs" />
-    <input type="hidden" name="hairBeard"    id="val-hairBeard"    value="@u.HairBeard" />
+    <input type="hidden" name="bodyType" id="val-bodyType" value="@u.BodyType" />
+    <input type="hidden" name="skinColor" id="val-skinColor" value="@u.SkinColor" />
+    <input type="hidden" name="hairStyle" id="val-hairStyle" value="@u.HairStyle" />
+    <input type="hidden" name="hairColor" id="val-hairColor" value="@u.HairColor" />
+    <input type="hidden" name="hairBangs" id="val-hairBangs" value="@u.HairBangs" />
+    <input type="hidden" name="hairBeard" id="val-hairBeard" value="@u.HairBeard" />
     <input type="hidden" name="hairMustache" id="val-hairMustache" value="@u.HairMustache" />
-    <input type="hidden" name="shirtStyle"   id="val-shirtStyle"   value="@u.ShirtStyle" />
+    <input type="hidden" name="shirtStyle" id="val-shirtStyle" value="@u.ShirtStyle" />
 </form>
 
-<div class="container-fluid py-4" style="max-width:1100px;">
+<div class="customize-page container-fluid py-4">
+    <div class="customize-toolbar">
+        <div class="customize-title-wrap">
+            <a href="/Character" class="customize-back-btn" title="Back to Character">←</a>
+            <div>
+                <h2>✨ Customize Avatar</h2>
+                <p class="customize-subtitle">Chỉnh ngoại hình nhân vật và xem trước ngay trước khi lưu.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
 
         <!-- ===== LEFT: Controls ===== -->
         <div class="col-md-8">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <a href="/Character" class="btn btn-outline-secondary btn-sm">← Character</a>
-                <h2 class="mb-0">✨ Customize Avatar</h2>
-            </div>
 
             @if (!string.IsNullOrEmpty(TempData["ToastLevel"]?.ToString()))
             {
@@ -73,10 +354,14 @@
                             <div class="d-flex gap-2">
                                 <button type="button" id="btn-broad"
                                         class="btn btn-sm @(u.BodyType == "broad" ? "btn-primary" : "btn-outline-secondary") bodytype-btn"
-                                        data-value="broad" onclick="selectBodyType('broad')">Broad</button>
+                                        data-value="broad" onclick="selectBodyType('broad')">
+                                    Broad
+                                </button>
                                 <button type="button" id="btn-slim"
                                         class="btn btn-sm @(u.BodyType == "slim" ? "btn-primary" : "btn-outline-secondary") bodytype-btn"
-                                        data-value="slim" onclick="selectBodyType('slim')">Slim</button>
+                                        data-value="slim" onclick="selectBodyType('slim')">
+                                    Slim
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -120,7 +405,6 @@
                     </div>
 
                 </div><!-- /tab-appearance -->
-
                 <!-- ===== HAIR TAB ===== -->
                 <div class="tab-pane fade" id="tab-hair">
 
@@ -169,7 +453,9 @@
                             <div class="d-flex flex-wrap gap-1 align-items-center">
                                 <button type="button" id="bangs-none-btn"
                                         class="btn btn-sm @(u.HairBangs == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectBangs(0)">None</button>
+                                        onclick="selectBangs(0)">
+                                    None
+                                </button>
                                 @for (int i = 1; i <= Model.HairBangsCount; i++)
                                 {
                                     <img src="/images/habitica/customize/hair/hair_bangs_@(i)_@(u.HairColor).png"
@@ -191,7 +477,9 @@
                             <div class="d-flex flex-wrap gap-1 align-items-center">
                                 <button type="button" id="beard-none-btn"
                                         class="btn btn-sm @(u.HairBeard == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectBeard(0)">None</button>
+                                        onclick="selectBeard(0)">
+                                    None
+                                </button>
                                 @for (int i = 1; i <= Model.HairBeardCount; i++)
                                 {
                                     <img src="/images/habitica/customize/beards/hair_beard_@(i)_@(u.HairColor).png"
@@ -213,7 +501,9 @@
                             <div class="d-flex flex-wrap gap-1 align-items-center">
                                 <button type="button" id="mustache-none-btn"
                                         class="btn btn-sm @(u.HairMustache == 0 ? "btn-primary" : "btn-outline-secondary")"
-                                        onclick="selectMustache(0)">None</button>
+                                        onclick="selectMustache(0)">
+                                    None
+                                </button>
                                 @for (int i = 1; i <= Model.HairMustacheCount; i++)
                                 {
                                     <img src="/images/habitica/customize/beards/hair_mustache_@(i)_@(u.HairColor).png"
@@ -229,7 +519,6 @@
                     </div>
 
                 </div><!-- /tab-hair -->
-
                 <!-- ===== BACKGROUND TAB ===== -->
                 <div class="tab-pane fade" id="tab-background">
                     <div class="card border-0 bg-dark mb-3" style="background:#1e1e2e!important;">
@@ -258,10 +547,9 @@
 
             </div><!-- /tab-content -->
         </div><!-- /col-md-8 -->
-
         <!-- ===== RIGHT: Preview + Save ===== -->
         <div class="col-md-4">
-            <div class="sticky-top" style="top:80px;">
+            <div class="preview-card">
                 <div class="card border-0 bg-dark text-center" style="background:#1e1e2e!important;">
                     <div class="card-body py-4">
                         <div class="small fw-semibold text-muted mb-3">PREVIEW</div>
@@ -344,192 +632,191 @@
 
     </div><!-- /row -->
 </div><!-- /container -->
-
 @section Scripts {
-<script>
-(function () {
-    // Current selections (JS state)
-    var cur = {
-        bodyType:    '@u.BodyType',
-        skinColor:   '@u.SkinColor',
-        hairStyle:   @u.HairStyle,
-        hairColor:   '@u.HairColor',
-        hairBangs:   @u.HairBangs,
-        hairBeard:   @u.HairBeard,
-        hairMustache: @u.HairMustache,
-        shirtStyle:  '@u.ShirtStyle'
-    };
+    <script>
+        (function () {
+            // Current selections (JS state)
+            var cur = {
+                bodyType:    '@u.BodyType',
+                skinColor:   '@u.SkinColor',
+                hairStyle:   @u.HairStyle,
+                hairColor:   '@u.HairColor',
+                hairBangs:   @u.HairBangs,
+                hairBeard:   @u.HairBeard,
+                hairMustache: @u.HairMustache,
+                shirtStyle:  '@u.ShirtStyle'
+            };
 
-    // ===== UPDATE FUNCTIONS =====
+            // ===== UPDATE FUNCTIONS =====
 
-    function updatePreview() {
-        // Update layer images — order: skin → shirt → bangs → base → mustache → beard
-        $('#layer-skin').attr('src', '/images/habitica/customize/skin/skin_' + cur.skinColor + '.png');
-        $('#layer-shirt').attr('src', '/images/habitica/customize/shirts/' + cur.bodyType + '_shirt_' + cur.shirtStyle + '.png');
+            function updatePreview() {
+                // Update layer images — order: skin → shirt → bangs → base → mustache → beard
+                $('#layer-skin').attr('src', '/images/habitica/customize/skin/skin_' + cur.skinColor + '.png');
+                $('#layer-shirt').attr('src', '/images/habitica/customize/shirts/' + cur.bodyType + '_shirt_' + cur.shirtStyle + '.png');
 
-        if (cur.hairBangs > 0) {
-            $('#layer-bangs').attr('src', '/images/habitica/customize/hair/hair_bangs_' + cur.hairBangs + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-bangs').hide(); }
+                if (cur.hairBangs > 0) {
+                    $('#layer-bangs').attr('src', '/images/habitica/customize/hair/hair_bangs_' + cur.hairBangs + '_' + cur.hairColor + '.png').show();
+                } else { $('#layer-bangs').hide(); }
 
-        $('#layer-hair').attr('src', '/images/habitica/customize/hair/hair_base_' + cur.hairStyle + '_' + cur.hairColor + '.png');
+                $('#layer-hair').attr('src', '/images/habitica/customize/hair/hair_base_' + cur.hairStyle + '_' + cur.hairColor + '.png');
 
-        if (cur.hairMustache > 0) {
-            $('#layer-mustache').attr('src', '/images/habitica/customize/beards/hair_mustache_' + cur.hairMustache + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-mustache').hide(); }
+                if (cur.hairMustache > 0) {
+                    $('#layer-mustache').attr('src', '/images/habitica/customize/beards/hair_mustache_' + cur.hairMustache + '_' + cur.hairColor + '.png').show();
+                } else { $('#layer-mustache').hide(); }
 
-        if (cur.hairBeard > 0) {
-            $('#layer-beard').attr('src', '/images/habitica/customize/beards/hair_beard_' + cur.hairBeard + '_' + cur.hairColor + '.png').show();
-        } else { $('#layer-beard').hide(); }
+                if (cur.hairBeard > 0) {
+                    $('#layer-beard').attr('src', '/images/habitica/customize/beards/hair_beard_' + cur.hairBeard + '_' + cur.hairColor + '.png').show();
+                } else { $('#layer-beard').hide(); }
 
-        // Re-src thumbnails that depend on mutable props
-        updateHairThumbs();
-        updateShirtThumbs();
+                // Re-src thumbnails that depend on mutable props
+                updateHairThumbs();
+                updateShirtThumbs();
 
-        // Sync hidden form inputs
-        $('#val-bodyType').val(cur.bodyType);
-        $('#val-skinColor').val(cur.skinColor);
-        $('#val-hairStyle').val(cur.hairStyle);
-        $('#val-hairColor').val(cur.hairColor);
-        $('#val-hairBangs').val(cur.hairBangs);
-        $('#val-hairBeard').val(cur.hairBeard);
-        $('#val-hairMustache').val(cur.hairMustache);
-        $('#val-shirtStyle').val(cur.shirtStyle);
-    }
-
-    function updateHairThumbs() {
-        var col = cur.hairColor;
-        $('.hairstyle-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/hair/hair_base_' + s + '_' + col + '.png');
-        });
-        $('.bangs-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/hair/hair_bangs_' + s + '_' + col + '.png');
-        });
-        $('.beard-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/beards/hair_beard_' + s + '_' + col + '.png');
-        });
-        $('.mustache-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/beards/hair_mustache_' + s + '_' + col + '.png');
-        });
-    }
-
-    function updateShirtThumbs() {
-        var bt = cur.bodyType;
-        $('.shirt-opt').each(function () {
-            var s = $(this).data('style');
-            $(this).attr('src', '/images/habitica/customize/shirts/' + bt + '_shirt_' + s + '.png');
-        });
-    }
-
-    // ===== HIGHLIGHT HELPERS =====
-
-    function highlightSwatch(selector, activeVal, attr) {
-        $(selector).each(function () {
-            var v = $(this).data(attr);
-            $(this).css('border-color', String(v) === String(activeVal) ? '#4a90d9' : 'transparent');
-        });
-    }
-
-    function highlightBtn(selector, activeVal) {
-        $(selector).each(function () {
-            var v = $(this).data('value');
-            if (String(v) === String(activeVal)) {
-                $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
-            } else {
-                $(this).removeClass('btn-primary').addClass('btn-outline-secondary');
+                // Sync hidden form inputs
+                $('#val-bodyType').val(cur.bodyType);
+                $('#val-skinColor').val(cur.skinColor);
+                $('#val-hairStyle').val(cur.hairStyle);
+                $('#val-hairColor').val(cur.hairColor);
+                $('#val-hairBangs').val(cur.hairBangs);
+                $('#val-hairBeard').val(cur.hairBeard);
+                $('#val-hairMustache').val(cur.hairMustache);
+                $('#val-shirtStyle').val(cur.shirtStyle);
             }
-        });
-    }
 
-    // ===== PUBLIC SELECTION HANDLERS =====
+            function updateHairThumbs() {
+                var col = cur.hairColor;
+                $('.hairstyle-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/images/habitica/customize/hair/hair_base_' + s + '_' + col + '.png');
+                });
+                $('.bangs-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/images/habitica/customize/hair/hair_bangs_' + s + '_' + col + '.png');
+                });
+                $('.beard-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/images/habitica/customize/beards/hair_beard_' + s + '_' + col + '.png');
+                });
+                $('.mustache-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/images/habitica/customize/beards/hair_mustache_' + s + '_' + col + '.png');
+                });
+            }
 
-    window.selectBodyType = function (val) {
-        cur.bodyType = val;
-        highlightBtn('.bodytype-btn', val);
-        updatePreview();
-    };
+            function updateShirtThumbs() {
+                var bt = cur.bodyType;
+                $('.shirt-opt').each(function () {
+                    var s = $(this).data('style');
+                    $(this).attr('src', '/images/habitica/customize/shirts/' + bt + '_shirt_' + s + '.png');
+                });
+            }
 
-    window.selectSkin = function (color) {
-        cur.skinColor = color;
-        highlightSwatch('.skin-opt', color, 'color');
-        updatePreview();
-    };
+            // ===== HIGHLIGHT HELPERS =====
 
-    window.selectShirt = function (style) {
-        cur.shirtStyle = style;
-        highlightSwatch('.shirt-opt', style, 'style');
-        updatePreview();
-    };
+            function highlightSwatch(selector, activeVal, attr) {
+                $(selector).each(function () {
+                    var v = $(this).data(attr);
+                    $(this).css('border-color', String(v) === String(activeVal) ? '#4a90d9' : 'transparent');
+                });
+            }
 
-    window.selectHairStyle = function (style) {
-        cur.hairStyle = style;
-        highlightSwatch('.hairstyle-opt', style, 'style');
-        updatePreview();
-    };
+            function highlightBtn(selector, activeVal) {
+                $(selector).each(function () {
+                    var v = $(this).data('value');
+                    if (String(v) === String(activeVal)) {
+                        $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
+                    } else {
+                        $(this).removeClass('btn-primary').addClass('btn-outline-secondary');
+                    }
+                });
+            }
 
-    window.selectHairColor = function (color) {
-        cur.hairColor = color;
-        highlightSwatch('.haircolor-opt', color, 'color');
-        updatePreview();
-    };
+            // ===== PUBLIC SELECTION HANDLERS =====
 
-    window.selectBangs = function (style) {
-        cur.hairBangs = style;
-        if (style === 0) {
-            $('#bangs-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#bangs-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.bangs-opt', style, 'style');
-        updatePreview();
-    };
+            window.selectBodyType = function (val) {
+                cur.bodyType = val;
+                highlightBtn('.bodytype-btn', val);
+                updatePreview();
+            };
 
-    window.selectBeard = function (style) {
-        cur.hairBeard = style;
-        if (style === 0) {
-            $('#beard-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#beard-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.beard-opt', style, 'style');
-        updatePreview();
-    };
+            window.selectSkin = function (color) {
+                cur.skinColor = color;
+                highlightSwatch('.skin-opt', color, 'color');
+                updatePreview();
+            };
 
-    window.selectMustache = function (style) {
-        cur.hairMustache = style;
-        if (style === 0) {
-            $('#mustache-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
-        } else {
-            $('#mustache-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
-        }
-        highlightSwatch('.mustache-opt', style, 'style');
-        updatePreview();
-    };
+            window.selectShirt = function (style) {
+                cur.shirtStyle = style;
+                highlightSwatch('.shirt-opt', style, 'style');
+                updatePreview();
+            };
 
-    window.setBackground = function (key) {
-        var el = document.getElementById('avatar-preview');
-        if (key) {
-            el.style.backgroundImage = "url('/images/habitica/backgrounds/background_" + key + ".png')";
-            el.style.backgroundSize = 'cover';
-            el.style.backgroundPosition = 'center top';
-        } else {
-            el.style.backgroundImage = '';
-        }
-        $('.bg-opt').css('border-color', 'transparent');
-        if (key) {
-            $('.bg-opt[data-key="' + key + '"]').css('border-color', '#4a90d9');
-        }
-        var csrf = document.querySelector('[name="__RequestVerificationToken"]')?.value ?? '';
-        fetch('/Character/SetBackground', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'key=' + encodeURIComponent(key || '') + '&__RequestVerificationToken=' + encodeURIComponent(csrf)
-        });
-    };
+            window.selectHairStyle = function (style) {
+                cur.hairStyle = style;
+                highlightSwatch('.hairstyle-opt', style, 'style');
+                updatePreview();
+            };
 
-})();
-</script>
+            window.selectHairColor = function (color) {
+                cur.hairColor = color;
+                highlightSwatch('.haircolor-opt', color, 'color');
+                updatePreview();
+            };
+
+            window.selectBangs = function (style) {
+                cur.hairBangs = style;
+                if (style === 0) {
+                    $('#bangs-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#bangs-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+                highlightSwatch('.bangs-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectBeard = function (style) {
+                cur.hairBeard = style;
+                if (style === 0) {
+                    $('#beard-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#beard-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+                highlightSwatch('.beard-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.selectMustache = function (style) {
+                cur.hairMustache = style;
+                if (style === 0) {
+                    $('#mustache-none-btn').removeClass('btn-outline-secondary').addClass('btn-primary');
+                } else {
+                    $('#mustache-none-btn').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+                highlightSwatch('.mustache-opt', style, 'style');
+                updatePreview();
+            };
+
+            window.setBackground = function (key) {
+                var el = document.getElementById('avatar-preview');
+                if (key) {
+                    el.style.backgroundImage = "url('/images/habitica/backgrounds/background_" + key + ".png')";
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center top';
+                } else {
+                    el.style.backgroundImage = '';
+                }
+                $('.bg-opt').css('border-color', 'transparent');
+                if (key) {
+                    $('.bg-opt[data-key="' + key + '"]').css('border-color', '#4a90d9');
+                }
+                var csrf = document.querySelector('[name="__RequestVerificationToken"]')?.value ?? '';
+                fetch('/Character/SetBackground', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'key=' + encodeURIComponent(key || '') + '&__RequestVerificationToken=' + encodeURIComponent(csrf)
+                });
+            };
+
+        })();
+    </script>
 }

@@ -6,221 +6,320 @@
 
 <style>
     :root {
-        --profile-bg: #f8fafc;
+        --profile-bg: #f6f7fb;
         --profile-card: #ffffff;
+        --profile-text: #111827;
+        --profile-muted: #6b7280;
         --profile-border: #e5e7eb;
-        --profile-text: #0f172a;
-        --profile-muted: #64748b;
+        --profile-soft: #f3f4f6;
+        --profile-primary: #2563eb;
+        --profile-primary-hover: #1d4ed8;
         --profile-purple: #7c3aed;
         --profile-purple-soft: #f5f3ff;
         --profile-green: #10b981;
         --profile-red: #f43f5e;
-        --profile-blue: #2563eb;
-        --profile-gold: #f59e0b;
+        --profile-shadow: 0 12px 28px rgba(15, 23, 42, .06);
     }
 
+    html,
     body {
-        background: var(--profile-bg);
-        font-family: "Nunito", sans-serif;
+        background: var(--profile-bg) !important;
+        color: var(--profile-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+        body::before,
+        body::after {
+            background: transparent !important;
+        }
+
+    main,
+    .main,
+    .content,
+    .content-wrapper,
+    .page-content,
+    .container,
+    .container-fluid {
+        background: transparent !important;
+    }
+
+    .profile-page,
+    .profile-page * {
+        box-sizing: border-box;
     }
 
     .profile-page {
-        max-width: 1320px;
-        margin: 22px auto;
-        padding: 0 16px 40px;
+        width: 100%;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 24px 14px 48px;
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
     }
 
-    .profile-hero {
-        position: relative;
-        overflow: hidden;
-        border-radius: 28px;
-        padding: 34px;
-        color: white;
-        margin-bottom: 24px;
-        background: radial-gradient(circle at 18% 55%, rgba(124, 58, 237, .65), transparent 32%), radial-gradient(circle at 85% 20%, rgba(245, 158, 11, .30), transparent 30%), linear-gradient(135deg, #070714, #17102d 55%, #1f1608);
-        box-shadow: 0 18px 45px rgba(15, 23, 42, .18);
+    .alert-s,
+    .alert-e {
+        border-radius: 14px;
+        padding: 12px 15px;
+        margin-bottom: 16px;
+        font-size: .9rem;
+        font-weight: 750;
+        border: 1px solid transparent;
     }
 
-    .profile-hero-inner {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        align-items: center;
-        gap: 28px;
-        flex-wrap: wrap;
+    .alert-s {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #bbf7d0;
     }
 
-    .profile-avatar,
-    .profile-avatar-placeholder {
-        width: 118px;
-        height: 118px;
-        border-radius: 50%;
-        border: 4px solid rgba(255,255,255,.35);
-        box-shadow: 0 16px 30px rgba(0,0,0,.25);
-        flex-shrink: 0;
-    }
-
-    .profile-avatar {
-        object-fit: cover;
-    }
-
-    .profile-avatar-placeholder {
-        background: rgba(255,255,255,.12);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 42px;
-        font-weight: 900;
-    }
-
-    .profile-name {
-        font-size: 34px;
-        font-weight: 900;
-        margin: 0;
-    }
-
-    .profile-email {
-        color: rgba(255,255,255,.72);
-        margin: 4px 0 14px;
-        font-weight: 700;
-    }
-
-    .profile-bio {
-        color: rgba(255,255,255,.82);
-        font-style: italic;
-        margin-bottom: 14px;
-        max-width: 720px;
-    }
-
-    .hero-stats {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-    }
-
-    .hero-stat {
-        min-width: 92px;
-        padding: 12px 16px;
-        border-radius: 16px;
-        background: rgba(255,255,255,.12);
-        border: 1px solid rgba(255,255,255,.18);
-        text-align: center;
-        backdrop-filter: blur(8px);
-    }
-
-        .hero-stat .num {
-            font-size: 26px;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .hero-stat .label {
-            color: rgba(255,255,255,.65);
-            font-size: 13px;
-            margin-top: 6px;
-            font-weight: 700;
-        }
-
-    .social-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-    }
-
-    .social-btn {
-        color: white;
-        text-decoration: none;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: rgba(255,255,255,.12);
-        border: 1px solid rgba(255,255,255,.16);
-        font-weight: 800;
-        font-size: 13px;
+    .alert-e {
+        background: #fff1f2;
+        color: #be123c;
+        border-color: #fecdd3;
     }
 
     .profile-layout {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) 390px;
-        gap: 22px;
+        grid-template-columns: 300px minmax(0, 1fr) 300px;
+        gap: 18px;
         align-items: start;
+        background: transparent !important;
+    }
+
+    .profile-left,
+    .profile-right {
+        position: sticky;
+        top: 86px;
+        background: transparent !important;
     }
 
     .profile-card {
-        background: var(--profile-card);
+        background: #ffffff !important;
+        background-image: none !important;
         border: 1px solid var(--profile-border);
         border-radius: 22px;
+        box-shadow: var(--profile-shadow);
         padding: 22px;
-        margin-bottom: 18px;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, .05);
+        margin-bottom: 16px;
     }
 
     .profile-card-title {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 19px;
-        font-weight: 900;
+        gap: 9px;
+        margin: 0 0 18px;
+        padding-bottom: 13px;
+        border-bottom: 1px solid var(--profile-border);
         color: var(--profile-text);
-        padding-bottom: 14px;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #ede9fe;
+        font-size: 1rem;
+        font-weight: 950;
+        letter-spacing: -.015em;
     }
+
+    .profile-summary-card {
+        text-align: center;
+    }
+
+    .profile-avatar,
+    .profile-avatar-placeholder {
+        width: 106px;
+        height: 106px;
+        border-radius: 26px;
+        border: 1px solid var(--profile-border);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .08);
+        margin: 0 auto 14px;
+    }
+
+    .profile-avatar {
+        object-fit: cover;
+        background: #fff;
+    }
+
+    .profile-avatar-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #eff6ff, #f8fafc);
+        color: var(--profile-primary);
+        font-size: 2.45rem;
+        font-weight: 950;
+    }
+
+    .profile-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid rgba(37, 99, 235, .15);
+        background: #eff6ff;
+        color: var(--profile-primary);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: .78rem;
+        font-weight: 850;
+        margin-bottom: 10px;
+    }
+
+    .profile-name {
+        margin: 0;
+        font-size: 1.6rem;
+        line-height: 1.1;
+        letter-spacing: -.035em;
+        font-weight: 950;
+        color: var(--profile-text);
+    }
+
+    .profile-email {
+        margin-top: 7px;
+        color: var(--profile-muted);
+        font-size: .9rem;
+        font-weight: 650;
+        word-break: break-word;
+    }
+
+    .profile-location {
+        margin-top: 6px;
+        color: var(--profile-muted);
+        font-size: .86rem;
+        font-weight: 700;
+    }
+
+    .profile-bio-box {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid var(--profile-border);
+        color: #4b5563;
+        font-size: .86rem;
+        line-height: 1.45;
+        text-align: left;
+    }
+
+    .left-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-top: 16px;
+    }
+
+    .left-stat {
+        background: #f8fafc;
+        border: 1px solid var(--profile-border);
+        border-radius: 16px;
+        padding: 12px 8px;
+        text-align: center;
+    }
+
+        .left-stat .num {
+            font-size: 1.25rem;
+            line-height: 1;
+            font-weight: 950;
+            color: var(--profile-text);
+        }
+
+        .left-stat .label {
+            margin-top: 5px;
+            color: var(--profile-muted);
+            font-size: .72rem;
+            font-weight: 800;
+        }
+
+    .social-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        justify-content: center;
+    }
+
+    .social-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--profile-text);
+        text-decoration: none;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: var(--profile-soft);
+        border: 1px solid var(--profile-border);
+        font-size: .8rem;
+        font-weight: 850;
+        transition: background .15s ease, transform .12s ease;
+    }
+
+        .social-btn:hover {
+            background: #e5e7eb;
+            color: var(--profile-text);
+            transform: translateY(-1px);
+        }
 
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px 18px;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
     }
 
-    .form-field label {
-        display: block;
-        margin-bottom: 7px;
-        font-weight: 800;
-        color: #475569;
-        font-size: 14px;
+    .form-field {
+        margin-bottom: 14px;
     }
 
-    .form-field input,
-    .form-field select,
-    .form-field textarea {
-        width: 100%;
-        border: 1px solid var(--profile-border);
-        border-radius: 14px;
-        padding: 12px 14px;
-        background: #fff;
-        color: var(--profile-text);
-        outline: none;
-        font-weight: 700;
-        transition: .15s ease;
-    }
-
-        .form-field input:focus,
-        .form-field select:focus,
-        .form-field textarea:focus {
-            border-color: #a78bfa;
-            box-shadow: 0 0 0 4px rgba(167,139,250,.14);
+        .form-field:last-child {
+            margin-bottom: 0;
         }
 
-    .form-field textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
+        .form-field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #374151;
+            font-size: .84rem;
+            font-weight: 850;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            border: 1px solid var(--profile-border);
+            border-radius: 14px;
+            background: #fff;
+            color: var(--profile-text);
+            padding: 11px 13px;
+            font-size: .92rem;
+            font-weight: 650;
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+            .form-field input:focus,
+            .form-field select:focus,
+            .form-field textarea:focus {
+                border-color: var(--profile-primary);
+                box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+            }
+
+        .form-field textarea {
+            min-height: 118px;
+            resize: vertical;
+            line-height: 1.5;
+        }
 
     .avatar-upload {
         position: relative;
-        border: 2px dashed #cbd5e1;
-        border-radius: 20px;
-        padding: 24px;
-        text-align: center;
-        cursor: pointer;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 18px;
         background: #f8fafc;
-        transition: .18s ease;
+        padding: 22px;
+        cursor: pointer;
+        text-align: center;
+        transition: border-color .15s ease, background .15s ease, transform .12s ease;
     }
 
         .avatar-upload:hover {
-            border-color: #a78bfa;
-            background: #faf5ff;
+            border-color: var(--profile-primary);
+            background: #eff6ff;
+            transform: translateY(-1px);
         }
 
         .avatar-upload input[type=file] {
@@ -228,81 +327,115 @@
             inset: 0;
             opacity: 0;
             cursor: pointer;
+            width: 100%;
+            height: 100%;
         }
 
     .avatar-preview {
-        width: 92px;
-        height: 92px;
-        border-radius: 50%;
+        width: 86px;
+        height: 86px;
+        border-radius: 22px;
         object-fit: cover;
-        border: 3px solid white;
-        box-shadow: 0 10px 22px rgba(15,23,42,.12);
-        margin-bottom: 10px;
+        margin: 0 auto 10px;
+        display: block;
+        border: 1px solid var(--profile-border);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+        background: #fff;
     }
 
     .avatar-note {
-        color: var(--profile-muted);
-        font-weight: 700;
         margin: 0;
+        color: var(--profile-muted);
+        font-size: .84rem;
+        font-weight: 750;
     }
 
     .action-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 4px;
+        gap: 10px;
+        margin-top: 2px;
+    }
+
+    .btn-save-profile,
+    .btn-soft-profile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border-radius: 14px;
+        padding: 11px 17px;
+        font-size: .88rem;
+        font-weight: 900;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: background .15s ease, transform .12s ease, border-color .15s ease;
     }
 
     .btn-save-profile {
+        background: var(--profile-primary);
+        color: #fff;
         border: 0;
-        border-radius: 999px;
-        padding: 12px 28px;
-        color: white;
-        background: linear-gradient(135deg, #7c3aed, #4f46e5);
-        font-weight: 900;
-        box-shadow: 0 10px 22px rgba(124,58,237,.25);
+        min-width: 150px;
     }
+
+        .btn-save-profile:hover {
+            background: var(--profile-primary-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
 
     .btn-soft-profile {
-        text-decoration: none;
-        border: 1px solid var(--profile-border);
-        border-radius: 999px;
-        padding: 11px 22px;
-        color: var(--profile-text);
         background: #fff;
-        font-weight: 800;
+        color: var(--profile-text);
+        border-color: var(--profile-border);
     }
 
-    .sidebar-card {
-        position: static;
-    }
+        .btn-soft-profile:hover {
+            background: var(--profile-soft);
+            color: var(--profile-text);
+            transform: translateY(-1px);
+        }
 
     .xp-line {
         display: flex;
         justify-content: space-between;
         font-weight: 900;
         margin-bottom: 8px;
+        font-size: .9rem;
     }
 
+        .xp-line span:last-child {
+            color: var(--profile-primary);
+        }
+
     .xp-bar {
-        height: 9px;
+        height: 10px;
         background: #e5e7eb;
         border-radius: 999px;
         overflow: hidden;
-        margin-bottom: 8px;
+        margin-bottom: 7px;
     }
 
     .xp-fill {
         height: 100%;
         width: @xpInLevel %;
-        background: linear-gradient(90deg, var(--profile-purple), var(--profile-green));
+        background: linear-gradient(90deg, var(--profile-primary), var(--profile-green));
+    }
+
+    .next-level {
+        font-size: .78rem;
+        color: #94a3b8;
+        font-weight: 800;
+        margin-bottom: 14px;
     }
 
     .stat-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 13px 0;
+        gap: 12px;
+        padding: 12px 0;
         border-bottom: 1px solid #f1f5f9;
     }
 
@@ -312,35 +445,48 @@
 
     .stat-label {
         color: var(--profile-muted);
+        font-size: .84rem;
         font-weight: 800;
     }
 
     .stat-value {
         color: var(--profile-text);
-        font-weight: 900;
+        font-size: .92rem;
+        font-weight: 950;
+        white-space: nowrap;
     }
 
     .quick-list {
         display: grid;
-        gap: 10px;
+        gap: 9px;
     }
 
-    .quick-link {
+    .quick-link,
+    .password-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         text-decoration: none;
         color: var(--profile-text);
         background: var(--profile-purple-soft);
         border: 1px solid #ede9fe;
         border-radius: 14px;
         padding: 12px 14px;
+        font-size: .88rem;
         font-weight: 900;
-        transition: .15s ease;
+        transition: background .15s ease, transform .12s ease, color .15s ease;
     }
 
-        .quick-link:hover {
+        .quick-link:hover,
+        .password-link:hover {
             transform: translateY(-1px);
             background: #ede9fe;
             color: var(--profile-purple);
         }
+
+    .password-link {
+        margin-top: 14px;
+    }
 
     .badge-grid {
         display: flex;
@@ -354,51 +500,82 @@
         border: 1px solid #ede9fe;
         border-radius: 999px;
         padding: 7px 12px;
-        font-weight: 800;
-        font-size: 13px;
+        font-weight: 850;
+        font-size: .8rem;
     }
 
-    .alert-s,
-    .alert-e {
-        border-radius: 16px;
-        padding: 13px 16px;
+    .badges-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         margin-bottom: 16px;
-        font-weight: 800;
+        padding-bottom: 13px;
+        border-bottom: 1px solid var(--profile-border);
     }
 
-    .alert-s {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
+        .badges-title-row .profile-card-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .badges-title-row a {
+            color: var(--profile-purple);
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+    @@media (max-width: 1120px) {
+        .profile-layout {
+            grid-template-columns: 280px minmax(0, 1fr);
+        }
+
+        .profile-right {
+            position: static;
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+            .profile-right .profile-card {
+                margin-bottom: 0;
+            }
     }
 
-    .alert-e {
-        background: #ffe4e6;
-        color: #be123c;
-        border: 1px solid #fecdd3;
-    }
-
-    @@media(max-width: 992px) {
+    @@media (max-width: 780px) {
         .profile-layout {
             grid-template-columns: 1fr;
         }
 
-        .sidebar-card {
+        .profile-left,
+        .profile-right {
             position: static;
         }
-    }
 
-    @@media(max-width: 640px) {
+        .profile-right {
+            display: block;
+        }
+
+            .profile-right .profile-card {
+                margin-bottom: 16px;
+            }
+
         .form-grid {
             grid-template-columns: 1fr;
+            gap: 0;
         }
 
-        .profile-hero {
-            padding: 24px;
+        .action-row {
+            flex-direction: column;
         }
 
-        .profile-name {
-            font-size: 28px;
+        .btn-save-profile,
+        .btn-soft-profile {
+            width: 100%;
         }
     }
 </style>
@@ -415,57 +592,57 @@
         <div class="alert-e">❌ @TempData["Error"]</div>
     }
 
-    <div class="profile-hero">
-        <div class="profile-hero-inner">
-            @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
-            {
-                <img src="@Model.Avatar" class="profile-avatar" alt="@Model.Username" />
-            }
-            else if (!string.IsNullOrEmpty(Model.Avatar))
-            {
-                <img src="@Url.Content("~/images/" + Model.Avatar)"
-                     class="profile-avatar"
-                     alt="@Model.Username"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                <div class="profile-avatar-placeholder" style="display:none">
-                    @Model.Username.Substring(0, 1).ToUpper()
-                </div>
-            }
-            else
-            {
-                <div class="profile-avatar-placeholder">
-                    @Model.Username.Substring(0, 1).ToUpper()
-                </div>
-            }
+    <div class="profile-layout">
 
-            <div>
+        <div class="profile-left">
+            <div class="profile-card profile-summary-card">
+                @if (!string.IsNullOrEmpty(Model.Avatar) && Model.Avatar.StartsWith("http"))
+                {
+                    <img src="@Model.Avatar" class="profile-avatar" alt="@Model.Username" />
+                }
+                else if (!string.IsNullOrEmpty(Model.Avatar))
+                {
+                    <img src="@Url.Content("~/images/" + Model.Avatar)" class="profile-avatar"
+                         alt="@Model.Username"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                    <div class="profile-avatar-placeholder" style="display:none">@Model.Username.Substring(0, 1).ToUpper()</div>
+                }
+                else
+                {
+                    <div class="profile-avatar-placeholder">@Model.Username.Substring(0, 1).ToUpper()</div>
+                }
+
+                <div class="profile-kicker">👤 Hồ sơ cá nhân</div>
                 <h2 class="profile-name">@Model.Username</h2>
-                <div class="profile-email">
-                    @Model.Email @(!string.IsNullOrEmpty(Model.Location) ? $"· 📍 {Model.Location}" : "")
-                </div>
+                <div class="profile-email">@Model.Email</div>
+
+                @if (!string.IsNullOrEmpty(Model.Location))
+                {
+                    <div class="profile-location">📍 @Model.Location</div>
+                }
 
                 @if (!string.IsNullOrEmpty(Model.Bio))
                 {
-                    <div class="profile-bio">"@Model.Bio"</div>
+                    <div class="profile-bio-box">"@Model.Bio"</div>
                 }
 
-                <div class="hero-stats">
-                    <div class="hero-stat">
+                <div class="left-stats">
+                    <div class="left-stat">
                         <div class="num">@Model.Level</div>
                         <div class="label">Level</div>
                     </div>
 
-                    <div class="hero-stat">
+                    <div class="left-stat">
                         <div class="num">@Model.XP.ToString("N0")</div>
                         <div class="label">Total XP</div>
                     </div>
 
-                    <div class="hero-stat">
-                        <div class="num">@Model.CurrentStreak 🔥</div>
+                    <div class="left-stat">
+                        <div class="num">@Model.CurrentStreak🔥</div>
                         <div class="label">Streak</div>
                     </div>
 
-                    <div class="hero-stat">
+                    <div class="left-stat">
                         <div class="num">@(Model.UserQuests?.Count ?? 0)</div>
                         <div class="label">Quests</div>
                     </div>
@@ -478,12 +655,10 @@
                         {
                             <a href="@Model.FacebookLink" target="_blank" class="social-btn">f Facebook</a>
                         }
-
                         @if (!string.IsNullOrEmpty(Model.InstagramLink))
                         {
                             <a href="@Model.InstagramLink" target="_blank" class="social-btn">📷 Instagram</a>
                         }
-
                         @if (!string.IsNullOrEmpty(Model.LinkedInLink))
                         {
                             <a href="@Model.LinkedInLink" target="_blank" class="social-btn">in LinkedIn</a>
@@ -492,9 +667,7 @@
                 }
             </div>
         </div>
-    </div>
 
-    <div class="profile-layout">
         <div>
             <form method="post" asp-action="Profile" enctype="multipart/form-data">
                 <input type="hidden" name="Id" value="@Model.Id" />
@@ -551,19 +724,13 @@
                             : Url.Content("~/images/default.png");
                         }
 
-                        <img id="avPreview"
-                             src="@avSrc"
-                             class="avatar-preview"
+                        <img id="avPreview" src="@avSrc" class="avatar-preview"
                              onerror="this.src='@Url.Content("~/images/default.png")'" />
 
                         <p class="avatar-note">📷 Nhấn để chọn ảnh mới (JPG, PNG · tối đa 5MB)</p>
 
-                        <input type="file"
-                               id="avFile"
-                               name="AvatarFile"
-                               accept="image/*"
-                               style="display:none"
-                               onchange="previewAv(event)" />
+                        <input type="file" id="avFile" name="AvatarFile" accept="image/*"
+                               style="display:none" onchange="previewAv(event)" />
                     </div>
                 </div>
 
@@ -572,7 +739,7 @@
 
                     <div class="form-field">
                         <textarea name="Bio" placeholder="Kể về bản thân bạn...">@(Model.Bio ?? "")</textarea>
-                        <small style="color:#64748b;font-weight:700;">Tối đa 500 ký tự</small>
+                        <small style="color:var(--profile-muted);font-size:.78rem;font-weight:750;">Tối đa 500 ký tự</small>
                     </div>
                 </div>
 
@@ -606,26 +773,24 @@
             </form>
         </div>
 
-        <div>
-            <div class="profile-card sidebar-card">
+        <div class="profile-right">
+            <div class="profile-card">
                 <div class="profile-card-title">⚡ Tiến trình</div>
 
                 <div class="xp-line">
                     <span>Level @Model.Level</span>
-                    <span style="color:var(--profile-purple)">@xpInLevel / 100 XP</span>
+                    <span>@xpInLevel / 100 XP</span>
                 </div>
 
                 <div class="xp-bar">
                     <div class="xp-fill"></div>
                 </div>
 
-                <div style="font-size:13px;color:#94a3b8;font-weight:800;margin-bottom:14px;">
-                    → Level @(Model.Level + 1)
-                </div>
+                <div class="next-level">→ Level @(Model.Level + 1)</div>
 
                 <div class="stat-row">
                     <span class="stat-label">🏆 Tổng XP</span>
-                    <span class="stat-value" style="color:var(--profile-purple)">@Model.XP.ToString("N0")</span>
+                    <span class="stat-value" style="color:var(--profile-primary)">@Model.XP.ToString("N0")</span>
                 </div>
 
                 <div class="stat-row">
@@ -648,20 +813,15 @@
                     <span class="stat-value">@Model.CreatedAt.ToString("MM/yyyy")</span>
                 </div>
 
-                <a href="/account/changepassword" class="quick-link" style="display:block;margin-top:16px;">
-                    🔐 Đổi mật khẩu
-                </a>
+                <a href="/account/changepassword" class="password-link">🔐 Đổi mật khẩu</a>
             </div>
 
             @if (Model.UserBadges != null && Model.UserBadges.Count > 0)
             {
                 <div class="profile-card">
-                    <div class="profile-card-title" style="justify-content:space-between;">
-                        <span>🏆 Badges (@Model.UserBadges.Count)</span>
-                        <a href="/Dashboard/Badges"
-                           style="font-size:13px;color:var(--profile-purple);text-decoration:none;font-weight:900;">
-                            Xem tất cả →
-                        </a>
+                    <div class="badges-title-row">
+                        <div class="profile-card-title">🏆 Badges (@Model.UserBadges.Count)</div>
+                        <a href="/Dashboard/Badges">Xem tất cả →</a>
                     </div>
 
                     <div class="badge-grid">
@@ -672,7 +832,7 @@
 
                         @if (Model.UserBadges.Count > 9)
                         {
-                            <div class="badge-chip">+@(Model.UserBadges.Count - 9)</div>
+                            <div class="badge-chip" style="background:#f1f5f9;color:var(--profile-muted)">+@(Model.UserBadges.Count - 9)</div>
                         }
                     </div>
                 </div>
@@ -689,6 +849,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

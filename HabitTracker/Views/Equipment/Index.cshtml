@@ -1,22 +1,22 @@
 @model HabitTracker.Models.ViewModels.EquipmentViewModel
 @{
     ViewData["Title"] = "Equipment";
-    var u  = Model.User;
+    var u = Model.User;
     var es = Model.Stats;
 
     var primarySlots = new[] { "weapon", "armor", "head", "shield", "back", "eyewear", "headAccessory" };
 
     string SlotIcon(string slot) => slot switch
     {
-        "weapon"        => "⚔️",
-        "armor"         => "🛡️",
-        "head"          => "🪖",
-        "shield"        => "🔰",
-        "back"          => "🌊",
-        "eyewear"       => "👓",
+        "weapon" => "⚔️",
+        "armor" => "🛡️",
+        "head" => "🪖",
+        "shield" => "🔰",
+        "back" => "🌊",
+        "eyewear" => "👓",
         "headAccessory" => "🎀",
-        "body"          => "👘",
-        _               => "📦"
+        "body" => "👘",
+        _ => "📦"
     };
 
     // Resolve equipped GearItem objects for avatar rendering
@@ -30,194 +30,772 @@
             equippedGear[slot] = null;
     }
 
-    var armorGear         = equippedGear.GetValueOrDefault("armor");
-    var headGear          = equippedGear.GetValueOrDefault("head");
-    var shieldGear        = equippedGear.GetValueOrDefault("shield");
-    var weaponGear        = equippedGear.GetValueOrDefault("weapon");
-    var backGear          = equippedGear.GetValueOrDefault("back");
-    var eyewearGear       = equippedGear.GetValueOrDefault("eyewear");
+    var armorGear = equippedGear.GetValueOrDefault("armor");
+    var headGear = equippedGear.GetValueOrDefault("head");
+    var shieldGear = equippedGear.GetValueOrDefault("shield");
+    var weaponGear = equippedGear.GetValueOrDefault("weapon");
+    var backGear = equippedGear.GetValueOrDefault("back");
+    var eyewearGear = equippedGear.GetValueOrDefault("eyewear");
     var headAccessoryGear = equippedGear.GetValueOrDefault("headAccessory");
     bool weaponIs2H = weaponGear?.TwoHanded ?? false;
     string bodyType = u.BodyType ?? "broad";
-    bool isMounted  = !string.IsNullOrEmpty(u.ActiveMountKey);
+    bool isMounted = !string.IsNullOrEmpty(u.ActiveMountKey);
 }
+
+<style>
+    :root {
+        --eq-bg: #f6f7fb;
+        --eq-card: #ffffff;
+        --eq-text: #111827;
+        --eq-muted: #6b7280;
+        --eq-border: #e5e7eb;
+        --eq-soft: #f1f5f9;
+        --eq-primary: #2563eb;
+        --eq-primary-hover: #1d4ed8;
+        --eq-green: #16a34a;
+        --eq-red: #dc2626;
+        --eq-gold: #f59e0b;
+        --eq-blue-soft: #eff6ff;
+        --eq-shadow: 0 14px 32px rgba(15, 23, 42, .07);
+    }
+
+    body {
+        background: var(--eq-bg);
+        color: var(--eq-text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .equipment-page {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 22px 12px 48px;
+    }
+
+    .eq-hero {
+        background: var(--eq-card);
+        border: 1px solid var(--eq-border);
+        border-radius: 24px;
+        box-shadow: var(--eq-shadow);
+        padding: 22px 24px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .eq-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 10% 10%, rgba(37, 99, 235, .10), transparent 32%), radial-gradient(circle at 90% 0%, rgba(245, 158, 11, .12), transparent 30%);
+            pointer-events: none;
+        }
+
+    .eq-hero-left,
+    .eq-hero-actions {
+        position: relative;
+        z-index: 1;
+    }
+
+    .eq-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--eq-primary);
+        background: var(--eq-blue-soft);
+        border: 1px solid rgba(37, 99, 235, .14);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: .78rem;
+        font-weight: 850;
+        margin-bottom: 10px;
+    }
+
+    .eq-title {
+        margin: 0;
+        font-size: 1.65rem;
+        font-weight: 950;
+        letter-spacing: -.04em;
+        color: var(--eq-text);
+    }
+
+    .eq-subtitle {
+        margin: 7px 0 0;
+        color: var(--eq-muted);
+        font-size: .94rem;
+        line-height: 1.45;
+    }
+
+    .eq-hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .eq-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border-radius: 14px;
+        border: 1px solid var(--eq-border);
+        padding: 10px 14px;
+        font-size: .84rem;
+        font-weight: 850;
+        text-decoration: none;
+        transition: transform .12s ease, background .15s ease, border-color .15s ease;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+        .eq-btn:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+    .eq-btn-soft {
+        background: #fff;
+        color: var(--eq-text);
+    }
+
+        .eq-btn-soft:hover {
+            background: var(--eq-soft);
+            color: var(--eq-text);
+        }
+
+    .eq-btn-primary {
+        background: var(--eq-primary);
+        color: #fff;
+        border-color: var(--eq-primary);
+    }
+
+        .eq-btn-primary:hover {
+            background: var(--eq-primary-hover);
+            color: #fff;
+        }
+
+    .eq-btn-warning {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .eq-mode-label {
+        color: var(--eq-muted);
+        font-size: .8rem;
+        font-weight: 750;
+    }
+
+    .eq-layout {
+        display: grid;
+        grid-template-columns: 330px minmax(220px, 280px) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+    .eq-card {
+        background: var(--eq-card);
+        border: 1px solid var(--eq-border);
+        border-radius: 22px;
+        box-shadow: var(--eq-shadow);
+        overflow: hidden;
+    }
+
+    .eq-card-header {
+        padding: 15px 16px;
+        border-bottom: 1px solid var(--eq-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+
+    .eq-card-title {
+        margin: 0;
+        color: var(--eq-text);
+        font-size: .92rem;
+        font-weight: 950;
+        letter-spacing: -.02em;
+    }
+
+    .eq-card-note {
+        color: var(--eq-muted);
+        font-size: .75rem;
+        font-weight: 700;
+    }
+
+    .slot-list {
+        padding: 8px;
+    }
+
+    .slot-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 10px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        transition: background .15s ease, border-color .15s ease;
+    }
+
+        .slot-row + .slot-row {
+            margin-top: 4px;
+        }
+
+        .slot-row:hover {
+            background: #f9fafb;
+            border-color: var(--eq-border);
+        }
+
+    .slot-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 13px;
+        background: var(--eq-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .gear-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+        background: #f8fafc;
+        border: 1px solid var(--eq-border);
+        object-fit: contain;
+        image-rendering: pixelated;
+        flex-shrink: 0;
+    }
+
+    .slot-name {
+        color: var(--eq-text);
+        font-size: .85rem;
+        font-weight: 850;
+    }
+
+    .slot-empty {
+        color: var(--eq-muted);
+        font-size: .84rem;
+        font-style: italic;
+        font-weight: 700;
+    }
+
+    .slot-stats {
+        color: var(--eq-muted);
+        font-size: .72rem;
+        margin-top: 2px;
+    }
+
+    .icon-danger {
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #be123c;
+        border-radius: 10px;
+        padding: 4px 9px;
+        font-size: .75rem;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .stat-box {
+        padding: 14px;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .stat-item {
+        background: #f9fafb;
+        border: 1px solid var(--eq-border);
+        border-radius: 15px;
+        padding: 10px 8px;
+        text-align: center;
+    }
+
+    .stat-label {
+        color: var(--eq-muted);
+        font-size: .72rem;
+        font-weight: 850;
+    }
+
+    .stat-value {
+        color: var(--eq-primary);
+        font-size: 1.05rem;
+        font-weight: 950;
+        margin-top: 3px;
+    }
+
+    .stat-grid-secondary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .preview-card {
+        padding: 18px;
+        text-align: center;
+        position: sticky;
+        top: 82px;
+    }
+
+    .preview-label {
+        color: var(--eq-muted);
+        font-size: .78rem;
+        font-weight: 950;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    .avatar-shell {
+        width: 200px;
+        min-height: 210px;
+        margin: 0 auto;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid var(--eq-border);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, .06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #avatar-preview {
+        border-radius: 16px;
+        overflow: visible;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center top;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+    }
+
+    .costume-note {
+        margin-top: 12px;
+        border: 1px solid #fde68a;
+        background: #fffbeb;
+        color: #92400e;
+        border-radius: 16px;
+        padding: 10px 12px;
+        font-size: .8rem;
+        font-weight: 800;
+    }
+
+    .inventory-card {
+        min-height: 620px;
+    }
+
+    .eq-tabs {
+        padding: 8px;
+        border-bottom: 1px solid var(--eq-border);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        background: #fff;
+    }
+
+        .eq-tabs .nav-link {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            color: var(--eq-muted);
+            background: transparent;
+            padding: 10px 12px;
+            font-weight: 900;
+        }
+
+            .eq-tabs .nav-link:hover {
+                background: var(--eq-soft);
+                color: var(--eq-text);
+            }
+
+            .eq-tabs .nav-link.active {
+                background: var(--eq-primary);
+                color: #fff;
+            }
+
+    .eq-scroll {
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 14px;
+    }
+
+    .slot-section {
+        margin-bottom: 18px;
+    }
+
+    .slot-section-title {
+        color: var(--eq-muted);
+        font-size: .76rem;
+        font-weight: 950;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .gear-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 16px;
+        border: 1px solid var(--eq-border);
+        background: #fff;
+        margin-bottom: 8px;
+        transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+        .gear-row:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+        }
+
+        .gear-row.equipped {
+            background: var(--eq-blue-soft);
+            border-color: rgba(37, 99, 235, .35);
+        }
+
+        .gear-row.owned {
+            opacity: .72;
+            background: #f9fafb;
+        }
+
+    .gear-name {
+        color: var(--eq-text);
+        font-size: .86rem;
+        font-weight: 900;
+    }
+
+    .gear-stats {
+        color: var(--eq-muted);
+        font-size: .72rem;
+        margin-top: 2px;
+    }
+
+    .badge-soft {
+        border-radius: 999px;
+        padding: 5px 9px;
+        font-size: .7rem;
+        font-weight: 900;
+    }
+
+    .badge-equipped {
+        background: var(--eq-primary);
+        color: #fff;
+    }
+
+    .badge-owned {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-2h {
+        background: #e5e7eb;
+        color: #374151;
+        margin-left: 4px;
+    }
+
+    .btn-equip,
+    .btn-buy {
+        border-radius: 11px;
+        border: 1px solid;
+        padding: 6px 10px;
+        font-size: .76rem;
+        font-weight: 900;
+        background: #fff;
+        white-space: nowrap;
+    }
+
+    .btn-equip {
+        color: #15803d;
+        border-color: #bbf7d0;
+    }
+
+        .btn-equip:hover {
+            background: #dcfce7;
+        }
+
+    .btn-buy {
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+        .btn-buy:hover:not(:disabled) {
+            background: #fffbeb;
+        }
+
+        .btn-buy:disabled {
+            color: #9ca3af;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+    .empty-state {
+        border: 1px dashed #d1d5db;
+        border-radius: 18px;
+        background: #f9fafb;
+        text-align: center;
+        color: var(--eq-muted);
+        padding: 46px 18px;
+    }
+
+    .gold-line {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
+        border-radius: 16px;
+        padding: 10px 12px;
+        font-size: .86rem;
+        font-weight: 850;
+        margin-bottom: 14px;
+    }
+
+    @@media (max-width: 1050px) {
+        .eq-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-card {
+            position: static;
+        }
+
+        .inventory-card {
+            min-height: auto;
+        }
+
+        .eq-scroll {
+            max-height: none;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .eq-hero {
+            padding: 20px 16px;
+        }
+
+        .eq-title {
+            font-size: 1.42rem;
+        }
+
+        .eq-hero-actions,
+        .eq-btn {
+            width: 100%;
+        }
+
+        .stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gear-row {
+            align-items: flex-start;
+        }
+    }
+</style>
 
 <form id="csrf-form" style="display:none">@Html.AntiForgeryToken()</form>
 
-<div class="container-fluid py-4" style="max-width:1200px;">
+<div class="equipment-page">
 
-    <!-- Header -->
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div class="d-flex align-items-center gap-3">
-            <a href="/Character" class="btn btn-outline-secondary btn-sm">← Character</a>
-            <h2 class="mb-0">⚔️ Equipment</h2>
+    <div class="eq-hero">
+        <div class="eq-hero-left">
+            <a href="/Character" class="eq-kicker">← Character</a>
+            <h2 class="eq-title">⚔️ Equipment</h2>
+            <p class="eq-subtitle">Trang bị vật phẩm, xem chỉ số hiệu quả và mua thêm trang bị mới cho nhân vật.</p>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="small text-muted">Mode:</span>
-            <button id="btn-toggle-costume" class="btn btn-sm @(u.CostumeModeEnabled ? "btn-warning" : "btn-outline-secondary")"
+
+        <div class="eq-hero-actions">
+            <span class="eq-mode-label">Mode:</span>
+            <button id="btn-toggle-costume"
+                    class="eq-btn @(u.CostumeModeEnabled ? "eq-btn-warning" : "eq-btn-soft")"
                     title="@(u.CostumeModeEnabled ? "Costume mode ON — stats from Battle Gear" : "Battle Gear mode")">
                 @(u.CostumeModeEnabled ? "🎭 Costume" : "⚔️ Battle Gear")
             </button>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="eq-layout">
 
-        <!-- ===== LEFT: Equipped slots + Stats ===== -->
-        <div class="col-md-4">
+        <!-- LEFT: Equipped slots + Stats -->
+        <div>
+            <div class="eq-card mb-3">
+                <div class="eq-card-header">
+                    <h6 class="eq-card-title">Equipped</h6>
+                    <span class="eq-card-note">Đang sử dụng</span>
+                </div>
 
-            <!-- Equipped Slots -->
-            <div class="card mb-3">
-                <div class="card-header py-2 fw-semibold small text-muted">EQUIPPED</div>
-                <div class="card-body p-2">
+                <div class="slot-list">
                     @foreach (var slot in primarySlots)
                     {
-                        var eqKey  = Model.EquippedKeys.GetValueOrDefault(slot);
+                        var eqKey = Model.EquippedKeys.GetValueOrDefault(slot);
                         var eqItem = equippedGear.GetValueOrDefault(slot);
-                        <div class="d-flex align-items-center gap-2 p-2 border-bottom slot-row" data-slot="@slot" id="slot-@slot">
-                            <span class="fs-5" style="width:28px;text-align:center;">@SlotIcon(slot)</span>
+                        <div class="slot-row" data-slot="@slot" id="slot-@slot">
+                            <span class="slot-icon">@SlotIcon(slot)</span>
                             @if (eqItem != null)
                             {
-                                <img src="@eqItem.ShopImagePath" width="36" height="36"
-                                     style="image-rendering:pixelated;border-radius:4px;background:rgba(255,255,255,0.05);"
+                                <img src="@eqItem.ShopImagePath" class="gear-thumb"
                                      onerror="this.style.display='none'" />
                                 <div class="flex-grow-1 lh-sm">
-                                    <div class="small fw-semibold" id="slot-name-@slot">@eqItem.Name</div>
-                                    <div class="text-muted" style="font-size:0.7rem;" id="slot-stats-@slot">
+                                    <div class="slot-name" id="slot-name-@slot">@eqItem.Name</div>
+                                    <div class="slot-stats" id="slot-stats-@slot">
                                         @(eqItem.STR > 0 ? $"STR +{eqItem.STR} " : "")@(eqItem.CON > 0 ? $"CON +{eqItem.CON} " : "")@(eqItem.INT > 0 ? $"INT +{eqItem.INT} " : "")@(eqItem.PER > 0 ? $"PER +{eqItem.PER}" : "")
                                     </div>
                                 </div>
-                                <button class="btn btn-outline-danger btn-sm py-0 px-2"
-                                        onclick="unequipSlot('@slot')">✕</button>
+                                <button class="icon-danger" onclick="unequipSlot('@slot')">✕</button>
                             }
                             else
                             {
-                                <img src="" width="36" height="36" style="display:none;image-rendering:pixelated;border-radius:4px;background:rgba(255,255,255,0.05);" id="slot-img-@slot" />
+                                <img src="" class="gear-thumb" style="display:none;" id="slot-img-@slot" />
                                 <div class="flex-grow-1 lh-sm">
-                                    <div class="small text-muted fst-italic" id="slot-name-@slot">Empty</div>
-                                    <div style="font-size:0.7rem;" id="slot-stats-@slot"></div>
+                                    <div class="slot-empty" id="slot-name-@slot">Empty</div>
+                                    <div class="slot-stats" id="slot-stats-@slot"></div>
                                 </div>
-                                <button class="btn btn-outline-danger btn-sm py-0 px-2" style="display:none;"
-                                        id="slot-unequip-@slot" onclick="unequipSlot('@slot')">✕</button>
+                                <button class="icon-danger" style="display:none;"
+                                        id="slot-unequip-@slot" onclick="unequipSlot('@slot')">
+                                    ✕
+                                </button>
                             }
                         </div>
                     }
                 </div>
             </div>
 
-            <!-- Effective Stats -->
-            <div class="card">
-                <div class="card-header py-2 fw-semibold small text-muted">EFFECTIVE STATS</div>
-                <div class="card-body p-3">
-                    <div class="row text-center g-2">
-                        <div class="col-3">
-                            <div class="small text-muted">STR</div>
-                            <div class="fw-bold" id="stat-STR">@es.STR</div>
+            <div class="eq-card">
+                <div class="eq-card-header">
+                    <h6 class="eq-card-title">Effective Stats</h6>
+                    <span class="eq-card-note">Chỉ số hiện tại</span>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">STR</div>
+                            <div class="stat-value" id="stat-STR">@es.STR</div>
                         </div>
-                        <div class="col-3">
-                            <div class="small text-muted">CON</div>
-                            <div class="fw-bold" id="stat-CON">@es.CON</div>
+                        <div class="stat-item">
+                            <div class="stat-label">CON</div>
+                            <div class="stat-value" id="stat-CON">@es.CON</div>
                         </div>
-                        <div class="col-3">
-                            <div class="small text-muted">INT</div>
-                            <div class="fw-bold" id="stat-INT">@es.INT</div>
+                        <div class="stat-item">
+                            <div class="stat-label">INT</div>
+                            <div class="stat-value" id="stat-INT">@es.INT</div>
                         </div>
-                        <div class="col-3">
-                            <div class="small text-muted">PER</div>
-                            <div class="fw-bold" id="stat-PER">@es.PER</div>
+                        <div class="stat-item">
+                            <div class="stat-label">PER</div>
+                            <div class="stat-value" id="stat-PER">@es.PER</div>
                         </div>
                     </div>
-                    <hr class="my-2" />
-                    <div class="row text-center g-2">
-                        <div class="col-6">
-                            <div class="small text-muted">Max Mana</div>
-                            <div class="fw-bold" id="stat-MaxMana">@es.MaxMana</div>
+
+                    <div class="stat-grid-secondary">
+                        <div class="stat-item">
+                            <div class="stat-label">Max Mana</div>
+                            <div class="stat-value" id="stat-MaxMana">@es.MaxMana</div>
                         </div>
-                        <div class="col-6">
-                            <div class="small text-muted">Max HP</div>
-                            <div class="fw-bold">@es.MaxHP</div>
+                        <div class="stat-item">
+                            <div class="stat-label">Max HP</div>
+                            <div class="stat-value">@es.MaxHP</div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ===== CENTER: Avatar Preview ===== -->
-        <div class="col-md-3 d-flex flex-column align-items-center">
-            <div class="small fw-semibold text-muted mb-2">PREVIEW</div>
-            <div id="avatar-preview"
-                 style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0" : "24")px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:visible; @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
-                <!-- Layer order: mount-body → back → skin → shirt → armor → bangs → hair → mustache → beard → eyewear → head → headAccessory → shield → weapon → mount-head / pet -->
-                <div style="position:relative; margin-left:24px; width:90px; height:90px;">
-                    @if (isMounted)
-                    {
-                        <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
-                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                    }
-                    <img id="layer-back"
-                         src="@(backGear != null ? backGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(backGear == null ? "display:none;" : "")"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                    <img id="layer-skin"
-                         src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                    <img id="layer-shirt"
-                         src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                    <img id="layer-armor"
-                         src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
-                    <img id="layer-bangs"
-                         src="@(u.HairBangs > 0 ? $"/images/habitica/customize/hair/hair_bangs_{u.HairBangs}_{u.HairColor}.png" : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBangs == 0 ? "display:none;" : "")" />
-                    <img id="layer-hair"
-                         src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
-                    <img id="layer-mustache"
-                         src="@(u.HairMustache > 0 ? $"/images/habitica/customize/beards/hair_mustache_{u.HairMustache}_{u.HairColor}.png" : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairMustache == 0 ? "display:none;" : "")" />
-                    <img id="layer-beard"
-                         src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
-                    <img id="layer-eyewear"
-                         src="@(eyewearGear != null ? eyewearGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(eyewearGear == null ? "display:none;" : "")"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                    <img id="layer-head"
-                         src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
-                    <img id="layer-headAccessory"
-                         src="@(headAccessoryGear != null ? headAccessoryGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headAccessoryGear == null ? "display:none;" : "")"
-                         onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
-                    <img id="layer-shield"
-                         src="@(shieldGear != null && !weaponIs2H ? shieldGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || weaponIs2H ? "display:none;" : "")" />
-                    <img id="layer-weapon"
-                         src="@(weaponGear != null ? weaponGear.GetWornImagePath(bodyType) : "")"
-                         style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(weaponGear == null ? "display:none;" : "")" />
-                    @if (isMounted)
-                    {
-                        <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
-                             style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
-                    }
-                    @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
-                    {
-                        <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
-                             style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
-                    }
+        <!-- CENTER: Avatar Preview -->
+        <div class="eq-card preview-card">
+            <div class="preview-label">Preview</div>
+
+            <div class="avatar-shell">
+                <div id="avatar-preview"
+                     style="position:relative; width:141px; height:147px; box-sizing:border-box; padding-top:@(isMounted ? "0px" : "24px"); @(!string.IsNullOrEmpty(u.Background) ? $"background-image:url('/images/habitica/backgrounds/background_{u.Background}.png');background-size:cover;background-position:center top;" : "")">
+                    <!-- Layer order: mount-body → back → skin → shirt → armor → bangs → hair → mustache → beard → eyewear → head → headAccessory → shield → weapon → mount-head / pet -->
+                    <div style="position:relative; margin-left:24px; width:90px; height:90px;">
+                        @if (isMounted)
+                        {
+                            <img src="/images/habitica/stable/mounts/body/Mount_Body_@(u.ActiveMountKey).png"
+                                 style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                        }
+                        <img id="layer-back"
+                             src="@(backGear != null ? backGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(backGear == null ? "display:none;" : "")"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                        <img id="layer-skin"
+                             src="/images/habitica/customize/skin/skin_@(u.SkinColor ?? "915533").png"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                        <img id="layer-shirt"
+                             src="/images/habitica/customize/shirts/@(bodyType)_shirt_@(u.ShirtStyle ?? "black").png"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                        <img id="layer-armor"
+                             src="@(armorGear != null ? armorGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(armorGear == null ? "display:none;" : "")" />
+                        <img id="layer-bangs"
+                             src="@(u.HairBangs > 0 ? $"/images/habitica/customize/hair/hair_bangs_{u.HairBangs}_{u.HairColor}.png" : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBangs == 0 ? "display:none;" : "")" />
+                        <img id="layer-hair"
+                             src="/images/habitica/customize/hair/hair_base_@(u.HairStyle > 0 ? u.HairStyle : 1)_@(u.HairColor ?? "black").png"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;" />
+                        <img id="layer-mustache"
+                             src="@(u.HairMustache > 0 ? $"/images/habitica/customize/beards/hair_mustache_{u.HairMustache}_{u.HairColor}.png" : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairMustache == 0 ? "display:none;" : "")" />
+                        <img id="layer-beard"
+                             src="@(u.HairBeard > 0 ? $"/images/habitica/customize/beards/hair_beard_{u.HairBeard}_{u.HairColor}.png" : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(u.HairBeard == 0 ? "display:none;" : "")" />
+                        <img id="layer-eyewear"
+                             src="@(eyewearGear != null ? eyewearGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(eyewearGear == null ? "display:none;" : "")"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                        <img id="layer-head"
+                             src="@(headGear != null ? headGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headGear == null ? "display:none;" : "")" />
+                        <img id="layer-headAccessory"
+                             src="@(headAccessoryGear != null ? headAccessoryGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(headAccessoryGear == null ? "display:none;" : "")"
+                             onerror="if(!this.src.endsWith('.gif')){this.src=this.src.replace('.png','.gif');}else{this.onerror=null;this.style.display='none';}" />
+                        <img id="layer-shield"
+                             src="@(shieldGear != null && !weaponIs2H ? shieldGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(shieldGear == null || weaponIs2H ? "display:none;" : "")" />
+                        <img id="layer-weapon"
+                             src="@(weaponGear != null ? weaponGear.GetWornImagePath(bodyType) : "")"
+                             style="position:absolute;top:0;left:0;width:90px;height:90px;image-rendering:pixelated;@(weaponGear == null ? "display:none;" : "")" />
+                        @if (isMounted)
+                        {
+                            <img src="/images/habitica/stable/mounts/head/Mount_Head_@(u.ActiveMountKey).png"
+                                 style="position:absolute;top:0;left:0;image-rendering:pixelated;" />
+                        }
+                        @if (!string.IsNullOrEmpty(u.ActivePetKey) && !isMounted)
+                        {
+                            <img src="/images/habitica/stable/pets/Pet-@(u.ActivePetKey).png"
+                                 style="position:absolute;bottom:-10px;left:-14px;image-rendering:pixelated;" />
+                        }
+                    </div>
                 </div>
             </div>
+
             @if (u.CostumeModeEnabled)
             {
-                <div class="small text-warning mt-2 text-center">🎭 Costume mode<br><span class="text-muted" style="font-size:0.7rem;">Stats come from battle gear</span></div>
+                <div class="costume-note">
+                    🎭 Costume mode<br>
+                    <span style="color:#6b7280;font-size:.72rem;">Stats come from battle gear</span>
+                </div>
             }
         </div>
 
-        <!-- ===== RIGHT: Inventory + Shop tabs ===== -->
-        <div class="col-md-5">
-            <ul class="nav nav-tabs mb-3" id="equipTabs">
+        <!-- RIGHT: Inventory + Shop tabs -->
+        <div class="eq-card inventory-card">
+            <ul class="nav eq-tabs" id="equipTabs">
                 <li class="nav-item">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-inventory">📦 Inventory</button>
                 </li>
@@ -226,13 +804,13 @@
                 </li>
             </ul>
 
-            <div class="tab-content" style="max-height:520px;overflow-y:auto;">
+            <div class="tab-content eq-scroll">
 
                 <!-- INVENTORY TAB -->
                 <div class="tab-pane fade show active" id="tab-inventory">
                     @if (!Model.OwnedBySlot.Any())
                     {
-                        <div class="text-center text-muted py-5">
+                        <div class="empty-state">
                             <div class="fs-1">📦</div>
                             <div>No gear yet — visit the Shop tab!</div>
                             @if (string.IsNullOrEmpty(u.Class))
@@ -247,31 +825,33 @@
                         {
                             if (!Model.OwnedBySlot.TryGetValue(slot, out var items) || !items.Any())
                                 continue;
-                            <div class="mb-3">
-                                <div class="small fw-semibold text-muted mb-1 text-uppercase">@SlotIcon(slot) @slot</div>
+                            <div class="slot-section">
+                                <div class="slot-section-title">@SlotIcon(slot) @slot</div>
                                 @foreach (var item in items)
                                 {
                                     bool isEquipped = Model.EquippedKeys.GetValueOrDefault(slot) == item.Key;
-                                    <div class="d-flex align-items-center gap-2 p-2 rounded mb-1"
-                                         style="background:@(isEquipped ? "rgba(74,144,217,0.15)" : "rgba(255,255,255,0.03)");border:1px solid @(isEquipped ? "#4a90d9" : "transparent");">
-                                        <img src="@item.ShopImagePath" width="36" height="36"
-                                             style="image-rendering:pixelated;border-radius:4px;"
+                                    <div class="gear-row @(isEquipped ? "equipped" : "")">
+                                        <img src="@item.ShopImagePath" class="gear-thumb"
                                              onerror="this.style.display='none'" />
                                         <div class="flex-grow-1 lh-sm">
-                                            <div class="small fw-semibold">@item.Name</div>
-                                            <div class="text-muted" style="font-size:0.7rem;">
+                                            <div class="gear-name">@item.Name</div>
+                                            <div class="gear-stats">
                                                 @(item.STR > 0 ? $"STR +{item.STR} " : "")@(item.CON > 0 ? $"CON +{item.CON} " : "")@(item.INT > 0 ? $"INT +{item.INT} " : "")@(item.PER > 0 ? $"PER +{item.PER}" : "")
-                                                @if (item.TwoHanded) { <span class="badge bg-secondary ms-1" style="font-size:0.6rem;">2H</span> }
+                                                @if (item.TwoHanded)
+                                                {
+                                                    <span class="badge-soft badge-2h">2H</span>
+                                                }
                                             </div>
                                         </div>
                                         @if (isEquipped)
                                         {
-                                            <span class="badge bg-primary">Equipped</span>
+                                            <span class="badge-soft badge-equipped">Equipped</span>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-sm btn-outline-success py-0"
-                                                    onclick="equipItem('@item.Key')">Equip</button>
+                                            <button class="btn-equip" onclick="equipItem('@item.Key')">
+                                                Equip
+                                            </button>
                                         }
                                     </div>
                                 }
@@ -284,12 +864,12 @@
                 <div class="tab-pane fade" id="tab-shop">
                     @if (!Model.ShopBySlot.Any())
                     {
-                        <div class="text-center text-muted py-5">
+                        <div class="empty-state">
                             <div class="fs-1">🛒</div>
                             @if (string.IsNullOrEmpty(u.Class))
                             {
                                 <div>Choose a class first to unlock your class shop.</div>
-                                <a href="/Character/SelectClass" class="btn btn-warning btn-sm mt-2">Choose Class</a>
+                                <a href="/Character/SelectClass" class="eq-btn eq-btn-warning mt-2">Choose Class</a>
                             }
                             else
                             {
@@ -299,36 +879,37 @@
                     }
                     else
                     {
-                        <div class="small text-muted mb-2">💰 You have <strong id="gold-display">@u.Gold.ToString("F0") GP</strong></div>
+                        <div class="gold-line">💰 You have <strong id="gold-display">@u.Gold.ToString("F0") GP</strong></div>
                         foreach (var slot in primarySlots)
                         {
                             if (!Model.ShopBySlot.TryGetValue(slot, out var items) || !items.Any())
                                 continue;
-                            <div class="mb-3">
-                                <div class="small fw-semibold text-muted mb-1 text-uppercase">@SlotIcon(slot) @slot</div>
+                            <div class="slot-section">
+                                <div class="slot-section-title">@SlotIcon(slot) @slot</div>
                                 @foreach (var item in items)
                                 {
-                                    bool owned    = Model.OwnedKeys.Contains(item.Key);
+                                    bool owned = Model.OwnedKeys.Contains(item.Key);
                                     bool canAfford = u.Gold >= item.GoldCost;
-                                    <div class="d-flex align-items-center gap-2 p-2 rounded mb-1"
-                                         style="background:rgba(255,255,255,0.03);opacity:@(owned ? "0.6" : "1");">
-                                        <img src="@item.ShopImagePath" width="36" height="36"
-                                             style="image-rendering:pixelated;border-radius:4px;"
+                                    <div class="gear-row @(owned ? "owned" : "")">
+                                        <img src="@item.ShopImagePath" class="gear-thumb"
                                              onerror="this.style.display='none'" />
                                         <div class="flex-grow-1 lh-sm">
-                                            <div class="small fw-semibold">@item.Name</div>
-                                            <div class="text-muted" style="font-size:0.7rem;">
+                                            <div class="gear-name">@item.Name</div>
+                                            <div class="gear-stats">
                                                 @(item.STR > 0 ? $"STR +{item.STR} " : "")@(item.CON > 0 ? $"CON +{item.CON} " : "")@(item.INT > 0 ? $"INT +{item.INT} " : "")@(item.PER > 0 ? $"PER +{item.PER}" : "")
-                                                @if (item.TwoHanded) { <span class="badge bg-secondary ms-1" style="font-size:0.6rem;">2H</span> }
+                                                @if (item.TwoHanded)
+                                                {
+                                                    <span class="badge-soft badge-2h">2H</span>
+                                                }
                                             </div>
                                         </div>
                                         @if (owned)
                                         {
-                                            <span class="badge bg-success">Owned</span>
+                                            <span class="badge-soft badge-owned">Owned</span>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-sm @(canAfford ? "btn-outline-warning" : "btn-outline-secondary") py-0"
+                                            <button class="btn-buy"
                                                     onclick="buyItem('@item.Key', this)"
                                                     @(!canAfford ? "disabled" : "")
                                                     title="@item.GoldCost GP">
@@ -349,125 +930,125 @@
 </div>
 
 @section Scripts {
-<script>
-(function () {
-    'use strict';
+    <script>
+        (function () {
+            'use strict';
 
-    const token = () => $('input[name="__RequestVerificationToken"]').first().val();
+            const token = () => $('input[name="__RequestVerificationToken"]').first().val();
 
-    // ── Avatar update helpers ────────────────────────────────────────────────
+            // ── Avatar update helpers ────────────────────────────────────────────────
 
-    function updateAvatarLayer(slot, imgPath, twoHanded) {
-        var layerId = '#layer-' + slot;
-        if (!imgPath) {
-            $(layerId).hide().attr('src', '');
-        } else {
-            $(layerId).attr('src', imgPath).show();
-        }
-        if (slot === 'weapon' && twoHanded) {
-            $('#layer-shield').hide();
-        }
-        if (slot === 'weapon' && !twoHanded) {
-            // Re-show shield if previously hidden by 2H
-            var shieldSrc = $('#layer-shield').attr('src');
-            if (shieldSrc) $('#layer-shield').show();
-        }
-    }
-
-    function updateStats(s) {
-        if (!s) return;
-        $('#stat-STR').text(s.str !== undefined ? s.str : s.STR);
-        $('#stat-CON').text(s.con !== undefined ? s.con : s.CON);
-        $('#stat-INT').text(s.int !== undefined ? s.int : s.INT);
-        $('#stat-PER').text(s.per !== undefined ? s.per : s.PER);
-        $('#stat-MaxMana').text(s.maxMana !== undefined ? s.maxMana : s.MaxMana);
-    }
-
-    // ── Equip ────────────────────────────────────────────────────────────────
-
-    window.equipItem = function (key) {
-        $.ajax({
-            url: '/Equipment/Equip?key=' + encodeURIComponent(key),
-            method: 'POST',
-            data: { __RequestVerificationToken: token() },
-            success: function (r) {
-                if (!r.success) {
-                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
-                    return;
+            function updateAvatarLayer(slot, imgPath, twoHanded) {
+                var layerId = '#layer-' + slot;
+                if (!imgPath) {
+                    $(layerId).hide().attr('src', '');
+                } else {
+                    $(layerId).attr('src', imgPath).show();
                 }
-                updateAvatarLayer(r.slot, r.wornImgPath, r.twoHanded);
-                updateStats(r.newStats);
-                refreshHud();
-                showToast('⚔️', 'Equipped!', r.itemName + ' equipped.', 'toast-xp', 2000);
-                // Reload page to sync inventory/equipped state
-                location.reload();
-            },
-            error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
-        });
-    };
-
-    // ── Unequip ──────────────────────────────────────────────────────────────
-
-    window.unequipSlot = function (slot) {
-        $.ajax({
-            url: '/Equipment/Unequip?slot=' + slot,
-            method: 'POST',
-            data: { __RequestVerificationToken: token() },
-            success: function (r) {
-                if (!r.success) {
-                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
-                    return;
+                if (slot === 'weapon' && twoHanded) {
+                    $('#layer-shield').hide();
                 }
-                updateAvatarLayer(slot, null, false);
-                updateStats(r.newStats);
-                refreshHud();
-                showToast('📦', 'Unequipped', slot + ' slot cleared.', 'toast-gold', 2000);
-                location.reload();
-            },
-            error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
-        });
-    };
-
-    // ── Buy ──────────────────────────────────────────────────────────────────
-
-    window.buyItem = function (key, btn) {
-        $(btn).prop('disabled', true);
-        $.ajax({
-            url: '/Equipment/Buy?key=' + encodeURIComponent(key),
-            method: 'POST',
-            data: { __RequestVerificationToken: token() },
-            success: function (r) {
-                if (!r.success) {
-                    showToast('❌', 'Error', r.error, 'toast-death', 3500);
-                    $(btn).prop('disabled', false);
-                    return;
+                if (slot === 'weapon' && !twoHanded) {
+                    // Re-show shield if previously hidden by 2H
+                    var shieldSrc = $('#layer-shield').attr('src');
+                    if (shieldSrc) $('#layer-shield').show();
                 }
-                refreshHud();
-                $('#gold-display').text(Math.round(r.newGold) + ' GP');
-                showToast('🛒', 'Purchased!', r.itemName + ' added to inventory.', 'toast-gold', 2500);
-                location.reload();
-            },
-            error: function () {
-                showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000);
-                $(btn).prop('disabled', false);
             }
-        });
-    };
 
-    // ── Toggle Costume ────────────────────────────────────────────────────────
-
-    $('#btn-toggle-costume').on('click', function () {
-        $.ajax({
-            url: '/Equipment/ToggleCostume',
-            method: 'POST',
-            data: { __RequestVerificationToken: token() },
-            success: function (r) {
-                if (!r.success) return;
-                location.reload();
+            function updateStats(s) {
+                if (!s) return;
+                $('#stat-STR').text(s.str !== undefined ? s.str : s.STR);
+                $('#stat-CON').text(s.con !== undefined ? s.con : s.CON);
+                $('#stat-INT').text(s.int !== undefined ? s.int : s.INT);
+                $('#stat-PER').text(s.per !== undefined ? s.per : s.PER);
+                $('#stat-MaxMana').text(s.maxMana !== undefined ? s.maxMana : s.MaxMana);
             }
-        });
-    });
 
-})();
-</script>
+            // ── Equip ────────────────────────────────────────────────────────────────
+
+            window.equipItem = function (key) {
+                $.ajax({
+                    url: '/Equipment/Equip?key=' + encodeURIComponent(key),
+                    method: 'POST',
+                    data: { __RequestVerificationToken: token() },
+                    success: function (r) {
+                        if (!r.success) {
+                            showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                            return;
+                        }
+                        updateAvatarLayer(r.slot, r.wornImgPath, r.twoHanded);
+                        updateStats(r.newStats);
+                        refreshHud();
+                        showToast('⚔️', 'Equipped!', r.itemName + ' equipped.', 'toast-xp', 2000);
+                        // Reload page to sync inventory/equipped state
+                        location.reload();
+                    },
+                    error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
+                });
+            };
+
+            // ── Unequip ──────────────────────────────────────────────────────────────
+
+            window.unequipSlot = function (slot) {
+                $.ajax({
+                    url: '/Equipment/Unequip?slot=' + slot,
+                    method: 'POST',
+                    data: { __RequestVerificationToken: token() },
+                    success: function (r) {
+                        if (!r.success) {
+                            showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                            return;
+                        }
+                        updateAvatarLayer(slot, null, false);
+                        updateStats(r.newStats);
+                        refreshHud();
+                        showToast('📦', 'Unequipped', slot + ' slot cleared.', 'toast-gold', 2000);
+                        location.reload();
+                    },
+                    error: function () { showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000); }
+                });
+            };
+
+            // ── Buy ──────────────────────────────────────────────────────────────────
+
+            window.buyItem = function (key, btn) {
+                $(btn).prop('disabled', true);
+                $.ajax({
+                    url: '/Equipment/Buy?key=' + encodeURIComponent(key),
+                    method: 'POST',
+                    data: { __RequestVerificationToken: token() },
+                    success: function (r) {
+                        if (!r.success) {
+                            showToast('❌', 'Error', r.error, 'toast-death', 3500);
+                            $(btn).prop('disabled', false);
+                            return;
+                        }
+                        refreshHud();
+                        $('#gold-display').text(Math.round(r.newGold) + ' GP');
+                        showToast('🛒', 'Purchased!', r.itemName + ' added to inventory.', 'toast-gold', 2500);
+                        location.reload();
+                    },
+                    error: function () {
+                        showToast('❌', 'Error', 'Request failed.', 'toast-death', 3000);
+                        $(btn).prop('disabled', false);
+                    }
+                });
+            };
+
+            // ── Toggle Costume ────────────────────────────────────────────────────────
+
+            $('#btn-toggle-costume').on('click', function () {
+                $.ajax({
+                    url: '/Equipment/ToggleCostume',
+                    method: 'POST',
+                    data: { __RequestVerificationToken: token() },
+                    success: function (r) {
+                        if (!r.success) return;
+                        location.reload();
+                    }
+                });
+            });
+
+        })();
+    </script>
 }

@@ -13,7 +13,7 @@ namespace HabitTracker.Controllers
         public PartyQuestController(IBossQuestService bossQuestService, IPartyService partyService)
         {
             _bossQuestService = bossQuestService;
-            _partyService     = partyService;
+            _partyService = partyService;
         }
 
         // POST /PartyQuest/Invite

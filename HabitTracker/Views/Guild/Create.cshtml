@@ -2,53 +2,252 @@
     ViewData["Title"] = "Create Guild";
 }
 
-<div class="container py-4" style="max-width:600px;">
-    <h4 class="fw-bold mb-4">⚔️ Create Guild</h4>
+<style>
+    :root {
+        --page-bg: #f6f7fb;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --border: #e5e7eb;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --soft: #f1f5f9;
+        --shadow: 0 14px 32px rgba(15, 23, 42, .08);
+    }
 
-    <form asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
+    body {
+        background: var(--page-bg);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Guild Name <span class="text-danger">*</span></label>
-            <input type="text" name="name" class="form-control" maxlength="100"
-                   placeholder="e.g. The Night Owls" required />
+    .guild-create-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 28px 14px 48px;
+    }
+
+    .guild-create-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .guild-create-header {
+        padding: 26px 28px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+
+    .guild-create-title {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 850;
+        color: var(--text-main);
+        letter-spacing: -.03em;
+    }
+
+    .guild-create-subtitle {
+        margin: 8px 0 0;
+        color: var(--text-muted);
+        font-size: .94rem;
+    }
+
+    .guild-create-body {
+        padding: 26px 28px 28px;
+    }
+
+    .form-label {
+        color: var(--text-main);
+        font-size: .9rem;
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 11px 14px;
+        font-size: .94rem;
+        color: var(--text-main);
+        background: #fff;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+        }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .privacy-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .privacy-card {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s, transform .12s;
+    }
+
+        .privacy-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+            transform: translateY(-1px);
+        }
+
+        .privacy-card .form-check-input {
+            margin-top: 3px;
+        }
+
+            .privacy-card .form-check-input:checked {
+                background-color: var(--primary);
+                border-color: var(--primary);
+            }
+
+    .privacy-title {
+        font-weight: 800;
+        color: var(--text-main);
+        font-size: .92rem;
+    }
+
+    .privacy-desc {
+        color: var(--text-muted);
+        font-size: .8rem;
+        margin-top: 3px;
+    }
+
+    .guild-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 8px;
+    }
+
+    .btn-main {
+        background: var(--primary);
+        border: 0;
+        color: #fff;
+        border-radius: 14px;
+        padding: 11px 18px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: background .15s, transform .12s;
+    }
+
+        .btn-main:hover {
+            background: var(--primary-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+    .btn-cancel {
+        background: var(--soft);
+        color: var(--text-main);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 11px 18px;
+        font-weight: 750;
+        text-decoration: none;
+    }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+            color: var(--text-main);
+        }
+
+    @@media (max-width: 640px) {
+        .guild-create-header,
+        .guild-create-body {
+            padding: 22px 18px;
+        }
+
+        .privacy-options {
+            grid-template-columns: 1fr;
+        }
+
+        .guild-actions {
+            flex-direction: column;
+        }
+
+            .guild-actions .btn-main,
+            .guild-actions .btn-cancel {
+                width: 100%;
+                text-align: center;
+            }
+    }
+</style>
+
+<div class="guild-create-page">
+    <div class="guild-create-card">
+        <div class="guild-create-header">
+            <h4 class="guild-create-title">⚔️ Create Guild</h4>
+            <p class="guild-create-subtitle">Create a group for friends, quests, and shared goals.</p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Short Summary</label>
-            <input type="text" name="summary" class="form-control" maxlength="200"
-                   placeholder="One-line tagline for discovery (optional)" />
-        </div>
+        <div class="guild-create-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Description</label>
-            <textarea name="description" class="form-control" rows="4" maxlength="500"
-                      placeholder="Tell people what your guild is about..."></textarea>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Privacy</label>
-            <div class="d-flex gap-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy"
-                           id="privPublic" value="public" checked />
-                    <label class="form-check-label" for="privPublic">
-                        🌐 <strong>Public</strong> — anyone can join
-                    </label>
+                <div class="mb-3">
+                    <label class="form-label">Guild Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" maxlength="100"
+                           placeholder="e.g. The Night Owls" required />
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy"
-                           id="privPrivate" value="private" />
-                    <label class="form-check-label" for="privPrivate">
-                        🔒 <strong>Private</strong> — invite only
-                    </label>
-                </div>
-            </div>
-        </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Create Guild</button>
-            <a href="/Guild" class="btn btn-outline-secondary">Cancel</a>
+                <div class="mb-3">
+                    <label class="form-label">Short Summary</label>
+                    <input type="text" name="summary" class="form-control" maxlength="200"
+                           placeholder="One-line tagline for discovery (optional)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="4" maxlength="500"
+                              placeholder="Tell people what your guild is about..."></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Privacy</label>
+
+                    <div class="privacy-options">
+                        <label class="privacy-card">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="radio" name="privacy"
+                                       id="privPublic" value="public" checked />
+                                <div class="ms-4">
+                                    <div class="privacy-title">🌐 Public</div>
+                                    <div class="privacy-desc">Anyone can find and join your guild.</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="privacy-card">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="radio" name="privacy"
+                                       id="privPrivate" value="private" />
+                                <div class="ms-4">
+                                    <div class="privacy-title">🔒 Private</div>
+                                    <div class="privacy-desc">Only invited users can join.</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="guild-actions">
+                    <button type="submit" class="btn-main">Create Guild</button>
+                    <a href="/Guild" class="btn-cancel">Cancel</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>

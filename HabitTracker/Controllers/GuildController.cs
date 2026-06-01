@@ -14,7 +14,7 @@ public class GuildController : Controller
 
     public GuildController(IGuildService guilds, AppDbContext context)
     {
-        _guilds  = guilds;
+        _guilds = guilds;
         _context = context;
     }
 
@@ -27,7 +27,7 @@ public class GuildController : Controller
         if (userId == null) return RedirectToAction("Login", "Account");
 
         var publicGuilds = await _guilds.GetPublicGuildsAsync(search);
-        var myGuilds     = await _guilds.GetMyGuildsAsync(userId.Value);
+        var myGuilds = await _guilds.GetMyGuildsAsync(userId.Value);
         var pendingInvites = await _guilds.GetPendingInvitesAsync(userId.Value);
 
         var memberCounts = new Dictionary<int, int>();
@@ -43,15 +43,15 @@ public class GuildController : Controller
         {
             PublicGuilds = publicGuilds.Select(g => new GuildCardModel
             {
-                Guild       = g,
+                Guild = g,
                 MemberCount = memberCounts.TryGetValue(g.Id, out var c) ? c : 0,
-                IsMember    = myGuildIds.Contains(g.Id),
-                MyRole      = myGuilds.FirstOrDefault(mg => mg.Guild.Id == g.Id)?.MyRole
+                IsMember = myGuildIds.Contains(g.Id),
+                MyRole = myGuilds.FirstOrDefault(mg => mg.Guild.Id == g.Id)?.MyRole
             }).ToList(),
-            MyGuilds       = myGuilds,
+            MyGuilds = myGuilds,
             PendingInvites = pendingInvites,
-            Search         = search,
-            ActiveTab      = tab
+            Search = search,
+            ActiveTab = tab
         };
 
         return View(model);
@@ -235,12 +235,12 @@ public class GuildController : Controller
 
         return Json(new
         {
-            success      = true,
-            messageId    = msg.Id,
-            body         = renderedBody,
-            sentAt       = msg.SentAt.ToLocalTime().ToString("g"),
-            authorId     = userId.Value,
-            authorName   = author?.Username ?? "Unknown",
+            success = true,
+            messageId = msg.Id,
+            body = renderedBody,
+            sentAt = msg.SentAt.ToLocalTime().ToString("g"),
+            authorId = userId.Value,
+            authorName = author?.Username ?? "Unknown",
             authorAvatar = avatarSrc
         });
     }
@@ -255,19 +255,19 @@ public class GuildController : Controller
         var entries = await _guilds.GetMessagesAsync(id, userId.Value, page);
         return Json(new
         {
-            success  = true,
-            hasMore  = entries.Count == 20,
+            success = true,
+            hasMore = entries.Count == 20,
             messages = entries.Select(e => new
             {
-                id           = e.Message.Id,
-                body         = e.RenderedBody,
-                sentAt       = e.Message.SentAt.ToLocalTime().ToString("g"),
-                authorId     = e.Message.AuthorId,
-                authorName   = e.Message.Author?.Username ?? "?",
+                id = e.Message.Id,
+                body = e.RenderedBody,
+                sentAt = e.Message.SentAt.ToLocalTime().ToString("g"),
+                authorId = e.Message.AuthorId,
+                authorName = e.Message.Author?.Username ?? "?",
                 authorAvatar = string.IsNullOrEmpty(e.Message.Author?.Avatar) || e.Message.Author.Avatar == "default.png"
                                ? "/images/default.png" : "/uploads/" + e.Message.Author.Avatar,
-                likedByMe    = e.LikedByMe,
-                likeCount    = e.LikeCount
+                likedByMe = e.LikedByMe,
+                likeCount = e.LikeCount
             })
         });
     }

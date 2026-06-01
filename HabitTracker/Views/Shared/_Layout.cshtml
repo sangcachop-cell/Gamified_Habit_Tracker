@@ -1,20 +1,44 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Html
 
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
 
     bool isFullPage = controller == "Account" &&
-        (action == "Login" || action == "Register"
-         || action == "Profile"
-         || action == "EditProfile"
-         || action == "ChangePassword");
+        (action == "Login" || action == "Register");
 
     bool isSocialActive = controller == "Friend"
         || controller == "Message"
         || controller == "Guild"
         || controller == "Party"
         || (controller == "Account" && action == "Leaderboard");
+
+    string Active(string c, string? a = null)
+    {
+        bool ok = controller == c && (a == null || action == a);
+        return ok ? "active" : "";
+    }
+
+    IHtmlContent Icon(string name)
+    {
+        string svg = name switch
+        {
+            "dashboard" => @"<svg viewBox='0 0 24 24'><path d='M3 11l9-8 9 8'/><path d='M5 10v10h14V10'/><path d='M9 20v-6h6v6'/></svg>",
+            "tasks" => @"<svg viewBox='0 0 24 24'><rect x='4' y='4' width='16' height='16' rx='2'/><path d='M8 12l3 3 5-7'/></svg>",
+            "social" => @"<svg viewBox='0 0 24 24'><circle cx='8' cy='8' r='3'/><circle cx='16' cy='8' r='3'/><path d='M2 20c1-4 4-6 6-6s5 2 6 6'/><path d='M10 20c1-4 4-6 6-6s5 2 6 6'/></svg>",
+            "economy" => @"<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='8'/><path d='M12 7v10'/><path d='M9 10c0-2 6-2 6 0 0 3-6 1-6 4 0 2 6 2 6 0'/></svg>",
+            "character" => @"<svg viewBox='0 0 24 24'><path d='M4 20L20 4'/><path d='M14 4l6 6'/><path d='M20 20L4 4'/><path d='M10 4l-6 6'/></svg>",
+            "equipment" => @"<svg viewBox='0 0 24 24'><path d='M12 3l8 3v5c0 5-3 8-8 10-5-2-8-5-8-10V6l8-3z'/><path d='M9 12l2 2 4-5'/></svg>",
+            "market" => @"<svg viewBox='0 0 24 24'><path d='M4 10h16'/><path d='M5 10l2-5h10l2 5'/><path d='M6 10v10h12V10'/><path d='M9 20v-6h6v6'/></svg>",
+            "inventory" => @"<svg viewBox='0 0 24 24'><rect x='4' y='5' width='16' height='14' rx='2'/><path d='M4 10h16'/><path d='M9 5a3 3 0 0 1 6 0'/></svg>",
+            "stable" => @"<svg viewBox='0 0 24 24'><path d='M6 18c2-4 1-9 6-12 4 2 6 5 6 9 0 3-2 5-6 5H6z'/><path d='M13 6l4-3'/><path d='M10 20v2'/><path d='M16 20v2'/></svg>",
+            "bell" => @"<svg viewBox='0 0 24 24'><path d='M6 9a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9'/><path d='M10 21h4'/></svg>",
+            _ => @"<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='8'/></svg>"
+        };
+
+        return new HtmlString(svg);
+    }
 }
 
 <!DOCTYPE html>
@@ -23,288 +47,572 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HabitTracker</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        body {
+            background: #f8fafc;
+            font-family: "Nunito", sans-serif;
+        }
+
+        .app-navbar {
+            margin: 8px 14px 0;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 22px;
+            box-shadow: 0 14px 35px rgba(15,23,42,.08);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 66px;
+            overflow: visible;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #0f172a;
+            font-weight: 900;
+            font-size: 20px;
+            white-space: nowrap;
+            padding-right: 12px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .brand-star {
+            color: #7c3aed;
+            font-size: 22px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+            overflow: visible;
+            position: relative;
+            z-index: 20;
+        }
+
+            .nav-menu::-webkit-scrollbar {
+                height: 0;
+            }
+
+        .nav-item-link,
+        .nav-dropdown-btn {
+            min-width: 68px;
+            height: 54px;
+            border-radius: 16px;
+            color: #020617;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            font-weight: 900;
+            transition: .16s ease;
+            border: 0;
+            background: transparent;
+            padding: 0 6px;
+            white-space: nowrap;
+        }
+
+            .nav-item-link:hover,
+            .nav-dropdown-btn:hover {
+                color: #020617;
+                background: #f1f5f9;
+                transform: translateY(-1px);
+            }
+
+            .nav-item-link.active,
+            .nav-dropdown-btn.active {
+                background: #eee7ff;
+                color: #020617;
+            }
+
+        .nav-svg {
+            width: 22px;
+            height: 22px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .nav-svg svg {
+                width: 22px;
+                height: 22px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+        .nav-item-link small,
+        .nav-dropdown-btn small {
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .nav-social-dropdown {
+            position: relative;
+            z-index: 100000;
+        }
+
+        .social-menu {
+            min-width: 220px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 8px;
+            margin-top: 8px;
+            box-shadow: 0 18px 35px rgba(15,23,42,.14);
+            z-index: 99999;
+        }
+
+            .social-menu .dropdown-item {
+                border-radius: 10px;
+                font-weight: 800;
+                padding: 10px 14px;
+            }
+
+                .social-menu .dropdown-item:hover,
+                .social-menu .dropdown-item.active {
+                    background: #f5f3ff;
+                    color: #7c3aed;
+                }
+
+        .nav-social-dropdown .dropdown-menu.show {
+            display: block;
+        }
+
+        .social-caret {
+            font-size: 10px;
+            margin-left: 3px;
+        }
+
+        .hud-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 12px;
+            border-left: 1px solid #e5e7eb;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .hud-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 900;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .hud-icon {
+            font-size: 20px;
+        }
+
+        .hud-bar {
+            width: 78px;
+            height: 7px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .hud-fill {
+            height: 100%;
+            border-radius: 999px;
+            width: 100%;
+            transition: width .25s ease;
+        }
+
+            .hud-fill.hp {
+                background: #f43f5e;
+            }
+
+            .hud-fill.mana {
+                background: #2563eb;
+            }
+
+        .notif-btn {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            background: #fff;
+            color: #000;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .notif-btn svg {
+                width: 22px;
+                height: 22px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+        .user-circle {
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 2px solid #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #0f172a;
+            text-decoration: none;
+            font-weight: 900;
+            gap: 4px;
+        }
+
+        .avatar-mini {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .custom-dropdown {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 18px 35px rgba(15,23,42,.14);
+        }
+
+            .custom-dropdown .dropdown-item {
+                border-radius: 10px;
+                font-weight: 800;
+                padding: 9px 12px;
+            }
+
+                .custom-dropdown .dropdown-item:hover {
+                    background: #f5f3ff;
+                    color: #7c3aed;
+                }
+
+        .app-body {
+            max-width: 1320px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .auth-body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 96px;
+            right: 22px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-noti {
+            min-width: 280px;
+            max-width: 340px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            color: white;
+            font-size: .95rem;
+            font-weight: 600;
+            box-shadow: 0 10px 28px rgba(0,0,0,.18);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateX(120px);
+            transition: opacity .35s ease, transform .35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .toast-noti.show {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .toast-noti.hide {
+                opacity: 0;
+                transform: translateX(120px);
+            }
+
+        .toast-xp {
+            background: linear-gradient(135deg,#f59e0b,#f97316);
+        }
+
+        .toast-badge {
+            background: linear-gradient(135deg,#7c3aed,#2563eb);
+        }
+
+        .toast-streak {
+            background: linear-gradient(135deg,#f43f5e,#ef4444);
+        }
+
+        .toast-level {
+            background: linear-gradient(135deg,#10b981,#22c55e);
+            color: #111827;
+        }
+
+        .toast-gold {
+            background: linear-gradient(135deg,#f59e0b,#f97316);
+        }
+
+        .toast-hp {
+            background: linear-gradient(135deg,#f43f5e,#be123c);
+        }
+
+        .toast-crit {
+            background: linear-gradient(135deg,#facc15,#fb923c);
+            color: #111827;
+        }
+
+        .toast-drop {
+            background: linear-gradient(135deg,#7c3aed,#2563eb);
+        }
+
+        .toast-death {
+            background: linear-gradient(135deg,#0f172a,#be123c);
+        }
+
+        .toast-rebirth {
+            background: linear-gradient(135deg,#7c3aed,#10b981);
+        }
+
+        .toast-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255,255,255,.55);
+            animation: progressBar 3.5s linear forwards;
+        }
+
+        @@keyframes progressBar {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        @@media(max-width: 1250px) {
+            .app-navbar {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                flex-wrap: wrap;
+                overflow: visible;
+            }
+
+            .hud-area {
+                margin-left: auto;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
     @if (!isFullPage)
     {
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
-                <div class="container-fluid">
+        <header class="app-navbar">
+            <a class="brand-box" asp-controller="Dashboard" asp-action="Index">
+                <span class="brand-star">✦</span>
+                <span>HabitTracker</span>
+            </a>
 
-                    <!-- Logo -->
-                    <a class="navbar-brand fw-bold text-primary"
-                       asp-controller="Dashboard" asp-action="Index">
-                        🚀 HabitTracker
-                    </a>
+            <div class="nav-menu">
+                <a class="nav-item-link @Active("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
+                    <span class="nav-svg">@Icon("dashboard")</span>
+                    <small>Dashboard</small>
+                </a>
 
-                    <button class="navbar-toggler" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#navbarContent">
-                        <span class="navbar-toggler-icon"></span>
+                <a class="nav-item-link @Active("Task")" asp-controller="Task" asp-action="Index">
+                    <span class="nav-svg">@Icon("tasks")</span>
+                    <small>Tasks</small>
+                </a>
+
+                <div class="dropdown nav-social-dropdown">
+                    <button class="nav-dropdown-btn @(isSocialActive ? "active" : "")"
+                            type="button"
+                            id="socialDropdown"
+                            aria-expanded="false">
+                        <span class="nav-svg">@Icon("social")</span>
+                        <small>Social <span class="social-caret">▼</span></small>
                     </button>
 
-                    <div class="collapse navbar-collapse" id="navbarContent">
-
-                        <!-- LEFT MENU -->
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
-                                    📊 Dashboard
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Task" asp-action="Index">
-                                    📋 Tasks
-                                </a>
-                            </li>
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle @(isSocialActive ? "active" : "")"
-                                   href="#" data-bs-toggle="dropdown">
-                                    👥 Social
-                                    <span id="msg-badge" class="badge rounded-pill bg-danger d-none ms-1"
-                                          style="font-size:10px;vertical-align:middle;"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item @(controller == "Account" && action == "Leaderboard" ? "active" : "")"
-                                           asp-controller="Account" asp-action="Leaderboard">
-                                            🏆 Leaderboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item @(controller == "Friend" ? "active" : "")"
-                                           asp-controller="Friend" asp-action="Index">
-                                            👥 Friends
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item @(controller == "Message" ? "active" : "")"
-                                           asp-controller="Message" asp-action="Index">
-                                            ✉️ Messages
-                                            <span id="msg-badge-dd" class="badge rounded-pill bg-danger d-none ms-1"
-                                                  style="font-size:10px;"></span>
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item @(controller == "Guild" ? "active" : "")"
-                                           asp-controller="Guild" asp-action="Index">
-                                            ⚔️ Guilds
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item @(controller == "Party" ? "active" : "")"
-                                           asp-controller="Party" asp-action="Index">
-                                            🛡️ Party
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Character" asp-action="Index">
-                                    ⚔️ Character
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Equipment" asp-action="Index">
-                                    🛡️ Equipment
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Market" asp-action="Index">
-                                    🏪 Market
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Inventory" asp-action="Index">
-                                    🎒 Inventory
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Stable" asp-action="Index">
-                                    🐾 Stable
-                                </a>
-                            </li>
-
-                            @if (Context.Session.GetString("IsAdmin") == "true")
-                            {
-                                <li class="nav-item ms-2">
-                                    <a class="nav-link text-warning fw-bold"
-                                       asp-controller="Admin" asp-action="Index">
-                                        ⚙️ Admin
-                                    </a>
-                                </li>
-                            }
-
-                        </ul>
-
-                        <!-- CENTER - HUD BARS -->
-                        @if (Context.Session.GetString("Username") != null)
-                        {
-                            <div id="hud-bars" style="margin:0 16px;display:flex;gap:10px;align-items:center;flex-wrap:nowrap;">
-                                <div title="HP" style="display:flex;align-items:center;gap:4px;">
-                                    <span>❤️</span>
-                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
-                                        <div id="hud-hp-bar" style="height:100%;background:#e8436a;border-radius:4px;transition:width .3s;width:100%;"></div>
-                                    </div>
-                                    <small id="hud-hp-text" style="color:#e8436a;font-weight:700;font-size:.75rem;min-width:36px;"></small>
-                                </div>
-                                <div title="MP" style="display:flex;align-items:center;gap:4px;">
-                                    <span>💙</span>
-                                    <div style="width:72px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">
-                                        <div id="hud-mana-bar" style="height:100%;background:#4a90d9;border-radius:4px;transition:width .3s;width:100%;"></div>
-                                    </div>
-                                    <small id="hud-mana-text" style="color:#4a90d9;font-weight:700;font-size:.75rem;min-width:36px;"></small>
-                                </div>
-                                <div title="Gold" style="display:flex;align-items:center;gap:3px;">
-                                    <span>🪙</span>
-                                    <small id="hud-gold-text" style="color:#f0b429;font-weight:700;font-size:.8rem;min-width:32px;">0</small>
-                                </div>
-                                <div title="Gems" style="display:flex;align-items:center;gap:3px;">
-                                    <span>💎</span>
-                                    <small id="hud-gems-text" style="color:#a78bfa;font-weight:700;font-size:.8rem;min-width:16px;">0</small>
-                                </div>
-                                <small style="color:#667eea;font-size:.75rem;font-weight:700;">Lv<span id="navbar-level">-</span></small>
-                                <small id="hud-sleep" style="display:none;" title="Rest mode active">🌙</small>
-                                <a id="hud-dead" href="/Economy" style="display:none;color:#e8436a;font-weight:700;font-size:.75rem;text-decoration:none;" title="You died! Click to revive.">💀 Dead!</a>
-                            </div>
-                        }
-
-                        <!-- RIGHT USER MENU -->
-                        <ul class="navbar-nav align-items-center">
-
-                            @* Notification bell *@
-                            @if (Context.Session.GetString("Username") != null)
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link position-relative px-2" href="#"
-                                       data-bs-toggle="dropdown" id="notifBell" title="Notifications">
-                                        🔔
-                                        <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
-                                              style="font-size:10px;"></span>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" id="notif-dropdown" style="min-width:320px;max-height:400px;overflow-y:auto;">
-                                        <li class="dropdown-header d-flex justify-content-between">
-                                            <span>Notifications</span>
-                                            <a href="#" class="small" onclick="markAllRead(event)">Mark all read</a>
-                                        </li>
-                                        <li><div id="notif-list" class="px-2 py-1 text-muted small">Loading…</div></li>
-                                    </ul>
-                                </li>
-                            }
-
-                            @if (Context.Session.GetString("Username") != null)
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center"
-                                       href="#"
-                                       data-bs-toggle="dropdown"
-                                       style="gap:10px;">
-                                        <img src="@(Context.Session.GetString("Avatar") != null
-                                                                                                                                                                                               && Context.Session.GetString("Avatar").StartsWith("http")
-                                                                                                                                                                                               ? Context.Session.GetString("Avatar")
-                                                                                                                                                                                               : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
-                                     width="40" height="40"
-                                     class="rounded-circle border"
-                                     style="object-fit:cover;" />
-                                <span class="fw-semibold d-none d-md-inline">
-                                    @Context.Session.GetString("Username")
-                                </span>
+                    <ul class="dropdown-menu social-menu" aria-labelledby="socialDropdown">
+                        <li>
+                            <a class="dropdown-item @(controller == "Account" && action == "Leaderboard" ? "active" : "")"
+                               asp-controller="Account" asp-action="Leaderboard">
+                                🏆 Leaderboard
                             </a>
+                        </li>
 
-                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+                        <li>
+                            <a class="dropdown-item @(controller == "Friend" ? "active" : "")"
+                               asp-controller="Friend" asp-action="Index">
+                                👥 Friends
+                            </a>
+                        </li>
 
-                                        <!-- PROFILE LINK -->
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                                👤 My Profile
-                                            </a>
-                                        </li>
+                        <li>
+                            <a class="dropdown-item @(controller == "Message" ? "active" : "")"
+                               asp-controller="Message" asp-action="Index">
+                                ✉️ Messages
+                                <span id="msg-badge-dd" class="badge rounded-pill bg-danger d-none ms-1" style="font-size:10px;"></span>
+                            </a>
+                        </li>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
-                                                📊 Dashboard
-                                            </a>
-                                        </li>
+                        <li><hr class="dropdown-divider" /></li>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Statistics">
-                                                📈 Statistics
-                                            </a>
-                                        </li>
+                        <li>
+                            <a class="dropdown-item @(controller == "Guild" ? "active" : "")"
+                               asp-controller="Guild" asp-action="Index">
+                                ⚔️ Guilds
+                            </a>
+                        </li>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Task" asp-action="Index">
-                                                📋 All Tasks
-                                            </a>
-                                        </li>
+                        <li>
+                            <a class="dropdown-item @(controller == "Party" ? "active" : "")"
+                               asp-controller="Party" asp-action="Index">
+                                🛡️ Party
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">
-                                                🏆 My Badges
-                                            </a>
-                                        </li>
+                <a class="nav-item-link @Active("Character")" asp-controller="Character" asp-action="Index">
+                    <span class="nav-svg">@Icon("character")</span>
+                    <small>Character</small>
+                </a>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">
-                                                🏅 Leaderboard
-                                            </a>
-                                        </li>
+                <a class="nav-item-link @Active("Equipment")" asp-controller="Equipment" asp-action="Index">
+                    <span class="nav-svg">@Icon("equipment")</span>
+                    <small>Equipment</small>
+                </a>
 
-                                        <li><hr class="dropdown-divider"></li>
+                <a class="nav-item-link @Active("Market")" asp-controller="Market" asp-action="Index">
+                    <span class="nav-svg">@Icon("market")</span>
+                    <small>Market</small>
+                </a>
 
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
-                                                🔐 Change Password
-                                            </a>
-                                        </li>
+                <a class="nav-item-link @Active("Inventory")" asp-controller="Inventory" asp-action="Index">
+                    <span class="nav-svg">@Icon("inventory")</span>
+                    <small>Inventory</small>
+                </a>
 
-                                        <li><hr class="dropdown-divider"></li>
+                <a class="nav-item-link @Active("Stable")" asp-controller="Stable" asp-action="Index">
+                    <span class="nav-svg">@Icon("stable")</span>
+                    <small>Stable</small>
+                </a>
+            </div>
 
-                                        <li>
-                                            <a class="dropdown-item text-danger"
-                                               asp-controller="Account"
-                                               asp-action="Logout">
-                                                🚪 Logout
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                                }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                        🔐 Login
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Register">
-                                        📝 Register
-                                    </a>
-                                </li>
-                            }
+            @if (Context.Session.GetString("Username") != null)
+            {
+                <div class="hud-area">
+                    <div class="hud-stat">
+                        <span class="hud-icon">♡</span>
+                        <div>
+                            <span id="hud-hp-text">50/50</span>
+                            <div class="hud-bar"><div id="hud-hp-bar" class="hud-fill hp"></div></div>
+                        </div>
+                    </div>
 
+                    <div class="hud-stat">
+                        <span class="hud-icon">♢</span>
+                        <div>
+                            <span id="hud-mana-text">42/42</span>
+                            <div class="hud-bar"><div id="hud-mana-bar" class="hud-fill mana"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="hud-stat">
+                        <span class="hud-icon">🟡</span>
+                        <span id="hud-gold-text">0</span>
+                    </div>
+
+                    <span id="hud-gems-text" style="display:none;">0</span>
+                    <span id="navbar-level" style="display:none;">-</span>
+                    <small id="hud-sleep" style="display:none;">🌙</small>
+                    <a id="hud-dead" href="/Economy" style="display:none;color:#e8436a;font-weight:900;text-decoration:none;">💀 Dead!</a>
+
+                    <div class="dropdown">
+                        <button class="notif-btn" data-bs-toggle="dropdown" id="notifBell" title="Notifications">
+                            @Icon("bell")
+                            <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size:10px;"></span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end custom-dropdown" id="notif-dropdown" style="min-width:320px;max-height:400px;overflow-y:auto;">
+                            <li class="dropdown-header d-flex justify-content-between">
+                                <span>Notifications</span>
+                                <a href="#" class="small" onclick="markAllRead(event)">Mark all read</a>
+                            </li>
+                            <li>
+                                <div id="notif-list" class="px-2 py-1 text-muted small">Loading…</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <a class="user-circle" href="#" data-bs-toggle="dropdown">
+                            <img src="@(Context.Session.GetString("Avatar") != null && Context.Session.GetString("Avatar").StartsWith("http")
+                                                             ? Context.Session.GetString("Avatar")
+                                                             : Url.Content("~/images/" + (Context.Session.GetString("Avatar") ?? "default.png")))"
+                         class="avatar-mini"
+                         onerror="this.src='@Url.Content("~/images/default.png")'" />
+                    <span>⌄</span>
+                </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">👤 My Profile</a></li>
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a></li>
+                            
+                            <li><a class="dropdown-item" asp-controller="Task" asp-action="Index">📋 All Tasks</a></li>
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">🏆 My Badges</a></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">🏅 Leaderboard</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">🔐 Change Password</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">🚪 Logout</a></li>
                         </ul>
                     </div>
                 </div>
-            </nav>
+                }
         </header>
 
-        @* ===== TOAST DATA TỪ TEMPDATA ===== *@
         @if (TempData["ToastXP"] != null)
         {
             <div id="toast-data-xp" data-value="@TempData["ToastXP"]" style="display:none"></div>
@@ -327,152 +635,37 @@
         }
     }
 
-    <!-- ================= BODY ================= -->
-    <div class="@(isFullPage ? "" : "container mt-4")">
+    <div class="@(isFullPage ? "auth-body" : "app-body")">
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <!-- ================= FOOTER ================= -->
     @if (!isFullPage)
     {
-        <footer class="border-top mt-5">
-            <div class="container text-center py-3 text-muted">
-                © 2026 - HabitTracker 🚀 | v1.0
-            </div>
+        <footer class="text-center py-4 text-muted">
+            © 2026 - HabitTracker | v1.0
         </footer>
     }
 
-    <!-- SCRIPTS -->
+    <div id="toast-container"></div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
-
-    <!-- ===== TOAST CONTAINER + SCRIPT ===== -->
-    <div id="toast-container"></div>
-
-    <style>
-        #toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast-noti {
-            min-width: 280px;
-            max-width: 340px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 500;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            opacity: 0;
-            transform: translateX(120px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .toast-noti.show {
-                opacity: 1;
-                transform: translateX(0);
-            }
-
-            .toast-noti.hide {
-                opacity: 0;
-                transform: translateX(120px);
-            }
-
-        .toast-xp {
-            background: linear-gradient(135deg, #f6a623, #f76b1c);
-        }
-
-        .toast-badge {
-            background: linear-gradient(135deg, #7b2ff7, #4a90d9);
-        }
-
-        .toast-streak {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-        }
-
-        .toast-level {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            color: #1a1a1a;
-        }
-
-        .toast-gold  { background: linear-gradient(135deg, #f0b429, #f76b1c); }
-        .toast-hp    { background: linear-gradient(135deg, #e8436a, #c0392b); }
-        .toast-crit  { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #1a1a1a; }
-        .toast-drop  { background: linear-gradient(135deg, #7b2ff7, #4a90d9); }
-        .toast-death { background: linear-gradient(135deg, #1a1a2e, #c0392b); }
-        .success     { background: linear-gradient(135deg, #11998e, #38ef7d); color: #1a1a1a; }
-        .danger      { background: linear-gradient(135deg, #e8436a, #c0392b); }
-        .info        { background: linear-gradient(135deg, #4a90d9, #667eea); }
-        .warning     { background: linear-gradient(135deg, #f0b429, #f76b1c); color: #1a1a1a; }
-
-        .toast-icon {
-            font-size: 2rem;
-            line-height: 1;
-            flex-shrink: 0;
-            animation: bounceIcon 0.5s ease;
-        }
-
-        .toast-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 0 0 12px 12px;
-            animation: progressBar 3.5s linear forwards;
-        }
-
-        @@keyframes bounceIcon {
-            0% {
-                transform: scale(0.5);
-            }
-
-            60% {
-                transform: scale(1.3);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @@keyframes progressBar {
-            from {
-                width: 100%;
-            }
-
-            to {
-                width: 0%;
-            }
-        }
-    </style>
 
     <script>
         function showToast(icon, title, message, type, duration) {
             duration = duration || 3500;
             var container = document.getElementById('toast-container');
+            if (!container) return;
+
             var toast = document.createElement('div');
             toast.className = 'toast-noti ' + type;
             toast.innerHTML =
                 '<div class="toast-icon">' + icon + '</div>' +
-                '<div>' +
-                    '<div style="font-weight:700;font-size:1rem;">' + title + '</div>' +
-                    '<div style="font-size:0.85rem;opacity:0.9;">' + message + '</div>' +
-                '</div>' +
+                '<div><div style="font-weight:900;font-size:1rem;">' + title + '</div>' +
+                '<div style="font-size:.86rem;opacity:.9;">' + message + '</div></div>' +
                 '<div class="toast-progress"></div>';
 
             container.appendChild(toast);
@@ -491,76 +684,150 @@
         }
 
         function refreshHud() {
-            $.getJSON('/Economy/GetStats', function(s) {
+            $.getJSON('/Economy/GetStats', function (s) {
                 if (!s) return;
-                document.getElementById('navbar-level').textContent    = s.level;
-                var hpPct   = s.maxHp   > 0 ? Math.round(s.hp   / s.maxHp   * 100) : 0;
-                var mpPct   = s.maxMana > 0 ? Math.round(s.mana / s.maxMana * 100) : 0;
-                document.getElementById('hud-hp-bar').style.width      = hpPct  + '%';
-                document.getElementById('hud-mana-bar').style.width    = mpPct  + '%';
-                document.getElementById('hud-hp-text').textContent     = Math.round(s.hp)   + '/' + s.maxHp;
-                document.getElementById('hud-mana-text').textContent   = Math.round(s.mana) + '/' + s.maxMana;
-                document.getElementById('hud-gold-text').textContent   = Math.round(s.gold * 10) / 10;
-                document.getElementById('hud-gems-text').textContent   = s.gems ?? 0;
-                document.getElementById('hud-sleep').style.display     = s.isSleeping ? 'inline' : 'none';
-                document.getElementById('hud-dead').style.display      = s.isDead     ? 'inline' : 'none';
+
+                var hpPct = s.maxHp > 0 ? Math.round(s.hp / s.maxHp * 100) : 0;
+                var mpPct = s.maxMana > 0 ? Math.round(s.mana / s.maxMana * 100) : 0;
+
+                $('#navbar-level').text(s.level);
+                $('#hud-hp-bar').css('width', hpPct + '%');
+                $('#hud-mana-bar').css('width', mpPct + '%');
+                $('#hud-hp-text').text(Math.round(s.hp) + '/' + s.maxHp);
+                $('#hud-mana-text').text(Math.round(s.mana) + '/' + s.maxMana);
+                $('#hud-gold-text').text(Math.round(s.gold * 10) / 10);
+                $('#hud-gems-text').text(s.gems ?? 0);
+                $('#hud-sleep').css('display', s.isSleeping ? 'inline' : 'none');
+                $('#hud-dead').css('display', s.isDead ? 'inline' : 'none');
             });
-            // Message unread badge
-            fetch('/Message/UnreadCount').then(r => r.json()).then(d => {
-                var b  = document.getElementById('msg-badge');
-                var bd = document.getElementById('msg-badge-dd');
-                var show = d.count > 0;
-                if (b)  { b.textContent  = d.count; b.classList.toggle('d-none',  !show); }
-                if (bd) { bd.textContent = d.count; bd.classList.toggle('d-none', !show); }
-            }).catch(() => {});
-            // Notification unread badge
-            fetch('/api/notification/unread-count').then(r => r.json()).then(d => {
-                var b = document.getElementById('notif-badge');
-                if (b) { b.textContent = d.count ?? d; b.classList.toggle('d-none', !((d.count ?? d) > 0)); }
-            }).catch(() => {});
+
+            fetch('/Message/UnreadCount')
+                .then(r => r.json())
+                .then(d => {
+                    var bd = document.getElementById('msg-badge-dd');
+                    var show = d.count > 0;
+                    if (bd) {
+                        bd.textContent = d.count;
+                        bd.classList.toggle('d-none', !show);
+                    }
+                })
+                .catch(() => { });
+
+            fetch('/api/notification/unread-count')
+                .then(r => r.json())
+                .then(d => {
+                    var b = document.getElementById('notif-badge');
+                    if (b) {
+                        var count = d.count ?? d;
+                        b.textContent = count;
+                        b.classList.toggle('d-none', !(count > 0));
+                    }
+                })
+                .catch(() => { });
         }
 
-        // Load notifications into dropdown
         document.getElementById('notifBell')?.addEventListener('show.bs.dropdown', function () {
-            fetch('/api/notification?limit=8').then(r => r.json()).then(items => {
-                var list = document.getElementById('notif-list');
-                if (!list) return;
-                if (!items || items.length === 0) { list.textContent = 'No notifications.'; return; }
-                list.innerHTML = items.map(n =>
-                    `<div class="py-2 border-bottom" style="font-size:.82rem;">
-                        <div>${n.icon || 'ℹ️'} <strong>${n.title}</strong></div>
-                        ${n.message ? `<div class="text-muted">${n.message}</div>` : ''}
-                        ${n.link ? `<a href="${n.link}" class="small">View →</a>` : ''}
-                     </div>`
-                ).join('');
-            }).catch(() => { const l = document.getElementById('notif-list'); if(l) l.textContent='Failed to load.'; });
+            fetch('/api/notification?limit=8')
+                .then(r => r.json())
+                .then(items => {
+                    var list = document.getElementById('notif-list');
+                    if (!list) return;
+
+                    if (!items || items.length === 0) {
+                        list.textContent = 'No notifications.';
+                        return;
+                    }
+
+                    list.innerHTML = items.map(n =>
+                        `<div class="py-2 border-bottom" style="font-size:.82rem;">
+                            <div>${n.icon || 'ℹ️'} <strong>${n.title}</strong></div>
+                            ${n.message ? `<div class="text-muted">${n.message}</div>` : ''}
+                            ${n.link ? `<a href="${n.link}" class="small">View →</a>` : ''}
+                        </div>`
+                    ).join('');
+                });
         });
 
         async function markAllRead(e) {
             e.preventDefault();
             await fetch('/api/notification/read-all', { method: 'PUT' });
             var b = document.getElementById('notif-badge');
-            if (b) { b.textContent = '0'; b.classList.add('d-none'); }
+            if (b) {
+                b.textContent = '0';
+                b.classList.add('d-none');
+            }
+        }
+
+        function initSocialDropdown() {
+            var btn = document.getElementById('socialDropdown');
+            if (!btn || typeof bootstrap === 'undefined') return;
+
+            var dropdown = bootstrap.Dropdown.getOrCreateInstance(btn, {
+                autoClose: true,
+                boundary: document.body,
+                popperConfig: function (defaultConfig) {
+                    defaultConfig.strategy = 'fixed';
+                    return defaultConfig;
+                }
+            });
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.toggle();
+            });
+        }
+
+        function updateCountdown() {
+            const cards = document.querySelectorAll(".card");
+
+            cards.forEach(card => {
+                const deadlineEl = card.querySelector(".deadline");
+                const countdownEl = card.querySelector(".countdown");
+
+                if (!deadlineEl || !deadlineEl.dataset.deadline || !countdownEl) return;
+
+                const deadline = new Date(deadlineEl.dataset.deadline);
+                const now = new Date();
+                const diff = deadline - now;
+
+                if (diff <= 0) {
+                    countdownEl.innerHTML = "⛔ Expired";
+                    return;
+                }
+
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+                countdownEl.innerHTML = `⏳ ${hours}h ${minutes}m left`;
+
+                if (diff <= 600000) {
+                    countdownEl.innerHTML += " 🔔 Hurry!";
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            var xp     = document.getElementById('toast-data-xp');
-            var badge  = document.getElementById('toast-data-badge');
-            var level  = document.getElementById('toast-data-level');
+            initSocialDropdown();
+            var xp = document.getElementById('toast-data-xp');
+            var badge = document.getElementById('toast-data-badge');
+            var level = document.getElementById('toast-data-level');
             var streak = document.getElementById('toast-data-streak');
-
             var rebirth = document.getElementById('toast-data-rebirth');
 
-            if (xp)      showToast('⚡', 'Nhận XP!',      xp.dataset.value,      'toast-xp',      3500);
-            if (streak)  setTimeout(function(){ showToast('🔥', 'Streak!',        streak.dataset.value,  'toast-streak',  4000); }, 300);
-            if (badge)   setTimeout(function(){ showToast('🏅', 'Huy hiệu mới!', badge.dataset.value,   'toast-badge',   5000); }, 800);
-            if (level)   setTimeout(function(){ showToast('⬆️', 'Level Up!',      level.dataset.value,   'toast-level',   5000); }, 1400);
-            if (rebirth) setTimeout(function(){ showToast('🔁', 'Reborn!',        rebirth.dataset.value, 'toast-rebirth', 5000); }, 300);
+            if (xp) showToast('⚡', 'Nhận XP!', xp.dataset.value, 'toast-xp', 3500);
+            if (streak) setTimeout(function () { showToast('🔥', 'Streak!', streak.dataset.value, 'toast-streak', 4000); }, 300);
+            if (badge) setTimeout(function () { showToast('🏅', 'Huy hiệu mới!', badge.dataset.value, 'toast-badge', 5000); }, 800);
+            if (level) setTimeout(function () { showToast('⬆️', 'Level Up!', level.dataset.value, 'toast-level', 5000); }, 1400);
+            if (rebirth) setTimeout(function () { showToast('🔁', 'Reborn!', rebirth.dataset.value, 'toast-rebirth', 5000); }, 300);
 
             @if (Context.Session.GetString("Username") != null)
             {
-                <text>refreshHud();</text>
+                    <text>refreshHud();</text>
             }
+
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
         });
     </script>
 

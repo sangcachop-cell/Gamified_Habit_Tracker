@@ -1,763 +1,669 @@
-﻿@using HabitTracker.Constants
-@using HabitTracker.Models
-@using Microsoft.AspNetCore.Http
-@{
-    ViewData["Title"] = "Bảng xếp hạng";
+﻿@{
+    ViewData["Title"] = "Leaderboard";
+    var topXP = ViewBag.TopXP as List<HabitTracker.Models.User>;
+    var topStreak = ViewBag.TopStreak as List<HabitTracker.Models.User>;
 
-    var topXP = ViewBag.TopXP as List<User> ?? new List<User>();
-    var topStreak = ViewBag.TopStreak as List<User> ?? new List<User>();
-    var currentUserId = Context.Session.GetInt32(AppConstants.SESSION_USER_ID);
-
-    var currentUserXPIndex = currentUserId.HasValue ? topXP.FindIndex(x => x.Id == currentUserId.Value) : -1;
-    var currentUserStreakIndex = currentUserId.HasValue ? topStreak.FindIndex(x => x.Id == currentUserId.Value) : -1;
-    var currentUser = currentUserXPIndex >= 0 ? topXP[currentUserXPIndex] : null;
-
-    Func<User, string> avatarUrl = u => string.IsNullOrWhiteSpace(u.Avatar)
-        ? Url.Content("~/images/default.png")
-        : Url.Content("~/images/" + u.Avatar);
-
-    Func<User, string> firstLetter = u => string.IsNullOrWhiteSpace(u.Username)
-        ? "?"
-        : u.Username.Trim().Substring(0, 1).ToUpper();
-
-    Func<int, string> rankText = i => i == 0 ? "1" : i == 1 ? "2" : i == 2 ? "3" : (i + 1).ToString();
-    Func<int, string> medalIcon = i => i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : (i + 1).ToString();
-    Func<int, string> rankClass = i => i == 0 ? "rank-gold" : i == 1 ? "rank-silver" : i == 2 ? "rank-bronze" : "";
-
-    var podiumXP = new List<User>();
-    if (topXP.Count > 1) { podiumXP.Add(topXP[1]); }
-    if (topXP.Count > 0) { podiumXP.Add(topXP[0]); }
-    if (topXP.Count > 2) { podiumXP.Add(topXP[2]); }
+    var xpCount = topXP?.Count ?? 0;
+    var streakCount = topStreak?.Count ?? 0;
+    var bestXp = topXP != null && topXP.Count > 0 ? topXP[0] : null;
+    var bestStreak = topStreak != null && topStreak.Count > 0 ? topStreak[0] : null;
 }
 
 <style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+        --page-bg: #f6f1e8;
+        --card-bg: #ffffff;
+        --text-main: #24211f;
+        --text-muted: #766f68;
+        --border: #e8dfd2;
+        --primary: #7c5cff;
+        --primary-dark: #4f35c8;
+        --primary-soft: #f0ecff;
+        --gold: #d89b21;
+        --gold-soft: #fff6dd;
+        --danger: #e25563;
+        --danger-soft: #fff0f2;
+        --success: #0f9f83;
+        --success-soft: #e9fbf6;
+        --shadow: 0 16px 34px rgba(61, 47, 33, .08);
+        --radius-lg: 24px;
+        --radius-md: 18px;
+        --radius-sm: 14px;
+    }
+
     body {
-        background: #f8fafc !important;
+        background: var(--page-bg);
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .leader-page {
-        padding: 18px 28px 50px;
-        color: #071733;
+    .leaderboard-page {
+        padding: 10px 0 48px;
+        color: var(--text-main);
     }
 
-    .leader-head {
-        display: flex;
+    .leaderboard-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #fbf7ef 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .leaderboard-hero::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(124, 92, 255, .16), transparent 68%);
+            right: -90px;
+            top: -110px;
+            pointer-events: none;
+        }
+
+    .hero-inner {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 20px;
         align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
     }
 
-    .leader-head-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #7c3aed, #5b21b6);
-        color: #fff;
-        display: flex;
+    .eyebrow {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;
-        box-shadow: 0 14px 28px rgba(124, 58, 237, .22);
+        gap: 8px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        border: 1px solid rgba(124, 92, 255, .18);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: .78rem;
+        font-weight: 800;
+        margin-bottom: 12px;
     }
 
-    .leader-head h1 {
+    .leaderboard-title {
         margin: 0;
-        font-size: 2rem;
-        line-height: 1.1;
-        font-weight: 950;
+        font-size: clamp(1.55rem, 3vw, 2.2rem);
+        font-weight: 900;
         letter-spacing: -.04em;
-        color: #071733;
+        color: var(--text-main);
+        line-height: 1.05;
     }
 
-    .leader-head p {
-        margin: 6px 0 0;
-        color: #64748b;
-        font-weight: 700;
+    .leaderboard-subtitle {
+        margin: 10px 0 0;
+        color: var(--text-muted);
+        font-size: .96rem;
+        line-height: 1.55;
+        max-width: 620px;
     }
 
-    .leader-tabs {
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(138px, 1fr));
+        gap: 10px;
+        min-width: 300px;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, .78);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 14px;
+        box-shadow: 0 10px 24px rgba(61, 47, 33, .045);
+    }
+
+    .stat-label {
+        font-size: .76rem;
+        color: var(--text-muted);
+        font-weight: 800;
+        margin-bottom: 7px;
+    }
+
+    .stat-value {
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: -.03em;
+        color: var(--text-main);
+    }
+
+    .leaderboard-tabs-wrap {
         display: flex;
-        gap: 12px;
-        align-items: center;
-        padding-bottom: 18px;
-        margin-bottom: 26px;
-        border-bottom: 1px solid #e5e7eb;
+        justify-content: center;
+        margin: 18px 0;
     }
 
-    .leader-tab {
-        border: 1px solid #e5e7eb;
+    .leaderboard-tabs {
         background: #fff;
-        color: #475569;
-        border-radius: 14px;
-        padding: 13px 22px;
-        font-weight: 950;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, .04);
-        transition: .18s ease;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px;
+        display: flex;
+        gap: 6px;
+        box-shadow: 0 10px 22px rgba(61, 47, 33, .06);
     }
 
-    .leader-tab:hover {
-        transform: translateY(-1px);
-        color: #6d28d9;
-        border-color: #c4b5fd;
+    .lb-tab {
+        border: 0;
+        background: transparent;
+        color: var(--text-muted);
+        border-radius: 999px;
+        padding: 10px 20px;
+        font-weight: 900;
+        font-size: .9rem;
+        cursor: pointer;
+        transition: background .15s, color .15s, transform .15s;
     }
 
-    .leader-tab.active {
-        color: #6d28d9;
-        border-color: #8b5cf6;
-        background: #fbfaff;
-        box-shadow: 0 12px 28px rgba(124, 58, 237, .12);
-    }
+        .lb-tab:hover {
+            background: #f8f3eb;
+            color: var(--text-main);
+        }
 
-    .leader-panel {
+        .lb-tab.active {
+            background: var(--text-main);
+            color: #fff;
+            box-shadow: 0 8px 16px rgba(36, 33, 31, .15);
+        }
+
+    .lb-panel {
         display: none;
     }
 
-    .leader-panel.active {
-        display: block;
-    }
+        .lb-panel.active {
+            display: block;
+        }
 
-    .podium {
+    .top-three {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 24px;
-        align-items: end;
-        margin: 8px 44px 26px;
+        gap: 14px;
+        margin-bottom: 18px;
     }
 
-    .pod-card {
-        position: relative;
-        min-height: 250px;
+    .top-card {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 22px;
-        padding: 26px 24px;
-        text-align: center;
-        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-height: 104px;
+        transition: transform .15s, box-shadow .15s;
+    }
+
+        .top-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 38px rgba(61, 47, 33, .11);
+        }
+
+        .top-card.first {
+            border-color: rgba(216, 155, 33, .38);
+            background: linear-gradient(135deg, #fff7df, #ffffff 72%);
+        }
+
+        .top-card.second {
+            background: linear-gradient(135deg, #f7f7f7, #ffffff 72%);
+        }
+
+        .top-card.third {
+            background: linear-gradient(135deg, #fff0df, #ffffff 72%);
+        }
+
+    .rank-medal {
+        width: 50px;
+        height: 50px;
+        border-radius: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.55rem;
+        background: rgba(255, 255, 255, .72);
+        border: 1px solid rgba(232, 223, 210, .9);
+        flex-shrink: 0;
+    }
+
+    .top-info {
+        min-width: 0;
+    }
+
+    .top-name {
+        font-size: .98rem;
+        font-weight: 900;
+        color: var(--text-main);
         text-decoration: none;
-        box-shadow: 0 14px 34px rgba(15, 23, 42, .05);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .pod-card::before,
-    .pod-card::after {
-        content: "";
-        position: absolute;
-        width: 80px;
-        height: 120px;
-        bottom: 34px;
-        opacity: .36;
-        background-repeat: no-repeat;
-        background-size: contain;
-        pointer-events: none;
-    }
-
-    .pod-card::before {
-        left: 34px;
-        background-image: radial-gradient(ellipse at center, currentColor 0 38%, transparent 40%);
-        transform: rotate(-24deg);
-        color: #93c5fd;
-    }
-
-    .pod-card::after {
-        right: 34px;
-        background-image: radial-gradient(ellipse at center, currentColor 0 38%, transparent 40%);
-        transform: rotate(24deg);
-        color: #93c5fd;
-    }
-
-    .pod-card.top-1 {
-        min-height: 290px;
-        border-color: #fbbf24;
-        background: linear-gradient(180deg, #fffbeb, #fff);
-    }
-
-    .pod-card.top-1::before,
-    .pod-card.top-1::after {
-        color: #f59e0b;
-    }
-
-    .pod-card.top-2 {
-        background: linear-gradient(180deg, #f8fbff, #fff);
-    }
-
-    .pod-card.top-3 {
-        background: linear-gradient(180deg, #fff7f3, #fff);
-    }
-
-    .pod-card.top-3::before,
-    .pod-card.top-3::after {
-        color: #fb7185;
-    }
-
-    .pod-rank {
-        position: absolute;
-        top: 18px;
-        left: 28px;
-        width: 44px;
-        height: 44px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.15rem;
-        font-weight: 950;
-        color: #fff;
-        background: #60a5fa;
-        box-shadow: 0 8px 18px rgba(96, 165, 250, .25);
-    }
-
-    .top-1 .pod-rank {
-        left: 50%;
-        transform: translateX(-50%);
-        top: 16px;
-        background: #f59e0b;
-        box-shadow: 0 8px 18px rgba(245, 158, 11, .28);
-    }
-
-    .top-3 .pod-rank {
-        background: #f43f5e;
-        box-shadow: 0 8px 18px rgba(244, 63, 94, .22);
-    }
-
-    .pod-avatar {
-        width: 86px;
-        height: 86px;
-        border-radius: 999px;
-        object-fit: cover;
-        background: #ede9fe;
-        border: 3px solid #60a5fa;
-        box-shadow: 0 12px 24px rgba(15, 23, 42, .10);
-        margin-top: 16px;
-        z-index: 2;
-    }
-
-    .top-1 .pod-avatar {
-        width: 92px;
-        height: 92px;
-        border-color: #f59e0b;
-        margin-top: 34px;
-    }
-
-    .top-3 .pod-avatar {
-        border-color: #fb7185;
-    }
-
-    .pod-fallback {
-        display: none;
-        align-items: center;
-        justify-content: center;
-        color: #6d28d9;
-        font-weight: 950;
-        font-size: 1.8rem;
-    }
-
-    .pod-name {
-        margin-top: 14px;
-        color: #071733;
-        font-size: 1.1rem;
-        font-weight: 950;
-        max-width: 100%;
+        display: block;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        z-index: 2;
     }
 
-    .level-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 13px;
-        border-radius: 999px;
-        font-size: .82rem;
-        font-weight: 950;
-        background: #dbeafe;
-        color: #2563eb;
-        margin-top: 10px;
-        z-index: 2;
+        .top-name:hover {
+            color: var(--primary-dark);
+        }
+
+    .top-value {
+        margin-top: 5px;
+        font-size: .84rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        line-height: 1.35;
     }
 
-    .top-1 .level-pill {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .top-3 .level-pill {
-        background: #ffe4e6;
-        color: #e11d48;
-    }
-
-    .pod-score {
-        margin-top: 14px;
-        font-size: 1.45rem;
-        font-weight: 950;
-        color: #2563eb;
-        z-index: 2;
-    }
-
-    .top-1 .pod-score {
-        color: #f59e0b;
-        font-size: 1.7rem;
-    }
-
-    .top-3 .pod-score {
-        color: #f43f5e;
-    }
-
-    .leader-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
-        gap: 22px;
-        align-items: start;
-    }
-
-    .leader-table-card,
-    .my-stat-card {
+    .lb-card {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 22px;
-        box-shadow: 0 14px 34px rgba(15, 23, 42, .05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
         overflow: hidden;
+        box-shadow: var(--shadow);
     }
 
-    .leader-table {
-        width: 100%;
-        border-collapse: collapse;
+    .lb-row {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr) 126px 106px;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 18px;
+        border-bottom: 1px solid #f1e9de;
     }
 
-    .leader-table th {
-        text-align: left;
-        color: #475569;
-        font-size: .86rem;
-        font-weight: 950;
-        padding: 20px 22px 14px;
-        border-bottom: 1px solid #e2e8f0;
-        white-space: nowrap;
+        .lb-row:last-child {
+            border-bottom: 0;
+        }
+
+        .lb-row:not(.lb-head):hover {
+            background: #fffaf3;
+        }
+
+    .lb-head {
+        background: #fbf6ee;
+        color: var(--text-muted);
+        font-size: .74rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding-top: 13px;
+        padding-bottom: 13px;
     }
 
-    .leader-table td {
-        padding: 14px 22px;
-        border-bottom: 1px solid #eef2f7;
-        color: #1e293b;
-        font-weight: 800;
-        vertical-align: middle;
-    }
-
-    .leader-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .leader-table tr.me td {
-        background: #f3e8ff;
-        color: #6d28d9;
-        font-weight: 950;
-    }
-
-    .table-rank {
-        width: 34px;
-        height: 34px;
-        border-radius: 999px;
+    .rank {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #f1f5f9;
-        color: #475569;
-        font-weight: 950;
+        font-weight: 900;
+        color: #9b948c;
+        background: #f8f3eb;
+        border: 1px solid var(--border);
     }
 
-    .table-rank.rank-gold {
-        background: #fef3c7;
-        color: #d97706;
-    }
+        .rank.gold {
+            color: var(--gold);
+            background: var(--gold-soft);
+        }
 
-    .table-rank.rank-silver {
-        background: #e2e8f0;
-        color: #64748b;
-    }
+        .rank.silver {
+            color: #7b818a;
+            background: #f5f6f7;
+        }
 
-    .table-rank.rank-bronze {
-        background: #fed7aa;
-        color: #c2410c;
-    }
+        .rank.bronze {
+            color: #b06b29;
+            background: #fff0df;
+        }
 
-    .table-user {
+    .user-cell {
         display: flex;
         align-items: center;
         gap: 12px;
         min-width: 0;
     }
 
-    .table-avatar {
+    .avatar {
         width: 42px;
         height: 42px;
-        border-radius: 999px;
-        object-fit: cover;
-        background: #ede9fe;
-        flex-shrink: 0;
-    }
-
-    .table-fallback {
-        display: none;
+        border-radius: 15px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        display: flex;
         align-items: center;
         justify-content: center;
-        color: #6d28d9;
-        font-weight: 950;
+        font-weight: 900;
+        flex-shrink: 0;
+        border: 1px solid rgba(124, 92, 255, .14);
     }
 
-    .table-name {
+    .user-meta {
+        min-width: 0;
+    }
+
+    .user-name {
+        color: var(--text-main);
         text-decoration: none;
-        color: #071733;
-        font-weight: 950;
+        font-weight: 900;
+        font-size: .94rem;
         display: block;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .me .table-name {
-        color: #6d28d9;
+        .user-name:hover {
+            color: var(--primary-dark);
+        }
+
+    .user-small {
+        color: var(--text-muted);
+        font-size: .78rem;
+        margin-top: 3px;
     }
 
-    .table-level {
-        display: inline-flex;
-        padding: 6px 13px;
-        border-radius: 999px;
-        background: #fef3c7;
-        color: #d97706;
-        font-weight: 950;
-        font-size: .82rem;
-    }
-
-    .table-xp {
-        color: #334155;
-        font-weight: 950;
-        white-space: nowrap;
-    }
-
-    .me .table-xp {
-        color: #6d28d9;
-    }
-
-    .table-streak {
-        color: #334155;
-        font-weight: 950;
-        white-space: nowrap;
-    }
-
-    .my-stat-card {
-        padding: 24px;
-    }
-
-    .my-stat-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #6d28d9;
-        font-size: 1.15rem;
-        font-weight: 950;
-        padding-bottom: 18px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .my-profile {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin: 22px 0;
-    }
-
-    .my-avatar {
-        width: 70px;
-        height: 70px;
-        border-radius: 999px;
-        object-fit: cover;
-        border: 2px solid #8b5cf6;
-        background: #ede9fe;
-    }
-
-    .my-name {
-        font-size: 1.08rem;
-        color: #071733;
-        font-weight: 950;
-    }
-
-    .my-desc {
-        margin-top: 5px;
-        color: #64748b;
-        font-weight: 700;
+    .value-xp,
+    .value-streak,
+    .value-level {
+        font-weight: 900;
         font-size: .92rem;
+        white-space: nowrap;
     }
 
-    .my-list {
-        display: grid;
-        gap: 14px;
+    .value-xp {
+        color: var(--primary-dark);
+        background: var(--primary-soft);
+        border-radius: 999px;
+        padding: 7px 10px;
+        width: fit-content;
     }
 
-    .my-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        align-items: center;
-        color: #475569;
-        font-weight: 850;
+    .value-streak {
+        color: var(--danger);
+        background: var(--danger-soft);
+        border-radius: 999px;
+        padding: 7px 10px;
+        width: fit-content;
     }
 
-    .my-row strong {
-        color: #0f172a;
-        font-weight: 950;
+    .value-level {
+        color: var(--text-main);
     }
 
-    .my-note {
-        margin-top: 24px;
-        display: flex;
-        gap: 13px;
-        align-items: center;
-        border-radius: 16px;
-        background: #f3e8ff;
-        color: #6d28d9;
-        padding: 16px;
-        font-weight: 850;
-    }
-
-    .empty-leader {
+    .empty-state {
         background: #fff;
-        border: 1px dashed #cbd5e1;
-        border-radius: 22px;
+        border: 1px dashed #d8cdbd;
+        border-radius: var(--radius-lg);
         padding: 52px 20px;
         text-align: center;
-        color: #94a3b8;
-        font-weight: 800;
+        color: var(--text-muted);
+        box-shadow: var(--shadow);
+        font-weight: 700;
     }
 
-    .empty-leader strong {
-        display: block;
-        color: #071733;
-        font-size: 1.18rem;
-        margin-bottom: 6px;
+    .empty-icon {
+        font-size: 2.3rem;
+        margin-bottom: 10px;
     }
 
-    @@media (max-width: 1200px) {
-        .podium {
-            margin-left: 0;
-            margin-right: 0;
+    @@media (max-width: 900px) {
+        .hero-inner {
+            grid-template-columns: 1fr;
         }
 
-        .leader-layout {
+        .hero-stats {
+            min-width: 0;
+        }
+
+        .top-three {
             grid-template-columns: 1fr;
         }
     }
 
-    @@media (max-width: 850px) {
-        .leader-page {
-            padding: 14px 14px 40px;
+    @@media (max-width: 680px) {
+        .leaderboard-hero {
+            padding: 18px;
+            border-radius: 20px;
         }
 
-        .podium {
+        .hero-stats {
             grid-template-columns: 1fr;
         }
 
-        .pod-card,
-        .pod-card.top-1 {
-            min-height: 230px;
+        .leaderboard-tabs {
+            width: 100%;
+            border-radius: 18px;
         }
 
-        .leader-table-card {
-            overflow-x: auto;
+        .lb-tab {
+            flex: 1;
+            padding-left: 10px;
+            padding-right: 10px;
         }
 
-        .leader-table {
-            min-width: 720px;
-        }
-    }
-
-    @@media (max-width: 560px) {
-        .leader-head {
-            align-items: flex-start;
+        .lb-row {
+            grid-template-columns: 48px minmax(0, 1fr) 96px;
+            padding: 13px 12px;
         }
 
-        .leader-head h1 {
-            font-size: 1.65rem;
+        .col-extra {
+            display: none;
         }
 
-        .leader-tabs {
-            display: grid;
-            grid-template-columns: 1fr;
+        .rank {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 13px;
         }
     }
 </style>
 
-<div class="leader-page">
+<div class="leaderboard-page">
 
-    <div class="leader-tabs" role="tablist" aria-label="Leaderboard tabs">
-        <button type="button" class="leader-tab active" onclick="switchLeaderboardTab('xp', this)">⭐ Top XP (Tất cả thời gian)</button>
-        <button type="button" class="leader-tab" onclick="switchLeaderboardTab('streak', this)">🔥 Top Streak (Hiện tại)</button>
+    <div class="leaderboard-hero">
+        <div class="hero-inner">
+            <div>
+                <div class="eyebrow">🏆 Bảng xếp hạng cộng đồng</div>
+                <h1 class="leaderboard-title">Theo dõi người dùng nổi bật</h1>
+                <p class="leaderboard-subtitle">
+                    Xem ai đang có nhiều XP nhất và ai đang giữ chuỗi ngày tốt nhất. Giao diện được làm gọn hơn để dễ nhìn và dễ sử dụng.
+                </p>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-label">⚡ Người trong Top XP</div>
+                    <div class="stat-value">@xpCount</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🔥 Người trong Top Streak</div>
+                    <div class="stat-value">@streakCount</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <section id="panel-xp" class="leader-panel active">
-        @if (topXP.Any())
+    <div class="leaderboard-tabs-wrap">
+        <div class="leaderboard-tabs">
+            <button type="button" class="lb-tab active" onclick="switchTab('xp', this)">⚡ Top XP</button>
+            <button type="button" class="lb-tab" onclick="switchTab('streak', this)">🔥 Top Streak</button>
+        </div>
+    </div>
+
+    <div id="panel-xp" class="lb-panel active">
+        @if (topXP != null && topXP.Count > 0)
         {
-            if (podiumXP.Any())
+            @if (topXP.Count >= 3)
             {
-                <div class="podium">
-                    @foreach (var u in podiumXP)
-                    {
-                        var realIndex = topXP.FindIndex(x => x.Id == u.Id);
-                        <a asp-controller="Friend" asp-action="ViewProfile" asp-route-id="@u.Id" class="pod-card top-@(realIndex + 1)">
-                            <div class="pod-rank">@rankText(realIndex)</div>
-                            <img class="pod-avatar" src="@avatarUrl(u)" alt="@u.Username" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                            <div class="pod-avatar pod-fallback">@firstLetter(u)</div>
-                            <div class="pod-name">@u.Username</div>
-                            <div class="level-pill">Level @u.Level</div>
-                            <div class="pod-score">@u.XP.ToString("N0") XP</div>
-                        </a>
-                    }
+                <div class="top-three">
+                    <div class="top-card first">
+                        <div class="rank-medal">🥇</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topXP[0].Id" class="top-name">@topXP[0].Username</a>
+                            <div class="top-value">@topXP[0].XP.ToString("N0") XP • Level @topXP[0].Level</div>
+                        </div>
+                    </div>
+
+                    <div class="top-card second">
+                        <div class="rank-medal">🥈</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topXP[1].Id" class="top-name">@topXP[1].Username</a>
+                            <div class="top-value">@topXP[1].XP.ToString("N0") XP • Level @topXP[1].Level</div>
+                        </div>
+                    </div>
+
+                    <div class="top-card third">
+                        <div class="rank-medal">🥉</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topXP[2].Id" class="top-name">@topXP[2].Username</a>
+                            <div class="top-value">@topXP[2].XP.ToString("N0") XP • Level @topXP[2].Level</div>
+                        </div>
+                    </div>
                 </div>
             }
 
-            <div class="leader-layout">
-                <div class="leader-table-card">
-                    <table class="leader-table">
-                        <thead>
-                            <tr>
-                                <th style="width:86px;">#</th>
-                                <th>Người chơi</th>
-                                <th>Level</th>
-                                <th>XP</th>
-                                <th>Streak hiện tại 🔥</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int i = 0; i < topXP.Count; i++)
-                            {
-                                var u = topXP[i];
-                                var isMe = currentUserId.HasValue && currentUserId.Value == u.Id;
-                                <tr class="@(isMe ? "me" : "")">
-                                    <td><span class="table-rank @rankClass(i)">@medalIcon(i)</span></td>
-                                    <td>
-                                        <div class="table-user">
-                                            <img class="table-avatar" src="@avatarUrl(u)" alt="@u.Username" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                                            <div class="table-avatar table-fallback">@firstLetter(u)</div>
-                                            <a asp-controller="Friend" asp-action="ViewProfile" asp-route-id="@u.Id" class="table-name">@u.Username @(isMe ? "(Demo User)" : "")</a>
-                                        </div>
-                                    </td>
-                                    <td><span class="table-level">Level @u.Level</span></td>
-                                    <td class="table-xp">@u.XP.ToString("N0") XP</td>
-                                    <td class="table-streak">@u.CurrentStreak ngày 🔥</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+            <div class="lb-card">
+                <div class="lb-row lb-head">
+                    <span>Hạng</span>
+                    <span>Người dùng</span>
+                    <span>XP</span>
+                    <span class="col-extra">Level</span>
                 </div>
 
-                <aside class="my-stat-card">
-                    <div class="my-stat-title">👤 Thông tin của bạn</div>
-                    @if (currentUser != null)
-                    {
-                        <div class="my-profile">
-                            <img class="my-avatar" src="@avatarUrl(currentUser)" alt="@currentUser.Username" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                            <div class="my-avatar table-fallback">@firstLetter(currentUser)</div>
-                            <div>
-                                <div class="my-name">@currentUser.Username <span class="table-level">Level @currentUser.Level</span></div>
-                                <div class="my-desc">Đang trên đà tiến bộ! 🚀</div>
+                @for (int i = 0; i < topXP.Count; i++)
+                {
+                    var u = topXP[i];
+                    var rankClass = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "";
+                    var rankText = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : (i + 1).ToString();
+                    var initial = !string.IsNullOrWhiteSpace(u.Username) ? u.Username.Substring(0, 1).ToUpper() : "?";
+
+                    <div class="lb-row">
+                        <span class="rank @rankClass">@rankText</span>
+
+                        <div class="user-cell">
+                            <div class="avatar">@initial</div>
+                            <div class="user-meta">
+                                <a href="/Friend/ViewProfile/@u.Id" class="user-name">@u.Username</a>
+                                <div class="user-small">@(u.CurrentStreak > 0 ? $"🔥 {u.CurrentStreak} ngày liên tiếp" : "Chưa có streak")</div>
                             </div>
                         </div>
 
-                        <div class="my-list">
-                            <div class="my-row"><span>⭐ Tổng XP</span><strong>@currentUser.XP.ToString("N0")</strong></div>
-                            <div class="my-row"><span>🔥 Streak hiện tại</span><strong>@currentUser.CurrentStreak ngày</strong></div>
-                            <div class="my-row"><span>🏆 Hạng (XP)</span><strong>@(currentUserXPIndex >= 0 ? (currentUserXPIndex + 1).ToString() : "-")</strong></div>
-                            <div class="my-row"><span>🔥 Hạng (Streak)</span><strong>@(currentUserStreakIndex >= 0 ? (currentUserStreakIndex + 1).ToString() : "-")</strong></div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="my-note">Bạn chưa có trong bảng xếp hạng. Hãy hoàn thành nhiệm vụ để leo top nhé!</div>
-                    }
-                    <div class="my-note">🏆 Cố gắng duy trì thói quen và leo top nhé!</div>
-                </aside>
+                        <span class="value-xp">@u.XP.ToString("N0")</span>
+                        <span class="value-level col-extra">Lv.@u.Level</span>
+                    </div>
+                }
             </div>
         }
         else
         {
-            <div class="empty-leader"><strong>Chưa có dữ liệu xếp hạng</strong>Hãy hoàn thành nhiệm vụ để xuất hiện trên bảng xếp hạng.</div>
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div>Chưa có dữ liệu xếp hạng XP.</div>
+            </div>
         }
-    </section>
+    </div>
 
-    <section id="panel-streak" class="leader-panel">
-        @if (topStreak.Any())
+    <div id="panel-streak" class="lb-panel">
+        @if (topStreak != null && topStreak.Count > 0)
         {
-            <div class="leader-layout">
-                <div class="leader-table-card">
-                    <table class="leader-table">
-                        <thead>
-                            <tr>
-                                <th style="width:86px;">#</th>
-                                <th>Người chơi</th>
-                                <th>Level</th>
-                                <th>XP</th>
-                                <th>Streak hiện tại 🔥</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int i = 0; i < topStreak.Count; i++)
-                            {
-                                var u = topStreak[i];
-                                var isMe = currentUserId.HasValue && currentUserId.Value == u.Id;
-                                <tr class="@(isMe ? "me" : "")">
-                                    <td><span class="table-rank @rankClass(i)">@medalIcon(i)</span></td>
-                                    <td>
-                                        <div class="table-user">
-                                            <img class="table-avatar" src="@avatarUrl(u)" alt="@u.Username" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                                            <div class="table-avatar table-fallback">@firstLetter(u)</div>
-                                            <a asp-controller="Friend" asp-action="ViewProfile" asp-route-id="@u.Id" class="table-name">@u.Username @(isMe ? "(Bạn)" : "")</a>
-                                        </div>
-                                    </td>
-                                    <td><span class="table-level">Level @u.Level</span></td>
-                                    <td class="table-xp">@u.XP.ToString("N0") XP</td>
-                                    <td class="table-streak">@u.CurrentStreak ngày 🔥</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+            @if (topStreak.Count >= 3)
+            {
+                <div class="top-three">
+                    <div class="top-card first">
+                        <div class="rank-medal">🥇</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topStreak[0].Id" class="top-name">@topStreak[0].Username</a>
+                            <div class="top-value">🔥 @topStreak[0].CurrentStreak ngày • @topStreak[0].XP.ToString("N0") XP</div>
+                        </div>
+                    </div>
+
+                    <div class="top-card second">
+                        <div class="rank-medal">🥈</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topStreak[1].Id" class="top-name">@topStreak[1].Username</a>
+                            <div class="top-value">🔥 @topStreak[1].CurrentStreak ngày • @topStreak[1].XP.ToString("N0") XP</div>
+                        </div>
+                    </div>
+
+                    <div class="top-card third">
+                        <div class="rank-medal">🥉</div>
+                        <div class="top-info">
+                            <a href="/Friend/ViewProfile/@topStreak[2].Id" class="top-name">@topStreak[2].Username</a>
+                            <div class="top-value">🔥 @topStreak[2].CurrentStreak ngày • @topStreak[2].XP.ToString("N0") XP</div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="lb-card">
+                <div class="lb-row lb-head">
+                    <span>Hạng</span>
+                    <span>Người dùng</span>
+                    <span>Streak</span>
+                    <span class="col-extra">XP</span>
                 </div>
 
-                <aside class="my-stat-card">
-                    <div class="my-stat-title">🔥 Xếp hạng Streak</div>
-                    <div class="my-note">Hoàn thành nhiệm vụ mỗi ngày để giữ streak và tăng thứ hạng.</div>
-                    @if (currentUser != null)
-                    {
-                        <div class="my-list" style="margin-top:18px;">
-                            <div class="my-row"><span>🔥 Streak của bạn</span><strong>@currentUser.CurrentStreak ngày</strong></div>
-                            <div class="my-row"><span>🏆 Hạng Streak</span><strong>@(currentUserStreakIndex >= 0 ? (currentUserStreakIndex + 1).ToString() : "-")</strong></div>
-                            <div class="my-row"><span>⭐ Tổng XP</span><strong>@currentUser.XP.ToString("N0")</strong></div>
+                @for (int i = 0; i < topStreak.Count; i++)
+                {
+                    var u = topStreak[i];
+                    var rankClass = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "";
+                    var rankText = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : (i + 1).ToString();
+                    var initial = !string.IsNullOrWhiteSpace(u.Username) ? u.Username.Substring(0, 1).ToUpper() : "?";
+
+                    <div class="lb-row">
+                        <span class="rank @rankClass">@rankText</span>
+
+                        <div class="user-cell">
+                            <div class="avatar">@initial</div>
+                            <div class="user-meta">
+                                <a href="/Friend/ViewProfile/@u.Id" class="user-name">@u.Username</a>
+                                <div class="user-small">Level @u.Level</div>
+                            </div>
                         </div>
-                    }
-                </aside>
+
+                        <span class="value-streak">🔥 @u.CurrentStreak</span>
+                        <span class="value-xp col-extra">@u.XP.ToString("N0")</span>
+                    </div>
+                }
             </div>
         }
         else
         {
-            <div class="empty-leader"><strong>Chưa có dữ liệu streak</strong>Hoàn thành nhiệm vụ hằng ngày để tạo chuỗi streak.</div>
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div>Chưa có dữ liệu xếp hạng streak.</div>
+            </div>
         }
-    </section>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        function switchLeaderboardTab(id, btn) {
-            document.querySelectorAll('.leader-panel').forEach(function (panel) {
-                panel.classList.remove('active');
+        function switchTab(id, btn) {
+            document.querySelectorAll(".lb-panel").forEach(function (panel) {
+                panel.classList.remove("active");
             });
 
-            document.querySelectorAll('.leader-tab').forEach(function (tab) {
-                tab.classList.remove('active');
+            document.querySelectorAll(".lb-tab").forEach(function (tab) {
+                tab.classList.remove("active");
             });
 
-            document.getElementById('panel-' + id).classList.add('active');
-            btn.classList.add('active');
+            document.getElementById("panel-" + id).classList.add("active");
+            btn.classList.add("active");
         }
     </script>
 }

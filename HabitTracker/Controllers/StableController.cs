@@ -34,10 +34,10 @@ namespace HabitTracker.Controllers
             var result = await _stableService.HatchAsync(userId.Value, eggGameItemId, potionGameItemId);
             return Json(new
             {
-                success      = result.Success,
-                error        = result.Error,
-                petKey       = result.HatchedPetKey,
-                petName      = result.HatchedPetName,
+                success = result.Success,
+                error = result.Error,
+                petKey = result.HatchedPetKey,
+                petName = result.HatchedPetName,
                 petImagePath = result.PetImagePath
             });
         }
@@ -52,13 +52,13 @@ namespace HabitTracker.Controllers
             var result = await _stableService.FeedAsync(userId.Value, petKey, foodGameItemId);
             return Json(new
             {
-                success          = result.Success,
-                error            = result.Error,
-                evolved          = result.Evolved,
+                success = result.Success,
+                error = result.Error,
+                evolved = result.Evolved,
                 newFeedingPoints = result.NewFeedingPoints,
-                mountIconPath    = result.MountIconPath,
-                newFoodQuantity  = result.NewFoodQuantity,
-                foodGameItemId   = foodGameItemId
+                mountIconPath = result.MountIconPath,
+                newFoodQuantity = result.NewFoodQuantity,
+                foodGameItemId = foodGameItemId
             });
         }
 
@@ -72,8 +72,8 @@ namespace HabitTracker.Controllers
             var result = await _stableService.SetActivePetAsync(userId.Value, petKey);
             return Json(new
             {
-                success      = result.Success,
-                error        = result.Error,
+                success = result.Success,
+                error = result.Error,
                 activePetKey = result.NewActivePetKey
             });
         }
@@ -88,9 +88,9 @@ namespace HabitTracker.Controllers
             var result = await _stableService.SetActiveMountAsync(userId.Value, mountKey);
             return Json(new
             {
-                success         = result.Success,
-                error           = result.Error,
-                activeMountKey  = result.NewActiveMountKey
+                success = result.Success,
+                error = result.Error,
+                activeMountKey = result.NewActiveMountKey
             });
         }
 
