@@ -1,7 +1,49 @@
 # Handoff — Gamified Habit Tracker
 
-**Session date:** 2026-05-30
-**Session goal:** Stable UX polish — pet feeding flow, tab restructure, text visibility fixes
+**Session date:** 2026-06-02
+**Session goal:** Bug fixes — rebirth toast text invisible, gold HUD icon not rendering
+
+---
+
+## What Was Done This Session (2026-06-02, session 9)
+
+### Fix — Rebirth Toast Text Invisible
+
+**Problem:** Revive/rebirth toast showed no visible text — same color as background.
+
+**Root cause:** `showToast('🔁', 'Reborn!', ..., 'toast-rebirth', ...)` — type `toast-rebirth` had no CSS class defined. Only `toast-death` existed. No background → default browser background with white text from `.toast-noti` → invisible on white.
+
+**Fix:** Added `.toast-rebirth` to `Views/Shared/_Layout.cshtml`:
+```css
+.toast-rebirth { background: linear-gradient(135deg, #1a1a2e, #7b2ff7); color: white; }
+```
+
+**Files changed:**
+- `Views/Shared/_Layout.cshtml` — added `.toast-rebirth` CSS class
+
+---
+
+### Fix — Gold HUD Icon Not Rendering
+
+**Problem:** 🪙 (coin emoji) rendered as empty box on user's system — not supported in browser/OS font stack.
+
+**Fix:** Replaced emoji with CSS-styled gold circle span:
+```html
+<span style="display:inline-block;width:13px;height:13px;background:#f0b429;border-radius:50%;border:1.5px solid #c8960c;flex-shrink:0;"></span>
+```
+No local gold coin image exists in `wwwroot/images/habitica/` — CSS fallback is correct approach.
+
+**Files changed:**
+- `Views/Shared/_Layout.cshtml` — replaced 🪙 with CSS gold circle in HUD gold div
+
+---
+
+## Current State (end of 2026-06-02 session 9)
+
+- **Build:** 0 errors
+- **Rebirth toast:** `.toast-rebirth` CSS added — dark navy→purple gradient, white text
+- **Gold HUD icon:** CSS circle replaces 🪙 emoji (cross-platform safe)
+- **Next:** Phase 9 — Challenges
 
 ---
 
@@ -1184,6 +1226,8 @@ All Habitica source at: `D:\Download\habitica-develop\habitica-develop\website\c
 - **Skills in task page:** `TaskBoardViewModel.CanUseSkills` = class set AND level ≥ 11. `TaskController.Index` loads user with gear + EffectiveStats + class spells. `POST /Task/CastSpell` delegates to `SpellService.CastAsync`. Skills bar hidden if `!CanUseSkills`. Task-targeting: `.skill-targeting` body class + `pointer-events:none` on `.task-card *` makes click bubble to card.
 - **SpellService formulas (Habitica-synced):** `DR(bonus, max, halfway)` = `max * bonus / (bonus + halfway)`. `CalcBonus(taskValue, stat, critMult)` = `(taskValue < 0 ? 1 : taskValue+1) + stat * 0.5 * critMult` (crit scales ONLY the stat term). `smash` crit uses CON; `fireball`/`pickPocket` crit uses PER; `backStab` crit uses STR at 0.3 base chance. `smash` boss damage = `DR(STR*crit, 55, 70)`; `fireball` boss damage = `INT * 0.1`.
 - **Party spells:** All 7 party spells now implemented. Load party members via `_context.PartyMembers.Where(partyId).Include(User)`. Apply buff/heal to each. Solo (no party) applies to self only. `mpheal` skips users with Class=="mage". Buff expiry = `UtcNow.AddDays(1)`. Posts `[SYS]` chat message after. `IBossQuestService.FinishQuestAsync` is now public (was private) — called by `SpellService.ApplySpellBossDamageAsync` if boss HP ≤ 0 from spell damage.
+- **Toast type naming:** `showToast(icon, title, msg, type, duration)` — `type` must match a CSS class in `_Layout.cshtml`. Known types: `toast-xp`, `toast-badge`, `toast-streak`, `toast-level`, `toast-gold`, `toast-hp`, `toast-crit`, `toast-drop`, `toast-death`, `toast-rebirth`, `success`, `danger`, `info`, `warning`. Missing type = no background → invisible text on white.
+- **HUD icon fallback rule:** Do NOT use emojis for HUD icons — emoji support varies by OS/browser (renders as empty box on some systems). Use `<img>` from `/images/habitica/` if asset exists, otherwise CSS-styled `<span>` (e.g. gold coin = yellow circle via `border-radius:50%;background:#f0b429`). Gem icon 💎 currently still emoji — replace with `Pet_Currency_Gem.png` if it breaks.
 
 ---
 
