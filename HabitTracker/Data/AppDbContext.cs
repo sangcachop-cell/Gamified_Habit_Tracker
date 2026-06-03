@@ -60,13 +60,46 @@ namespace HabitTracker.Data
         public DbSet<PartyQuest>       PartyQuests       { get; set; }
         public DbSet<PartyQuestMember> PartyQuestMembers { get; set; }
 
+        // Admin (Phase 13)
+        public DbSet<AdminBlocklistEntry> AdminBlocklistEntries { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Seed Badge
+            // Phase 10 — Achievement seeds
+            var seed = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             modelBuilder.Entity<Badge>().HasData(
-                new Badge { Id = 1, Name = "Người mới bắt đầu", Description = "Đạt 50 XP", Icon = "🌱", RequiredXP = 50 },
-                new Badge { Id = 2, Name = "Chiến binh", Description = "Đạt 200 XP", Icon = "⚔️", RequiredXP = 200 },
-                new Badge { Id = 3, Name = "Huyền thoại", Description = "Đạt 500 XP", Icon = "🏆", RequiredXP = 500 }
+                // ── Streak ──────────────────────────────────────────────────────────────
+                new Badge { Id = 10, Key = "streak_7",   TriggerType = "Streak",       TriggerValue = 7,   Name = "Streak Starter",   Description = "Maintain a 7-day task streak",    Icon = "🌡️", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 11, Key = "streak_21",  TriggerType = "Streak",       TriggerValue = 21,  Name = "Habit Builder",    Description = "Maintain a 21-day task streak",   Icon = "🔥", Rarity = "Rare",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 12, Key = "streak_90",  TriggerType = "Streak",       TriggerValue = 90,  Name = "Dedicated",        Description = "Maintain a 90-day task streak",   Icon = "⚡", Rarity = "Epic",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 13, Key = "streak_180", TriggerType = "Streak",       TriggerValue = 180, Name = "Half Year Hero",   Description = "Maintain a 180-day task streak",  Icon = "💎", Rarity = "Legendary", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 14, Key = "streak_365", TriggerType = "Streak",       TriggerValue = 365, Name = "Year Champion",    Description = "Maintain a 365-day task streak",  Icon = "👑", Rarity = "Legendary", IsActive = true, CreatedAt = seed },
+                // ── Task milestones ──────────────────────────────────────────────────
+                new Badge { Id = 15, Key = "tasks_1",   TriggerType = "TaskMilestone", TriggerValue = 1,   Name = "First Step",       Description = "Complete your first task",        Icon = "✅", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 16, Key = "tasks_10",  TriggerType = "TaskMilestone", TriggerValue = 10,  Name = "Getting Started",  Description = "Complete 10 tasks",               Icon = "📋", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 17, Key = "tasks_50",  TriggerType = "TaskMilestone", TriggerValue = 50,  Name = "On a Roll",        Description = "Complete 50 tasks",               Icon = "🎯", Rarity = "Rare",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 18, Key = "tasks_100", TriggerType = "TaskMilestone", TriggerValue = 100, Name = "Century Mark",     Description = "Complete 100 tasks",              Icon = "💯", Rarity = "Epic",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 19, Key = "tasks_500", TriggerType = "TaskMilestone", TriggerValue = 500, Name = "Task Master",      Description = "Complete 500 tasks",              Icon = "🏆", Rarity = "Legendary", IsActive = true, CreatedAt = seed },
+                // ── Perfect Day ──────────────────────────────────────────────────────
+                new Badge { Id = 20, Key = "perfect_1",  TriggerType = "PerfectDay",   TriggerValue = 1,   Name = "Perfect Day",      Description = "Complete all dailies in a day",   Icon = "⭐", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 21, Key = "perfect_7",  TriggerType = "PerfectDay",   TriggerValue = 7,   Name = "Week of Perfection", Description = "Achieve 7 perfect days",        Icon = "🌟", Rarity = "Rare",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 22, Key = "perfect_30", TriggerType = "PerfectDay",   TriggerValue = 30,  Name = "Flawless Month",   Description = "Achieve 30 perfect days",         Icon = "✨", Rarity = "Epic",      IsActive = true, CreatedAt = seed },
+                // ── Ultimate Gear ────────────────────────────────────────────────────
+                new Badge { Id = 23, Key = "ultimate_warrior", TriggerType = "UltimateGear", TriggerValue = 0, Name = "Warrior's Arsenal",  Description = "Collect all Warrior class gear",  Icon = "⚔️", Rarity = "Epic", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 24, Key = "ultimate_mage",    TriggerType = "UltimateGear", TriggerValue = 0, Name = "Arcane Scholar",     Description = "Collect all Mage class gear",     Icon = "🔮", Rarity = "Epic", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 25, Key = "ultimate_rogue",   TriggerType = "UltimateGear", TriggerValue = 0, Name = "Shadow Striker",     Description = "Collect all Rogue class gear",    Icon = "🗡️", Rarity = "Epic", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 26, Key = "ultimate_healer",  TriggerType = "UltimateGear", TriggerValue = 0, Name = "Divine Healer",      Description = "Collect all Healer class gear",   Icon = "💚", Rarity = "Epic", IsActive = true, CreatedAt = seed },
+                // ── Party Quests ─────────────────────────────────────────────────────
+                new Badge { Id = 27, Key = "quests_1",  TriggerType = "Quest", TriggerValue = 1,  Name = "First Quest",    Description = "Complete your first party quest", Icon = "⚔️", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 28, Key = "quests_10", TriggerType = "Quest", TriggerValue = 10, Name = "Quest Veteran",  Description = "Complete 10 party quests",        Icon = "🗡️", Rarity = "Rare",      IsActive = true, CreatedAt = seed },
+                new Badge { Id = 29, Key = "quests_50", TriggerType = "Quest", TriggerValue = 50, Name = "Quest Legend",   Description = "Complete 50 party quests",        Icon = "🏅", Rarity = "Epic",      IsActive = true, CreatedAt = seed },
+                // ── Stable ───────────────────────────────────────────────────────────
+                new Badge { Id = 30, Key = "stable_10",    TriggerType = "Stable", TriggerValue = 10,  Name = "Animal Keeper", Description = "Own 10 pets or mounts",          Icon = "🐾", Rarity = "Common",    IsActive = true, CreatedAt = seed },
+                new Badge { Id = 31, Key = "beast_master", TriggerType = "Stable", TriggerValue = 100, Name = "Beast Master",  Description = "Own 100 unique pets",            Icon = "🦁", Rarity = "Legendary", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 32, Key = "mount_master", TriggerType = "Stable", TriggerValue = 50,  Name = "Mount Master",  Description = "Own 50 unique mounts",           Icon = "🐴", Rarity = "Legendary", IsActive = true, CreatedAt = seed },
+                new Badge { Id = 33, Key = "triad_bingo",  TriggerType = "Stable", TriggerValue = 0,   Name = "Triad Bingo",   Description = "Own a pet and mount from the same species", Icon = "🎰", Rarity = "Epic", IsActive = true, CreatedAt = seed },
+                // ── Social ───────────────────────────────────────────────────────────
+                new Badge { Id = 34, Key = "joined_guild", TriggerType = "Social", TriggerValue = 0,   Name = "Guild Member",  Description = "Join your first guild",          Icon = "🏰", Rarity = "Common",    IsActive = true, CreatedAt = seed }
             );
 
             // Friendship relationships

@@ -398,6 +398,23 @@
             background: linear-gradient(135deg,#7c3aed,#10b981);
         }
 
+        .success {
+            background: linear-gradient(135deg,#10b981,#059669);
+        }
+
+        .danger {
+            background: linear-gradient(135deg,#ef4444,#dc2626);
+        }
+
+        .info {
+            background: linear-gradient(135deg,#3b82f6,#2563eb);
+        }
+
+        .warning {
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            color: #1a1a1a;
+        }
+
         .toast-icon {
             font-size: 2rem;
             line-height: 1;
@@ -575,13 +592,16 @@
                             <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size:10px;"></span>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end custom-dropdown" id="notif-dropdown" style="min-width:320px;max-height:400px;overflow-y:auto;">
-                            <li class="dropdown-header d-flex justify-content-between">
-                                <span>Notifications</span>
+                        <ul class="dropdown-menu dropdown-menu-end custom-dropdown" id="notif-dropdown" style="min-width:320px;max-height:440px;overflow-y:auto;">
+                            <li class="dropdown-header d-flex justify-content-between align-items-center">
+                                <a href="/Notifications" class="text-decoration-none fw-semibold" style="color:inherit">Notifications</a>
                                 <a href="#" class="small" onclick="markAllRead(event)">Mark all read</a>
                             </li>
                             <li>
-                                <div id="notif-list" class="px-2 py-1 text-muted small">Loading…</div>
+                                <div id="notif-list" class="px-1 py-1">Loading…</div>
+                            </li>
+                            <li class="border-top text-center py-2">
+                                <a href="/Notifications" class="small text-decoration-none" style="opacity:.7">See all notifications →</a>
                             </li>
                         </ul>
                     </div>
@@ -599,11 +619,18 @@
                         <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">👤 My Profile</a></li>
                             <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a></li>
-                            
+
                             <li><a class="dropdown-item" asp-controller="Task" asp-action="Index">📋 All Tasks</a></li>
                             <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Badges">🏆 My Badges</a></li>
+                            <li><a class="dropdown-item" href="/Notifications">🔔 Notifications</a></li>
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="Leaderboard">🏅 Leaderboard</a></li>
+                            @if (Context.Session.GetString("IsAdmin") == "true")
+                            {
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item text-warning" asp-controller="Admin" asp-action="Index">🛡️ Admin Panel</a></li>
+                            }
                             <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" href="/Settings">⚙️ Settings</a></li>
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">🔐 Change Password</a></li>
                             <li><hr class="dropdown-divider" /></li>
                             <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">🚪 Logout</a></li>
@@ -728,25 +755,68 @@
 
         document.getElementById('notifBell')?.addEventListener('show.bs.dropdown', function () {
             fetch('/api/notification?limit=8')
-                .then(r => r.json())
-                .then(items => {
+                .then(function (r) { return r.json(); })
+                .then(function (items) {
                     var list = document.getElementById('notif-list');
                     if (!list) return;
 
                     if (!items || items.length === 0) {
-                        list.textContent = 'No notifications.';
+                        list.innerHTML = '<div class="py-3 text-center text-muted small">No notifications.</div>';
                         return;
                     }
 
-                    list.innerHTML = items.map(n =>
-                        `<div class="py-2 border-bottom" style="font-size:.82rem;">
-                            <div>${n.icon || 'ℹ️'} <strong>${n.title}</strong></div>
-                            ${n.message ? `<div class="text-muted">${n.message}</div>` : ''}
-                            ${n.link ? `<a href="${n.link}" class="small">View →</a>` : ''}
-                        </div>`
-                    ).join('');
+                    var typeColor = function (type) {
+                        var map = {
+                            'achievement': '#f0a500', 'Achievement': '#f0a500',
+                            'Streak': '#fc9044',
+                            'LevelUp': '#4e9af1', 'level_up': '#4e9af1',
+                            'Quest': '#a680e8', 'quest': '#a680e8', 'quest_invite': '#a680e8', 'quest_complete': '#4caf50',
+                            'quest_rage': '#e8436a',
+                            'Guild': '#26a69a', 'Party': '#42a5f5', 'Social': '#e76e78'
+                        };
+                        return map[type] || '#8a8a8a';
+                    };
+
+                    list.innerHTML = items.map(function (n) {
+                        var color = typeColor(n.type);
+                        var unread = !n.isRead;
+                        var borderLeft = unread ? '3px solid ' + color : '3px solid transparent';
+                        var bg = unread ? 'rgba(255,255,255,0.04)' : 'transparent';
+                        return '<div class="d-flex align-items-start gap-2 py-2 px-2 border-bottom"'
+                            + ' style="cursor:pointer;border-left:' + borderLeft + ';background:' + bg + ';font-size:.82rem;"'
+                            + ' data-id="' + n.id + '" data-link="' + (n.link || '') + '" data-read="' + (n.isRead ? 'true' : 'false') + '"'
+                            + ' onclick="notifDropClick(this)">'
+                            + '<span style="font-size:1rem;flex-shrink:0;padding-top:1px;">' + (n.icon || 'ℹ️') + '</span>'
+                            + '<div style="min-width:0;flex:1;">'
+                            + '<div class="' + (unread ? 'fw-semibold' : '') + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + n.title + '</div>'
+                            + (n.message ? '<div class="text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + n.message + '</div>' : '')
+                            + '</div>'
+                            + '</div>';
+                    }).join('');
                 });
         });
+
+        async function notifDropClick(el) {
+            var id = el.dataset.id;
+            var link = el.dataset.link;
+            if (el.dataset.read === 'false') {
+                fetch('/api/notification/' + id + '/read', { method: 'PUT' }).catch(function () {});
+                el.dataset.read = 'true';
+                el.style.borderLeft = '3px solid transparent';
+                el.style.background = 'transparent';
+                var title = el.querySelector('.fw-semibold');
+                if (title) title.classList.remove('fw-semibold');
+                var b = document.getElementById('notif-badge');
+                if (b) {
+                    var cur = parseInt(b.textContent) || 0;
+                    if (cur > 0) {
+                        b.textContent = cur - 1;
+                        b.classList.toggle('d-none', cur - 1 <= 0);
+                    }
+                }
+            }
+            if (link) window.location.href = link;
+        }
 
         async function markAllRead(e) {
             e.preventDefault();

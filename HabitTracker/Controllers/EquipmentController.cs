@@ -13,11 +13,14 @@ namespace HabitTracker.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ICharacterService _characterService;
+        private readonly IAchievementService _achievements;
 
-        public EquipmentController(AppDbContext context, ICharacterService characterService)
+        public EquipmentController(AppDbContext context, ICharacterService characterService,
+                                   IAchievementService achievements)
         {
-            _context = context;
+            _context          = context;
             _characterService = characterService;
+            _achievements     = achievements;
         }
 
         // GET /Equipment
@@ -143,6 +146,9 @@ namespace HabitTracker.Controllers
 
             SetSlot(user, gear.Slot, key, isCostume);
             await _context.SaveChangesAsync();
+
+            if (!isCostume && !string.IsNullOrEmpty(user.Class))
+                await _achievements.CheckUltimateGearAsync(userId.Value, user.Class);
 
             // Re-compute stats (gear loaded from OwnedGear navigation)
             var stats = await _characterService.GetEffectiveStatsAsync(user);

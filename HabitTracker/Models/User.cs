@@ -72,6 +72,12 @@ namespace HabitTracker.Models
         // ===== ADMIN & AUDIT =====
         public bool IsAdmin { get; set; } = false;
 
+        /// <summary>Chat privilege revoked globally by admin.</summary>
+        public bool IsMuted { get; set; } = false;
+
+        /// <summary>Account banned by admin — login blocked.</summary>
+        public bool IsBanned { get; set; } = false;
+
         [Required]
         public DateTime CreatedAt { get; set; } 
 
@@ -238,6 +244,28 @@ namespace HabitTracker.Models
         // ===== BACKGROUND (Phase 9) =====
         [StringLength(100)]
         public string? Background { get; set; }
+
+        // ===== ACHIEVEMENTS (Phase 10) =====
+        public int TotalTasksCompleted { get; set; } = 0;
+        public int PerfectDayCount     { get; set; } = 0;
+
+        // ===== SETTINGS (Phase 12) =====
+        /// <summary>Hour (0-23) when the new day begins for cron purposes. Default 0 = midnight.</summary>
+        public int DayStart { get; set; } = 0;
+
+        /// <summary>Random token for API access. Generated on first request.</summary>
+        [StringLength(64)]
+        public string? ApiToken { get; set; }
+
+        /// <summary>"everyone" | "nobody"</summary>
+        [StringLength(20)]
+        public string PMPermission { get; set; } = "everyone";
+
+        /// <summary>"public" | "private"</summary>
+        [StringLength(20)]
+        public string ProfileVisibility { get; set; } = "public";
+
+        public bool SuppressNotifications { get; set; } = false;
 
         // ===== RELATIONSHIPS =====
         public virtual List<Notification>? Notifications { get; set; }

@@ -184,7 +184,8 @@
             @if (Model.IsMember)
             {
                 <div class="p-3 border-top bg-white">
-                    <div class="input-group">
+                    <div class="input-group" style="position:relative;">
+                        <div id="mention-dropdown" style="display:none;position:absolute;bottom:100%;left:0;right:0;z-index:1050;background:#fff;border:1px solid rgba(0,0,0,.15);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;margin-bottom:4px;"></div>
                         <textarea id="msgInput" class="form-control" rows="1"
                                   placeholder="Message guild... (type @@username to mention)"
                                   style="resize:none;" maxlength="2000"
@@ -247,6 +248,14 @@
 const GUILD_ID = @Model.Guild.Id;
 const CURRENT_USER_ID = @currentUserId;
 const _token = document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+const MEMBERS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.Members.Select(e => new {
+        id = e.User.Id,
+        username = e.User.Username,
+        avatar = (string.IsNullOrEmpty(e.User.Avatar) || e.User.Avatar == "default.png")
+            ? "/images/default.png" : "/uploads/" + e.User.Avatar
+    })
+));
 
 let currentPage = @Model.Page;
 const canModerate = @(canModerate ? "true" : "false");
@@ -258,6 +267,8 @@ function scrollToBottom() {
 scrollToBottom();
 
 function handleKey(e) {
+    var dd = document.getElementById('mention-dropdown');
+    if (dd && dd.style.display !== 'none' && ['Enter','Tab','ArrowUp','ArrowDown','Escape'].includes(e.key)) return;
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 }
 
@@ -514,6 +525,93 @@ async function loadMore() {
         const loadBtn = area.querySelector('button[onclick="loadMore()"]');
         if (loadBtn) loadBtn.closest('div')?.remove();
     }
+}
+
+// ── mention autocomplete ──────────────────────────────────────────────────
+function initMentionAutocomplete(taId, members) {
+    var ta = document.getElementById(taId);
+    var dd = document.getElementById('mention-dropdown');
+    if (!ta || !dd) return;
+
+    var nameCounts = {};
+    members.forEach(function (m) {
+        var k = m.username.toLowerCase();
+        nameCounts[k] = (nameCounts[k] || 0) + 1;
+    });
+
+    var mentionStart = -1;
+    var activeIdx = 0;
+
+    function typed() {
+        if (mentionStart < 0) return '';
+        return ta.value.substring(mentionStart + 1, ta.selectionStart);
+    }
+
+    function filtered() {
+        var q = typed().toLowerCase();
+        return members.filter(function (m) { return m.username.toLowerCase().startsWith(q); });
+    }
+
+    function render() {
+        var items = filtered();
+        if (!items.length) { close(); return; }
+        if (activeIdx >= items.length) activeIdx = items.length - 1;
+        dd.innerHTML = items.map(function (m, i) {
+            var dup = (nameCounts[m.username.toLowerCase()] || 0) > 1;
+            return '<div class="d-flex align-items-center gap-2 px-3 py-2" '
+                + 'style="cursor:pointer;font-size:.88rem;background:' + (i === activeIdx ? '#eef2ff' : 'transparent') + ';" '
+                + 'data-idx="' + i + '">'
+                + '<img src="' + m.avatar + '" width="26" height="26" style="border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.src=\'/images/default.png\'">'
+                + '<span class="fw-semibold">' + m.username + '</span>'
+                + (dup ? '<span style="color:#999;font-size:.75rem;">&nbsp;#' + m.id + '</span>' : '')
+                + '</div>';
+        }).join('');
+        dd.style.display = 'block';
+        dd.querySelectorAll('[data-idx]').forEach(function (el) {
+            el.addEventListener('mousedown', function (e) { e.preventDefault(); select(items[parseInt(el.dataset.idx)]); });
+        });
+    }
+
+    function select(member) {
+        var dup = (nameCounts[member.username.toLowerCase()] || 0) > 1;
+        var insert = dup ? '@@' + member.username + ':' + member.id : '@@' + member.username;
+        var val = ta.value;
+        var typedLen = typed().length;
+        ta.value = val.substring(0, mentionStart) + insert + ' ' + val.substring(mentionStart + 1 + typedLen);
+        var pos = mentionStart + insert.length + 1;
+        ta.setSelectionRange(pos, pos);
+        close();
+        ta.focus();
+    }
+
+    function close() { dd.style.display = 'none'; mentionStart = -1; activeIdx = 0; }
+
+    ta.addEventListener('input', function () {
+        var pos = ta.selectionStart;
+        var val = ta.value;
+        var lastAt = val.lastIndexOf('@@', pos - 1);
+        if (lastAt === -1) { close(); return; }
+        var between = val.substring(lastAt + 1, pos);
+        if (/\s/.test(between)) { close(); return; }
+        mentionStart = lastAt;
+        activeIdx = 0;
+        render();
+    });
+
+    ta.addEventListener('keydown', function (e) {
+        if (dd.style.display === 'none') return;
+        var items = filtered();
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = (activeIdx + 1) % Math.max(items.length, 1); render(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = (activeIdx - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1); render(); }
+        else if (e.key === 'Enter' || e.key === 'Tab') { if (items.length) { e.preventDefault(); select(items[activeIdx]); } }
+        else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    });
+
+    document.addEventListener('click', function (e) { if (e.target !== ta && !dd.contains(e.target)) close(); });
+}
+
+@if (Model.IsMember) {
+    <text>initMentionAutocomplete('msgInput', MEMBERS);</text>
 }
 </script>
 }

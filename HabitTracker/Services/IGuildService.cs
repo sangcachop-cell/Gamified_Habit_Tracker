@@ -24,5 +24,5 @@ public interface IGuildService
     Task<List<GuildInvite>> GetPendingInvitesAsync(int userId);
     Task<bool> IsMemberAsync(int userId, int guildId);
     Task<string?> GetRoleAsync(int userId, int guildId);
-    Task<string> RenderBodyAsync(string body);
+    Task<string> RenderBodyAsync(string body, int guildId);
 }

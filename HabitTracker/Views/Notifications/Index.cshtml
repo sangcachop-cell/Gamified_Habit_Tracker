@@ -1,0 +1,255 @@
+@model List<HabitTracker.Models.Notification>
+@{
+    ViewData["Title"] = "Notifications";
+
+    string TimeAgo(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 1) return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return dt.ToString("MMM d");
+    }
+
+    string TypeColor(string? type) => type switch
+    {
+        "achievement" or "Achievement" => "#f0a500",
+        "Streak" => "#fc9044",
+        "LevelUp" or "level_up" => "#4e9af1",
+        "Quest" or "quest" or "quest_invite" or "quest_complete" => "#a680e8",
+        "quest_rage" => "#e8436a",
+        "Guild" => "#26a69a",
+        "Party" => "#42a5f5",
+        "Social" => "#e76e78",
+        _ => "#8a8a8a"
+    };
+
+    string TypeLabel(string? type) => type switch
+    {
+        "achievement" or "Achievement" => "Achievement",
+        "Streak" => "Streak",
+        "LevelUp" or "level_up" => "Level Up",
+        "Quest" or "quest" => "Quest",
+        "quest_invite" => "Quest Invite",
+        "quest_rage" => "Rage!",
+        "quest_complete" => "Quest Done",
+        "Guild" => "Guild",
+        "Party" => "Party",
+        "Social" => "Social",
+        _ => "Info"
+    };
+
+    int unreadCount = Model.Count(n => !n.IsRead);
+    int totalCount = Model.Count;
+}
+
+<style>
+    .notif-page { max-width: 740px; margin: 0 auto; }
+
+    .notif-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        margin-bottom: 6px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.09);
+        border-radius: 10px;
+        transition: background 0.15s;
+        border-left-width: 4px;
+        border-left-style: solid;
+    }
+
+    .notif-row:hover { background: #f8f9fa; }
+    .notif-row.notif-read { opacity: 0.65; }
+
+    .notif-icon { font-size: 1.4rem; width: 36px; text-align: center; flex-shrink: 0; padding-top: 2px; }
+    .notif-content { flex: 1; min-width: 0; }
+    .notif-title-text { word-break: break-word; color: #1a1a2e; }
+    .notif-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: flex-start; margin-top: 2px; }
+
+    .type-badge {
+        font-size: 0.65rem;
+        padding: 2px 7px;
+        border-radius: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+        color: #fff;
+        vertical-align: middle;
+    }
+
+    .notif-tabs-bar .nav-link { color: rgba(0,0,0,0.55); border: 1px solid rgba(0,0,0,0.12); background: #fff; }
+    .notif-tabs-bar .nav-link.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+    .notif-tabs-bar .nav-link:hover:not(.active) { background: #f3f4f6; color: rgba(0,0,0,0.8); }
+
+    .notif-empty { color: rgba(0,0,0,0.35); padding: 48px 0; text-align: center; font-size: 1rem; }
+    .notif-message-text { color: #555; }
+</style>
+
+<div class="container py-4 notif-page">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">🔔 Notifications</h4>
+        <button class="btn btn-sm btn-outline-secondary" onclick="markAllReadPage()" id="markAllBtn"
+                @(unreadCount == 0 ? "disabled" : "")>
+            ✓ Mark all read
+        </button>
+    </div>
+
+    <ul class="nav nav-pills mb-3 gap-2 notif-tabs-bar" id="notif-tabs">
+        <li class="nav-item">
+            <button class="nav-link active" id="tab-all" onclick="switchTab('all')">
+                All <span class="badge bg-secondary ms-1" id="badge-all">@totalCount</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-unread" onclick="switchTab('unread')">
+                Unread <span class="badge bg-danger ms-1" id="badge-unread">@unreadCount</span>
+            </button>
+        </li>
+    </ul>
+
+    @if (!Model.Any())
+    {
+        <div class="notif-empty">No notifications yet.</div>
+    }
+    else
+    {
+        <div id="notif-page-list">
+            @foreach (var n in Model)
+            {
+                var color = TypeColor(n.Type);
+                var label = TypeLabel(n.Type);
+                <div class="notif-row @(n.IsRead ? "notif-read" : "")"
+                     id="notif-@n.Id"
+                     data-read="@n.IsRead.ToString().ToLower()"
+                     style="border-left-color: @(n.IsRead ? "transparent" : color)">
+
+                    <div class="notif-icon">@n.Icon</div>
+
+                    <div class="notif-content">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="notif-title-text @(!n.IsRead ? "fw-semibold" : "")">@n.Title</span>
+                            <span class="type-badge" style="background:@color;color:#fff">@label</span>
+                            <small class="text-muted ms-auto" style="white-space:nowrap">@TimeAgo(n.CreatedAt)</small>
+                        </div>
+                        @if (!string.IsNullOrEmpty(n.Message))
+                        {
+                            <div class="small notif-message-text">@n.Message</div>
+                        }
+                        @if (!string.IsNullOrEmpty(n.Link))
+                        {
+                            <a href="@n.Link" class="small mt-1 d-inline-block">View →</a>
+                        }
+                    </div>
+
+                    <div class="notif-actions">
+                        @if (!n.IsRead)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" title="Mark read"
+                                    onclick="markOneRead(@n.Id, this)"
+                                    style="padding:2px 8px;font-size:.72rem;">✓</button>
+                        }
+                        <button class="btn btn-sm btn-outline-danger" title="Delete"
+                                onclick="deleteNotif(@n.Id, this)"
+                                style="padding:2px 8px;font-size:.72rem;">✕</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div id="notif-unread-empty" class="notif-empty d-none">All caught up!</div>
+    }
+</div>
+
+<script>
+    var currentTab = 'all';
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-all').classList.toggle('active', tab === 'all');
+        document.getElementById('tab-unread').classList.toggle('active', tab === 'unread');
+
+        var rows = document.querySelectorAll('.notif-row');
+        var anyUnread = false;
+        rows.forEach(function (el) {
+            if (tab === 'unread') {
+                var show = el.dataset.read === 'false';
+                el.style.display = show ? '' : 'none';
+                if (show) anyUnread = true;
+            } else {
+                el.style.display = '';
+            }
+        });
+
+        var emptyEl = document.getElementById('notif-unread-empty');
+        if (emptyEl) emptyEl.classList.toggle('d-none', tab !== 'unread' || anyUnread);
+    }
+
+    async function markOneRead(id, btn) {
+        await fetch('/api/notification/' + id + '/read', { method: 'PUT' }).catch(function () {});
+        var row = document.getElementById('notif-' + id);
+        if (row) {
+            row.dataset.read = 'true';
+            row.classList.add('notif-read');
+            row.style.borderLeftColor = 'transparent';
+            var title = row.querySelector('.fw-semibold');
+            if (title) title.classList.remove('fw-semibold');
+            btn.remove();
+        }
+        updateCounts();
+        if (currentTab === 'unread' && row) {
+            row.style.display = 'none';
+            checkUnreadEmpty();
+        }
+    }
+
+    async function deleteNotif(id, btn) {
+        await fetch('/api/notification/' + id, { method: 'DELETE' }).catch(function () {});
+        var row = document.getElementById('notif-' + id);
+        if (row) {
+            var wasUnread = row.dataset.read === 'false';
+            row.remove();
+            if (wasUnread) updateCounts();
+            updateTotalCount();
+        }
+        if (currentTab === 'unread') checkUnreadEmpty();
+    }
+
+    async function markAllReadPage() {
+        await fetch('/api/notification/read-all', { method: 'PUT' }).catch(function () {});
+        document.querySelectorAll('.notif-row').forEach(function (row) {
+            row.dataset.read = 'true';
+            row.classList.add('notif-read');
+            row.style.borderLeftColor = 'transparent';
+            var title = row.querySelector('.fw-semibold');
+            if (title) title.classList.remove('fw-semibold');
+            var markBtn = row.querySelector('button[title="Mark read"]');
+            if (markBtn) markBtn.remove();
+        });
+        document.getElementById('badge-unread').textContent = '0';
+        document.getElementById('markAllBtn').disabled = true;
+        if (currentTab === 'unread') {
+            document.querySelectorAll('.notif-row').forEach(function (el) { el.style.display = 'none'; });
+            checkUnreadEmpty();
+        }
+    }
+
+    function updateCounts() {
+        var unread = document.querySelectorAll('.notif-row[data-read="false"]').length;
+        document.getElementById('badge-unread').textContent = unread;
+        document.getElementById('markAllBtn').disabled = unread === 0;
+    }
+
+    function updateTotalCount() {
+        var total = document.querySelectorAll('.notif-row').length;
+        document.getElementById('badge-all').textContent = total;
+        updateCounts();
+    }
+
+    function checkUnreadEmpty() {
+        var anyUnread = document.querySelectorAll('.notif-row[data-read="false"]').length > 0;
+        var emptyEl = document.getElementById('notif-unread-empty');
+        if (emptyEl) emptyEl.classList.toggle('d-none', anyUnread);
+    }
+</script>

@@ -18,5 +18,5 @@ public interface IPartyService
     Task<(bool Liked, int Count)> ToggleLikeAsync(int userId, int messageId);
     Task<(bool Success, string? Error)> DeleteMessageAsync(int userId, int messageId);
     Task<List<PartyInvite>> GetPendingInvitesAsync(int userId);
-    Task<string> RenderBodyAsync(string body);
+    Task<string> RenderBodyAsync(string body, int partyId);
 }

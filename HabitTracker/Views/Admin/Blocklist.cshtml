@@ -1,0 +1,110 @@
+@model List<HabitTracker.Models.AdminBlocklistEntry>
+@{
+    ViewData["Title"] = "Admin — Blocklist";
+}
+<style>
+    body { background:#f5f3ef; font-family:"DM Sans",sans-serif }
+    .admin-hero { background:#0a0a12; border-radius:20px; padding:28px 36px; color:white; margin-bottom:24px; position:relative; overflow:hidden }
+    .admin-hero::before { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 10% 60%,rgba(232,67,106,.35),transparent 50%),radial-gradient(ellipse at 90% 30%,rgba(92,61,222,.3),transparent 55%); pointer-events:none }
+    .admin-hero h2 { font-size:1.5rem; font-weight:800; letter-spacing:-1px; position:relative; z-index:2; margin:0 }
+    .admin-hero p { color:rgba(255,255,255,.55); font-size:.85rem; margin:4px 0 0; position:relative; z-index:2 }
+    .glass-card { background:white; border-radius:16px; border:1.5px solid rgba(0,0,0,.07); overflow:hidden; margin-bottom:24px; box-shadow:0 4px 16px rgba(0,0,0,.04) }
+    .card-head { padding:14px 22px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between }
+    .card-head h4 { font-size:.9rem; font-weight:700; margin:0 }
+    .add-form { padding:18px 22px; border-bottom:1px solid #f0f0f0; display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end }
+    .add-form label { font-size:.78rem; font-weight:700; color:#aaa; display:block; margin-bottom:4px }
+    .add-form input, .add-form select { border:1.5px solid #e5e5e5; border-radius:8px; padding:8px 14px; font-size:.85rem; outline:none }
+    .add-form input:focus, .add-form select:focus { border-color:#5c3dde }
+    .add-form button { background:#e8436a; color:white; border:none; border-radius:50px; padding:9px 22px; font-size:.85rem; font-weight:700; cursor:pointer }
+    table { width:100%; border-collapse:collapse }
+    th { padding:10px 16px; text-align:left; font-size:.73rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#aaa; background:#fafafa; border-bottom:1px solid #f0f0f0 }
+    td { padding:11px 16px; border-bottom:1px solid #f8f8f8; font-size:.86rem; vertical-align:middle }
+    tr:last-child td { border:none }
+    .type-pill { display:inline-block; padding:2px 9px; border-radius:50px; font-size:.7rem; font-weight:700 }
+    .tp-email { background:#e3f0ff; color:#2255aa }
+    .tp-ip { background:#fde8ed; color:#e8436a }
+    .btn-del { background:#fde8ed; color:#e8436a; border:none; border-radius:50px; padding:5px 12px; font-size:.75rem; font-weight:600; cursor:pointer }
+    .btn-del:hover { background:#f9c9d4 }
+    .alert-s { background:#d4f5ef; color:#006651; padding:11px 16px; border-radius:10px; font-size:.88rem; margin-bottom:18px }
+    .alert-e { background:#fde8ed; color:#c00; padding:11px 16px; border-radius:10px; font-size:.88rem; margin-bottom:18px }
+    .nav-pills-admin { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px }
+    .nav-pills-admin a { padding:8px 18px; border-radius:50px; font-size:.82rem; font-weight:700; text-decoration:none; background:#edeaf5; color:#5c3dde }
+    .nav-pills-admin a.active { background:#5c3dde; color:white }
+</style>
+
+<div style="padding:8px 0 48px">
+    @if (TempData["Success"] != null) { <div class="alert-s">✅ @TempData["Success"]</div> }
+    @if (TempData["Error"] != null) { <div class="alert-e">❌ @TempData["Error"]</div> }
+
+    <div class="admin-hero">
+        <h2>🚫 Email / IP Blocklist</h2>
+        <p>Block email addresses or IP addresses from registration / login</p>
+    </div>
+
+    <div class="nav-pills-admin">
+        <a asp-action="Index">📋 Quests</a>
+        <a asp-action="Users">👤 Users</a>
+        <a asp-action="Groups">🏰 Groups</a>
+        <a asp-action="Blocklist" class="active">🚫 Blocklist</a>
+        <a asp-action="Reports">📣 Reports</a>
+        <a asp-action="Stats">📊 Stats</a>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-head"><h4>Add Entry</h4></div>
+        <form asp-action="AddBlocklist" method="post" class="add-form">
+            @Html.AntiForgeryToken()
+            <div>
+                <label>Type</label>
+                <select name="type">
+                    <option value="email">email</option>
+                    <option value="ip">ip</option>
+                </select>
+            </div>
+            <div style="flex:1;min-width:200px">
+                <label>Value</label>
+                <input type="text" name="value" placeholder="e.g. spam@@example.com or 192.168.1.1" style="width:100%" required />
+            </div>
+            <div style="flex:1;min-width:160px">
+                <label>Note (optional)</label>
+                <input type="text" name="note" placeholder="Reason…" style="width:100%" />
+            </div>
+            <button type="submit">+ Add</button>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>Blocklist Entries</h4>
+            <span style="font-size:.8rem;color:#aaa">@Model.Count entries</span>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Type</th><th>Value</th><th>Note</th><th>Added</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model)
+                {
+                    <tr>
+                        <td><span class="type-pill tp-@e.Type">@e.Type</span></td>
+                        <td style="font-family:monospace">@e.Value</td>
+                        <td style="color:#aaa">@(e.Note ?? "—")</td>
+                        <td style="color:#aaa;font-size:.8rem">@e.AddedAt.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <form asp-action="RemoveBlocklist" method="post" style="display:inline"
+                                  onsubmit="return confirm('Remove @e.Value from blocklist?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@e.Id" />
+                                <button class="btn-del">✕ Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="5" style="text-align:center;color:#aaa;padding:32px">Blocklist is empty.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

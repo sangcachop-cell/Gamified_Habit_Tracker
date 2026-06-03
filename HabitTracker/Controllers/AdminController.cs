@@ -211,20 +211,29 @@ namespace HabitTracker.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ===== QUẢN LÝ NGƯỜI DÙNG =====
-        public async Task<IActionResult> Users()
+        // ===== USER MANAGEMENT =====
+
+        public async Task<IActionResult> Users(string? q)
         {
             var adminCheck = CheckAdmin();
             if (adminCheck != null) return adminCheck;
 
-            var users = await _context.Users
-                .OrderByDescending(u => u.XP)
-                .ToListAsync();
+            var query = _context.Users.AsNoTracking().AsQueryable();
 
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+                if (int.TryParse(q, out var uid))
+                    query = query.Where(u => u.Id == uid);
+                else
+                    query = query.Where(u => u.Username.Contains(q) || u.Email.Contains(q));
+            }
+
+            var users = await query.OrderByDescending(u => u.Id).Take(200).ToListAsync();
+            ViewBag.Q = q;
             return View(users);
         }
 
-        // ===== TOGGLE ADMIN STATUS =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleAdmin(int id)
@@ -233,19 +242,167 @@ namespace HabitTracker.Controllers
             if (adminCheck != null) return adminCheck;
 
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                TempData["Error"] = "User không tồn tại!";
-                return RedirectToAction(nameof(Users));
-            }
+            if (user == null) { TempData["Error"] = "User not found."; return RedirectToAction(nameof(Users)); }
 
             user.IsAdmin = !user.IsAdmin;
             await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"Admin toggled user role: {user.Email}, IsAdmin: {user.IsAdmin}");
-            TempData["Success"] = $"Đã cập nhật quyền cho {user.Username}";
-
+            TempData["Success"] = $"Admin toggled for {user.Username}.";
             return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MuteUser(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) { TempData["Error"] = "User not found."; return RedirectToAction(nameof(Users)); }
+
+            user.IsMuted = !user.IsMuted;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"{user.Username} is now {(user.IsMuted ? "muted" : "unmuted")}.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BanUser(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) { TempData["Error"] = "User not found."; return RedirectToAction(nameof(Users)); }
+
+            var adminId = HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+            if (user.Id == adminId) { TempData["Error"] = "Cannot ban yourself."; return RedirectToAction(nameof(Users)); }
+
+            user.IsBanned = !user.IsBanned;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"{user.Username} is now {(user.IsBanned ? "banned" : "unbanned")}.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        public async Task<IActionResult> UserDetail(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.UserBadges).ThenInclude(ub => ub.Badge)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null) return NotFound();
+
+            var tasks = await _context.HabitTasks
+                .AsNoTracking()
+                .Where(t => t.UserId == id)
+                .OrderByDescending(t => t.UpdatedAt ?? t.CreatedAt)
+                .Take(50)
+                .ToListAsync();
+
+            var gear = await _context.UserGearItems
+                .AsNoTracking()
+                .Include(g => g.GearItem)
+                .Where(g => g.UserId == id)
+                .ToListAsync();
+
+            var inventory = await _context.UserInventoryItems
+                .AsNoTracking()
+                .Include(i => i.GameItem)
+                .Where(i => i.UserId == id && i.Quantity > 0)
+                .ToListAsync();
+
+            ViewBag.Tasks     = tasks;
+            ViewBag.Gear      = gear;
+            ViewBag.Inventory = inventory;
+            return View(user);
+        }
+
+        // ===== EMAIL / IP BLOCKLIST =====
+
+        public async Task<IActionResult> Blocklist()
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var entries = await _context.AdminBlocklistEntries
+                .AsNoTracking()
+                .OrderByDescending(e => e.AddedAt)
+                .ToListAsync();
+
+            return View(entries);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddBlocklist(string type, string value, string? note)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                TempData["Error"] = "Value is required.";
+                return RedirectToAction(nameof(Blocklist));
+            }
+
+            var adminId = HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
+            _context.AdminBlocklistEntries.Add(new AdminBlocklistEntry
+            {
+                Type           = type == "ip" ? "ip" : "email",
+                Value          = value.Trim().ToLower(),
+                Note           = note?.Trim(),
+                AddedAt        = DateTime.UtcNow,
+                AddedByAdminId = adminId
+            });
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Blocklisted: {value}";
+            return RedirectToAction(nameof(Blocklist));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveBlocklist(int id)
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var entry = await _context.AdminBlocklistEntries.FindAsync(id);
+            if (entry != null)
+            {
+                _context.AdminBlocklistEntries.Remove(entry);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"Removed: {entry.Value}";
+            }
+            return RedirectToAction(nameof(Blocklist));
+        }
+
+        // ===== GROUP MANAGEMENT =====
+
+        public async Task<IActionResult> Groups()
+        {
+            var adminCheck = CheckAdmin();
+            if (adminCheck != null) return adminCheck;
+
+            var guilds = await _context.Guilds
+                .AsNoTracking()
+                .Include(g => g.Members)
+                .OrderByDescending(g => g.Id)
+                .ToListAsync();
+
+            var parties = await _context.Parties
+                .AsNoTracking()
+                .Include(p => p.Members)
+                .OrderByDescending(p => p.Id)
+                .ToListAsync();
+
+            ViewBag.Guilds  = guilds;
+            ViewBag.Parties = parties;
+            return View();
         }
 
         // ===== STATS DASHBOARD =====

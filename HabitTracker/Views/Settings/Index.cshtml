@@ -1,0 +1,398 @@
+@model HabitTracker.Models.User
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<style>
+    .settings-wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+
+    .settings-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+    .settings-tab-btn {
+        padding: 8px 18px; border-radius: 20px; border: none; cursor: pointer;
+        font-size: 14px; font-weight: 500; background: rgba(0,0,0,0.06);
+        color: rgba(0,0,0,0.6); transition: all 0.15s;
+    }
+    .settings-tab-btn.active { background: #4f46e5; color: #fff; }
+    .settings-tab-btn:hover:not(.active) { background: rgba(0,0,0,0.11); }
+
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    .settings-card {
+        background: #fff; border: 1px solid rgba(0,0,0,0.09); border-radius: 12px;
+        padding: 22px 24px; margin-bottom: 16px;
+    }
+    .settings-card h5 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .settings-card .sub { font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 16px; }
+
+    .form-label-sm { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 4px; }
+    .inp { background: #f8fafc; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 9px 12px; font-size: 14px; color: #1a1a2e; width: 100%; outline: none; transition: border 0.15s; }
+    .inp:focus { border-color: #4f46e5; background: #fff; }
+
+    .btn-save { background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn-save:hover { opacity: 0.88; }
+    .btn-danger2 { background: #ef4444; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn-danger2:hover { opacity: 0.88; }
+    .btn-outline { background: transparent; color: #4f46e5; border: 1.5px solid #4f46e5; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-outline:hover { background: #4f46e5; color: #fff; }
+
+    .token-box { font-family: monospace; font-size: 13px; background: #1a1a2e; color: #a5f3fc; border-radius: 8px; padding: 12px 16px; word-break: break-all; margin-bottom: 12px; min-height: 44px; letter-spacing: 0.5px; }
+
+    .radio-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+    .radio-pill input { display: none; }
+    .radio-pill label { padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgba(0,0,0,0.15); font-size: 13px; cursor: pointer; transition: all 0.15s; color: rgba(0,0,0,0.6); }
+    .radio-pill input:checked + label { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    .toggle-row { display: flex; align-items: center; gap: 14px; }
+    .toggle { position: relative; display: inline-block; width: 42px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: rgba(0,0,0,0.18); border-radius: 24px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+    .toggle input:checked + .toggle-slider { background: #4f46e5; }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    .day-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .day-btn { padding: 8px 4px; border-radius: 8px; border: 1.5px solid rgba(0,0,0,0.12); background: #f8fafc; font-size: 13px; cursor: pointer; text-align: center; color: rgba(0,0,0,0.6); transition: all 0.15s; }
+    .day-btn.selected { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    .feedback-msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
+    .feedback-msg.ok { color: #22c55e; }
+    .feedback-msg.err { color: #ef4444; }
+
+    .danger-box { border: 1.5px solid rgba(239,68,68,0.4); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
+    .danger-box h6 { color: #ef4444; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .danger-box p { font-size: 13px; color: rgba(0,0,0,0.55); margin-bottom: 12px; }
+</style>
+
+<div class="settings-wrap">
+    <h2 style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:6px;">⚙️ Settings</h2>
+    <p style="font-size:14px;color:rgba(0,0,0,0.45);margin-bottom:20px;">Account, preferences, and data management.</p>
+
+    <div class="settings-tabs">
+        <button class="settings-tab-btn active" onclick="switchTab('account',this)">Account</button>
+        <button class="settings-tab-btn" onclick="switchTab('daystart',this)">Day Start</button>
+        <button class="settings-tab-btn" onclick="switchTab('prefs',this)">Preferences</button>
+        <button class="settings-tab-btn" onclick="switchTab('privacy',this)">Privacy</button>
+        <button class="settings-tab-btn" onclick="switchTab('api',this)">API Token</button>
+        <button class="settings-tab-btn" onclick="switchTab('data',this)">Data</button>
+    </div>
+
+    @* ── ACCOUNT TAB ── *@
+    <div id="tab-account" class="settings-panel active">
+
+        @* Change Username *@
+        <div class="settings-card">
+            <h5>Change Username</h5>
+            <div class="sub">Requires your current password to confirm.</div>
+            <div style="display:grid;gap:10px;">
+                <div>
+                    <div class="form-label-sm">New username</div>
+                    <input id="new-username" class="inp" type="text" placeholder="3–50 characters" value="@Model.Username" />
+                </div>
+                <div>
+                    <div class="form-label-sm">Current password</div>
+                    <input id="username-pw" class="inp" type="password" placeholder="Your password" />
+                </div>
+            </div>
+            <div style="margin-top:14px;">
+                <button class="btn-save" onclick="changeUsername()">Save Username</button>
+            </div>
+            <div id="username-msg" class="feedback-msg"></div>
+        </div>
+
+        @* Change Email *@
+        <div class="settings-card">
+            <h5>Change Email</h5>
+            <div class="sub">Requires your current password to confirm.</div>
+            <div style="display:grid;gap:10px;">
+                <div>
+                    <div class="form-label-sm">New email</div>
+                    <input id="new-email" class="inp" type="email" placeholder="email@example.com" value="@Model.Email" />
+                </div>
+                <div>
+                    <div class="form-label-sm">Current password</div>
+                    <input id="email-pw" class="inp" type="password" placeholder="Your password" />
+                </div>
+            </div>
+            <div style="margin-top:14px;">
+                <button class="btn-save" onclick="changeEmail()">Save Email</button>
+            </div>
+            <div id="email-msg" class="feedback-msg"></div>
+        </div>
+
+        @* Change Password — link to existing page *@
+        <div class="settings-card">
+            <h5>Change Password</h5>
+            <div class="sub">Update your login password.</div>
+            <a href="/Account/ChangePassword" class="btn-outline" style="display:inline-block;text-decoration:none;">Go to Change Password →</a>
+        </div>
+
+    </div>
+
+    @* ── DAY START TAB ── *@
+    <div id="tab-daystart" class="settings-panel">
+        <div class="settings-card">
+            <h5>Custom Day Start</h5>
+            <div class="sub">Choose which hour the new day begins for cron and streak purposes. Default is midnight (0:00).</div>
+            <div class="day-grid" id="day-grid">
+                @for (int h = 0; h < 24; h++)
+                {
+                    <button class="day-btn @(Model.DayStart == h ? "selected" : "")"
+                            onclick="selectDayStart(@h, this)">
+                        @h.ToString("00"):00
+                    </button>
+                }
+            </div>
+            <div style="margin-top:16px;">
+                <button class="btn-save" onclick="saveDayStart()">Save Day Start</button>
+            </div>
+            <div id="daystart-msg" class="feedback-msg"></div>
+        </div>
+    </div>
+
+    @* ── PREFERENCES TAB ── *@
+    <div id="tab-prefs" class="settings-panel">
+        <div class="settings-card">
+            <h5>Notifications</h5>
+            <div class="sub">Control whether in-app notifications appear for you.</div>
+            <div class="toggle-row">
+                <label class="toggle">
+                    <input type="checkbox" id="suppress-notif" @(Model.SuppressNotifications ? "checked" : "") onchange="savePreferences()" />
+                    <span class="toggle-slider"></span>
+                </label>
+                <span style="font-size:14px;color:rgba(0,0,0,0.7);">Suppress all notifications</span>
+            </div>
+            <div id="prefs-msg" class="feedback-msg"></div>
+        </div>
+    </div>
+
+    @* ── PRIVACY TAB ── *@
+    <div id="tab-privacy" class="settings-panel">
+        <div class="settings-card">
+            <h5>Who can send you private messages?</h5>
+            <div class="sub">Controls who can reach your inbox.</div>
+            <div class="radio-row" id="pm-radio">
+                @foreach (var opt in new[] { ("everyone", "Everyone"), ("nobody", "Nobody") })
+                {
+                    <div class="radio-pill">
+                        <input type="radio" name="pm-perm" id="pm-@opt.Item1" value="@opt.Item1"
+                               @(Model.PMPermission == opt.Item1 ? "checked" : "") />
+                        <label for="pm-@opt.Item1">@opt.Item2</label>
+                    </div>
+                }
+            </div>
+            <div style="margin-top:20px;">
+                <h5>Profile visibility</h5>
+                <div class="sub">Who can view your public profile page.</div>
+                <div class="radio-row">
+                    @foreach (var opt in new[] { ("public", "Public"), ("private", "Private") })
+                    {
+                        <div class="radio-pill">
+                            <input type="radio" name="profile-vis" id="vis-@opt.Item1" value="@opt.Item1"
+                                   @(Model.ProfileVisibility == opt.Item1 ? "checked" : "") />
+                            <label for="vis-@opt.Item1">@opt.Item2</label>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div style="margin-top:14px;">
+                <button class="btn-save" onclick="savePrivacy()">Save Privacy</button>
+            </div>
+            <div id="privacy-msg" class="feedback-msg"></div>
+        </div>
+    </div>
+
+    @* ── API TOKEN TAB ── *@
+    <div id="tab-api" class="settings-panel">
+        <div class="settings-card">
+            <h5>API Token</h5>
+            <div class="sub">Use this token to authenticate API requests. Keep it secret.</div>
+            <div id="token-box" class="token-box" style="cursor:pointer;" onclick="copyToken()" title="Click to copy">
+                <span style="opacity:0.4;">Click 'Show Token' to reveal…</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-outline" onclick="showToken()">Show Token</button>
+                <button class="btn-save" onclick="regenToken()">Regenerate</button>
+            </div>
+            <div id="api-msg" class="feedback-msg"></div>
+        </div>
+    </div>
+
+    @* ── DATA TAB ── *@
+    <div id="tab-data" class="settings-panel">
+
+        @* Export *@
+        <div class="settings-card">
+            <h5>Export Account Data</h5>
+            <div class="sub">Download a JSON file with your account info, character stats, tasks, and badges.</div>
+            <a href="/Settings/ExportData" class="btn-save" style="display:inline-block;text-decoration:none;">⬇ Download Data</a>
+        </div>
+
+        @* Reset Progress *@
+        <div class="danger-box">
+            <h6>⚠ Reset Game Progress</h6>
+            <p>Wipes your level, XP, gold, HP, stats, and all tasks. Keeps your account, cosmetics, and achievements. This cannot be undone.</p>
+            <input id="reset-pw" class="inp" type="password" placeholder="Enter your password to confirm" style="margin-bottom:10px;" />
+            <br />
+            <button class="btn-danger2" onclick="resetProgress()">Reset Progress</button>
+            <div id="reset-msg" class="feedback-msg"></div>
+        </div>
+
+        @* Delete Account *@
+        <div class="danger-box" style="margin-top:16px;">
+            <h6>🗑 Delete Account</h6>
+            <p>Permanently deletes your account and all associated data. Type <strong>DELETE</strong> and enter your password to confirm.</p>
+            <div style="display:grid;gap:8px;margin-bottom:10px;">
+                <input id="delete-confirm" class="inp" type="text" placeholder='Type "DELETE" to confirm' />
+                <input id="delete-pw" class="inp" type="password" placeholder="Enter your password" />
+            </div>
+            <button class="btn-danger2" onclick="deleteAccount()">Delete My Account</button>
+            <div id="delete-msg" class="feedback-msg"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const TOKEN_URL    = '/Settings/GetApiToken';
+    const REGEN_URL    = '/Settings/RegenerateToken';
+    const DAYSTART_URL = '/Settings/SaveDayStart';
+    const PREFS_URL    = '/Settings/SavePreferences';
+    const PRIVACY_URL  = '/Settings/SavePrivacy';
+    const RESET_URL    = '/Settings/ResetProgress';
+    const DEL_URL      = '/Account/DeleteAccount';
+    const UNAMEURL     = '/Account/ChangeUsername';
+    const EMAILURL     = '/Account/ChangeEmail';
+
+    function csrfToken() {
+        return document.querySelector('[name=__RequestVerificationToken]')?.value ?? '';
+    }
+
+    function switchTab(name, btn) {
+        document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function feedback(id, msg, ok) {
+        var el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'feedback-msg ' + (ok ? 'ok' : 'err');
+        setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
+    }
+
+    // ── Account ─────────────────────────────────
+
+    async function changeUsername() {
+        var u = document.getElementById('new-username').value.trim();
+        var p = document.getElementById('username-pw').value;
+        if (!u || !p) { feedback('username-msg', 'Fill all fields.', false); return; }
+        var r = await fetch(UNAMEURL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken() }, body: JSON.stringify({ newUsername: u, password: p }) });
+        var d = await r.json();
+        feedback('username-msg', d.error || 'Username updated!', d.success);
+    }
+
+    async function changeEmail() {
+        var e = document.getElementById('new-email').value.trim();
+        var p = document.getElementById('email-pw').value;
+        if (!e || !p) { feedback('email-msg', 'Fill all fields.', false); return; }
+        var r = await fetch(EMAILURL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken() }, body: JSON.stringify({ newEmail: e, password: p }) });
+        var d = await r.json();
+        feedback('email-msg', d.error || 'Email updated!', d.success);
+    }
+
+    // ── Day Start ────────────────────────────────
+
+    var selectedDayStart = @Model.DayStart;
+
+    function selectDayStart(h, btn) {
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedDayStart = h;
+    }
+
+    async function saveDayStart() {
+        var r = await fetch(DAYSTART_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': csrfToken() }, body: 'dayStart=' + selectedDayStart });
+        var d = await r.json();
+        feedback('daystart-msg', d.error || 'Day start saved!', d.success);
+    }
+
+    // ── Preferences ──────────────────────────────
+
+    async function savePreferences() {
+        var suppress = document.getElementById('suppress-notif').checked;
+        var r = await fetch(PREFS_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': csrfToken() }, body: 'suppressNotifications=' + suppress });
+        var d = await r.json();
+        feedback('prefs-msg', d.error || 'Preferences saved!', d.success);
+    }
+
+    // ── Privacy ──────────────────────────────────
+
+    async function savePrivacy() {
+        var pm  = document.querySelector('[name=pm-perm]:checked')?.value ?? 'everyone';
+        var vis = document.querySelector('[name=profile-vis]:checked')?.value ?? 'public';
+        var r = await fetch(PRIVACY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': csrfToken() }, body: 'pmPermission=' + pm + '&profileVisibility=' + vis });
+        var d = await r.json();
+        feedback('privacy-msg', d.error || 'Privacy settings saved!', d.success);
+    }
+
+    // ── API Token ────────────────────────────────
+
+    var loadedToken = '';
+
+    async function showToken() {
+        var r = await fetch(TOKEN_URL);
+        var d = await r.json();
+        if (d.success) {
+            loadedToken = d.token;
+            document.getElementById('token-box').textContent = d.token;
+        } else {
+            feedback('api-msg', d.error, false);
+        }
+    }
+
+    async function regenToken() {
+        if (!confirm('Regenerate token? Old token will stop working immediately.')) return;
+        var r = await fetch(REGEN_URL, { method: 'POST', headers: { 'RequestVerificationToken': csrfToken() } });
+        var d = await r.json();
+        if (d.success) {
+            loadedToken = d.token;
+            document.getElementById('token-box').textContent = d.token;
+            feedback('api-msg', 'Token regenerated!', true);
+        } else {
+            feedback('api-msg', d.error, false);
+        }
+    }
+
+    function copyToken() {
+        if (!loadedToken) return;
+        navigator.clipboard.writeText(loadedToken).then(() => feedback('api-msg', 'Copied to clipboard!', true));
+    }
+
+    // ── Data ─────────────────────────────────────
+
+    async function resetProgress() {
+        var pw = document.getElementById('reset-pw').value;
+        if (!pw) { feedback('reset-msg', 'Enter your password.', false); return; }
+        if (!confirm('Reset all game progress? This cannot be undone.')) return;
+        var r = await fetch(RESET_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': csrfToken() }, body: 'password=' + encodeURIComponent(pw) });
+        var d = await r.json();
+        feedback('reset-msg', d.error || 'Progress reset! Page will reload…', d.success);
+        if (d.success) setTimeout(() => location.reload(), 1800);
+    }
+
+    async function deleteAccount() {
+        var confirm_ = document.getElementById('delete-confirm').value.trim();
+        var pw = document.getElementById('delete-pw').value;
+        if (confirm_ !== 'DELETE') { feedback('delete-msg', 'Type DELETE exactly.', false); return; }
+        if (!pw) { feedback('delete-msg', 'Enter your password.', false); return; }
+        if (!confirm('Permanently delete your account? This cannot be undone.')) return;
+        var r = await fetch(DEL_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': csrfToken() }, body: 'password=' + encodeURIComponent(pw) });
+        var d = await r.json();
+        if (d.success) { feedback('delete-msg', 'Account deleted. Redirecting…', true); setTimeout(() => location.href = '/Account/Login', 1500); }
+        else feedback('delete-msg', d.error, false);
+    }
+</script>
+
+@Html.AntiForgeryToken()

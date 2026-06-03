@@ -104,6 +104,12 @@ namespace HabitTracker.Controllers
                 return View(model);
             }
 
+            if (user.IsBanned)
+            {
+                ModelState.AddModelError("", "This account has been banned. Contact support if you believe this is an error.");
+                return View(model);
+            }
+
             SetUserSession(user);
             _logger.LogInformation($"User logged in: {user.Email}");
 
@@ -325,6 +331,80 @@ namespace HabitTracker.Controllers
             return View();
         }
 
+        // ===== CHANGE USERNAME =====
+        [HttpPost]
+        public async Task<IActionResult> ChangeUsername([FromBody] ChangeCredentialRequest req)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false, error = "Not logged in." });
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return Json(new { success = false, error = "User not found." });
+
+            if (!_authService.VerifyPassword(req.Password, user.Password))
+                return Json(new { success = false, error = "Incorrect password." });
+
+            var newUsername = req.NewUsername?.Trim() ?? "";
+            if (newUsername.Length < AppConstants.MIN_USERNAME_LENGTH || newUsername.Length > AppConstants.MAX_USERNAME_LENGTH)
+                return Json(new { success = false, error = $"Username must be {AppConstants.MIN_USERNAME_LENGTH}–{AppConstants.MAX_USERNAME_LENGTH} characters." });
+
+            var taken = await _context.Users.AnyAsync(u => u.Username == newUsername && u.Id != userId);
+            if (taken) return Json(new { success = false, error = "Username already taken." });
+
+            user.Username = newUsername;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString(AppConstants.SESSION_USERNAME, user.Username);
+            return Json(new { success = true });
+        }
+
+        // ===== CHANGE EMAIL =====
+        [HttpPost]
+        public async Task<IActionResult> ChangeEmail([FromBody] ChangeCredentialRequest req)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false, error = "Not logged in." });
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return Json(new { success = false, error = "User not found." });
+
+            if (!_authService.VerifyPassword(req.Password, user.Password))
+                return Json(new { success = false, error = "Incorrect password." });
+
+            var newEmail = req.NewEmail?.ToLower().Trim() ?? "";
+            if (!newEmail.Contains('@')) return Json(new { success = false, error = "Invalid email address." });
+
+            var taken = await _context.Users.AnyAsync(u => u.Email == newEmail && u.Id != userId);
+            if (taken) return Json(new { success = false, error = "Email already in use." });
+
+            user.Email = newEmail;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        // ===== DELETE ACCOUNT =====
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount(string password)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Json(new { success = false, error = "Not logged in." });
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return Json(new { success = false, error = "User not found." });
+
+            if (!_authService.VerifyPassword(password, user.Password))
+                return Json(new { success = false, error = "Incorrect password." });
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.Clear();
+            return Json(new { success = true });
+        }
+
         // ===== VIEW OTHER USER PROFILE (public) =====
         public async Task<IActionResult> PublicProfile(int id)
         {
@@ -348,5 +428,12 @@ namespace HabitTracker.Controllers
         {
             return HttpContext.Session.GetInt32(AppConstants.SESSION_USER_ID);
         }
+    }
+
+    public class ChangeCredentialRequest
+    {
+        public string? NewUsername { get; set; }
+        public string? NewEmail    { get; set; }
+        public string  Password    { get; set; } = "";
     }
 }

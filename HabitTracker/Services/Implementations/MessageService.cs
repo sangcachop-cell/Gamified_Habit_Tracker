@@ -33,10 +33,21 @@ public class MessageService : IMessageService
         if (receiver == null)
             return (false, "User not found.", null);
 
+        var sender = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == senderId);
+        if (sender == null)
+            return (false, "Sender not found.", null);
+
+        if (sender.IsBanned)
+            return (false, "Your account has been banned.", null);
+
+        if (sender.IsMuted)
+            return (false, "You have been muted and cannot send messages.", null);
+
         if (await IsBlockedAsync(senderId, receiverId))
             return (false, "Cannot send message — user is blocked.", null);
 
-        var sender = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == senderId);
+        if (receiver.PMPermission == "nobody")
+            return (false, "This user is not accepting private messages.", null);
 
         var message = new Message
         {

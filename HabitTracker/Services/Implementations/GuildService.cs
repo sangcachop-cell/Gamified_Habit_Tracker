@@ -10,12 +10,14 @@ public class GuildService : IGuildService
 {
     private readonly AppDbContext _context;
     private readonly INotificationService _notifications;
+    private readonly IAchievementService _achievements;
     private const int PAGE_SIZE = 20;
 
-    public GuildService(AppDbContext context, INotificationService notifications)
+    public GuildService(AppDbContext context, INotificationService notifications, IAchievementService achievements)
     {
-        _context = context;
+        _context       = context;
         _notifications = notifications;
+        _achievements  = achievements;
     }
 
     public async Task<(bool Success, string? Error, Guild? Guild)> CreateAsync(
@@ -140,6 +142,7 @@ public class GuildService : IGuildService
             JoinedAt = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
+        await _achievements.CheckGuildJoinAsync(userId);
         return (true, null);
     }
 
@@ -242,6 +245,7 @@ public class GuildService : IGuildService
             JoinedAt = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
+        await _achievements.CheckGuildJoinAsync(userId);
         return (true, null);
     }
 
@@ -316,6 +320,10 @@ public class GuildService : IGuildService
         if (!await IsMemberAsync(userId, guildId))
             return (false, "You must be a member to chat.", null);
 
+        var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user?.IsBanned == true) return (false, "Your account has been banned.", null);
+        if (user?.IsMuted  == true) return (false, "You have been muted and cannot chat.", null);
+
         body = body.Trim();
         if (string.IsNullOrWhiteSpace(body)) return (false, "Message is empty.", null);
         if (body.Length > 2000) return (false, "Message exceeds 2000 characters.", null);
@@ -332,7 +340,7 @@ public class GuildService : IGuildService
         await _context.SaveChangesAsync();
 
         var guild = await _context.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.Id == guildId);
-        await ProcessMentionsAsync(body, guild?.Name ?? "a guild", $"/Guild/View/{guildId}", userId);
+        await ProcessMentionsAsync(body, guildId, guild?.Name ?? "a guild", $"/Guild/View/{guildId}", userId);
 
         return (true, null, msg);
     }
@@ -357,14 +365,25 @@ public class GuildService : IGuildService
             .Distinct()
             .ToList();
 
-        var mentionLookup = mentionedNames.Any()
-            ? (await _context.Users.AsNoTracking()
-                .Where(u => mentionedNames.Contains(u.Username))
+        Dictionary<string, int> mentionLookup;
+        if (mentionedNames.Any())
+        {
+            var memberIds = await _context.GuildMembers
+                .Where(gm => gm.GuildId == guildId)
+                .Select(gm => gm.UserId)
+                .ToListAsync();
+
+            mentionLookup = (await _context.Users.AsNoTracking()
+                .Where(u => memberIds.Contains(u.Id) && mentionedNames.Contains(u.Username))
                 .Select(u => new { u.Username, u.Id })
                 .ToListAsync())
                 .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase)
-            : new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+        }
+        else
+        {
+            mentionLookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        }
 
         return messages.Select(m => new GuildMessageEntry
         {
@@ -437,13 +456,18 @@ public class GuildService : IGuildService
         return member?.Role;
     }
 
-    public async Task<string> RenderBodyAsync(string body)
+    public async Task<string> RenderBodyAsync(string body, int guildId)
     {
         var names = Regex.Matches(body, @"@(\w+)").Select(m => m.Groups[1].Value).Distinct().ToList();
         if (!names.Any()) return body;
 
+        var memberIds = await _context.GuildMembers
+            .Where(gm => gm.GuildId == guildId)
+            .Select(gm => gm.UserId)
+            .ToListAsync();
+
         var lookup = (await _context.Users.AsNoTracking()
-            .Where(u => names.Contains(u.Username))
+            .Where(u => memberIds.Contains(u.Id) && names.Contains(u.Username))
             .Select(u => new { u.Username, u.Id })
             .ToListAsync())
             .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
@@ -454,18 +478,56 @@ public class GuildService : IGuildService
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    private async Task ProcessMentionsAsync(string body, string groupName, string groupLink, int authorId)
+    private async Task ProcessMentionsAsync(string body, int guildId, string groupName, string groupLink, int authorId)
     {
-        var mentions = Regex.Matches(body, @"@(\w+)");
+        var mentions = Regex.Matches(body, @"@(\w+)(?::(\d+))?");
+        if (mentions.Count == 0) return;
+
+        var memberIds = await _context.GuildMembers
+            .Where(gm => gm.GuildId == guildId)
+            .Select(gm => gm.UserId)
+            .ToListAsync();
+
+        var memberIdSet = memberIds.ToHashSet();
+
+        // Build name lookup for @name format (not needed for @name:id format)
+        var mentionedNames = mentions
+            .Where(m => !m.Groups[2].Success)
+            .Select(m => m.Groups[1].Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var memberLookup = mentionedNames.Any()
+            ? (await _context.Users.AsNoTracking()
+                .Where(u => memberIdSet.Contains(u.Id) && mentionedNames.Contains(u.Username))
+                .Select(u => new { u.Id, u.Username })
+                .ToListAsync())
+                .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        var notified = new HashSet<int>();
         foreach (Match match in mentions)
         {
             var username = match.Groups[1].Value;
-            var user = await _context.Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null || user.Id == authorId) continue;
+            int targetId;
+
+            if (match.Groups[2].Success && int.TryParse(match.Groups[2].Value, out var explicitId))
+            {
+                // @username:id — explicit selection from autocomplete
+                if (!memberIdSet.Contains(explicitId)) continue;
+                targetId = explicitId;
+            }
+            else
+            {
+                // @username — resolve by name within guild members
+                if (!memberLookup.TryGetValue(username, out targetId)) continue;
+            }
+
+            if (targetId == authorId || !notified.Add(targetId)) continue;
 
             await _notifications.CreateNotificationAsync(
-                user.Id,
+                targetId,
                 $"You were mentioned in {groupName}",
                 body.Length > 80 ? body[..80] + "…" : body,
                 "Social",
@@ -477,9 +539,12 @@ public class GuildService : IGuildService
 
     private static string RenderMentions(string body, Dictionary<string, int> userLookup)
     {
-        return Regex.Replace(body, @"@(\w+)", m =>
+        return Regex.Replace(body, @"@(\w+)(?::(\d+))?", m =>
         {
             var name = m.Groups[1].Value;
+            // @username:id — explicit id from autocomplete selection
+            if (m.Groups[2].Success && int.TryParse(m.Groups[2].Value, out var explicitId))
+                return $"<a href=\"/Friend/ViewProfile/{explicitId}\" class=\"mention fw-semibold\">@{name}</a>";
             return userLookup.TryGetValue(name, out var id)
                 ? $"<a href=\"/Friend/ViewProfile/{id}\" class=\"mention fw-semibold\">@{name}</a>"
                 : $"@{name}";

@@ -1,0 +1,137 @@
+@model List<HabitTracker.Models.User>
+@{
+    ViewData["Title"] = "Admin — Users";
+    var q = (string?)ViewBag.Q ?? "";
+}
+<style>
+    body { background: #f5f3ef; font-family: "DM Sans",sans-serif }
+    .admin-hero { background: #0a0a12; border-radius:20px; padding:28px 36px; color:white; margin-bottom:24px; position:relative; overflow:hidden; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px }
+    .admin-hero::before { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 10% 60%,rgba(232,67,106,.35),transparent 50%),radial-gradient(ellipse at 90% 30%,rgba(92,61,222,.3),transparent 55%); pointer-events:none }
+    .admin-hero h2 { font-size:1.5rem; font-weight:800; letter-spacing:-1px; position:relative; z-index:2; margin:0 }
+    .admin-hero p { color:rgba(255,255,255,.55); font-size:.85rem; margin:4px 0 0; position:relative; z-index:2 }
+    .glass-card { background:white; border-radius:16px; border:1.5px solid rgba(0,0,0,.07); overflow:hidden; margin-bottom:24px; box-shadow:0 4px 16px rgba(0,0,0,.04) }
+    .search-bar { padding:16px 22px; border-bottom:1px solid #f0f0f0; display:flex; gap:10px; align-items:center }
+    .search-bar input { flex:1; border:1.5px solid #e5e5e5; border-radius:50px; padding:8px 18px; font-size:.88rem; outline:none }
+    .search-bar input:focus { border-color:#5c3dde }
+    .search-bar button { background:#5c3dde; color:white; border:none; border-radius:50px; padding:8px 22px; font-size:.85rem; font-weight:700; cursor:pointer }
+    table { width:100%; border-collapse:collapse }
+    th { padding:11px 16px; text-align:left; font-size:.73rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#aaa; background:#fafafa; border-bottom:1px solid #f0f0f0 }
+    td { padding:12px 16px; border-bottom:1px solid #f8f8f8; vertical-align:middle; font-size:.86rem }
+    tr:last-child td { border:none }
+    tr:hover td { background:#fafcff }
+    .user-name { font-weight:700 }
+    .user-email { font-size:.78rem; color:#aaa; margin-top:2px }
+    .badge-pill { display:inline-block; padding:2px 9px; border-radius:50px; font-size:.7rem; font-weight:700; margin-right:3px }
+    .bp-admin { background:#fff0c2; color:#b07800 }
+    .bp-muted { background:#fde8ed; color:#e8436a }
+    .bp-banned { background:#fde8ed; color:#c00 }
+    .btn-sm-act { padding:5px 12px; border:none; border-radius:50px; font-size:.75rem; font-weight:600; cursor:pointer; transition:.15s }
+    .btn-view { background:#edeaf5; color:#5c3dde; text-decoration:none }
+    .btn-mute { background:#fde8ed; color:#e8436a }
+    .btn-unmute { background:#d4f5ef; color:#00b89c }
+    .btn-ban { background:#fde8ed; color:#c00 }
+    .btn-unban { background:#d4f5ef; color:#006651 }
+    .btn-admin { background:#fff0c2; color:#b07800 }
+    .btn-sm-act:hover { opacity:.8 }
+    .alert-s { background:#d4f5ef; color:#006651; padding:11px 16px; border-radius:10px; font-size:.88rem; margin-bottom:18px }
+    .alert-e { background:#fde8ed; color:#c00; padding:11px 16px; border-radius:10px; font-size:.88rem; margin-bottom:18px }
+    .nav-pills-admin { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px }
+    .nav-pills-admin a { padding:8px 18px; border-radius:50px; font-size:.82rem; font-weight:700; text-decoration:none; background:#edeaf5; color:#5c3dde }
+    .nav-pills-admin a.active { background:#5c3dde; color:white }
+    .count-info { font-size:.82rem; color:#aaa; padding:8px 22px 0 }
+</style>
+
+<div style="padding:8px 0 48px">
+    @if (TempData["Success"] != null) { <div class="alert-s">✅ @TempData["Success"]</div> }
+    @if (TempData["Error"] != null) { <div class="alert-e">❌ @TempData["Error"]</div> }
+
+    <div class="admin-hero">
+        <div>
+            <h2>👤 User Management</h2>
+            <p>Search, view history, mute, ban users</p>
+        </div>
+    </div>
+
+    <div class="nav-pills-admin">
+        <a asp-action="Index">📋 Quests</a>
+        <a asp-action="Users" class="active">👤 Users</a>
+        <a asp-action="Groups">🏰 Groups</a>
+        <a asp-action="Blocklist">🚫 Blocklist</a>
+        <a asp-action="Reports">📣 Reports</a>
+        <a asp-action="Stats">📊 Stats</a>
+    </div>
+
+    <div class="glass-card">
+        <div class="search-bar">
+            <form method="get" style="display:flex;flex:1;gap:10px">
+                <input type="text" name="q" value="@q" placeholder="Search by username, email, or user ID…" />
+                <button type="submit">🔍 Search</button>
+            </form>
+        </div>
+        @if (Model.Any())
+        {
+            <div class="count-info">
+                Showing @Model.Count user(s)@if (!string.IsNullOrEmpty(q)) { <text> for "@q"</text> }
+            </div>
+        }
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Level / XP</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td style="color:#aaa;font-size:.8rem">#@u.Id</td>
+                        <td>
+                            <div class="user-name">@u.Username</div>
+                            <div class="user-email">@u.Email</div>
+                        </td>
+                        <td>Lv @u.Level &nbsp;·&nbsp; <span style="color:#f0b429">@u.XP XP</span></td>
+                        <td style="font-size:.8rem;color:#aaa">@u.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (u.IsAdmin) { <span class="badge-pill bp-admin">ADMIN</span> }
+                            @if (u.IsMuted) { <span class="badge-pill bp-muted">MUTED</span> }
+                            @if (u.IsBanned) { <span class="badge-pill bp-banned">BANNED</span> }
+                        </td>
+                        <td style="display:flex;gap:6px;flex-wrap:wrap">
+                            <a asp-action="UserDetail" asp-route-id="@u.Id" class="btn-sm-act btn-view">👁 View</a>
+                            @Html.AntiForgeryToken()
+                            <form asp-action="MuteUser" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn-sm-act @(u.IsMuted ? "btn-unmute" : "btn-mute")">
+                                    @(u.IsMuted ? "🔊 Unmute" : "🔇 Mute")
+                                </button>
+                            </form>
+                            <form asp-action="BanUser" method="post" style="display:inline"
+                                  onsubmit="return confirm('@(u.IsBanned ? "Unban" : "Ban") @u.Username?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn-sm-act @(u.IsBanned ? "btn-unban" : "btn-ban")">
+                                    @(u.IsBanned ? "✅ Unban" : "🔨 Ban")
+                                </button>
+                            </form>
+                            <form asp-action="ToggleAdmin" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn-sm-act btn-admin">⭐ @(u.IsAdmin ? "Revoke Admin" : "Make Admin")</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" style="text-align:center;color:#aaa;padding:32px">No users found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
