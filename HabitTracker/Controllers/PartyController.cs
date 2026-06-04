@@ -155,7 +155,7 @@ public class PartyController : Controller
             ? "/images/default.png"
             : "/uploads/" + author.Avatar;
 
-        var renderedBody = await _party.RenderBodyAsync(msg!.Body);
+        var renderedBody = await _party.RenderBodyAsync(msg!.Body, msg.PartyId);
 
         return Json(new
         {

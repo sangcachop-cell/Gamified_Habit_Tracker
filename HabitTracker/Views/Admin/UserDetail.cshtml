@@ -1,0 +1,181 @@
+@model HabitTracker.Models.User
+@using HabitTracker.Models
+@{
+    ViewData["Title"] = "Admin — User Detail";
+    var tasks     = (List<HabitTask>)ViewBag.Tasks;
+    var gear      = (List<UserGearItem>)ViewBag.Gear;
+    var inventory = (List<UserInventoryItem>)ViewBag.Inventory;
+}
+<style>
+    body { background:#f5f3ef; font-family:"DM Sans",sans-serif }
+    .glass-card { background:white; border-radius:16px; border:1.5px solid rgba(0,0,0,.07); overflow:hidden; margin-bottom:24px; box-shadow:0 4px 16px rgba(0,0,0,.04) }
+    .card-head { padding:14px 22px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between }
+    .card-head h4 { font-size:.9rem; font-weight:700; margin:0 }
+    .profile-hero { background:#0a0a12; border-radius:20px; padding:28px 36px; color:white; margin-bottom:24px; display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap }
+    .profile-hero h2 { font-size:1.4rem; font-weight:800; margin:0 0 4px }
+    .profile-hero p { color:rgba(255,255,255,.55); font-size:.85rem; margin:0 }
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; padding:16px 22px }
+    .stat-box { background:#f7f5ff; border-radius:12px; padding:12px 16px; text-align:center }
+    .stat-box .val { font-family:"Syne",sans-serif; font-size:1.3rem; font-weight:800; color:#5c3dde }
+    .stat-box .lbl { font-size:.73rem; color:#aaa; margin-top:2px }
+    table { width:100%; border-collapse:collapse }
+    th { padding:10px 16px; text-align:left; font-size:.73rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#aaa; background:#fafafa; border-bottom:1px solid #f0f0f0 }
+    td { padding:11px 16px; border-bottom:1px solid #f8f8f8; font-size:.86rem; vertical-align:middle }
+    tr:last-child td { border:none }
+    .badge-pill { display:inline-block; padding:2px 9px; border-radius:50px; font-size:.7rem; font-weight:700 }
+    .bp-admin { background:#fff0c2; color:#b07800 }
+    .bp-muted { background:#fde8ed; color:#e8436a }
+    .bp-banned { background:#fde8ed; color:#c00 }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; background:#edeaf5; color:#5c3dde; padding:8px 18px; border-radius:50px; font-size:.82rem; font-weight:700; text-decoration:none; margin-bottom:18px }
+    .section-empty { padding:24px; text-align:center; color:#aaa; font-size:.86rem }
+    .task-type { display:inline-block; padding:2px 8px; border-radius:50px; font-size:.7rem; font-weight:700 }
+    .tt-habit { background:#e3f0ff; color:#2255aa }
+    .tt-daily { background:#e2f5e2; color:#2e7d2e }
+    .tt-todo { background:#f0f4ff; color:#4457aa }
+</style>
+
+<div style="padding:8px 0 48px">
+    <a asp-action="Users" class="back-btn">← Back to Users</a>
+
+    <div class="profile-hero">
+        <div>
+            <h2>@Model.Username <span style="font-size:.9rem;font-weight:400;opacity:.6">#@Model.Id</span></h2>
+            <p>@Model.Email</p>
+            <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+                @if (Model.IsAdmin) { <span class="badge-pill bp-admin">ADMIN</span> }
+                @if (Model.IsMuted) { <span class="badge-pill bp-muted">MUTED</span> }
+                @if (Model.IsBanned) { <span class="badge-pill bp-banned">BANNED</span> }
+                @if (Model.Class != null) { <span class="badge-pill" style="background:#edeaf5;color:#5c3dde">@Model.Class.ToUpper()</span> }
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="glass-card">
+        <div class="card-head"><h4>📊 Stats</h4></div>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="val">@Model.Level</div><div class="lbl">Level</div></div>
+            <div class="stat-box"><div class="val">@Model.XP</div><div class="lbl">Total XP</div></div>
+            <div class="stat-box"><div class="val" style="color:#f0b429">@Model.Gold.ToString("0.0")</div><div class="lbl">Gold</div></div>
+            <div class="stat-box"><div class="val" style="color:#4e9af1">@Model.Gems</div><div class="lbl">Gems</div></div>
+            <div class="stat-box"><div class="val" style="color:#e8436a">@Model.HP.ToString("0.0")</div><div class="lbl">HP</div></div>
+            <div class="stat-box"><div class="val">@Model.CurrentStreak</div><div class="lbl">Streak</div></div>
+            <div class="stat-box"><div class="val">@Model.TotalTasksCompleted</div><div class="lbl">Tasks Done</div></div>
+            <div class="stat-box"><div class="val">@Model.PerfectDayCount</div><div class="lbl">Perfect Days</div></div>
+            <div class="stat-box"><div class="val">@Model.STR/@Model.CON/@Model.INT/@Model.PER</div><div class="lbl">STR/CON/INT/PER</div></div>
+        </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="glass-card">
+        <div class="card-head"><h4>🧾 Account Info</h4></div>
+        <table>
+            <tr><td style="color:#aaa;width:160px">Joined</td><td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm") UTC</td></tr>
+            <tr><td style="color:#aaa">Last Active</td><td>@(Model.LastActiveDate?.ToString("yyyy-MM-dd") ?? "—")</td></tr>
+            <tr><td style="color:#aaa">Last Cron</td><td>@(Model.LastCronDate?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td></tr>
+            <tr><td style="color:#aaa">Day Start</td><td>@Model.DayStart:00</td></tr>
+            <tr><td style="color:#aaa">PM Permission</td><td>@Model.PMPermission</td></tr>
+            <tr><td style="color:#aaa">Profile</td><td>@Model.ProfileVisibility</td></tr>
+            <tr><td style="color:#aaa">Rebirth Count</td><td>@Model.RebirthCount</td></tr>
+            <tr><td style="color:#aaa">Sleeping</td><td>@(Model.IsSleeping ? "Yes" : "No")</td></tr>
+        </table>
+    </div>
+
+    <!-- Recent tasks -->
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>📋 Recent Tasks (last 50)</h4>
+            <span style="font-size:.8rem;color:#aaa">@tasks.Count tasks</span>
+        </div>
+        @if (tasks.Any())
+        {
+            <table>
+                <thead><tr><th>Title</th><th>Type</th><th>Value</th><th>Created</th></tr></thead>
+                <tbody>
+                    @foreach (var t in tasks)
+                    {
+                        <tr>
+                            <td>@t.Text</td>
+                            <td><span class="task-type tt-@t.Type.ToString().ToLower()">@t.Type</span></td>
+                            <td>@t.Value.ToString("0.00")</td>
+                            <td style="color:#aaa;font-size:.8rem">@((t.UpdatedAt ?? t.CreatedAt).ToString("yyyy-MM-dd"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else { <div class="section-empty">No tasks found.</div> }
+    </div>
+
+    <!-- Inventory -->
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>🎒 Inventory</h4>
+            <span style="font-size:.8rem;color:#aaa">@inventory.Count item types</span>
+        </div>
+        @if (inventory.Any())
+        {
+            <table>
+                <thead><tr><th>Item</th><th>Type</th><th>Qty</th></tr></thead>
+                <tbody>
+                    @foreach (var i in inventory)
+                    {
+                        <tr>
+                            <td>@(i.GameItem?.Name ?? $"Item #{i.GameItemId}")</td>
+                            <td style="color:#aaa;font-size:.8rem">@(i.GameItem?.Type.ToString() ?? "")</td>
+                            <td>@i.Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else { <div class="section-empty">No inventory items.</div> }
+    </div>
+
+    <!-- Gear -->
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>⚔️ Owned Gear</h4>
+            <span style="font-size:.8rem;color:#aaa">@gear.Count pieces</span>
+        </div>
+        @if (gear.Any())
+        {
+            <table>
+                <thead><tr><th>Gear</th><th>Slot</th><th>Class</th></tr></thead>
+                <tbody>
+                    @foreach (var g in gear)
+                    {
+                        <tr>
+                            <td>@(g.GearItem?.Name ?? g.GearItemId.ToString())</td>
+                            <td style="color:#aaa;font-size:.8rem">@(g.GearItem?.Slot ?? "")</td>
+                            <td style="font-size:.8rem">@(g.GearItem?.GearClass ?? "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else { <div class="section-empty">No gear owned.</div> }
+    </div>
+
+    <!-- Badges -->
+    <div class="glass-card">
+        <div class="card-head">
+            <h4>🏆 Badges</h4>
+            <span style="font-size:.8rem;color:#aaa">@(Model.UserBadges?.Count ?? 0) earned</span>
+        </div>
+        @if (Model.UserBadges?.Any() == true)
+        {
+            <div style="padding:14px 22px;display:flex;flex-wrap:wrap;gap:10px">
+                @foreach (var ub in Model.UserBadges)
+                {
+                    <div style="background:#f7f5ff;border-radius:10px;padding:8px 14px;font-size:.82rem">
+                        <span style="font-size:1.1rem">@(ub.Badge?.Icon ?? "🏅")</span>
+                        <span style="font-weight:700;margin-left:6px">@(ub.Badge?.Name ?? "Badge")</span>
+                        <span style="color:#aaa;font-size:.75rem;margin-left:6px">@ub.EarnedDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                }
+            </div>
+        }
+        else { <div class="section-empty">No badges earned.</div> }
+    </div>
+</div>

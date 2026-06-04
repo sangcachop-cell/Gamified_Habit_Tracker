@@ -290,6 +290,10 @@ public class PartyService : IPartyService
         var myParty = await GetMyPartyAsync(userId);
         if (myParty == null) return (false, "You are not in a party.", null);
 
+        var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user?.IsBanned == true) return (false, "Your account has been banned.", null);
+        if (user?.IsMuted  == true) return (false, "You have been muted and cannot chat.", null);
+
         body = body.Trim();
         if (string.IsNullOrWhiteSpace(body)) return (false, "Message is empty.", null);
         if (body.Length > 2000) return (false, "Message exceeds 2000 characters.", null);
@@ -305,7 +309,7 @@ public class PartyService : IPartyService
         _context.PartyMessages.Add(msg);
         await _context.SaveChangesAsync();
 
-        await ProcessMentionsAsync(body, myParty.Name, $"/Party", userId);
+        await ProcessMentionsAsync(body, myParty.Id, myParty.Name, $"/Party", userId);
 
         return (true, null, msg);
     }
@@ -329,11 +333,25 @@ public class PartyService : IPartyService
             .Distinct()
             .ToList();
 
-        var mentionLookup = mentionedNames.Any()
-            ? await _context.Users.AsNoTracking()
-                .Where(u => mentionedNames.Contains(u.Username))
-                .ToDictionaryAsync(u => u.Username, u => u.Id)
-            : new Dictionary<string, int>();
+        Dictionary<string, int> mentionLookup;
+        if (mentionedNames.Any())
+        {
+            var memberIds = await _context.PartyMembers
+                .Where(pm => pm.PartyId == partyId)
+                .Select(pm => pm.UserId)
+                .ToListAsync();
+
+            mentionLookup = (await _context.Users.AsNoTracking()
+                .Where(u => memberIds.Contains(u.Id) && mentionedNames.Contains(u.Username))
+                .Select(u => new { u.Username, u.Id })
+                .ToListAsync())
+                .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+        }
+        else
+        {
+            mentionLookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        }
 
         return messages.Select(m =>
         {
@@ -412,18 +430,53 @@ public class PartyService : IPartyService
             .ToListAsync();
     }
 
-    private async Task ProcessMentionsAsync(string body, string partyName, string link, int authorId)
+    private async Task ProcessMentionsAsync(string body, int partyId, string partyName, string link, int authorId)
     {
-        var mentions = Regex.Matches(body, @"@(\w+)");
+        var mentions = Regex.Matches(body, @"@(\w+)(?::(\d+))?");
+        if (mentions.Count == 0) return;
+
+        var memberIds = await _context.PartyMembers
+            .Where(pm => pm.PartyId == partyId)
+            .Select(pm => pm.UserId)
+            .ToListAsync();
+
+        var memberIdSet = memberIds.ToHashSet();
+
+        var mentionedNames = mentions
+            .Where(m => !m.Groups[2].Success)
+            .Select(m => m.Groups[1].Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var memberLookup = mentionedNames.Any()
+            ? (await _context.Users.AsNoTracking()
+                .Where(u => memberIdSet.Contains(u.Id) && mentionedNames.Contains(u.Username))
+                .Select(u => new { u.Id, u.Username })
+                .ToListAsync())
+                .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        var notified = new HashSet<int>();
         foreach (Match match in mentions)
         {
             var username = match.Groups[1].Value;
-            var user = await _context.Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null || user.Id == authorId) continue;
+            int targetId;
+
+            if (match.Groups[2].Success && int.TryParse(match.Groups[2].Value, out var explicitId))
+            {
+                if (!memberIdSet.Contains(explicitId)) continue;
+                targetId = explicitId;
+            }
+            else
+            {
+                if (!memberLookup.TryGetValue(username, out targetId)) continue;
+            }
+
+            if (targetId == authorId || !notified.Add(targetId)) continue;
 
             await _notifications.CreateNotificationAsync(
-                user.Id,
+                targetId,
                 $"You were mentioned in {partyName}",
                 body.Length > 80 ? body[..80] + "…" : body,
                 "Social",
@@ -433,13 +486,18 @@ public class PartyService : IPartyService
         }
     }
 
-    public async Task<string> RenderBodyAsync(string body)
+    public async Task<string> RenderBodyAsync(string body, int partyId)
     {
         var names = Regex.Matches(body, @"@(\w+)").Select(m => m.Groups[1].Value).Distinct().ToList();
         if (!names.Any()) return body;
 
+        var memberIds = await _context.PartyMembers
+            .Where(pm => pm.PartyId == partyId)
+            .Select(pm => pm.UserId)
+            .ToListAsync();
+
         var lookup = (await _context.Users.AsNoTracking()
-            .Where(u => names.Contains(u.Username))
+            .Where(u => memberIds.Contains(u.Id) && names.Contains(u.Username))
             .Select(u => new { u.Username, u.Id })
             .ToListAsync())
             .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
@@ -450,9 +508,12 @@ public class PartyService : IPartyService
 
     private static string RenderMentions(string body, Dictionary<string, int> userLookup)
     {
-        return Regex.Replace(body, @"@(\w+)", m =>
+        return Regex.Replace(body, @"@(\w+)(?::(\d+))?", m =>
         {
             var name = m.Groups[1].Value;
+            // @username:id — explicit id from autocomplete selection
+            if (m.Groups[2].Success && int.TryParse(m.Groups[2].Value, out var explicitId))
+                return $"<a href=\"/Friend/ViewProfile/{explicitId}\" class=\"mention fw-semibold\">@{name}</a>";
             return userLookup.TryGetValue(name, out var id)
                 ? $"<a href=\"/Friend/ViewProfile/{id}\" class=\"mention fw-semibold\">@{name}</a>"
                 : $"@{name}";

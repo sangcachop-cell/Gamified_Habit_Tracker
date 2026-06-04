@@ -14,14 +14,18 @@ namespace HabitTracker.Services.Implementations
         private readonly IBossQuestService _bossQuestService;
         private readonly ILogger<TaskService> _logger;
 
+        private readonly IAchievementService _achievements;
+
         public TaskService(AppDbContext context, IQuestService questService,
                            IEconomyService economyService, IBossQuestService bossQuestService,
+                           IAchievementService achievements,
                            ILogger<TaskService> logger)
         {
             _context          = context;
             _questService     = questService;
             _economyService   = economyService;
             _bossQuestService = bossQuestService;
+            _achievements     = achievements;
             _logger           = logger;
         }
 
@@ -275,6 +279,8 @@ namespace HabitTracker.Services.Implementations
             {
                 user.TotalQuestsCompleted++;
                 user.LastActiveDate = DateTime.UtcNow;
+                if (task.Type != TaskType.Reward)
+                    user.TotalTasksCompleted++;
             }
 
             // Type-specific side-effects
@@ -308,7 +314,14 @@ namespace HabitTracker.Services.Implementations
 
             await _context.SaveChangesAsync();
 
-            var newBadges = await _questService.AwardBadgesAsync(user, oldXP);
+            var newBadges = new List<string>();
+            if (isUp)
+            {
+                var s1 = await _achievements.CheckStreakAsync(user);
+                var s2 = await _achievements.CheckTaskMilestoneAsync(user);
+                newBadges.AddRange(s1);
+                newBadges.AddRange(s2);
+            }
 
             return new ScoreResultViewModel
             {
@@ -378,12 +391,15 @@ namespace HabitTracker.Services.Implementations
 
         public async Task RunCronAsync(int userId)
         {
-            var today = DateTime.Today;
-
             var user = await _context.Users
                 .Include(u => u.OwnedGear!).ThenInclude(ug => ug.GearItem)
                 .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return;
+
+            // Respect custom day start: if current local hour < DayStart, we're still in yesterday
+            var now = DateTime.Now;
+            var today = now.Hour < user.DayStart ? now.Date.AddDays(-1) : now.Date;
+
             if (user.LastCronDate?.Date == today) return;
 
             var tasks = await _context.HabitTasks
@@ -462,7 +478,7 @@ namespace HabitTracker.Services.Implementations
             user.BuffPER    = 0;
             user.BuffExpiry = null;
 
-            // Perfect Day: all due Dailies completed → grant ceil(level/2) to all stats
+            // Perfect Day: all due Dailies completed → grant buff + increment counter
             if (anyDailyDue && allDailiesCompleted)
             {
                 int buffAmount  = (int)Math.Ceiling(Math.Min(user.Level, 100) / 2.0);
@@ -471,6 +487,7 @@ namespace HabitTracker.Services.Implementations
                 user.BuffINT    = buffAmount;
                 user.BuffPER    = buffAmount;
                 user.BuffExpiry = DateTime.UtcNow.AddDays(1);
+                user.PerfectDayCount++;
             }
 
             await _economyService.ApplyCronManaRegenAsync(user);
@@ -483,6 +500,9 @@ namespace HabitTracker.Services.Implementations
                 user.FrozenStreaks = false;
 
             await _context.SaveChangesAsync();
+
+            if (anyDailyDue && allDailiesCompleted)
+                await _achievements.CheckPerfectDayAsync(user);
 
             _logger.LogInformation("Cron ran for user {UserId} on {Date}", userId, today);
         }

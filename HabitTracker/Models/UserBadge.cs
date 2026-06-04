@@ -28,21 +28,8 @@ namespace HabitTracker.Models
         [Required]
         public Badge? Badge { get; set; }
 
-        // ===== METHODS =====
-        /// <summary>
-        /// Get display name
-        /// </summary>
-        public string GetDisplayName()
-        {
-            return Badge?.GetDisplayName() ?? "Unknown Badge";
-        }
+        public string GetDisplayName() => Badge != null ? $"{Badge.Icon} {Badge.Name}" : "Unknown Achievement";
 
-        /// <summary>
-        /// Check nếu badge vừa được kiếm (trong 24h)
-        /// </summary>
-        public bool IsNewlyEarned()
-        {
-            return DateTime.UtcNow - EarnedDate < TimeSpan.FromHours(24);
-        }
+        public bool IsNewlyEarned() => DateTime.UtcNow - EarnedDate < TimeSpan.FromHours(24);
     }
 }

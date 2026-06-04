@@ -11,13 +11,16 @@ public class BossQuestService : IBossQuestService
 {
     private readonly AppDbContext _db;
     private readonly INotificationService _notify;
+    private readonly IAchievementService _achievements;
     private readonly ILogger<BossQuestService> _logger;
 
-    public BossQuestService(AppDbContext db, INotificationService notify, ILogger<BossQuestService> logger)
+    public BossQuestService(AppDbContext db, INotificationService notify,
+                            IAchievementService achievements, ILogger<BossQuestService> logger)
     {
-        _db     = db;
-        _notify = notify;
-        _logger = logger;
+        _db           = db;
+        _notify       = notify;
+        _achievements = achievements;
+        _logger       = logger;
     }
 
     // ─── Shop ────────────────────────────────────────────────────────────────
@@ -563,6 +566,7 @@ public class BossQuestService : IBossQuestService
             await _notify.CreateNotificationAsync(user.Id, "Quest Complete!",
                 $"'{questDef.Text}' complete! +{questDef.DropGold}gp, +{questDef.DropExp}xp",
                 "quest_complete", "/Party", "🏆");
+            await _achievements.CheckQuestAsync(user.Id);
         }
     }
 

@@ -87,7 +87,7 @@ namespace HabitTracker.Controllers
             return View(history);
         }
 
-        // ===== BADGES VIEW =====
+        // ===== ACHIEVEMENTS VIEW =====
         [HttpGet("Badges")]
         public async Task<IActionResult> Badges()
         {
@@ -95,17 +95,25 @@ namespace HabitTracker.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Account");
 
-            var badges = await _context.UserBadges
-                .Where(ub => ub.UserId == userId)
-                .Include(ub => ub.Badge)
-                .OrderByDescending(ub => ub.EarnedDate)
+            var allBadges = await _context.Badges
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.TriggerType)
+                .ThenBy(b => b.TriggerValue)
                 .ToListAsync();
 
-            ViewBag.TotalBadges = badges.Count;
+            var earnedMap = (await _context.UserBadges
+                .Where(ub => ub.UserId == userId)
+                .ToListAsync())
+                .ToDictionary(ub => ub.BadgeId);
 
-            _logger.LogInformation($"User {userId} viewed {badges.Count} badges");
+            ViewBag.AllBadges  = allBadges;
+            ViewBag.EarnedMap  = earnedMap;
+            ViewBag.EarnedCount = earnedMap.Count;
 
-            return View(badges);
+            _logger.LogInformation("User {UserId} viewed achievements ({Earned}/{Total} earned)",
+                userId, earnedMap.Count, allBadges.Count);
+
+            return View();
         }
 
         // ===== ADVANCED STATISTICS WITH CHARTS =====

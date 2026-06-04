@@ -60,6 +60,7 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IGuildService, GuildService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBossQuestService, BossQuestService>();
+builder.Services.AddScoped<IAchievementService, AchievementService>();
 
 // Logging
 builder.Services.AddLogging(config =>

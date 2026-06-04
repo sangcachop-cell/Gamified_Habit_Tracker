@@ -231,7 +231,7 @@ public class GuildController : Controller
             ? "/images/default.png"
             : "/uploads/" + author.Avatar;
 
-        var renderedBody = await _guilds.RenderBodyAsync(msg!.Body);
+        var renderedBody = await _guilds.RenderBodyAsync(msg!.Body, id);
 
         return Json(new
         {

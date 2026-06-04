@@ -50,52 +50,6 @@ namespace HabitTracker.Services.Implementations
             _logger.LogInformation($"User {user.Id} streak updated to {user.CurrentStreak}");
         }
 
-        public async Task<List<string>> AwardBadgesAsync(User user, int oldXP)
-        {
-            var newBadgeNames = new List<string>();
-
-            try
-            {
-                // Lấy tất cả badges
-                var allBadges = await _context.Badges.ToListAsync();
-
-                // Lấy những badge user đã có
-                var earnedBadgeIds = user.UserBadges?
-                    .Select(ub => ub.BadgeId)
-                    .ToHashSet() ?? new HashSet<int>();
-
-                // Kiểm tra từng badge
-                foreach (var badge in allBadges)
-                {
-                    // Nếu user vừa đạt được badge
-                    if (user.XP >= badge.RequiredXP && !earnedBadgeIds.Contains(badge.Id))
-                    {
-                        _context.UserBadges.Add(new UserBadge
-                        {
-                            UserId = user.Id,
-                            BadgeId = badge.Id,
-                            EarnedDate = DateTime.Now
-                        });
-
-                        newBadgeNames.Add($"{badge.Icon} {badge.Name}");
-                    }
-                }
-
-                if (newBadgeNames.Any())
-                {
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation(
-                        $"User {user.Id} earned {newBadgeNames.Count} new badges");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error awarding badges: {ex.Message}");
-            }
-
-            return newBadgeNames;
-        }
-
         /// <summary>
         /// XP required to advance FROM level N to N+1 (Habitica quadratic formula).
         /// </summary>

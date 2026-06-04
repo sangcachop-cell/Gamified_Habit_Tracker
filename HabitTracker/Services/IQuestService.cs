@@ -18,11 +18,6 @@ namespace HabitTracker.Services
         void UpdateStreak(User user);
 
         /// <summary>
-        /// Trao badge nếu đạt XP requirement
-        /// </summary>
-        Task<List<string>> AwardBadgesAsync(User user, int oldXP);
-
-        /// <summary>
         /// Tính level dựa vào cumulative XP (Habitica quadratic formula).
         /// </summary>
         int CalculateLevel(int cumulativeXp);

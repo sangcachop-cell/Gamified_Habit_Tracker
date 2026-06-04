@@ -10,11 +10,13 @@ namespace HabitTracker.Services.Implementations
     {
         private readonly AppDbContext _context;
         private readonly IPetCatalogService _catalog;
+        private readonly IAchievementService _achievements;
 
-        public StableService(AppDbContext context, IPetCatalogService catalog)
+        public StableService(AppDbContext context, IPetCatalogService catalog, IAchievementService achievements)
         {
-            _context = context;
-            _catalog = catalog;
+            _context      = context;
+            _catalog      = catalog;
+            _achievements = achievements;
         }
 
         public async Task<StableResult> HatchAsync(int userId, int eggGameItemId, int potionGameItemId)
@@ -118,6 +120,9 @@ namespace HabitTracker.Services.Implementations
             }
 
             await _context.SaveChangesAsync();
+
+            if (evolved)
+                await _achievements.CheckStableAsync(userId);
 
             return new StableResult
             {

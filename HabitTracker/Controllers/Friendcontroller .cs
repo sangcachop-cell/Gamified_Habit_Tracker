@@ -90,6 +90,9 @@ namespace HabitTracker.Controllers
 
             if (target == null) return NotFound();
 
+            if (target.ProfileVisibility == "private" && target.Id != userId)
+                return View("ProfilePrivate");
+
             // Friendship status
             var relation = await _context.Friendships
                 .FirstOrDefaultAsync(f =>
