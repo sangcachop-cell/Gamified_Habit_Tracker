@@ -789,7 +789,7 @@
                     return;
                 }
                 if (r.goldGained > 0)
-                    showToast('🪙', 'Gold!', '+' + r.goldGained.toFixed(1) + ' GP', 'toast-gold', 2500);
+                    showToast('🟡', 'Gold!', '+' + r.goldGained.toFixed(1) + ' GP', 'toast-gold', 2500);
                 if (r.isCrit)
                     setTimeout(function(){ showToast('⚡', 'Critical Hit!', '1.5× bonus!', 'toast-crit', 3000); }, 300);
                 if (r.droppedItemName)

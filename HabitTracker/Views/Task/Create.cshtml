@@ -133,7 +133,7 @@
             <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Any extra details..."></textarea>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-4" id="difficulty-section" style="@(initialType == "reward" ? "display:none" : "")">
             <label class="form-label">Difficulty</label>
             <select asp-for="Priority" class="form-select">
                 <option value="@((int)TaskPriority.Trivial)">Trivial (+5 XP)</option>
@@ -230,9 +230,9 @@
         <!-- REWARD SECTION -->
         <div class="type-section @(initialType == "reward" ? "active" : "")" id="section-reward">
             <div class="mb-3">
-                <label class="form-label">Gold cost 🪙</label>
+                <label class="form-label">Gold cost 🟡</label>
                 <input asp-for="GoldCost" type="number" class="form-control" min="1" max="9999" step="1" style="max-width:160px" />
-                <small class="text-muted">Phase 2: gold balance not enforced yet.</small>
+                <small class="text-muted"></small>
             </div>
         </div>
 
@@ -256,6 +256,11 @@
         $('#section-' + type).addClass('active');
         var typeInt = { habit: 0, daily: 1, todo: 2, reward: 3 }[type];
         $('#hidden-type').val(typeInt);
+        if (type === 'reward') {
+            $('#difficulty-section').hide();
+        } else {
+            $('#difficulty-section').show();
+        }
     });
 
     // Daily frequency toggle

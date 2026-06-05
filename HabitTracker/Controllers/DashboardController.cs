@@ -16,15 +16,18 @@ namespace HabitTracker.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IStatisticsService _statisticsService;
+        private readonly ICharacterService _characterService;
         private readonly ILogger<DashboardController> _logger;
 
         public DashboardController(
             AppDbContext context,
             IStatisticsService statisticsService,
+            ICharacterService characterService,
             ILogger<DashboardController> logger)
         {
             _context = context;
             _statisticsService = statisticsService;
+            _characterService = characterService;
             _logger = logger;
         }
 
@@ -40,10 +43,15 @@ namespace HabitTracker.Controllers
             var user = await _context.Users
                 .Include(u => u.UserBadges)
                     .ThenInclude(ub => ub.Badge)
+                .Include(u => u.OwnedGear!)
+                    .ThenInclude(ug => ug.GearItem)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
                 return RedirectToAction("Login", "Account");
+
+            var stats = await _characterService.GetEffectiveStatsAsync(user);
+            ViewBag.MaxMana = stats.MaxMana;
 
             // Lấy dữ liệu 7 ngày gần nhất
             var chartData = await GetLast7DaysData(userId.Value);
